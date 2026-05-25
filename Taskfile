@@ -108,6 +108,7 @@ function task:lint { ## Run checks by Rector, ECS and PHPStan.
 
 function task:stan { ## Run PHPStan static analysis checker
     docker:ensure-running
+    docker exec wsv-admin-app-1 /bin/sh -c 'chown -R php:nginx /tmp/phpstan'
     title "Analysing domain code"
     task:exec "./vendor/bin/phpstan analyse --configuration=phpstan-domain.neon --memory-limit=2G"
     title "Analysing infrastructure code"

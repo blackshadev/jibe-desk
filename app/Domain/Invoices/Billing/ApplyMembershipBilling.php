@@ -9,7 +9,6 @@ use App\Domain\Members\MemberRepository;
 use App\Domain\Members\MembershipId;
 use App\Domain\Members\MembershipRepository;
 use App\Domain\NumericId;
-use Webmozart\Assert\Assert;
 
 /** @implements ApplyBillableItem<MembershipId> */
 final readonly class ApplyMembershipBilling implements ApplyBillableItem
@@ -23,6 +22,7 @@ final readonly class ApplyMembershipBilling implements ApplyBillableItem
 
     public function __invoke(MemberId $memberId, ?NumericId $membershipId): void
     {
+        /** @var MembershipId $membershipId */
         $member = $this->memberRepository->getById($memberId);
 
         $allBillingIds = $this->membershipRepository->all()->asBillingIdList();

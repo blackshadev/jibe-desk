@@ -6,7 +6,6 @@ namespace App\Models;
 
 use App\Domain\Members\Gender;
 use App\Observers\MemberObserver;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -44,6 +43,7 @@ final class Member extends Model
     {
         return [
             'birthdate' => 'date',
+            'is_volunteer' => 'boolean',
             'gender' => Gender::class,
         ];
     }

@@ -25,6 +25,7 @@ final class MemberFactory extends Factory
             'birthdate' => $this->faker->date(),
             'gender' => $this->faker->randomElement(Gender::cases()),
             'membership_id' => Membership::factory(),
+            'is_volunteer' => $this->faker->boolean(),
         ];
     }
 }

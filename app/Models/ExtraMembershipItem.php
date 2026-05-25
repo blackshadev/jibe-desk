@@ -16,16 +16,16 @@ final class ExtraMembershipItem extends Model
 {
     use HasFactory;
 
+    /** @return BelongsTo<BillableItem, $this> */
+    public function billableItem(): BelongsTo
+    {
+        return $this->belongsTo(BillableItem::class);
+    }
+
     protected function casts(): array
     {
         return [
             'code' => ExtraMembershipItemCode::class,
         ];
-    }
-
-    /** @return BelongsTo<BillableItem, $this> */
-    public function billableItem(): BelongsTo
-    {
-        return $this->belongsTo(BillableItem::class);
     }
 }

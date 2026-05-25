@@ -17,8 +17,7 @@ final readonly class ApplyMemberVolunteerBilling implements ApplyBillableItem
         private ExtraMembershipBillingItemRepository $extraMembershipBillingItemRepository,
         private BillableItemInstanceRepository $billableItemInstanceRepository,
         private MemberRepository $memberRepository,
-    )
-    {
+    ) {
     }
 
     public function __invoke(MemberId $memberId, ?NumericId $null): void

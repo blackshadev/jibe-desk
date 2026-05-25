@@ -6,7 +6,6 @@ namespace App\Listeners;
 
 use App\Domain\Invoices\Billing\ApplyMembershipBilling;
 use App\Events\MemberMembershipChanged;
-use Illuminate\Support\Facades\Log;
 
 final readonly class ApplyMembershipBillingOnMembershipChange
 {

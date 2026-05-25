@@ -14,7 +14,7 @@ use App\Models\Member;
 use Carbon\CarbonImmutable;
 use Tests\FeatureTestCase;
 
-final class BillableItemDbRepositoryTest extends FeatureTestCase
+final class BillableItemDbInstanceRepositoryTest extends FeatureTestCase
 {
     private const NOW = '2023-01-01 00:00:00';
 
@@ -51,8 +51,8 @@ final class BillableItemDbRepositoryTest extends FeatureTestCase
 
         $billable = BillableItem::factory()->create();
 
-        BillableItemInstance::factory()->create([ 'member_id' => $member->id, 'billable_item_id' => $billable->id, 'bill_cycle_in_months' => 12, 'start_date' => '2023-01-01']);
-        BillableItemInstance::factory()->create([ 'member_id' => $other->id, 'billable_item_id' => $billable->id,  'bill_cycle_in_months' => 12 ]);
+        BillableItemInstance::factory()->create(['member_id' => $member->id, 'billable_item_id' => $billable->id, 'bill_cycle_in_months' => 12, 'start_date' => '2023-01-01']);
+        BillableItemInstance::factory()->create(['member_id' => $other->id, 'billable_item_id' => $billable->id,  'bill_cycle_in_months' => 12]);
 
         $repo = new BillableItemDbInstanceRepository();
 
@@ -76,5 +76,42 @@ final class BillableItemDbRepositoryTest extends FeatureTestCase
             'start_date' => self::NOW,
             'end_date' => null,
         ]);
+    }
+
+    public function test_ensure_creates_record_when_missing(): void
+    {
+        $member = Member::factory()->createQuietly();
+        $billable = BillableItem::factory()->create(['bill_period' => 'monthly']);
+
+        $repo = new BillableItemDbInstanceRepository();
+
+        $repo->ensure(MemberId::create($member->id), BillableItemId::create($billable->id));
+
+        $this->assertDatabaseHas('billable_item_instances', [
+            'member_id' => $member->id,
+            'billable_item_id' => $billable->id,
+            'bill_cycle_in_months' => 1,
+            'end_date' => null,
+        ]);
+    }
+
+    public function test_ensure_does_not_duplicate_active_record(): void
+    {
+        $member = Member::factory()->createQuietly();
+        $billable = BillableItem::factory()->create(['bill_period' => 'monthly']);
+
+        BillableItemInstance::factory()->create([
+            'member_id' => $member->id,
+            'billable_item_id' => $billable->id,
+            'bill_cycle_in_months' => 1,
+            'start_date' => '2023-01-01',
+            'end_date' => null,
+        ]);
+
+        $repo = new BillableItemDbInstanceRepository();
+
+        $repo->ensure(MemberId::create($member->id), BillableItemId::create($billable->id));
+
+        self::assertSame(1, BillableItemInstance::query()->where('member_id', $member->id)->where('billable_item_id', $billable->id)->whereNull('end_date')->count());
     }
 }

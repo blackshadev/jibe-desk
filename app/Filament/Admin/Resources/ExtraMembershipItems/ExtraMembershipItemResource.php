@@ -24,7 +24,7 @@ final class ExtraMembershipItemResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::PlusCircle;
 
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Invoicing;
+    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Invoicing;
 
     protected static ?string $recordTitleAttribute = 'code';
 
@@ -38,12 +38,12 @@ final class ExtraMembershipItemResource extends Resource
         return ExtraMembershipItemsTable::configure($table);
     }
 
-    public static function getLabel(): ?string
+    public static function getLabel(): string
     {
         return __('labels.extra_membership_item');
     }
 
-    public static function getPluralLabel(): ?string
+    public static function getPluralLabel(): string
     {
         return __('labels.extra_membership_items');
     }

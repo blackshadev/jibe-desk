@@ -10,6 +10,7 @@ use App\Domain\Invoices\Billing\BillableItemInstanceRepository;
 use App\Domain\Members\MemberId;
 use Mockery;
 use Mockery\MockInterface;
+
 use function PHPUnit\Framework\equalTo;
 
 final readonly class BillableItemRepositoryExpectation
@@ -34,6 +35,13 @@ final readonly class BillableItemRepositoryExpectation
     {
         $this->mock
             ->expects('add')
+            ->with(equalTo($memberId), equalTo($billableItemId));
+    }
+
+    public function expectsEnsure(MemberId $memberId, BillableItemId $billableItemId): void
+    {
+        $this->mock
+            ->expects('ensure')
             ->with(equalTo($memberId), equalTo($billableItemId));
     }
 }

@@ -14,7 +14,7 @@ final class MemberDbRepositoryTest extends FeatureTestCase
 {
     public function test_get_by_id_returns_member_domain_object(): void
     {
-        $model = Member::factory()->create();
+        $model = Member::factory()->createQuietly(['is_volunteer' => true]);
 
         $repo = new MemberDbRepository();
 
@@ -22,6 +22,7 @@ final class MemberDbRepositoryTest extends FeatureTestCase
 
         self::assertSame($model->id, $domain->id->value);
         self::assertSame($model->membership_id, $domain->membershipId->value);
+        self::assertTrue($domain->isVolunteer);
     }
 
     public function test_get_by_id_throws_when_member_not_found(): void

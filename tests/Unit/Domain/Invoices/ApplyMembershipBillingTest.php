@@ -21,10 +21,19 @@ final class ApplyMembershipBillingTest extends UnitTestCase
     public function test_it_removes_old_membership_billable_item_and_adds_new_one(): void
     {
         $memberId = MemberId::create(1);
-        $member = new Member(id: $memberId, membershipId: MembershipId::create(2)); // already updated
+        $membershipId1 = MembershipId::create(1);
+        $membershipId2 = MembershipId::create(2);
+        $billableItemId1 = BillableItemId::create(10);
+        $billableItemId2 = BillableItemId::create(20);
 
-        $membership1 = new Membership(MembershipId::create(1), BillableItemId::create(10));
-        $membership2 = new Membership(MembershipId::create(2), BillableItemId::create(20));
+        $member = new Member(
+            id: $memberId,
+            membershipId: $membershipId2,
+            isVolunteer: false,
+        );
+
+        $membership1 = new Membership($membershipId1, $billableItemId1);
+        $membership2 = new Membership($membershipId2, $billableItemId2);
         $allMemberships = new MembershipList([$membership1, $membership2]);
 
         $newMembership = $membership2;
@@ -37,13 +46,13 @@ final class ApplyMembershipBillingTest extends UnitTestCase
         $membershipRepo->expectsAll($allMemberships);
         $billableRepo->expectsRemoveInstances(
             $memberId,
-            new BillableItemIdList([BillableItemId::create(10), BillableItemId::create(20)])
+            new BillableItemIdList([$billableItemId1, $billableItemId2])
         );
-        $membershipRepo->expectsGetById(MembershipId::create(2), $newMembership);
-        $billableRepo->expectsAddInstance($memberId, BillableItemId::create(20));
+        $membershipRepo->expectsGetById($membershipId2, $newMembership);
+        $billableRepo->expectsAddInstance($memberId, $billableItemId2);
 
-        $sut = new ApplyMembershipBilling($memberRepo->mock, $membershipRepo->mock, $billableRepo->mock);
+        $subject = new ApplyMembershipBilling($memberRepo->mock, $membershipRepo->mock, $billableRepo->mock);
 
-        ($sut)($memberId, MembershipId::create(2));
+        ($subject)($memberId, $membershipId2);
     }
 }

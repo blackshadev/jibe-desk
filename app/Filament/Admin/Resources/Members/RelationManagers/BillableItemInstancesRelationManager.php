@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Members\RelationManagers;
 
-use App\Domain\Invoices\Billing\BillableItemInstanceRepository;
 use App\Domain\Invoices\Billing\BillPeriod;
 use App\Formatters\PriceFormatter;
 use App\Models\BillableItemInstance;
@@ -58,7 +57,7 @@ final class BillableItemInstancesRelationManager extends RelationManager
                     ->hiddenLabel()
                     ->icon(Heroicon::PlayCircle)
                     ->requiresConfirmation()
-                    ->action(static fn (BillableItemInstance $record) => $record->resume())
+                    ->action(static fn (BillableItemInstance $record) => $record->resume()),
             ]);
     }
 
