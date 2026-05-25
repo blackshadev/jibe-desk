@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Domain\Members\Gender;
 use App\Observers\MemberObserver;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -55,6 +56,30 @@ final class Member extends Model
             $firstName = empty($attributes['infix_name']) ? $attributes['first_name'] : "{$attributes['first_name']} {$attributes['infix_name']}";
 
             return sprintf('%s, %s', $attributes['last_name'], $firstName);
+        });
+    }
+
+    /** @return Attribute<int, never> */
+    protected function age(): Attribute
+    {
+        return Attribute::get(static function (mixed $value, array $attributes) {
+            return (int)floor(new Carbon($attributes['birthdate'])->diffInYears());
+        });
+    }
+
+    /** @return Attribute<non-falsy-string, never> */
+    protected function address(): Attribute
+    {
+        return Attribute::get(static function (mixed $value, array $attributes): string {
+            $lineOne = sprintf('%s %s', $attributes['address_street'], $attributes['address_housenumber']);
+
+            if (!empty($attributes['address_housenumber_addition'])) {
+                $lineOne .= $attributes['address_housenumber_addition'];
+            }
+
+            $lineTwo = sprintf('%s, %s', $attributes['address_postalcode'], $attributes['address_city']);
+
+            return sprintf("%s\n%s", $lineOne, $lineTwo);
         });
     }
 }

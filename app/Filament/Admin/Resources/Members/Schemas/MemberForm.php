@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\Members\Schemas;
 
 use App\Domain\Members\Gender;
+use App\Models\Member;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
 
 final class MemberForm
@@ -18,10 +19,13 @@ final class MemberForm
     {
         return $schema
             ->components([
-                Section::make(__('labels.personal_information'))
+                Tabs::make('Tabs')
                     ->columnSpanFull()
                     ->columns(2)
-                    ->schema([
+                    ->tabs([
+                        Tabs\Tab::make(__('labels.personal_information'))
+                            ->schema([
+
                         TextInput::make('first_name')
                             ->label(__('labels.first_name'))
                             ->required(),
@@ -50,21 +54,57 @@ final class MemberForm
                             ->label(__('labels.birthdate'))
                             ->required(),
 
-                    ]),
-
-                Section::make(__('labels.membership_information'))
-                    ->columnSpanFull()
-                    ->columns(2)
-                    ->schema([
-
-                        Select::make('membership')
-                            ->label(__('labels.membership'))
-                            ->relationship('membership', 'name')
+                        TextInput::make('age')
+                            ->formatStateUsing(static fn (?Member $record) => $record?->age)
+                            ->disabled()
+                            ->label(__('labels.age'))
                             ->required(),
 
-                        Toggle::make('is_volunteer')
-                            ->label(__('labels.is_volunteer')),
                     ]),
+
+                        Tabs\Tab::make(__('labels.membership_information'))
+                        ->schema([
+
+                            Select::make('membership')
+                                ->label(__('labels.membership'))
+                                ->relationship('membership', 'name')
+                                ->required(),
+
+                            Toggle::make('is_volunteer')
+                                ->label(__('labels.is_volunteer')),
+                        ]),
+
+                        Tabs\Tab::make(__('labels.address_information'))
+                            ->columns(12)
+                            ->schema([
+
+                                TextInput::make('address_street')
+                                    ->columnSpan(6)
+                                    ->required()
+                                    ->label(__('labels.address_street')),
+
+                                TextInput::make('address_housenumber')
+                                    ->columnSpan(3)
+                                    ->required()
+                                    ->label(__('labels.address_housenumber')),
+
+                                TextInput::make('address_housenumber_addition')
+                                    ->columnSpan(3)
+                                    ->label(__('labels.address_housenumber_addition')),
+
+                                TextInput::make('address_postalcode')
+                                    ->required()
+                                    ->columnSpan(6)
+                                    ->helperText(__('labels.address_postalcode_format'))
+                                    ->regex('/^\d{4}\[A-Z]{2}$/')
+                                    ->label(__('labels.address_postalcode')),
+
+                                TextInput::make('address_city')
+                                    ->required()
+                                    ->columnSpan(6)
+                                    ->label(__('labels.address_city')),
+                            ]),
+                ]),
             ]);
     }
 }

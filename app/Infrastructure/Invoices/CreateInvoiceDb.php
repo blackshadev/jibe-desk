@@ -30,7 +30,7 @@ final class CreateInvoiceDb implements CreateInvoice
         $model = Invoice::query()->create([
             'invoice_batch_id' => $invoice->batchId?->value,
             'recipient_name' => $member->name,
-            'recipient_address' => 'TODO',
+            'recipient_address' => $member->address,
             'invoice_number' => $invoiceNumber,
             'member_id' => $invoice->memberId->value,
             'date' => $invoice->invoiceDate,

@@ -23,7 +23,13 @@ final class CreateInvoiceDbTest extends FeatureTestCase
 {
     public function test_it_persists_invoice_and_lines(): void
     {
-        $member = Member::factory()->createQuietly();
+        $member = Member::factory()->createQuietly([
+            'address_street' => 'Main Street',
+            'address_housenumber' => '12',
+            'address_housenumber_addition' => 'B',
+            'address_city' => 'Amsterdam',
+            'address_postalcode' => '1234 AB',
+        ]);
         Invoice::factory()->forMember($member)->create([
             'invoice_number' => 'I-2026000000',
         ]);
@@ -46,11 +52,24 @@ final class CreateInvoiceDbTest extends FeatureTestCase
         $this->assertDatabaseHas('invoices', [
             'id' => $result->value,
             'recipient_name' => $member->name,
-            'recipient_address' => 'TODO',
+            'recipient_address' => "Main Street 12B\n1234 AB, Amsterdam",
             'invoice_number' => 'I-2026000001',
             'member_id' => $member->id,
         ]);
         $this->assertDatabaseCount('invoice_lines', 2);
+    }
+
+    public function test_it_formats_the_member_address_accessor(): void
+    {
+        $member = Member::factory()->createQuietly([
+            'address_street' => 'Main Street',
+            'address_housenumber' => '12',
+            'address_housenumber_addition' => 'B',
+            'address_city' => 'Amsterdam',
+            'address_postalcode' => '1234 AB',
+        ]);
+
+        self::assertSame("Main Street 12B\n1234 AB, Amsterdam", $member->address);
     }
 
     public function test_it_persists_invoice_batch_id_when_provided(): void
