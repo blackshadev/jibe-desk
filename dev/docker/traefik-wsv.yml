@@ -1,0 +1,4 @@
+tls:
+  certificates:
+    - certFile: /var/certs/local.leden.almerecentraal.nl.pem
+      keyFile: /var/certs/local.leden.almerecentraal.nl-key.pem

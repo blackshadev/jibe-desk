@@ -1,0 +1,51 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+#[Fillable(['member_id', 'billable_item_id', 'start_date', 'end_date', 'bill_cycle_in_months'])]
+final class BillableItemInstance extends Model
+{
+    use HasFactory;
+
+    /** @return BelongsTo<BillableItem, $this> */
+    public function billableItem(): BelongsTo
+    {
+        return $this->belongsTo(BillableItem::class);
+    }
+
+    /** @return BelongsTo<Member, $this> */
+    public function member(): BelongsTo
+    {
+        return $this->belongsTo(Member::class);
+    }
+
+    public function stop(): void
+    {
+        $this->update([ 'end_date' => now() ]);
+    }
+
+    public function isStopped(): bool
+    {
+        return $this->end_date !== null;
+    }
+
+    public function resume(): void
+    {
+        $this->update([ 'end_date' => null ]);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'start_date' => 'date',
+            'end_date' => 'date',
+        ];
+    }
+}

@@ -1,0 +1,376 @@
+#!/usr/bin/env bash
+# =========================================================
+# Taskfile gives you a set of quick tasks for your project
+# More info: https://github.com/Enrise/Taskfile
+# =========================================================
+
+function banner {
+	echo -e "${BLUE}\n"\
+	"██╗    ██╗███████╗██╗   ██╗\n"\
+	"██║    ██║██╔════╝██║   ██║\n"\
+	"██║ █╗ ██║███████╗██║   ██║\n"\
+	"██║███╗██║╚════██║╚██╗ ██╔╝\n"\
+	"╚███╔███╔╝███████║ ╚████╔╝ \n"\
+	" ╚══╝╚══╝ ╚══════╝  ╚═══╝  ${RESET}"
+}
+
+# =========================================================
+## Project
+# =========================================================
+
+function task:init { ## Initialise the project for local development
+    app:ensure docker
+    title "Ensuring required files are present"
+    task:update:env
+#	project:git-config
+	task:build
+	task:start
+    title "Installing project dependencies"
+	task:composer "install"
+    task:migrate
+	task:seed
+	title "Use ./Taskfile help for options on how to continue"
+}
+
+function task:start { ## Start the project in development mode
+    title "Starting project"
+	proxy:start
+	docker:start
+	proxy:connect
+	echo "https://local.leden.almerecentraal.nl"
+}
+
+function task:stop { ## Stop the local project
+    title "Stopping project"
+	proxy:disconnect
+	docker:stop
+}
+
+function task:restart { ## Restart the local project
+    title "Restarting project"
+	proxy:disconnect
+	docker:stop
+	proxy:start
+	docker:start
+	proxy:connect
+}
+
+function task:update { ## Update the project based on the latest changes
+    title "Updating project dependencies"
+    docker:ensure-running
+    task:composer "install"
+    title "Migrating local database"
+    task:migrate
+    title "Verifying local configuration is up to date"
+}
+
+function project:git-config {
+	title "Setting git configuration"
+	git config --local core.hooksPath dev/git-hooks
+	echo -e "Git hooks directory is set to ${YELLOW}./dev/git-hooks${RESET}."
+}
+
+function task:test { ## Run tests
+    docker:ensure-running
+    task:artisan test --parallel "${*}"
+}
+
+function task:test:coverage { ## Run tests with code coverage
+    docker:ensure-running
+    task:exec "XDEBUG_MODE=coverage php -d zend_extension=xdebug.so vendor/bin/phpunit --coverage-text --only-summary-for-coverage-text --coverage-html=./coverage/phpunit"
+    echo ""
+    echo "View coverage: ./coverage/phpunit/index.html"
+    echo ""
+}
+
+function task:test:mutations { ## Run mutation tests
+    docker:ensure-running
+    task:exec "./vendor/bin/infection --threads=max --initial-tests-php-options='-d zend_extension=xdebug.so' ${*}"
+    echo ""
+    echo "Mutation report: ./coverage/infection/infection.html"
+    echo ""
+}
+
+function task:test:mutations:diff { ## Run mutation tests on changes files
+    docker:ensure-running
+    task:exec "./vendor/bin/infection --git-diff-lines --git-diff-base=main --threads=max --initial-tests-php-options='-d zend_extension=xdebug.so' ${*}"
+    echo ""
+    echo "Mutation report: ./coverage/infection/infection.html"
+    echo ""
+}
+
+function task:lint { ## Run checks by Rector, ECS and PHPStan.
+    task:psr
+    task:rector --dry-run
+    task:ecs
+    task:stan
+}
+
+function task:stan { ## Run PHPStan static analysis checker
+    docker:ensure-running
+    title "Analysing domain code"
+    task:exec "./vendor/bin/phpstan analyse --configuration=phpstan-domain.neon --memory-limit=2G"
+    title "Analysing infrastructure code"
+    task:exec "./vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=2G"
+}
+
+function task:psr {
+    title "Verifying PSR compliancy"
+    task:exec "composer dump-autoload --optimize --strict-psr --dry-run"
+}
+
+function task:rector { ## Run rector code formatter
+    docker:ensure-running
+    title "Running rector"
+    task:exec "./vendor/bin/rector process ${*}"
+}
+
+function task:stan:clear { ## Run PHPStan static analysis checker
+    docker:ensure-running
+    task:exec "./vendor/bin/phpstan clear-result-cache --configuration=phpstan.neon --memory-limit=2G"
+}
+
+function task:ecs { ## Run EasyCodingStandard
+    title "Running easy coding standard"
+    ./vendor/bin/ecs --config=ecs.php check ${*}
+}
+
+function task:fix { ## Run Codestyle fixer
+    task:ecs --fix
+}
+
+function task:watch {
+    task:exec "watchexec --restart --exts php,sh,js,css,json,json5,xml,neon,yml,yaml,lock --ignore dev -- ./dev/task/watcher.sh"
+}
+
+function task:watch:test {
+    task:exec "watchexec --clear -- './vendor/bin/phpunit --colors ${*}'"
+}
+
+function task:seed { ## Run database seeders
+    title "Running database seeders"
+    task:artisan db:seed
+}
+
+function task:migrate { ## Migrate the database
+    title "Running database migrations"
+    task:artisan migrate
+}
+
+# =========================================================
+## Documentation
+# =========================================================
+
+function task:docs:generate { ## Generate svg's for all the mermaid diagrams
+    title "Building documentation diagrams"
+    find ./docs/diagrams -type f -name "*.mermaid" -exec docker run --rm -u `id -u`:`id -g` -v .:/data minlag/mermaid-cli -i {} \;
+}
+
+function task:docs:clean { ## Remove svg's for all the mermaid diagrams
+    title "Cleaning documentation generated files"
+    find ./docs/diagrams -type f -name "*.svg" -exec rm {} \;
+}
+
+# =========================================================
+## Docker
+# =========================================================
+
+function task:build { ## Build all docker compose containers
+	title "Building docker compose project"
+	dockercompose build
+}
+
+function docker:start {
+	title "Starting docker compose project"
+	dockercompose up --detach
+}
+
+function docker:stop {
+	title "Stopping docker compose project"
+	dockercompose down
+}
+
+function task:logs { ## Show the docker compose logs
+	title "Following local logs"
+	dockercompose logs --tail="20" --follow "${*}"
+}
+
+function task:logs:app { ## Show the docker compose logs for app service
+	title "Following local logs for app service"
+	dockercompose logs --tail="20" --follow app
+}
+
+function task:shell { ## Open the application shell.
+    docker:ensure-running
+    dockercompose exec --user php app sh
+}
+
+function task:exec { ## Run anything in the application shell
+    docker:ensure-running
+    dockercompose exec --user php app sh -c "$*"
+}
+
+function task:artisan { ## Run any artisan command
+    docker:ensure-running
+    task:exec "php artisan ${*}"
+}
+
+function task:composer { ## Run any composer command
+    docker:ensure-running
+    task:exec "composer ${*}"
+}
+
+function docker:ensure-running {
+	if [ -z "$(dockercompose ps -q)" ]; then
+		echo -e "${RED}Oh noes, docker was not running yet, starting...${RESET}"
+		task:start
+		title "Resuming task"
+	fi
+}
+
+function dockercompose {
+	USERID=$USERID GROUPID=$GROUPID docker compose --file ./docker-compose.yml --project-name wsv-admin "$@"
+}
+
+# =========================================================
+# Development proxy
+# https://github.com/Enrise/DevelopmentProxy
+# =========================================================
+
+function proxy:start {
+    app:ensure curl
+    proxy:hosts
+    proxy:certificates
+	title "Starting development proxy"
+    curl --silent --location https://enri.se/development-proxy-start | sh
+}
+
+function proxy:connect {
+	title "Connecting development proxy network"
+    docker network connect wsv-admin development-proxy || true
+    echo "Connected docker network."
+}
+
+function proxy:disconnect {
+	title "Disconnecting development proxy network"
+    docker network disconnect wsv-admin development-proxy || true
+    echo "Disconnected docker network."
+}
+
+function proxy:hosts {
+    title "Setup hosts file"
+    for localHostName in "local.leden.almerecentraal.nl"; do
+        if ! cat /etc/hosts | grep --silent $localHostName; then
+            echo "Missing $localHostName in /etc/hosts, please make sure it contains:"
+            echo ""
+            echo "#==== AlmereCentraal"
+            echo "127.0.0.1    local.leden.almerecentraal.nl"
+            echo "::1          local.leden.almerecentraal.nl"
+            echo "#===="
+            exit 422
+        fi
+    done
+    echo "All hosts present."
+}
+
+function proxy:certificates { ## Generate the SSL certificates
+    app:ensure mkcert
+    title "Creating certificates"
+    mkdir -p ~/.development-proxy/certs
+    mkdir -p ~/.development-proxy/config
+    (
+        cd ~/.development-proxy/certs \
+        && mkcert "local.leden.almerecentraal.nl" \
+    )
+    echo "Done."
+    title "Copying dev proxy config"
+    cp ./dev/docker/traefik-wsv.yml ~/.development-proxy/config/
+    echo "Done."
+}
+
+
+# =========================================================
+# Utilities
+# =========================================================
+
+function file:ensure { # Abort if the desired file is not found
+	if [ ! -f $1 ]; then
+		echo -e "Missing required file ${RED}$1${RESET}, make sure it is created."
+		exit 1
+	else
+		echo "File ${GREEN}$1${RESET} is present.";
+	fi
+}
+
+function file:ensure-copy { # file:ensure-copy $COPY_DESTINATION $SOURCE
+	if [ ! -f $1 ]; then
+		cp $2 $1;
+		echo -e "Created copy of ${YELLOW}$2${RESET} to create required file ${GREEN}$1${RESET}.";
+	else
+		echo "File ${GREEN}$1${RESET} is present.";
+	fi
+}
+
+function app:ensure { # Abort if the desired program is not installed
+	if [ ! $(which "$1") ]; then
+		echo "Missing required application ${RED}$1${RESET}. Install it before tying again."
+		exit 1
+	fi
+}
+
+function app:ensure-bash { # Abort if wrong bash is used
+    if [[ $BASH_VERSION != "5."* ]]; then
+        echo -e "Bash version 5 is required, but found version ${RED}$BASH_VERSION${RESET}. Please install bash 5 and make sure it is used to run this Taskfile."
+        exit 1
+    fi
+}
+
+function task:update:env { ## Fetch credentials from 1password used in the .env
+    file:ensure-copy .env .env.example
+}
+
+# =========================================================
+## Taskfile
+# =========================================================
+
+set -eo pipefail
+
+BLUE=$(printf '\033[36m')
+YELLOW=$(printf '\033[33m')
+RED=$(printf '\033[31m')
+GREEN=$(printf '\033[32m')
+RESET=$(printf '\033[0m')
+
+USERID=$(id -u)
+GROUPID=$(id -g)
+
+function title {
+	echo -e "\n${BLUE}=>${RESET} $1\n"
+}
+
+function task:help { ## Show all available tasks
+    banner
+	title "Available tasks"
+	awk 'BEGIN {FS = " { [#][#][ ]?"} /^([a-zA-Z_-]*:?.*)(\{ )?[#][#][ ]?/ \
+		{printf "\033[33m%-34s\033[0m %s\n", $1, $2}' $0 |\
+		sed -E "s/[#]{2,}[ ]*/${RESET}/g" |\
+		sed -E "s/function task:*/  /g"
+	echo -e "\n${BLUE}Usage:${RESET} ./Taskfile ${YELLOW}<task>${RESET} <args>"
+}
+
+function task:shorthand { ## Create CLI shorthand task instead of ./Taskfile
+	title "Creating task shorthand"
+	echo -e "You're about to create ${YELLOW}/usr/local/bin/task${RESET} that requires ${RED}root${RESET} permission..."
+	sudo curl --location --silent --output /usr/local/bin/task https://enri.se/taskfile-bin
+	sudo chmod +x /usr/local/bin/task
+	echo -e "${BLUE}You can now use:${RESET} task ${YELLOW}<task>${RESET} <args>"
+}
+
+app:ensure-bash
+if [[ ! "$(declare -F task:${@-help})" ]]; then
+	title "Task not found"
+	echo -e "Task ${RED}$1${RESET} doesn't exist."
+	task:help
+	exit 1
+fi
+task:${@-help}

@@ -1,0 +1,40 @@
+services:
+  app:
+    platform: linux/amd64
+    build:
+      context: .
+      target: dev
+      args:
+        - UID=${USERID:-1000}
+        - GID=${GROUPID:-1000}
+    volumes:
+      - ./:/www:delegated
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.almerecentraal.rule=Host(`local.leden.almerecentraal.nl`)"
+      - "traefik.http.services.almerecentraal.loadbalancer.server.port=80"
+      - "traefik.http.routers.almerecentraal.tls=true"
+      - "traefik.http.routers.almerecentraal.entrypoints=web-secure"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "local.leden.almerecentraal.nl:host-gateway"
+
+  db:
+    platform: linux/amd64
+    image: postgres:18
+    environment:
+      POSTGRES_DB: wsv_admin
+      POSTGRES_USER: wsv_admin
+      POSTGRES_PASSWORD: ${POSTGRES_ROOT_PASSWORD:-secret}
+    volumes:
+      - pg-volume:/var/lib/postgresql:rw
+    ports:
+      - "5432:5432"
+
+volumes:
+  pg-volume:
+
+networks:
+  default:
+    name: wsv-admin
+    driver: bridge

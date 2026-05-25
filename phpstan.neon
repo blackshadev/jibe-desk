@@ -1,0 +1,18 @@
+includes:
+    - ./vendor/larastan/larastan/extension.neon
+    - ./vendor/phpstan/phpstan-mockery/extension.neon
+    - ./phpstan-baseline.neon
+
+parameters:
+    resultCachePath: %tmpDir%/resultCache.php
+
+    paths:
+        - ./app/
+        - ./tests/
+
+    excludePaths:
+        - ./app/Domain
+        - ./tests/Unit
+
+    level: 5
+
