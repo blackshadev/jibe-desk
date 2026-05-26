@@ -140,14 +140,6 @@ function task:fix { ## Run Codestyle fixer
     task:ecs --fix
 }
 
-function task:watch {
-    task:exec "watchexec --restart --exts php,sh,js,css,json,json5,xml,neon,yml,yaml,lock --ignore dev -- ./dev/task/watcher.sh"
-}
-
-function task:watch:test {
-    task:exec "watchexec --clear -- './vendor/bin/phpunit --colors ${*}'"
-}
-
 function task:seed { ## Run database seeders
     title "Running database seeders"
     task:artisan db:seed
