@@ -8,8 +8,7 @@ use App\Domain\Members\MemberId;
 
 final readonly class MemberVolunteerChanged
 {
-    public function __construct(
-        public MemberId $memberId,
-    ) {
+    public function __construct(public MemberId $memberId)
+    {
     }
 }

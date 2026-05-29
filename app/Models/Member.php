@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Domain\Members\Gender;
+use App\Models\Pivots\ActivityMember;
 use App\Observers\MemberObserver;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Guarded('id', 'updated_at', 'created_at')]
@@ -39,6 +41,16 @@ final class Member extends Model
         return $this->hasMany(BillableItemInstance::class);
     }
 
+    /** @return BelongsToMany<Activity, $this, ActivityMember> */
+    public function activities(): BelongsToMany
+    {
+        return $this
+            ->belongsToMany(Activity::class)
+            ->using(ActivityMember::class)
+            ->withPivot('billable_item_instance_id')
+            ->withTimestamps();
+    }
+
     /** @return array<string, string> */
     protected function casts(): array
     {
@@ -63,7 +75,7 @@ final class Member extends Model
     protected function age(): Attribute
     {
         return Attribute::get(static function (mixed $value, array $attributes) {
-            return (int)floor(new Carbon($attributes['birthdate'])->diffInYears());
+            return (int) floor(new Carbon($attributes['birthdate'])->diffInYears());
         });
     }
 

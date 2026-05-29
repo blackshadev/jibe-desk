@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Domain\Members\ExtraMembershipItemCode;
+use App\Models\Activity;
 use App\Models\BillableItem;
 use App\Models\ExtraMembershipItem;
 use App\Models\Invoice;
@@ -28,6 +29,15 @@ final class DevelopmentSeeder extends Seeder
             ['name' => 'Kind'],
             ['name' => 'Bestuurslid'],
         ]);
+
+        $activities = Activity::factory()
+            ->createMany([
+                ['name' => 'Reguliere les volwassenen', 'start_date' => '2026-04-01', 'end_date' => '2026-10-30'],
+                ['name' => 'Reguliere les kinderen', 'start_date' => '2026-04-01', 'end_date' => '2026-10-30'],
+                ['name' => 'RTC 1', 'start_date' => '2026-01-01', 'end_date' => '2026-11-30'],
+                ['name' => 'RTC 2', 'start_date' => '2026-01-01', 'end_date' => '2026-11-30'],
+                ['name' => 'RTC 4', 'start_date' => '2026-01-01', 'end_date' => '2026-11-30'],
+            ]);
 
         ExtraMembershipItem::factory()
             ->for(BillableItem::factory()->state([
@@ -73,13 +83,13 @@ final class DevelopmentSeeder extends Seeder
                 'code' => 'zelfde_adres_korting_volwassen',
             ]);
 
-
         $members = collect();
         foreach ($memberships as $membership) {
             $members = $members->merge(
                 Member::factory()
                     ->count(10)
                     ->for($membership)
+                    ->withRandomActivity($activities)
                     ->createMany()
             );
         }

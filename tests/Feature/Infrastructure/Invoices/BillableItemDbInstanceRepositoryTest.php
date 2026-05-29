@@ -114,4 +114,25 @@ final class BillableItemDbInstanceRepositoryTest extends FeatureTestCase
 
         self::assertSame(1, BillableItemInstance::query()->where('member_id', $member->id)->where('billable_item_id', $billable->id)->whereNull('end_date')->count());
     }
+
+    public function test_stop_updates_end_date_for_instance(): void
+    {
+        $member = Member::factory()->createQuietly();
+
+        $billable = BillableItem::factory()->create();
+
+        $instance = BillableItemInstance::factory()->create([
+            'member_id' => $member->id,
+            'billable_item_id' => $billable->id,
+            'bill_cycle_in_months' => 12,
+            'start_date' => '2023-01-01',
+            'end_date' => null,
+        ]);
+
+        $repo = new BillableItemDbInstanceRepository();
+
+        $repo->stop(\App\Domain\Invoices\Billing\BillableItemInstanceId::create($instance->id));
+
+        $this->assertDatabaseHas('billable_item_instances', ['id' => $instance->id, 'end_date' => self::NOW]);
+    }
 }

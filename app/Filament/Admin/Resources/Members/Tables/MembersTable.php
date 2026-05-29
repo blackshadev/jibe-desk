@@ -18,8 +18,7 @@ final class MembersTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label(__('labels.name'))
-                    ->searchable(),
+                    ->label(__('labels.name')),
                 TextColumn::make('membership.name')
                     ->label(__('labels.membership')),
                 TextColumn::make('created_at')
@@ -49,6 +48,6 @@ final class MembersTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])->searchable(['first_name', 'last_name', 'infix_name']);
     }
 }

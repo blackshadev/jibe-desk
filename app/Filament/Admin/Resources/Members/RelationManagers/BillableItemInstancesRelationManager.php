@@ -24,7 +24,7 @@ final class BillableItemInstancesRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('billableItem.bill_period')
                     ->label(__('labels.bill_period'))
-                    ->formatStateUsing(fn (BillPeriod $state) => __('labels.bill_periods.' . $state->value)),
+                    ->formatStateUsing(static fn (BillPeriod $state) => __('labels.bill_periods.' . $state->value)),
                 TextColumn::make('billableItem.description')
                     ->label(__('labels.description')),
                 TextColumn::make('billableItem.price')
@@ -64,6 +64,16 @@ final class BillableItemInstancesRelationManager extends RelationManager
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('labels.billable_item_instances');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return mb_strtolower(__('labels.billable_item_instance'));
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return mb_strtolower(__('labels.billable_item_instances'));
     }
 
     protected function getDefaultTableSortColumn(): string

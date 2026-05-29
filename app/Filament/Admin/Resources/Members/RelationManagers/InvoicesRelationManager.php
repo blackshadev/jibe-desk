@@ -34,4 +34,14 @@ final class InvoicesRelationManager extends RelationManager
                 CreateAction::make(),
             ]);
     }
+
+    public static function getModelLabel(): string
+    {
+        return mb_strtolower(__('labels.invoice'));
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return mb_strtolower(__('labels.invoices'));
+    }
 }

@@ -4,36 +4,41 @@ declare(strict_types=1);
 
 namespace App\Observers;
 
+use App\Domain\Invoices\Billing\BillingItemApplicators\ApplyMembershipBilling;
+use App\Domain\Invoices\Billing\BillingItemApplicators\ApplyMemberVolunteerBilling;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MembershipId;
-use App\Events\MemberMembershipChanged;
-use App\Events\MemberVolunteerChanged;
 use App\Models\Member;
-use Illuminate\Support\Facades\Event;
 
-final class MemberObserver
+final readonly class MemberObserver
 {
+    public function __construct(
+        private ApplyMemberVolunteerBilling $applyMemberVolunteerBilling,
+        private ApplyMembershipBilling $applyMembershipBilling,
+    ) {
+    }
+
     public function created(Member $member): void
     {
-        Event::dispatch(new MemberMembershipChanged(
-            memberId: MemberId::create($member->id),
-            newMembershipId: MembershipId::create($member->membership_id),
-        ));
+        $this->applyMembershipBilling->apply(
+            MemberId::create($member->id),
+            MembershipId::create($member->membership_id),
+        );
 
-        Event::dispatch(new MemberVolunteerChanged(MemberId::create($member->id)));
+        $this->applyMemberVolunteerBilling->apply(MemberId::create($member->id));
     }
 
     public function updated(Member $member): void
     {
         if ($member->wasChanged('membership_id')) {
-            Event::dispatch(new MemberMembershipChanged(
-                memberId: MemberId::create($member->id),
-                newMembershipId: MembershipId::create($member->membership_id),
-            ));
+            $this->applyMembershipBilling->apply(
+                MemberId::create($member->id),
+                MembershipId::create($member->membership_id),
+            );
         }
 
         if ($member->wasChanged('is_volunteer')) {
-            Event::dispatch(new MemberVolunteerChanged(MemberId::create($member->id)));
+            $this->applyMemberVolunteerBilling->apply(MemberId::create($member->id));
         }
     }
 }

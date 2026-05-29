@@ -67,4 +67,8 @@ return [
     'address_postalcode' => 'Postcode',
     'address_postalcode_format' => '1234AB',
     'address_city' => 'Woonplaats',
+    'activity' => 'Activiteit',
+    'activities' => 'Activiteiten',
+    'participants' => 'Deelnemers',
+    'participant' => 'Deelnemer',
 ];

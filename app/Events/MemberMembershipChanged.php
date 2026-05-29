@@ -9,9 +9,7 @@ use App\Domain\Members\MembershipId;
 
 final readonly class MemberMembershipChanged
 {
-    public function __construct(
-        public MemberId $memberId,
-        public MembershipId $newMembershipId,
-    ) {
+    public function __construct(public MemberId $memberId, public MembershipId $newMembershipId)
+    {
     }
 }

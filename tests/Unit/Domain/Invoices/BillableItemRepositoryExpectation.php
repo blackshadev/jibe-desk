@@ -6,8 +6,10 @@ namespace Tests\Unit\Domain\Invoices;
 
 use App\Domain\Invoices\Billing\BillableItemId;
 use App\Domain\Invoices\Billing\BillableItemIdList;
+use App\Domain\Invoices\Billing\BillableItemInstanceId;
 use App\Domain\Invoices\Billing\BillableItemInstanceRepository;
 use App\Domain\Members\MemberId;
+use DateTimeInterface;
 use Mockery;
 use Mockery\MockInterface;
 
@@ -24,18 +26,19 @@ final readonly class BillableItemRepositoryExpectation
         return new self(Mockery::mock(BillableItemInstanceRepository::class));
     }
 
-    public function expectsRemoveInstances(MemberId $memberId, BillableItemIdList $billableItemIds): void
+    public function expectsRemove(MemberId $memberId, BillableItemIdList $billableItemIds): void
     {
         $this->mock
             ->expects('removeMany')
             ->with(equalTo($memberId), equalTo($billableItemIds));
     }
 
-    public function expectsAddInstance(MemberId $memberId, BillableItemId $billableItemId): void
+    public function expectsAdd(MemberId $memberId, BillableItemId $billableItemId, ?DateTimeInterface $endDate, BillableItemInstanceId $return): void
     {
         $this->mock
             ->expects('add')
-            ->with(equalTo($memberId), equalTo($billableItemId));
+            ->with(equalTo($memberId), equalTo($billableItemId), equalTo($endDate))
+            ->andReturn($return);
     }
 
     public function expectsEnsure(MemberId $memberId, BillableItemId $billableItemId): void
@@ -43,5 +46,12 @@ final readonly class BillableItemRepositoryExpectation
         $this->mock
             ->expects('ensure')
             ->with(equalTo($memberId), equalTo($billableItemId));
+    }
+
+    public function expectsStop(BillableItemInstanceId $instanceId): void
+    {
+        $this->mock
+            ->expects('stop')
+            ->with(equalTo($instanceId));
     }
 }

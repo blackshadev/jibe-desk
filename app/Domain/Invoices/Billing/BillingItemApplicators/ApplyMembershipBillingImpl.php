@@ -2,16 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\Invoices\Billing;
+namespace App\Domain\Invoices\Billing\BillingItemApplicators;
 
+use App\Domain\Invoices\Billing\BillableItemInstanceRepository;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MemberRepository;
 use App\Domain\Members\MembershipId;
 use App\Domain\Members\MembershipRepository;
-use App\Domain\NumericId;
 
-/** @implements ApplyBillableItem<MembershipId> */
-final readonly class ApplyMembershipBilling implements ApplyBillableItem
+final readonly class ApplyMembershipBillingImpl implements ApplyMembershipBilling
 {
     public function __construct(
         private MemberRepository $memberRepository,
@@ -20,15 +19,15 @@ final readonly class ApplyMembershipBilling implements ApplyBillableItem
     ) {
     }
 
-    public function __invoke(MemberId $memberId, ?NumericId $membershipId): void
+    public function apply(MemberId $memberId, MembershipId $membershipId): void
     {
-        /** @var MembershipId $membershipId */
         $member = $this->memberRepository->getById($memberId);
 
         $allBillingIds = $this->membershipRepository->all()->asBillingIdList();
         $this->billableItemRepository->removeMany($member->id, $allBillingIds);
 
         $newMembership = $this->membershipRepository->getById(MembershipId::create($membershipId->value));
-        $this->billableItemRepository->add($memberId, $newMembership->billableItemId);
+        // pass null endDate for items without an end date
+        $this->billableItemRepository->add($memberId, $newMembership->billableItemId, null);
     }
 }

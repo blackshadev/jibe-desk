@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\Invoices\Billing;
+namespace App\Domain\Invoices\Billing\BillingItemApplicators;
 
+use App\Domain\Invoices\Billing\BillableItemIdList;
+use App\Domain\Invoices\Billing\BillableItemInstanceRepository;
 use App\Domain\Members\ExtraMembershipBillingItemRepository;
 use App\Domain\Members\ExtraMembershipItemCode;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MemberRepository;
-use App\Domain\NumericId;
 
-/** @implements ApplyBillableItem<null>  */
-final readonly class ApplyMemberVolunteerBilling implements ApplyBillableItem
+final readonly class ApplyMemberVolunteerBillingImpl implements ApplyMemberVolunteerBilling
 {
     public function __construct(
         private ExtraMembershipBillingItemRepository $extraMembershipBillingItemRepository,
@@ -20,7 +20,7 @@ final readonly class ApplyMemberVolunteerBilling implements ApplyBillableItem
     ) {
     }
 
-    public function __invoke(MemberId $memberId, ?NumericId $null): void
+    public function apply(MemberId $memberId): void
     {
         $contributionId = $this->extraMembershipBillingItemRepository->getByCode(ExtraMembershipItemCode::VolunteerContribution);
         $restitutionId = $this->extraMembershipBillingItemRepository->getByCode(ExtraMembershipItemCode::VolunteerRestitution);
@@ -29,7 +29,8 @@ final readonly class ApplyMemberVolunteerBilling implements ApplyBillableItem
 
         $member = $this->memberRepository->getById($memberId);
         if ($member->isVolunteer) {
-            $this->billableItemInstanceRepository->add($memberId, $restitutionId);
+            // pass null endDate to match repository add signature
+            $this->billableItemInstanceRepository->add($memberId, $restitutionId, null);
         } else {
             $this->billableItemInstanceRepository->removeMany($memberId, new BillableItemIdList([$restitutionId]));
         }

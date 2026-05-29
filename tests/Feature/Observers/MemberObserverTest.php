@@ -4,29 +4,50 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Observers;
 
-use App\Events\MemberMembershipChanged;
-use App\Events\MemberVolunteerChanged;
+use App\Domain\Members\MemberId;
+use App\Domain\Members\MembershipId;
 use App\Models\Member;
 use App\Models\Membership;
 use App\Observers\MemberObserver;
-use Illuminate\Support\Facades\Event;
 use Tests\FeatureTestCase;
+use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplyMembershipBillingExpectation;
+use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplyMemberVolunteerBillingExpectation;
 
 final class MemberObserverTest extends FeatureTestCase
 {
-    public function test_it_does_dispatch_event_when_created(): void
+    private ApplyMembershipBillingExpectation $applyMembership;
+
+    private ApplyMemberVolunteerBillingExpectation $applyVolunteer;
+
+    private MemberObserver $subject;
+
+    protected function setUp(): void
     {
-        Event::fake();
+        parent::setUp();
 
-        $member = Member::factory()->createQuietly();
+        $this->applyMembership = ApplyMembershipBillingExpectation::create();
 
-        $observer = new MemberObserver();
-        $observer->created($member);
+        $this->applyVolunteer = ApplyMemberVolunteerBillingExpectation::create();
 
-        Event::assertDispatched(MemberMembershipChanged::class);
+        $this->subject = new MemberObserver(
+            $this->applyVolunteer->mock,
+            $this->applyMembership->mock,
+        );
     }
 
-    public function test_it_dispatches_event_when_membership_id_changes(): void
+    public function test_it_applies_billing_on_created_members(): void
+    {
+        $member = Member::factory()->createQuietly();
+        $memberId = new MemberId($member->id);
+        $membershipId = new MembershipId($member->membership_id);
+
+        $this->applyVolunteer->expectsApply($memberId);
+        $this->applyMembership->expectsApply($memberId, $membershipId);
+
+        $this->subject->created($member);
+    }
+
+    public function test_it_applies_membership_billing_on_membership_change(): void
     {
         $newMembership = Membership::factory()->create();
         $oldMembership = Membership::factory()->create();
@@ -34,21 +55,18 @@ final class MemberObserverTest extends FeatureTestCase
             ->for($oldMembership)
             ->createQuietly();
 
-        Event::fake();
-
         $member->membership_id = $newMembership->id;
-        $member->save();
+        $member->saveQuietly();
 
-        $observer = new MemberObserver();
-        $observer->updated($member);
+        $memberId = new MemberId($member->id);
+        $membershipId = new MembershipId($newMembership->id);
+        $this->applyMembership->expectsApply($memberId, $membershipId);
+        $this->applyVolunteer->expectsApplyNever();
 
-        Event::assertDispatched(MemberMembershipChanged::class, function (MemberMembershipChanged $event) use ($member, $newMembership) {
-            return $event->memberId->value === $member->id
-                && $event->newMembershipId->value === $newMembership->id;
-        });
+        $this->subject->updated($member);
     }
 
-    public function test_it_does_not_dispatch_event_when_other_fields_change(): void
+    public function test_it_does_not_apply_any_billing_on_irrelevant_changes(): void
     {
         $membership = Membership::factory()->create();
         $member = Member::factory()->createQuietly([
@@ -56,55 +74,30 @@ final class MemberObserverTest extends FeatureTestCase
             'first_name' => 'Old',
         ]);
 
-        Event::fake();
-
         $member->first_name = 'New';
-        $member->save();
+        $member->saveQuietly();
 
-        $observer = new MemberObserver();
-        $observer->updated($member);
+        $this->applyMembership->expectsApplyNever();
+        $this->applyVolunteer->expectsApplyNever();
 
-        Event::assertNotDispatched(MemberMembershipChanged::class);
+        $this->subject->updated($member);
     }
 
-    public function test_it_dispatches_member_volunteer_changed_when_is_volunteer_changes(): void
+    public function test_it_applies_volunteering_billing_on_volunteer_change(): void
     {
         $membership = Membership::factory()->create();
         $member = Member::factory()->createQuietly([
             'membership_id' => $membership->id,
             'is_volunteer' => false,
         ]);
-
-        Event::fake();
 
         $member->is_volunteer = true;
-        $member->save();
+        $member->saveQuietly();
 
-        $observer = new MemberObserver();
-        $observer->updated($member);
+        $memberId = new MemberId($member->id);
+        $this->applyMembership->expectsApplyNever();
+        $this->applyVolunteer->expectsApply($memberId);
 
-        Event::assertDispatched(MemberVolunteerChanged::class, function (MemberVolunteerChanged $event) use ($member): bool {
-            return $event->memberId->value === $member->id;
-        });
-    }
-
-    public function test_it_does_not_dispatch_member_volunteer_changed_when_other_fields_change(): void
-    {
-        $membership = Membership::factory()->create();
-        $member = Member::factory()->createQuietly([
-            'membership_id' => $membership->id,
-            'is_volunteer' => false,
-            'first_name' => 'Old',
-        ]);
-
-        Event::fake();
-
-        $member->first_name = 'New';
-        $member->save();
-
-        $observer = new MemberObserver();
-        $observer->updated($member);
-
-        Event::assertNotDispatched(MemberVolunteerChanged::class);
+        $this->subject->updated($member);
     }
 }

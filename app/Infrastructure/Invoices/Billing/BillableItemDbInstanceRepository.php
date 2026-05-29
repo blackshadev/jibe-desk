@@ -6,11 +6,13 @@ namespace App\Infrastructure\Invoices\Billing;
 
 use App\Domain\Invoices\Billing\BillableItemId;
 use App\Domain\Invoices\Billing\BillableItemIdList;
+use App\Domain\Invoices\Billing\BillableItemInstanceId;
 use App\Domain\Invoices\Billing\BillableItemInstanceRepository;
 use App\Domain\Members\MemberId;
 use App\Models\BillableItem;
 use App\Models\BillableItemInstance;
 use Carbon\CarbonImmutable;
+use DateTimeInterface;
 
 final class BillableItemDbInstanceRepository implements BillableItemInstanceRepository
 {
@@ -27,16 +29,18 @@ final class BillableItemDbInstanceRepository implements BillableItemInstanceRepo
             );
     }
 
-    public function add(MemberId $memberId, BillableItemId $billableItemId): void
+    public function add(MemberId $memberId, BillableItemId $billableItemId, ?DateTimeInterface $endDate = null): BillableItemInstanceId
     {
         $billableItem = BillableItem::findOrFail($billableItemId->value);
-        BillableItemInstance::create([
+        $instance = BillableItemInstance::create([
             'member_id' => $memberId->value,
             'billable_item_id' => $billableItemId->value,
             'start_date' => CarbonImmutable::now(),
-            'end_date' => null,
+            'end_date' => $endDate,
             'bill_cycle_in_months' => $billableItem->bill_period->toBillPeriodInMonths(),
         ]);
+
+        return BillableItemInstanceId::create($instance->id);
     }
 
     public function ensure(MemberId $memberId, BillableItemId $billableItemId): void
@@ -51,5 +55,16 @@ final class BillableItemDbInstanceRepository implements BillableItemInstanceRepo
         ], [
             'start_date' => CarbonImmutable::now(),
         ]);
+    }
+
+    public function stop(BillableItemInstanceId $instanceId): void
+    {
+        BillableItemInstance::query()
+            ->where('id', $instanceId->value)
+            ->update(
+                [
+                    'end_date' => CarbonImmutable::now(),
+                ]
+            );
     }
 }
