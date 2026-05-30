@@ -51,6 +51,12 @@ final class Member extends Model
             ->withTimestamps();
     }
 
+    /** @return HasMany<MemberObject, $this> */
+    public function memberObjects(): HasMany
+    {
+        return $this->hasMany(MemberObject::class);
+    }
+
     /** @return array<string, string> */
     protected function casts(): array
     {

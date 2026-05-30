@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Activities\Schemas;
 
-use App\Domain\Invoices\Billing\BillPeriod;
+use App\Filament\Admin\Labels\BillPeriodLabels;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -29,17 +29,21 @@ final class ActivityForm
             Section::make(__('labels.billing'))
                 ->relationship('billableItem')
                 ->schema([
-                    TextInput::make('description')
-                        ->required(),
                     TextInput::make('price')
+                        ->label(__('labels.price'))
                         ->required(),
                     Select::make('bill_period')
-                        ->options([
-                            BillPeriod::Monthly->value => __('labels.bill_periods.monthly'),
-                            BillPeriod::Quarterly->value => __('labels.bill_periods.quarterly'),
-                            BillPeriod::Annually->value => __('labels.bill_periods.annually'),
-                        ])
+                        ->label(__('labels.billing_period'))
+                        ->options(BillPeriodLabels::options())
                         ->required(),
+                ])
+                ->mutateRelationshipDataBeforeSaveUsing(static fn (array $state) => [
+                    ...$state,
+                    'vat' => $state['price'] * 0.21,
+                ])
+                ->mutateRelationshipDataBeforeCreateUsing(static fn (array $state) => [
+                    ...$state,
+                    'vat' => $state['price'] * 0.21,
                 ]),
         ]);
     }

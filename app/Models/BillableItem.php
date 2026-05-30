@@ -24,6 +24,17 @@ final class BillableItem extends Model
         return $this->hasMany(InvoiceLine::class);
     }
 
+    public static function createDefault(array $data = []): self
+    {
+        return self::create([
+            'description' => '',
+            'price' => 0,
+            'vat' => 0,
+            'bill_period' => BillPeriod::Annually,
+            ...$data,
+        ]);
+    }
+
     /** @return Attribute<CompoundPrice, never> */
     protected function compoundPrice(): Attribute
     {

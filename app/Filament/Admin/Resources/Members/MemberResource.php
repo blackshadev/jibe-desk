@@ -11,6 +11,7 @@ use App\Filament\Admin\Resources\Members\Pages\ListMembers;
 use App\Filament\Admin\Resources\Members\RelationManagers\ActivitiesRelationManager;
 use App\Filament\Admin\Resources\Members\RelationManagers\BillableItemInstancesRelationManager;
 use App\Filament\Admin\Resources\Members\RelationManagers\InvoicesRelationManager;
+use App\Filament\Admin\Resources\Members\RelationManagers\MemberObjectsRelationManager;
 use App\Filament\Admin\Resources\Members\Schemas\MemberForm;
 use App\Filament\Admin\Resources\Members\Tables\MembersTable;
 use App\Models\Member;
@@ -47,6 +48,7 @@ final class MemberResource extends Resource
             InvoicesRelationManager::make(),
             BillableItemInstancesRelationManager::make(),
             ActivitiesRelationManager::make(),
+            MemberObjectsRelationManager::make(),
         ];
     }
 

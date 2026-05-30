@@ -9,9 +9,11 @@ use App\Formatters\PriceFormatter;
 use App\Models\BillableItemInstance;
 use Filament\Actions\Action;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 final class BillableItemInstancesRelationManager extends RelationManager
@@ -74,6 +76,23 @@ final class BillableItemInstancesRelationManager extends RelationManager
     public static function getPluralModelLabel(): string
     {
         return mb_strtolower(__('labels.billable_item_instances'));
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            'all' => Tab::make(__('labels.all')),
+            'active' => Tab::make(__('labels.active'))
+                ->modifyQueryUsing(
+                    /** @param Builder<BillableItemInstance> $query */
+                    static fn (Builder $query) => $query->active()
+                ),
+            'inactive' => Tab::make(__('labels.inactive'))
+                ->modifyQueryUsing(
+                    /** @param Builder<BillableItemInstance> $query */
+                    static fn (Builder $query) => $query->inactive()
+                ),
+        ];
     }
 
     protected function getDefaultTableSortColumn(): string

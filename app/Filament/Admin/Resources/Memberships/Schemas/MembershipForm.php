@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Memberships\Schemas;
 
-use App\Domain\Invoices\Billing\BillPeriod;
+use App\Filament\Admin\Labels\BillPeriodLabels;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -35,11 +35,7 @@ final class MembershipForm
                             ->required(),
                         Select::make('bill_period')
                             ->label(__('labels.bill_period'))
-                            ->options([
-                                BillPeriod::Monthly->value => __('labels.bill_periods.monthly'),
-                                BillPeriod::Quarterly->value => __('labels.bill_periods.quarterly'),
-                                BillPeriod::Annually->value => __('labels.bill_periods.annually'),
-                            ])
+                            ->options(BillPeriodLabels::options())
                             ->required(),
                     ])
                     ->mutateRelationshipDataBeforeCreateUsing(static fn (array $data): array => [

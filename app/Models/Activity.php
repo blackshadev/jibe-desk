@@ -7,6 +7,8 @@ namespace App\Models;
 use App\Models\Pivots\ActivityMember;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,7 +26,9 @@ final class Activity extends Model
     /** @return BelongsTo<BillableItem, $this> */
     public function billableItem(): BelongsTo
     {
-        return $this->belongsTo(BillableItem::class);
+        return $this
+            ->belongsTo(BillableItem::class)
+            ->withDefault();
     }
 
     /** @return BelongsToMany<Member, $this, ActivityMember> */
@@ -43,5 +47,17 @@ final class Activity extends Model
             'start_date' => 'date',
             'end_date' => 'date',
         ];
+    }
+
+    #[Scope]
+    protected function active(Builder $query): Builder
+    {
+        return $query->whereNull('end_date')->orWhereFuture('end_date');
+    }
+
+    #[Scope]
+    protected function inactive(Builder $query): Builder
+    {
+        return $query->orWhereNowOrPast('end_date');
     }
 }

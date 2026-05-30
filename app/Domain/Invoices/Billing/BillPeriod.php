@@ -14,7 +14,7 @@ enum BillPeriod: string
     public function toBillPeriodInMonths(): int
     {
         return match ($this) {
-            self::Once => 999,
+            self::Once => PHP_INT_MAX,
             self::Monthly => 1,
             self::Quarterly => 3,
             self::Annually => 12,

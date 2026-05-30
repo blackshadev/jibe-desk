@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Members\RelationManagers;
 
+use App\Domain\Activities\Activity;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DetachAction;
@@ -11,6 +12,7 @@ use Filament\Actions\DetachBulkAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 final class ActivitiesRelationManager extends RelationManager
@@ -34,7 +36,11 @@ final class ActivitiesRelationManager extends RelationManager
             ])
 
             ->headerActions([
-                AttachAction::make(),
+                AttachAction::make()
+                    ->recordSelectOptionsQuery(
+                        /** @param Builder<Activity> $query */
+                        static fn (Builder $query) => $query->active()
+                    ),
             ])
             ->recordActions([
                 DetachAction::make(),

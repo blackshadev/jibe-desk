@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\ExtraMembershipItems;
 
 use App\Filament\Admin\Navigation\NavigationGroup;
-use App\Filament\Admin\Resources\ExtraMembershipItems\Pages\CreateExtraMembershipItem;
 use App\Filament\Admin\Resources\ExtraMembershipItems\Pages\EditExtraMembershipItem;
 use App\Filament\Admin\Resources\ExtraMembershipItems\Pages\ListExtraMembershipItems;
 use App\Filament\Admin\Resources\ExtraMembershipItems\Schemas\ExtraMembershipItemForm;
@@ -52,7 +51,6 @@ final class ExtraMembershipItemResource extends Resource
     {
         return [
             'index' => ListExtraMembershipItems::route('/'),
-            'create' => CreateExtraMembershipItem::route('/create'),
             'edit' => EditExtraMembershipItem::route('/{record}/edit'),
         ];
     }

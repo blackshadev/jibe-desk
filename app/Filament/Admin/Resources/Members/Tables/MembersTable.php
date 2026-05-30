@@ -6,7 +6,6 @@ namespace App\Filament\Admin\Resources\Members\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -40,9 +39,6 @@ final class MembersTable
                     ->label(__('labels.membership'))
                     ->relationship('membership', 'name')
                     ->preload(),
-            ])
-            ->recordActions([
-                EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
