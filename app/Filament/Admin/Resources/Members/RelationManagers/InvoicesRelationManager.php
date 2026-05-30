@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\Members\RelationManagers;
 
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
+use App\Models\Invoice;
 use Filament\Actions\CreateAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
@@ -30,6 +31,9 @@ final class InvoicesRelationManager extends RelationManager
                     ->label(__('labels.total'))
                     ->alignEnd(),
             ])
+            ->recordUrl(
+                static fn (Invoice $record): string => InvoiceResource::getUrl('edit', ['record' => $record])
+            )
             ->headerActions([
                 CreateAction::make(),
             ]);

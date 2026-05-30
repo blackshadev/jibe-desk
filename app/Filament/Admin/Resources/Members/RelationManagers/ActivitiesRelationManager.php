@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\Members\RelationManagers;
 
 use App\Domain\Activities\Activity;
+use App\Filament\Admin\Resources\Activities\ActivityResource;
+use App\Models\Activity as ActivityModel;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DetachAction;
@@ -21,6 +23,8 @@ final class ActivitiesRelationManager extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static ?string $relatedResource = ActivityResource::class;
+
     public function table(Table $table): Table
     {
         return $table
@@ -34,7 +38,9 @@ final class ActivitiesRelationManager extends RelationManager
                     ->label(__('labels.end_date'))
                     ->date(),
             ])
-
+            ->recordUrl(
+                static fn (ActivityModel $record): string => ActivityResource::getUrl('edit', ['record' => $record])
+            )
             ->headerActions([
                 AttachAction::make()
                     ->recordSelectOptionsQuery(
