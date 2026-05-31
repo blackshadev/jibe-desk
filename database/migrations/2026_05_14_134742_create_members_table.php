@@ -14,21 +14,23 @@ return new class() extends Migration {
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
 
             $table->string('initials');
-            $table->string('first_name');
-            $table->string('infix_name');
-            $table->string('last_name');
+            $table->string('first_name')->index();
+            $table->string('infix_name')->index();
+            $table->string('last_name')->index();
+            $table->string('email')->index();
 
             $table->string('gender');
 
             $table->date('birthdate');
 
-            $table->foreignId('membership_id')->constrained('memberships');
+            $table->foreignId('membership_id')
+                ->index()
+                ->constrained('memberships');
+
             $table->boolean('is_volunteer')->default(false);
 
             $table->timestamps();
             $table->softDeletes();
-
-            $table->index('membership_id');
         });
 
         DB::statement('CREATE UNIQUE INDEX members_user_id_unique ON members (user_id) WHERE user_id IS NOT NULL;');

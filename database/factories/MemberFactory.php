@@ -23,6 +23,7 @@ final class MemberFactory extends Factory
             'first_name' => $firstName,
             'infix_name' => $this->faker->randomElement(['van', 'de', 'den', 'van de', 'van den', '']),
             'last_name' => $this->faker->lastName(),
+            'email' => $this->faker ->safeEmail(),
             'address_street' => $this->faker->streetName(),
             'address_housenumber' => (string) $this->faker->numberBetween(1, 200),
             'address_housenumber_addition' => $this->faker->optional()->randomElement(['A', 'B', 'C', 'bis']),

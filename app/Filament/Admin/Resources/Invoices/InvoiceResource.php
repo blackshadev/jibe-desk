@@ -8,6 +8,7 @@ use App\Filament\Admin\Navigation\NavigationGroup;
 use App\Filament\Admin\Resources\Invoices\Pages\CreateInvoice;
 use App\Filament\Admin\Resources\Invoices\Pages\EditInvoice;
 use App\Filament\Admin\Resources\Invoices\Pages\ListInvoices;
+use App\Filament\Admin\Resources\Invoices\Pages\ViewInvoice;
 use App\Filament\Admin\Resources\Invoices\Schemas\InvoiceForm;
 use App\Filament\Admin\Resources\Invoices\Tables\InvoicesTable;
 use App\Models\Invoice;
@@ -61,6 +62,7 @@ final class InvoiceResource extends Resource
             'index' => ListInvoices::route('/'),
             'create' => CreateInvoice::route('/create'),
             'edit' => EditInvoice::route('/{record}/edit'),
+            'view' => ViewInvoice::route('/{record}'),
         ];
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Domain\Invoices\InvoiceStatus;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;
 use App\Models\Member;
@@ -21,6 +22,7 @@ final class InvoiceFactory extends Factory
             'invoice_number' => $this->faker->unique()->numerify("I-{$year}######"),
             'recipient_name' => $this->faker->name(),
             'recipient_address' => $this->faker->address(),
+            'status' => $this->faker->randomElement(InvoiceStatus::cases()),
         ];
     }
 

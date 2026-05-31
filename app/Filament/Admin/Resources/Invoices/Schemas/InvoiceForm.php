@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Invoices\Schemas;
 
+use App\Filament\Admin\Labels\InvoiceStatusLabels;
 use App\Formatters\PriceFormatter;
 use App\Models\Member;
 use Filament\Forms\Components\DatePicker;
@@ -34,6 +35,11 @@ final class InvoiceForm
                             ->label(__('labels.invoice_date'))
                             ->native(false)
                             ->format('d-m-Y')
+                            ->disabled(),
+
+                        Select::make('status')
+                            ->label(__('labels.status'))
+                            ->options(InvoiceStatusLabels::options())
                             ->disabled(),
 
                         Grid::make()

@@ -81,4 +81,10 @@ return [
     'all' => 'Alles',
     'active' => 'Actief',
     'inactive' => 'Inactief',
+    'status' => 'Status',
+    'invoice_status' => [
+        'open' => 'Open',
+        'pending' => 'In behandeling',
+        'paid' => 'Betaald',
+    ],
 ];

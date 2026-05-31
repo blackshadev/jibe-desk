@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\Invoices\Tables;
 
 use App\Domain\Invoices\CompoundPrice;
+use App\Domain\Invoices\InvoiceStatus;
+use App\Filament\Admin\Resources\Invoices\InvoiceResource;
+use App\Filament\Admin\Utils\ViewOrEdit;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
@@ -29,6 +32,9 @@ final class InvoicesTable
                 TextColumn::make('date')
                     ->label(__('labels.invoice_date'))
                     ->date(),
+                TextColumn::make('status')
+                    ->label(__('labels.status'))
+                    ->formatStateUsing(static fn (InvoiceStatus $state) => __('labels.invoice_status.' . $state->value)),
                 TextColumn::make('total')
                     ->label(__('labels.total'))
                     ->formatStateUsing(static fn (CompoundPrice $state) => (string)$state)
@@ -44,6 +50,7 @@ final class InvoicesTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->recordUrl(ViewOrEdit::route(InvoiceResource::class))
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

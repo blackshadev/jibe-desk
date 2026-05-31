@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Domain\Invoices\CompoundPrice;
+use App\Domain\Invoices\InvoiceStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +13,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['date', 'member_id', 'invoice_number', 'recipient_address', 'recipient_name', 'invoice_batch_id'])]
+/**
+ * @property InvoiceStatus $status
+ */
+#[Fillable(['date', 'status', 'member_id', 'invoice_number', 'recipient_address', 'recipient_name', 'invoice_batch_id'])]
 final class Invoice extends Model
 {
     use HasFactory;
@@ -27,6 +31,14 @@ final class Invoice extends Model
     public function lines(): HasMany
     {
         return $this->hasMany(InvoiceLine::class);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'date' => 'datetime',
+            'status' => InvoiceStatus::class,
+        ];
     }
 
     /** @return Attribute<CompoundPrice, never> */
