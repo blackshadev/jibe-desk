@@ -6,7 +6,7 @@ namespace Tests\Feature\Infrastructure\Activities;
 
 use App\Domain\Activities\ActivityId;
 use App\Infrastructure\Activities\ActivityDbRepository;
-use App\Models\Activity as ActivityModel;
+use App\Models\Activity;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Tests\FeatureTestCase;
 
@@ -14,7 +14,8 @@ final class ActivityDbRepositoryTest extends FeatureTestCase
 {
     public function test_get_by_id_returns_activity_domain_object(): void
     {
-        $model = ActivityModel::factory()->create();
+        /** @var Activity $model */
+        $model = Activity::factory()->create();
 
         $repo = new ActivityDbRepository();
 

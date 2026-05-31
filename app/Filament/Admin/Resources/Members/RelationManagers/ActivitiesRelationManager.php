@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Members\RelationManagers;
 
-use App\Domain\Activities\Activity;
 use App\Filament\Admin\Resources\Activities\ActivityResource;
 use App\Models\Activity as ActivityModel;
 use Filament\Actions\AttachAction;
@@ -44,7 +43,7 @@ final class ActivitiesRelationManager extends RelationManager
             ->headerActions([
                 AttachAction::make()
                     ->recordSelectOptionsQuery(
-                        /** @param Builder<Activity> $query */
+                        /** @phpstan-ignore-next-line method.notFound */
                         static fn (Builder $query) => $query->active()
                     ),
             ])

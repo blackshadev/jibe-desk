@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\Activities\Pages;
 
 use App\Filament\Admin\Resources\Activities\ActivityResource;
-use App\Models\Activity;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs;
@@ -21,12 +20,12 @@ final class ListActivities extends ListRecords
             'all' => Tabs\Tab::make(__('labels.all')),
             'active' => Tabs\Tab::make(__('labels.active'))
                 ->modifyQueryUsing(
-                    /** @param Builder<Activity> $query */
+                    /** @phpstan-ignore-next-line method.notFound */
                     static fn (Builder $query) => $query->active()
                 ),
             'inactive' => Tabs\Tab::make(__('labels.active'))
                 ->modifyQueryUsing(
-                    /** @param Builder<Activity> $query */
+                    /** @phpstan-ignore-next-line method.notFound */
                     static fn (Builder $query) => $query->inactive()
                 ),
         ];

@@ -19,7 +19,10 @@ final class ListMembers extends ListRecords
         return [
             'active' => Tab::make(__('labels.active')),
             'inactive' => Tab::make(__('labels.inactive'))
-                ->modifyQueryUsing(static fn (Builder $query) => $query->onlyTrashed()),
+                ->modifyQueryUsing(
+                    /** @phpstan-ignore-next-line method.notFound */
+                    static fn (Builder $query) => $query->onlyTrashed()
+                ),
         ];
     }
 

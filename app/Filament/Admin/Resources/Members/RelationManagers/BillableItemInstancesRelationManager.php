@@ -84,12 +84,12 @@ final class BillableItemInstancesRelationManager extends RelationManager
             'all' => Tab::make(__('labels.all')),
             'active' => Tab::make(__('labels.active'))
                 ->modifyQueryUsing(
-                    /** @param Builder<BillableItemInstance> $query */
+                    /** @phpstan-ignore-next-line method.notFound */
                     static fn (Builder $query) => $query->active()
                 ),
             'inactive' => Tab::make(__('labels.inactive'))
                 ->modifyQueryUsing(
-                    /** @param Builder<BillableItemInstance> $query */
+                    /** @phpstan-ignore-next-line method.notFound */
                     static fn (Builder $query) => $query->inactive()
                 ),
         ];

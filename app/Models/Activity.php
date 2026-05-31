@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Pivots\ActivityMember;
-use DateTimeInterface;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,8 +15,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
- * @property DateTimeInterface $start_date
- * @property DateTimeInterface $end_date
+ * @property CarbonInterface $start_date
+ * @property ?CarbonInterface $end_date
  */
 #[Fillable(['name', 'description', 'billable_item_id', 'start_date', 'end_date'])]
 final class Activity extends Model
