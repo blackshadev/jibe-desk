@@ -27,7 +27,7 @@ final class ActivityDbRepository implements ActivityRepository
         );
     }
 
-    public function attach(ActivityId $activityId, MemberId $memberId, BillableItemInstanceId $instanceId)
+    public function attach(ActivityId $activityId, MemberId $memberId, BillableItemInstanceId $instanceId): void
     {
         ActivityMember::query()
             ->where([

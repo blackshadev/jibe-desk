@@ -32,7 +32,17 @@ final class MemberFactory extends Factory
             'gender' => $this->faker->randomElement(Gender::cases()),
             'membership_id' => Membership::factory(),
             'is_volunteer' => $this->faker->boolean(),
+            'created_at' => $this->faker->dateTimeBetween('-1 years', 'now'),
         ];
+    }
+
+    public function deleted(): self
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'deleted_at' => $this->faker->dateTimeBetween($attributes['created_at'], 'now'),
+            ];
+        });
     }
 
     /** @param iterable<Activity> $activities */

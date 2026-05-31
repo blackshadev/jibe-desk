@@ -13,7 +13,7 @@ final class BillPeriodTest extends UnitTestCase
     /** @return iterable<string, array{BillPeriod, int}> */
     public static function billPeriodProvider(): iterable
     {
-        yield 'once' => [BillPeriod::Once, 999];
+        yield 'once' => [BillPeriod::Once, PHP_INT_MAX];
         yield 'monthly' => [BillPeriod::Monthly, 1];
         yield 'quarterly' => [BillPeriod::Quarterly, 3];
         yield 'annually' => [BillPeriod::Annually, 12];

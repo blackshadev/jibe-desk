@@ -13,5 +13,5 @@ interface ActivityRepository
 {
     public function getById(ActivityId $activityId): Activity;
 
-    public function attach(ActivityId $activityId, MemberId $memberId, BillableItemInstanceId $instanceId);
+    public function attach(ActivityId $activityId, MemberId $memberId, BillableItemInstanceId $instanceId): void;
 }

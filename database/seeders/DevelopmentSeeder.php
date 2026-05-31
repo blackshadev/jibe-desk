@@ -94,6 +94,14 @@ final class DevelopmentSeeder extends Seeder
             );
         }
 
+        Member::factory()
+            ->deleted()
+            ->count(100)
+            ->state([
+                'membership_id' => $memberships->first()->id,
+            ])
+            ->createQuietly();
+
         foreach ($members as $member) {
             Invoice::factory()
                 ->forMember($member)

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Activities\RelationManagers;
 
+use App\Filament\Admin\Resources\Members\MemberResource;
+use App\Models\Member;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DetachAction;
@@ -38,6 +40,7 @@ final class ActivityMembersRelationManager extends RelationManager
                         'infix_name',
                     ]),
             ])
+            ->recordUrl(static fn (Member $record): string => MemberResource::getUrl('edit', [ 'record' => $record ]))
             ->recordActions([
                 DetachAction::make(),
             ])
