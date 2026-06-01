@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Domain\Invoices\Billing\BillableItem as InvoiceBillableItem;
+use App\Domain\Invoices\Billing\BillableItemId;
 use App\Domain\Invoices\Billing\BillPeriod;
 use App\Domain\Invoices\CompoundPrice;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -33,6 +35,16 @@ final class BillableItem extends Model
             'bill_period' => BillPeriod::Annually,
             ...$data,
         ]);
+    }
+
+    public function toInvoiceBillableItem(): InvoiceBillableItem
+    {
+        return new InvoiceBillableItem(
+            new BillableItemId($this->id),
+            $this->compound_price,
+            1.0,
+            $this->description,
+        );
     }
 
     /** @return Attribute<CompoundPrice, never> */

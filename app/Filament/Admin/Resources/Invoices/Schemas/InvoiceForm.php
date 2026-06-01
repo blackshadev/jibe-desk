@@ -34,8 +34,7 @@ final class InvoiceForm
                         DatePicker::make('date')
                             ->label(__('labels.invoice_date'))
                             ->native(false)
-                            ->format('d-m-Y')
-                            ->disabled(),
+                            ->format('d-m-Y'),
 
                         Select::make('status')
                             ->label(__('labels.status'))
@@ -59,6 +58,7 @@ final class InvoiceForm
                                             return;
                                         }
 
+                                        $set('recipient_address', Member::findOrFail($state)->address);
                                         $set('recipient_name', Member::findOrFail($state)->name);
                                     }),
                             ]),

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Invoices\Billing;
 
-use App\Domain\Invoices\Billing\BillableItem as BillableItemEntity;
-use App\Domain\Invoices\Billing\BillableItemId;
 use App\Domain\Invoices\Billing\BillableItemList;
 use App\Domain\Invoices\Billing\BillableItemsViewRepository;
 use App\Domain\Members\MemberId;
@@ -37,12 +35,7 @@ final class BillableItemsViewDbRepository implements BillableItemsViewRepository
             ->with('billableItem')
             ->where('member_id', $memberId->value)
             ->get()
-            ->map(fn (BillableItemInstance $instance) => new BillableItemEntity(
-                id: BillableItemId::create($instance->billableItem->id),
-                price: $instance->billableItem->compoundPrice,
-                quantity: 1.0,
-                description: $instance->billableItem->description,
-            ))
+            ->map(static fn (BillableItemInstance $instance) => $instance->billableItem->toInvoiceBillableItem())
             ->all();
 
         return new BillableItemList($billingItems);

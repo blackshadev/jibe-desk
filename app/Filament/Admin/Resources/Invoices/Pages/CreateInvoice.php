@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\Invoices\Pages;
 
 use App\Domain\Invoices\InvoiceNumberGenerator;
+use App\Domain\Invoices\InvoiceStatus;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use Carbon\CarbonImmutable;
 use Filament\Resources\Pages\CreateRecord;
@@ -23,7 +24,7 @@ final class CreateInvoice extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['date'] = CarbonImmutable::now();
-        $data['invoice_number'] = $this->invoiceNumberGenerator->generate();
+        $data['invoice_number'] = $this->invoiceNumberGenerator->generate()->value;
 
         return $data;
     }
@@ -31,6 +32,7 @@ final class CreateInvoice extends CreateRecord
     protected function afterFill(): void
     {
         $this->data['date'] = CarbonImmutable::now();
-        $this->data['invoice_number'] = $this->invoiceNumberGenerator->generate();
+        $this->data['status'] = InvoiceStatus::Open;
+        $this->data['invoice_number'] = '';
     }
 }

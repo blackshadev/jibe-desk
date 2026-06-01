@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Infrastructure\Invoices;
 
-use App\Infrastructure\Invoices\InvoiceDbRepository;
+use App\Infrastructure\Invoices\InvoiceNumberDbRepository;
 use App\Models\Invoice;
 use Tests\FeatureTestCase;
 
@@ -22,7 +22,7 @@ final class InvoiceDbRepositoryTest extends FeatureTestCase
             'invoice_number' => 'I-2024000103',
         ]]);
 
-        $repository = new InvoiceDbRepository();
+        $repository = new InvoiceNumberDbRepository();
         $latestInvoiceNumber = $repository->getLatestInvoiceNumber();
 
         self::assertSame('I-2024000103', $latestInvoiceNumber);
@@ -30,7 +30,7 @@ final class InvoiceDbRepositoryTest extends FeatureTestCase
 
     public function test_get_latest_invoice_number_defaults_when_no_invoices_available(): void
     {
-        $repository = new InvoiceDbRepository();
+        $repository = new InvoiceNumberDbRepository();
         $latestInvoiceNumber = $repository->getLatestInvoiceNumber();
 
         self::assertSame('I-0000000000', $latestInvoiceNumber);

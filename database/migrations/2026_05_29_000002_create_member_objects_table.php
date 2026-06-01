@@ -16,6 +16,7 @@ return new class() extends Migration {
             $table->string('name');
             $table->date('start_date');
             $table->date('end_date')->nullable();
+            $table->foreignId('invoice_line_id')->nullable()->constrained('invoice_lines')->nullOnDelete();
             $table->timestamps();
         });
     }

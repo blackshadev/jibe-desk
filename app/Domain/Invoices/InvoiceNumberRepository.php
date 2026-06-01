@@ -7,7 +7,7 @@ namespace App\Domain\Invoices;
 use JeroenG\Autowire\Attribute\Autowire;
 
 #[Autowire]
-interface CreateInvoice
+interface InvoiceNumberRepository
 {
-    public function create(NewInvoice $invoice): InvoiceId;
+    public function getLatestInvoiceNumber(): string;
 }

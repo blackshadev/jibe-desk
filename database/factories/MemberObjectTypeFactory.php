@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\MemberObjectType;
+use App\Models\MemberObject;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/** @extends Factory<MemberObject> */
 final class MemberObjectTypeFactory extends Factory
 {
-    protected $model = MemberObjectType::class;
-
     public function definition(): array
     {
         return [

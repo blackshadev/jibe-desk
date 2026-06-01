@@ -9,7 +9,7 @@ use Psr\Clock\ClockInterface;
 final readonly class InvoiceNumberGeneratorImpl implements InvoiceNumberGenerator
 {
     public function __construct(
-        private InvoiceRepository $invoiceRepository,
+        private InvoiceNumberRepository $invoiceRepository,
         private ClockInterface $clock,
     ) {
     }

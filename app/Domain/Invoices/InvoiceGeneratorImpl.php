@@ -10,7 +10,7 @@ final readonly class InvoiceGeneratorImpl implements InvoiceGenerator
 {
     public function __construct(
         private BillableItemsViewRepository $billableViewRepository,
-        private CreateInvoice $invoiceRepository
+        private InvoiceRepository $invoiceRepository
     ) {
     }
 

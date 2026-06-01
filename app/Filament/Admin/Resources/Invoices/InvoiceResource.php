@@ -39,13 +39,6 @@ final class InvoiceResource extends Resource
         return InvoicesTable::configure($table);
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
     public static function getPluralLabel(): string
     {
         return __('labels.invoices');

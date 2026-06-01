@@ -17,7 +17,7 @@ final class MemberObjectFactory extends Factory
     {
         return [
             'member_id' => Member::factory(),
-            'object_type_id' => MemberObjectType::factory(),
+            'member_object_type_id' => MemberObjectType::factory(),
             'name' => $this->faker->word(),
             'start_date' => $this->faker->date(),
             'end_date' => null,

@@ -9,5 +9,7 @@ use JeroenG\Autowire\Attribute\Autowire;
 #[Autowire]
 interface InvoiceRepository
 {
-    public function getLatestInvoiceNumber(): string;
+    public function create(NewInvoice $invoice): InvoiceId;
+
+    public function applyLines(ApplyInvoiceLines $invoice): InvoiceWithLineIds;
 }

@@ -14,6 +14,7 @@ final class MemberObjectType extends Model
 
     protected $fillable = ['name', 'billable_item_id'];
 
+    /** @return BelongsTo<BillableItem, $this> */
     public function billableItem(): BelongsTo
     {
         return $this->belongsTo(BillableItem::class);
