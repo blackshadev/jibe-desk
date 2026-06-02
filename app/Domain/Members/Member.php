@@ -10,6 +10,18 @@ final readonly class Member
         public MemberId $id,
         public MembershipId $membershipId,
         public bool $isVolunteer,
+        public ?HouseholdId $householdId,
+        public int $age,
     ) {
+    }
+
+    public function isInHousehold(): bool
+    {
+        return $this->householdId !== null;
+    }
+
+    public function isYoungster(): bool
+    {
+        return $this->age < 18;
     }
 }

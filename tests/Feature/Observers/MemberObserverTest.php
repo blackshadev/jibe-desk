@@ -6,18 +6,21 @@ namespace Tests\Feature\Observers;
 
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MembershipId;
+use App\Models\Household;
 use App\Models\Member;
 use App\Models\Membership;
 use App\Observers\MemberObserver;
 use Tests\FeatureTestCase;
 use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplyMembershipBillingExpectation;
 use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplyMemberVolunteerBillingExpectation;
+use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplySameHouseholdBillingExpectation;
 
 final class MemberObserverTest extends FeatureTestCase
 {
     private ApplyMembershipBillingExpectation $applyMembership;
 
     private ApplyMemberVolunteerBillingExpectation $applyVolunteer;
+    private ApplySameHouseholdBillingExpectation $applySameHousehold;
 
     private MemberObserver $subject;
 
@@ -28,10 +31,12 @@ final class MemberObserverTest extends FeatureTestCase
         $this->applyMembership = ApplyMembershipBillingExpectation::create();
 
         $this->applyVolunteer = ApplyMemberVolunteerBillingExpectation::create();
+        $this->applySameHousehold = ApplySameHouseholdBillingExpectation::create();
 
         $this->subject = new MemberObserver(
             $this->applyVolunteer->mock,
             $this->applyMembership->mock,
+            $this->applySameHousehold->mock,
         );
     }
 
@@ -43,6 +48,7 @@ final class MemberObserverTest extends FeatureTestCase
 
         $this->applyVolunteer->expectsApply($memberId);
         $this->applyMembership->expectsApply($memberId, $membershipId);
+        $this->applySameHousehold->expectsApply($memberId);
 
         $this->subject->created($member);
     }
@@ -79,6 +85,7 @@ final class MemberObserverTest extends FeatureTestCase
 
         $this->applyMembership->expectsApplyNever();
         $this->applyVolunteer->expectsApplyNever();
+        $this->applySameHousehold->expectsApplyNever();
 
         $this->subject->updated($member);
     }
@@ -97,6 +104,26 @@ final class MemberObserverTest extends FeatureTestCase
         $memberId = new MemberId($member->id);
         $this->applyMembership->expectsApplyNever();
         $this->applyVolunteer->expectsApply($memberId);
+        $this->applySameHousehold->expectsApplyNever();
+
+        $this->subject->updated($member);
+    }
+
+    public function test_it_applies_same_household_billing_on_household_change(): void
+    {
+        $member = Member::factory()->createQuietly([
+            'membership_id' => Membership::factory(),
+            'household_id' => null,
+        ]);
+
+        $household = Household::factory()->createQuietly();
+
+        $member->household_id = $household->id;
+        $member->saveQuietly();
+
+        $memberId = new MemberId($member->id);
+
+        $this->applySameHousehold->expectsApply($memberId);
 
         $this->subject->updated($member);
     }

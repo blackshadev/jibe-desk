@@ -12,6 +12,7 @@ use App\Filament\Admin\Resources\Members\RelationManagers\ActivitiesRelationMana
 use App\Filament\Admin\Resources\Members\RelationManagers\BillableItemInstancesRelationManager;
 use App\Filament\Admin\Resources\Members\RelationManagers\InvoicesRelationManager;
 use App\Filament\Admin\Resources\Members\RelationManagers\MemberObjectsRelationManager;
+use App\Filament\Admin\Resources\Members\RelationManagers\HouseholdMembersRelationManager;
 use App\Filament\Admin\Resources\Members\Schemas\MemberForm;
 use App\Filament\Admin\Resources\Members\Tables\MembersTable;
 use App\Models\Member;
@@ -45,6 +46,7 @@ final class MemberResource extends Resource
     public static function getRelations(): array
     {
         return [
+            HouseholdMembersRelationManager::make(),
             InvoicesRelationManager::make(),
             BillableItemInstancesRelationManager::make(),
             ActivitiesRelationManager::make(),

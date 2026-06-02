@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Domain\Invoices\BillingItemApplicators;
+namespace Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators;
 
 use App\Domain\Activities\Activity as ActivityDomain;
 use App\Domain\Activities\ActivityId;

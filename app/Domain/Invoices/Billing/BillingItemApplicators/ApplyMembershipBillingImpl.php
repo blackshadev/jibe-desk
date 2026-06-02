@@ -27,6 +27,7 @@ final readonly class ApplyMembershipBillingImpl implements ApplyMembershipBillin
         $this->billableItemRepository->removeMany($member->id, $allBillingIds);
 
         $newMembership = $this->membershipRepository->getById(MembershipId::create($membershipId->value));
+
         // pass null endDate for items without an end date
         $this->billableItemRepository->add($memberId, $newMembership->billableItemId, null);
     }

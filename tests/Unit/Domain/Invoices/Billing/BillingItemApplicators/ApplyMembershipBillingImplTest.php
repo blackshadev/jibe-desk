@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Domain\Invoices\BillingItemApplicators;
+namespace Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators;
 
 use App\Domain\Invoices\Billing\BillableItemId;
 use App\Domain\Invoices\Billing\BillableItemIdList;
@@ -55,6 +55,8 @@ final class ApplyMembershipBillingImplTest extends UnitTestCase
             id: $memberId,
             membershipId: $membershipId2,
             isVolunteer: false,
+            householdId: null,
+            age: 19,
         );
 
         $membership1 = new Membership($membershipId1, $billableItemId1);

@@ -65,10 +65,18 @@ final class MemberForm
                         Tabs\Tab::make(__('labels.membership_information'))
                         ->schema([
 
-                            Select::make('membership')
-                                ->label(__('labels.membership'))
-                                ->relationship('membership', 'name')
-                                ->required(),
+                        Select::make('membership')
+                            ->label(__('labels.membership'))
+                            ->relationship('membership', 'name')
+                            ->required(),
+
+                        Select::make('household_id')
+                            ->label(__('labels.household'))
+                            ->relationship('household', 'id')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->member_names ?? (string) $record->id)
+                            ->searchable()
+                            ->preload()
+                            ->nullable(),
 
                             Toggle::make('is_volunteer')
                                 ->label(__('labels.is_volunteer')),

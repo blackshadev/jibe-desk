@@ -13,8 +13,8 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -43,8 +43,8 @@ final class Member extends Model
         return $this->hasMany(BillableItemInstance::class);
     }
 
-    /** @return BelongsToMany<Activity, $this, ActivityMember> */
-    public function activities(): BelongsToMany
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Activity, $this, ActivityMember> */
+    public function activities(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this
             ->belongsToMany(Activity::class)
@@ -58,6 +58,31 @@ final class Member extends Model
     {
         return $this->hasMany(MemberObject::class);
     }
+
+    /** @return BelongsTo<Household, $this> */
+    public function household(): BelongsTo
+    {
+        return $this->belongsTo(Household::class);
+    }
+
+    /**
+     * Get other members in the same household. If the member has no household
+     * this returns an empty relation.
+     *
+     * @return HasMany<Member, $this>
+     */
+    public function householdMembers(): HasMany
+    {
+        // If no household set, return an empty relationship by constraining to false
+        if ($this->household_id === null) {
+            return $this->hasMany(self::class, 'household_id', 'id')->whereRaw('1 = 0');
+        }
+
+        // Return other members in the same household (excluding self)
+        return $this->hasMany(self::class, 'household_id', 'household_id')
+            ->where('id', '!=', $this->id);
+    }
+
 
     /** @return array<string, string> */
     protected function casts(): array

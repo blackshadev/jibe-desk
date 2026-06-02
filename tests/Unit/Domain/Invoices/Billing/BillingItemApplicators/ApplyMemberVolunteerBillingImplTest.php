@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Domain\Invoices\BillingItemApplicators;
+namespace Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators;
 
 use App\Domain\Invoices\Billing\BillableItemId;
 use App\Domain\Invoices\Billing\BillableItemIdList;
@@ -49,7 +49,7 @@ final class ApplyMemberVolunteerBillingImplTest extends UnitTestCase
 
         $this->memberRepository->expectsGetById(
             $memberId,
-            new Member($memberId, MembershipId::create(2), true)
+            new Member($memberId, MembershipId::create(2), true, null, 22)
         );
         $this->extraMembershipBillingItemRepository->expectsGetByCode(ExtraMembershipItemCode::VolunteerContribution, $contributionId);
         $this->extraMembershipBillingItemRepository->expectsGetByCode(ExtraMembershipItemCode::VolunteerRestitution, $restitutionId);
@@ -67,7 +67,7 @@ final class ApplyMemberVolunteerBillingImplTest extends UnitTestCase
 
         $this->memberRepository->expectsGetById(
             $memberId,
-            new Member($memberId, MembershipId::create(2), false)
+            new Member($memberId, MembershipId::create(2), false, null, 22)
         );
         $this->extraMembershipBillingItemRepository->expectsGetByCode(ExtraMembershipItemCode::VolunteerContribution, $contributionId);
         $this->extraMembershipBillingItemRepository->expectsGetByCode(ExtraMembershipItemCode::VolunteerRestitution, $restitutionId);

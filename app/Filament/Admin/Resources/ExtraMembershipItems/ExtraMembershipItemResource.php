@@ -15,6 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
 final class ExtraMembershipItemResource extends Resource
@@ -26,6 +27,12 @@ final class ExtraMembershipItemResource extends Resource
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Invoicing;
 
     protected static ?string $recordTitleAttribute = 'code';
+
+    public static function getRecordTitle(?Model $record): string
+    {
+        /** @var $record ExtraMembershipItem */
+        return $record?->code->value ?? "";
+    }
 
     public static function form(Schema $schema): Schema
     {

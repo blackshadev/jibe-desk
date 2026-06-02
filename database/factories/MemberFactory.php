@@ -9,6 +9,7 @@ use App\Models\Activity;
 use App\Models\Member;
 use App\Models\Membership;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Household;
 
 /** @extends Factory<Member> */
 final class MemberFactory extends Factory
@@ -58,5 +59,12 @@ final class MemberFactory extends Factory
         return $this->afterCreating(function (Member $member) use ($activity) {
             $member->activities()->attach($activity);
         });
+    }
+
+    public function inHousehold(Household $household): self
+    {
+        return $this->state(fn (array $attributes) => [
+            'household_id' => $household->id,
+        ]);
     }
 }

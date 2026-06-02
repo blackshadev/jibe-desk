@@ -87,4 +87,10 @@ return [
         'pending' => 'In behandeling',
         'paid' => 'Betaald',
     ],
+    'household' => 'Huishouden',
+    'households' => 'Huishoudens',
+    'household_member' => 'Huishoudlid',
+    'household_members' => 'Huishoudleden',
+    'remove_from_household' => 'Verwijder uit huishouden',
+    'add_member_to_household' => 'Voeg lid toe aan huishouden',
 ];
