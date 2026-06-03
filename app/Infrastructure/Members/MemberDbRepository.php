@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Members;
 
+use App\Domain\Members\HouseholdId;
 use App\Domain\Members\Member as MemberEntity;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MemberRepository;
 use App\Domain\Members\MembershipId;
-use App\Domain\Members\HouseholdId;
 use App\Models\Member;
 
 final class MemberDbRepository implements MemberRepository

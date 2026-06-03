@@ -6,16 +6,16 @@ namespace App\Filament\Admin\Resources\Households;
 
 use App\Filament\Admin\Navigation\NavigationGroup;
 use App\Filament\Admin\Resources\Households\Pages\CreateHousehold;
-use App\Filament\Admin\Resources\Households\Pages\ListHouseholds;
 use App\Filament\Admin\Resources\Households\Pages\EditHousehold;
+use App\Filament\Admin\Resources\Households\Pages\ListHouseholds;
 use App\Filament\Admin\Resources\Households\RelationManagers\HouseholdMembersRelationManager;
 use App\Filament\Admin\Resources\Households\Table\HouseholdTable;
 use App\Models\Household;
+use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
-use BackedEnum;
 
 final class HouseholdResource extends Resource
 {

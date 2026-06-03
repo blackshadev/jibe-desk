@@ -45,10 +45,12 @@ final class ActivitiesRelationManager extends RelationManager
                     ->recordSelectOptionsQuery(
                         /** @phpstan-ignore-next-line method.notFound */
                         static fn (Builder $query) => $query->active()
-                    ),
+                    )
+                    ->successNotificationTitle(__('notifications.activity_attached')),
             ])
             ->recordActions([
-                DetachAction::make(),
+                DetachAction::make()
+                    ->successNotificationTitle(__('notifications.activity_detached')),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -13,7 +13,9 @@ use function PHPUnit\Framework\equalTo;
 
 final readonly class ApplySameHouseholdBillingExpectation
 {
-    private function __construct(public MockInterface&ApplySameHouseholdBilling $mock) {}
+    private function __construct(public MockInterface&ApplySameHouseholdBilling $mock)
+    {
+    }
 
     public static function create(): self
     {

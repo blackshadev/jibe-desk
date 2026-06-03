@@ -12,7 +12,6 @@ final class EditHousehold extends EditRecord
 {
     protected static string $resource = HouseholdResource::class;
 
-
     protected function getHeaderActions(): array
     {
         return [

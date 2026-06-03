@@ -30,7 +30,7 @@ final class ExtraMembershipItemResource extends Resource
 
     public static function getRecordTitle(?Model $record): string
     {
-        /** @var $record ExtraMembershipItem */
+        /** @var ExtraMembershipItem $record */
         return $record?->code->value ?? "";
     }
 

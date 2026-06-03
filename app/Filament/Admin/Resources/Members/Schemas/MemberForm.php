@@ -104,7 +104,7 @@ final class MemberForm
                                     ->required()
                                     ->columnSpan(6)
                                     ->helperText(__('labels.address_postalcode_format'))
-                                    ->regex('/^\d{4}\[A-Z]{2}$/')
+                                    ->regex('/^\d{4}[A-Z]{2}$/')
                                     ->label(__('labels.address_postalcode')),
 
                                 TextInput::make('address_city')

@@ -35,4 +35,9 @@ final class CreateInvoice extends CreateRecord
         $this->data['status'] = InvoiceStatus::Open;
         $this->data['invoice_number'] = '';
     }
+
+    protected function getCreatedNotificationTitle(): string
+    {
+        return __('notifications.invoice_created');
+    }
 }

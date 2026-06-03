@@ -19,4 +19,9 @@ final class CreateMember extends CreateRecord
 
         return $data;
     }
+
+    protected function getCreatedNotificationTitle(): string
+    {
+        return __('notifications.member_created');
+    }
 }

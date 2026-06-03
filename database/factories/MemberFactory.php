@@ -6,10 +6,10 @@ namespace Database\Factories;
 
 use App\Domain\Members\Gender;
 use App\Models\Activity;
+use App\Models\Household;
 use App\Models\Member;
 use App\Models\Membership;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\Household;
 
 /** @extends Factory<Member> */
 final class MemberFactory extends Factory

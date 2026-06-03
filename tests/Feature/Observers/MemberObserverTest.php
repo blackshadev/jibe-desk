@@ -20,6 +20,7 @@ final class MemberObserverTest extends FeatureTestCase
     private ApplyMembershipBillingExpectation $applyMembership;
 
     private ApplyMemberVolunteerBillingExpectation $applyVolunteer;
+
     private ApplySameHouseholdBillingExpectation $applySameHousehold;
 
     private MemberObserver $subject;

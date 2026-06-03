@@ -13,9 +13,9 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Guarded('id', 'updated_at', 'created_at')]
@@ -82,7 +82,6 @@ final class Member extends Model
         return $this->hasMany(self::class, 'household_id', 'household_id')
             ->where('id', '!=', $this->id);
     }
-
 
     /** @return array<string, string> */
     protected function casts(): array

@@ -9,19 +9,21 @@ use App\Domain\Invoices\Billing\BillableItemIdList;
 use App\Domain\Invoices\Billing\BillableItemInstanceId;
 use App\Domain\Invoices\Billing\BillingItemApplicators\ApplySameHouseholdBillingImpl;
 use App\Domain\Members\ExtraMembershipItemCode;
+use App\Domain\Members\HouseholdId;
 use App\Domain\Members\Member;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MembershipId;
-use App\Domain\Members\HouseholdId;
-use Tests\Unit\Domain\Members\MemberRepositoryExpectation;
-use Tests\Unit\Domain\Members\ExtraMembershipBillingItemRepositoryExpectation;
 use Tests\Unit\Domain\Invoices\BillableItemRepositoryExpectation;
+use Tests\Unit\Domain\Members\ExtraMembershipBillingItemRepositoryExpectation;
+use Tests\Unit\Domain\Members\MemberRepositoryExpectation;
 use Tests\UnitTestCase;
 
 final class ApplySameHouseholdBillingImplTest extends UnitTestCase
 {
     private MemberRepositoryExpectation $memberRepository;
+
     private ExtraMembershipBillingItemRepositoryExpectation $extraRepo;
+
     private BillableItemRepositoryExpectation $billableRepo;
 
     private ApplySameHouseholdBillingImpl $subject;

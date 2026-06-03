@@ -53,13 +53,19 @@ final class BillableItemInstancesRelationManager extends RelationManager
                     ->hiddenLabel()
                     ->icon(Heroicon::StopCircle)
                     ->requiresConfirmation()
-                    ->action(static fn (BillableItemInstance $record) => $record->stop()),
+                    ->action(static function (BillableItemInstance $record) {
+                        $record->stop();
+                    })
+                    ->successNotificationTitle(__('notifications.billable_item_instance_stopped')),
                 Action::make('resume')
                     ->hidden(static fn (BillableItemInstance $record) => !$record->isStopped())
                     ->hiddenLabel()
                     ->icon(Heroicon::PlayCircle)
                     ->requiresConfirmation()
-                    ->action(static fn (BillableItemInstance $record) => $record->resume()),
+                    ->action(static function (BillableItemInstance $record) {
+                        $record->resume();
+                    })
+                    ->successNotificationTitle(__('notifications.billable_item_instance_resumed')),
             ]);
     }
 

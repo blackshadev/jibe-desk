@@ -14,8 +14,7 @@ final class HouseholdTable
         return $table->columns([
             TextColumn::make('members.name')
                 ->label(__('labels.household_members'))
-                ->badge()
+                ->badge(),
         ]);
-
     }
 }
