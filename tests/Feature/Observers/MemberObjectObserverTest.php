@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Observers;
 
+use App\Domain\Invoices\AppliedInvoiceWithLineIds;
 use App\Domain\Invoices\ApplyInvoiceLines;
 use App\Domain\Invoices\Billing\BillableItemList;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceLineId;
-use App\Domain\Invoices\InvoiceWithLineIds;
 use App\Domain\Members\MemberId;
 use App\Models\BillableItem;
 use App\Models\Invoice;
@@ -32,8 +32,7 @@ final class MemberObjectObserverTest extends FeatureTestCase
         parent::setUp();
 
         CarbonImmutable::setTestNow('2026-06-01 00:00:00');
-
-
+        
         $this->invoiceRepository = CreateInvoiceExpectation::create();
         $this->subject = new MemberObjectObserver($this->invoiceRepository->mock);
     }
@@ -67,13 +66,17 @@ final class MemberObjectObserverTest extends FeatureTestCase
 
         $this->invoiceRepository->expectsApplyLines(
             new ApplyInvoiceLines(
-                CarbonImmutable::now(),
                 new MemberId($member->id),
+                CarbonImmutable::now(),
                 new BillableItemList([
                     $billable->toInvoiceBillableItem(),
                 ])
             ),
-            new InvoiceWithLineIds(InvoiceId::create($invoice->id), [InvoiceLineId::create($invoiceLine->id)]),
+            new AppliedInvoiceWithLineIds(
+                false,
+                InvoiceId::create($invoice->id),
+                [InvoiceLineId::create($invoiceLine->id)],
+            ),
         );
 
         $this->subject->created($memberObject);

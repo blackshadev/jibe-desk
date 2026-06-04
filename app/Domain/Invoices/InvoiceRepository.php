@@ -11,5 +11,5 @@ interface InvoiceRepository
 {
     public function create(NewInvoice $invoice): InvoiceId;
 
-    public function applyLines(ApplyInvoiceLines $invoice): InvoiceWithLineIds;
+    public function applyLines(ApplyInvoiceLines $invoice): AppliedInvoiceWithLineIds;
 }

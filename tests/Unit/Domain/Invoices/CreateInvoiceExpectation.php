@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Invoices;
 
+use App\Domain\Invoices\AppliedInvoiceWithLineIds;
 use App\Domain\Invoices\ApplyInvoiceLines;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceRepository;
-use App\Domain\Invoices\InvoiceWithLineIds;
 use App\Domain\Invoices\NewInvoice;
 use Mockery;
 use Mockery\MockInterface;
@@ -33,7 +33,7 @@ final readonly class CreateInvoiceExpectation
             ->andReturn($return);
     }
 
-    public function expectsApplyLines(ApplyInvoiceLines $invoiceLines, InvoiceWithLineIds $return): void
+    public function expectsApplyLines(ApplyInvoiceLines $invoiceLines, AppliedInvoiceWithLineIds $return): void
     {
         $this->mock
             ->expects('applyLines')

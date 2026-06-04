@@ -26,8 +26,8 @@ final readonly class MemberObjectObserver
         $billableItem = $memberObject->memberObjectType->billableItem;
 
         $apply = new ApplyInvoiceLines(
-            new CarbonImmutable(),
             MemberId::create($memberObject->member_id),
+            new CarbonImmutable(),
             new BillableItemList([
                 $billableItem->toInvoiceBillableItem(),
             ]),

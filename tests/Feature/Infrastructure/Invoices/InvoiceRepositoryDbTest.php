@@ -141,8 +141,8 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
         $subject = app(InvoiceRepositoryDb::class);
 
         $apply = new ApplyInvoiceLines(
-            new DateTimeImmutable('2026-05-25'),
             MemberId::create($member->id),
+            new DateTimeImmutable('2026-05-25'),
             new BillableItemList([
                 new BillableItem(BillableItemId::create($billableItemOne->id), new CompoundPrice(10.0, 2.1), 1.0, 'First'),
                 new BillableItem(BillableItemId::create($billableItemTwo->id), new CompoundPrice(20.0, 4.2), 2.0, 'Second'),
@@ -169,8 +169,8 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
         $subject = app(InvoiceRepositoryDb::class);
 
         $apply = new ApplyInvoiceLines(
-            new DateTimeImmutable('2026-06-05'),
             MemberId::create($member->id),
+            new DateTimeImmutable('2026-06-05'),
             new BillableItemList([
                 new BillableItem(BillableItemId::create($billableItemOne->id), new CompoundPrice(15.0, 3.0), 1.0, 'Only'),
             ])
@@ -196,8 +196,8 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
         $subject = app(InvoiceRepositoryDb::class);
 
         $apply = new ApplyInvoiceLines(
-            new DateTimeImmutable('2026-05-25'),
             MemberId::create($member->id),
+            new DateTimeImmutable('2026-05-25'),
             new BillableItemList([
                 new BillableItem(BillableItemId::create($billableItem->id), new CompoundPrice(12.0, 2.4), 1.0, 'New'),
             ])
@@ -223,8 +223,8 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
         $subject = app(InvoiceRepositoryDb::class);
 
         $apply = new ApplyInvoiceLines(
-            new DateTimeImmutable('2026-05-05'),
             MemberId::create($member->id),
+            new DateTimeImmutable('2026-05-05'),
             new BillableItemList([
                 new BillableItem(BillableItemId::create($billableItem->id), new CompoundPrice(8.0, 1.68), 1.0, 'Later'),
             ])

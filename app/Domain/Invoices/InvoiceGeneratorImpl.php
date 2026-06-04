@@ -14,7 +14,7 @@ final readonly class InvoiceGeneratorImpl implements InvoiceGenerator
     ) {
     }
 
-    public function generate(GenerateInvoice $createInvoice): void
+    public function generate(GenerateInvoice $createInvoice): ?InvoiceId
     {
         $billableItems = $this->billableViewRepository->listBillableItemsForMember(
             when: $createInvoice->invoiceDate,
@@ -22,16 +22,15 @@ final readonly class InvoiceGeneratorImpl implements InvoiceGenerator
         );
 
         if (empty($billableItems->items)) {
-            return;
+            return null;
         }
 
-        $this->invoiceRepository->create(
-            new NewInvoice(
-                memberId: $createInvoice->memberId,
-                invoiceDate: $createInvoice->invoiceDate,
-                items: $billableItems,
-                batchId: $createInvoice->invoiceBatchId,
-            )
+        $command = new ApplyInvoiceLines(
+            $createInvoice->memberId,
+            $createInvoice->invoiceDate,
+            $billableItems
         );
+
+        return $this->invoiceRepository->applyLines($command)->invoiceId;
     }
 }

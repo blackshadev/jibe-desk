@@ -93,4 +93,5 @@ return [
     'household_members' => 'Huishoudleden',
     'remove_from_household' => 'Verwijder uit huishouden',
     'add_member_to_household' => 'Voeg lid toe aan huishouden',
+    'generate_invoice' => 'Genereer factuur',
 ];

@@ -9,5 +9,5 @@ use JeroenG\Autowire\Attribute\Autowire;
 #[Autowire]
 interface InvoiceGenerator
 {
-    public function generate(GenerateInvoice $createInvoice): void;
+    public function generate(GenerateInvoice $createInvoice): ?InvoiceId;
 }

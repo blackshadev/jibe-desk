@@ -25,8 +25,8 @@ final class InvoiceBatchGeneratorImplTest extends UnitTestCase
         $invoiceGenerator = InvoiceGeneratorExpectation::create();
 
         $billableItemsViewRepository->expectsListBillableMembers($invoiceDate, $memberIds);
-        $invoiceGenerator->expectsGenerate(new GenerateInvoice(MemberId::create(1), $invoiceDate, $batch->id));
-        $invoiceGenerator->expectsGenerate(new GenerateInvoice(MemberId::create(2), $invoiceDate, $batch->id));
+        $invoiceGenerator->expectsGenerate(new GenerateInvoice(MemberId::create(1), $invoiceDate));
+        $invoiceGenerator->expectsGenerate(new GenerateInvoice(MemberId::create(2), $invoiceDate));
 
         $subject = new InvoiceBatchGeneratorImpl($invoiceGenerator->mock, $billableItemsViewRepository->mock);
 

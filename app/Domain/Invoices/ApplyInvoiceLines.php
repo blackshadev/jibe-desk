@@ -11,8 +11,8 @@ use DateTimeInterface;
 final readonly class ApplyInvoiceLines
 {
     public function __construct(
-        public DateTimeInterface $date,
         public MemberId $memberId,
+        public DateTimeInterface $date,
         public BillableItemList $items,
     ) {
     }

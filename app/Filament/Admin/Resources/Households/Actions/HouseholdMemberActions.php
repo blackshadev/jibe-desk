@@ -64,7 +64,7 @@ final class HouseholdMemberActions
                     /** @var Member $member */
                     $member = $livewire->getOwnerRecord();
 
-                   return $member->household_id === null;
+                    return $member->household_id === null;
                 })
                 ->schema([
                     Select::make('existing_household_id')

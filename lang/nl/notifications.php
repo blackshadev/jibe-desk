@@ -17,4 +17,6 @@ return [
     'billable_item_instance_resumed' => 'Factuurregel hervat',
     'activity_attached' => 'Activiteit gekoppeld aan lid',
     'activity_detached' => 'Activiteit verwijderd van lid',
+    'invoice_generated' => 'Factuur succesvol gegenereerd',
+    'nothing_to_invoice' => 'Niets om te factureren',
 ];

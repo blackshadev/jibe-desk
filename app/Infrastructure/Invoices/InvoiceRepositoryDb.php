@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Invoices;
 
+use App\Domain\Invoices\AppliedInvoiceWithLineIds;
 use App\Domain\Invoices\ApplyInvoiceLines;
 use App\Domain\Invoices\Billing\BillableItem;
 use App\Domain\Invoices\InvoiceId;
@@ -11,7 +12,6 @@ use App\Domain\Invoices\InvoiceLineId;
 use App\Domain\Invoices\InvoiceNumberGenerator;
 use App\Domain\Invoices\InvoiceRepository;
 use App\Domain\Invoices\InvoiceStatus;
-use App\Domain\Invoices\InvoiceWithLineIds;
 use App\Domain\Invoices\NewInvoice;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;
@@ -61,7 +61,7 @@ final class InvoiceRepositoryDb implements InvoiceRepository
         return new InvoiceId($model->id);
     }
 
-    public function applyLines(ApplyInvoiceLines $invoice): InvoiceWithLineIds
+    public function applyLines(ApplyInvoiceLines $invoice): AppliedInvoiceWithLineIds
     {
         DB::beginTransaction();
 
@@ -106,7 +106,8 @@ final class InvoiceRepositoryDb implements InvoiceRepository
 
         DB::commit();
 
-        return new InvoiceWithLineIds(
+        return new AppliedInvoiceWithLineIds(
+            isNew: $model->wasRecentlyCreated,
             invoiceId: InvoiceId::create($model->id),
             lineIds: array_map(static fn (InvoiceLine $item) => InvoiceLineId::create($item->id), $lines->all()),
         );

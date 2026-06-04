@@ -22,7 +22,6 @@ final readonly class InvoiceBatchGeneratorImpl implements InvoiceBatchGenerator
             $this->invoiceGenerator->generate(new GenerateInvoice(
                 memberId: $billableMember,
                 invoiceDate: $invoiceBatch->invoiceDate,
-                invoiceBatchId: $invoiceBatch->id,
             ));
         }
     }
