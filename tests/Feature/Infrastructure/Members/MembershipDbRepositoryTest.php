@@ -20,12 +20,12 @@ final class MembershipDbRepositoryTest extends FeatureTestCase
 
         $repo = new MembershipDbRepository();
 
-        $list = $repo->all();
+        $ids = $repo->all()->asBillingIdList()->toIntArray();
 
-        $ids = $list->asBillingIdList()->toIntArray();
-
-        self::assertContains($model1->billable_item_id, $ids);
-        self::assertContains($model2->billable_item_id, $ids);
+        self::assertContains($model1->adult_billable_item_id, $ids);
+        self::assertContains($model1->kids_billable_item_id, $ids);
+        self::assertContains($model2->adult_billable_item_id, $ids);
+        self::assertContains($model2->kids_billable_item_id, $ids);
     }
 
     public function test_get_by_id_returns_membership_domain_object(): void
@@ -37,7 +37,8 @@ final class MembershipDbRepositoryTest extends FeatureTestCase
         $domain = $repo->getById(MembershipId::create($model->id));
 
         self::assertSame($model->id, $domain->id->value);
-        self::assertSame($model->billable_item_id, $domain->billableItemId->value);
+        self::assertSame($model->adult_billable_item_id, $domain->adultBillableItemId->value);
+        self::assertSame($model->kids_billable_item_id, $domain->kidsBillableItemId->value);
     }
 
     public function test_get_by_id_throws_when_membership_not_found(): void

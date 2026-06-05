@@ -23,9 +23,27 @@ final class MembershipForm
                             ->label(__('labels.name'))
                             ->required(),
                     ]),
-                Section::make(__('labels.billing'))
-                    ->relationship('billableItem')
-                    ->columnSpanFull()
+                Section::make(__('labels.billing_adults'))
+                    ->relationship('adultBillableItem')
+                    ->schema([
+                        TextInput::make('description')
+                            ->label(__('labels.description'))
+                            ->required(),
+                        TextInput::make('price')
+                            ->label(__('labels.price'))
+                            ->required(),
+                        Select::make('bill_period')
+                            ->label(__('labels.bill_period'))
+                            ->options(BillPeriodLabels::options())
+                            ->required(),
+                    ])
+                    ->mutateRelationshipDataBeforeCreateUsing(static fn (array $data): array => [
+                        ...$data,
+                        'vat' => $data['price'] * 0.21,
+                    ]),
+
+                Section::make(__('labels.billing_kids'))
+                    ->relationship('kidsBillableItem')
                     ->schema([
                         TextInput::make('description')
                             ->label(__('labels.description'))

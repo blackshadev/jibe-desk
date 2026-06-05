@@ -10,7 +10,8 @@ final readonly class Membership
 {
     public function __construct(
         public MembershipId $id,
-        public BillableItemId $billableItemId,
+        public BillableItemId $adultBillableItemId,
+        public BillableItemId $kidsBillableItemId,
     ) {
     }
 }

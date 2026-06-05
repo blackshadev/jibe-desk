@@ -18,12 +18,17 @@ final class MembershipFactory extends Factory
     {
         return [
             'name' => $this->faker->word(),
-            'billable_item_id' => function (array $state) {
-                return BillableItem::factory()
-                    ->state([
-                        'description' => 'Lidmaatschap ' . $state['name'],
-                        'bill_period' => BillPeriod::Annually->value,
-                    ]);
+            'adult_billable_item_id' => function (array $state) {
+                return BillableItem::factory()->state([
+                    'description' => 'Lidmaatschap ' . $state['name'],
+                    'bill_period' => BillPeriod::Annually->value,
+                ]);
+            },
+            'kids_billable_item_id' => function (array $state) {
+                return BillableItem::factory()->state([
+                    'description' => 'Lidmaatschap Jeugd ' . $state['name'],
+                    'bill_period' => BillPeriod::Annually->value,
+                ]);
             },
         ];
     }

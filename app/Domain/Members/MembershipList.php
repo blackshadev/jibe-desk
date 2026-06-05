@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Domain\Members;
 
-use App\Domain\Invoices\Billing\BillableItemId;
 use App\Domain\Invoices\Billing\BillableItemIdList;
 
 final readonly class MembershipList
@@ -16,11 +15,12 @@ final readonly class MembershipList
 
     public function asBillingIdList(): BillableItemIdList
     {
-        return new BillableItemIdList(
-            array_map(
-                static fn (Membership $membership): BillableItemId => $membership->billableItemId,
-                $this->memberships,
-            )
-        );
+        $ids = [];
+        foreach ($this->memberships as $membership) {
+            $ids[] = $membership->adultBillableItemId;
+            $ids[] = $membership->kidsBillableItemId;
+        }
+
+        return new BillableItemIdList($ids);
     }
 }

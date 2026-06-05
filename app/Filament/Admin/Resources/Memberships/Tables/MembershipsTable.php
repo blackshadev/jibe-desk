@@ -18,8 +18,11 @@ final class MembershipsTable
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
-                TextColumn::make('billableItem.price')
-                    ->label(__('labels.price'))
+                TextColumn::make('adultBillableItem.price')
+                    ->label(__('labels.price_adults'))
+                    ->formatStateUsing(PriceFormatter::format(...)),
+                TextColumn::make('kidsBillableItem.price')
+                    ->label(__('labels.price_kids'))
                     ->formatStateUsing(PriceFormatter::format(...)),
                 TextColumn::make('members_count')
                     ->label(__('labels.members_count'))

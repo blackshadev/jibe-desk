@@ -46,6 +46,10 @@ return [
     ],
     'members_count' => 'Aantal leden',
     'billing' => 'Facturering',
+    'billing_adults' => 'Facturering volwassenen',
+    'billing_kids' => 'Facturering jeugd',
+    'price_adults' => 'Prijs volwassenen',
+    'price_kids' => 'Prijs jeugd',
     'billable_item_instances' => 'Terugkerende factuurregels',
     'bill_period' => 'Factuurperiode',
     'bill_periods' => [

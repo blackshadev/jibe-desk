@@ -25,8 +25,8 @@ final class DevelopmentSeeder extends Seeder
         ]);
 
         $memberships = Membership::factory()->createMany([
-            ['name' => 'Regulier'],
-            ['name' => 'Kind'],
+            ['name' => 'Windsurfer'],
+            ['name' => 'Zeiler'],
             ['name' => 'Bestuurslid'],
         ]);
 
@@ -66,10 +66,10 @@ final class DevelopmentSeeder extends Seeder
                 'price' => -4.5,
                 'vat' => -0.945,
                 'bill_period' => 'annually',
-                'description' => 'Zelfde adres korting jeugd',
+                'description' => 'Zelfde huishouden korting jeugd',
             ]))
             ->create([
-                'code' => 'zelfde_adres_korting_jeugd',
+                'code' => 'zelfde_huishouden_korting_jeugd',
             ]);
 
         ExtraMembershipItem::factory()
@@ -77,10 +77,10 @@ final class DevelopmentSeeder extends Seeder
                 'price' => -8,
                 'vat' => -1.68,
                 'bill_period' => 'annually',
-                'description' => 'Zelfde adres korting volwassenen',
+                'description' => 'Zelfde huishouden korting volwassenen',
             ]))
             ->create([
-                'code' => 'zelfde_adres_korting_volwassen',
+                'code' => 'zelfde_huishouden_korting_volwassen',
             ]);
 
         $members = collect();

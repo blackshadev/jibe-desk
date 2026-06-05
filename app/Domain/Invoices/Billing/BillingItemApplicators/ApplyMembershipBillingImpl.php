@@ -28,7 +28,10 @@ final readonly class ApplyMembershipBillingImpl implements ApplyMembershipBillin
 
         $newMembership = $this->membershipRepository->getById(MembershipId::create($membershipId->value));
 
-        // pass null endDate for items without an end date
-        $this->billableItemRepository->add($memberId, $newMembership->billableItemId, null);
+        $billableItemId = $member->isYoungster()
+            ? $newMembership->kidsBillableItemId
+            : $newMembership->adultBillableItemId;
+
+        $this->billableItemRepository->add($memberId, $billableItemId, null);
     }
 }

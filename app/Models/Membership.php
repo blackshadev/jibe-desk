@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name'])]
+#[Fillable(['name', 'adult_billable_item_id', 'kids_billable_item_id'])]
 final class Membership extends Model
 {
     use HasFactory;
@@ -22,8 +22,14 @@ final class Membership extends Model
     }
 
     /** @return BelongsTo<BillableItem, $this> */
-    public function billableItem(): BelongsTo
+    public function adultBillableItem(): BelongsTo
     {
-        return $this->belongsTo(BillableItem::class);
+        return $this->belongsTo(BillableItem::class, 'adult_billable_item_id');
+    }
+
+    /** @return BelongsTo<BillableItem, $this> */
+    public function kidsBillableItem(): BelongsTo
+    {
+        return $this->belongsTo(BillableItem::class, 'kids_billable_item_id');
     }
 }

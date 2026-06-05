@@ -15,10 +15,10 @@ final class MembershipListTest extends UnitTestCase
     public function test_it_converts_memberships_to_billing_ids(): void
     {
         $subject = new MembershipList([
-            new Membership(MembershipId::create(1), BillableItemId::create(10)),
-            new Membership(MembershipId::create(2), BillableItemId::create(20)),
+            new Membership(MembershipId::create(1), BillableItemId::create(10), BillableItemId::create(20)),
+            new Membership(MembershipId::create(2), BillableItemId::create(30), BillableItemId::create(40)),
         ]);
 
-        self::assertSame([10, 20], $subject->asBillingIdList()->toIntArray());
+        self::assertSame([10, 20, 30, 40], $subject->asBillingIdList()->toIntArray());
     }
 }

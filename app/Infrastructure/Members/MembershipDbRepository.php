@@ -9,25 +9,28 @@ use App\Domain\Members\Membership;
 use App\Domain\Members\MembershipId;
 use App\Domain\Members\MembershipList;
 use App\Domain\Members\MembershipRepository;
+use App\Models\Membership as MembershipModel;
 
 final class MembershipDbRepository implements MembershipRepository
 {
     public function getById(MembershipId $membershipId): Membership
     {
-        $model = \App\Models\Membership::findOrFail($membershipId->value);
+        $model = MembershipModel::findOrFail($membershipId->value);
 
         return new Membership(
             id: MembershipId::create($model->id),
-            billableItemId: BillableItemId::create($model->billable_item_id),
+            adultBillableItemId: BillableItemId::create($model->adult_billable_item_id),
+            kidsBillableItemId: BillableItemId::create($model->kids_billable_item_id),
         );
     }
 
     public function all(): MembershipList
     {
-        $memberships = \App\Models\Membership::all()->map(
-            fn (\App\Models\Membership $model): Membership => new Membership(
+        $memberships = MembershipModel::all()->map(
+            static fn (MembershipModel $model): Membership => new Membership(
                 id: MembershipId::create($model->id),
-                billableItemId: BillableItemId::create($model->billable_item_id),
+                adultBillableItemId: BillableItemId::create($model->adult_billable_item_id),
+                kidsBillableItemId: BillableItemId::create($model->kids_billable_item_id),
             )
         )->all();
 

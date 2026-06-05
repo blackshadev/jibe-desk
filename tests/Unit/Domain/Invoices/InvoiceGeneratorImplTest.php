@@ -11,7 +11,6 @@ use App\Domain\Invoices\Billing\BillableItemId;
 use App\Domain\Invoices\Billing\BillableItemList;
 use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\GenerateInvoice;
-use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceGeneratorImpl;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceLineId;

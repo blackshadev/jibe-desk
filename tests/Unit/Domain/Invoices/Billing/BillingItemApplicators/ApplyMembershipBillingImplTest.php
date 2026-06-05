@@ -43,37 +43,69 @@ final class ApplyMembershipBillingImplTest extends UnitTestCase
         );
     }
 
-    public function test_it_removes_old_membership_billable_item_and_adds_new_one(): void
+    public function test_it_applies_adult_billable_item_for_adult_member(): void
     {
         $memberId = MemberId::create(1);
-        $membershipId1 = MembershipId::create(1);
-        $membershipId2 = MembershipId::create(2);
-        $billableItemId1 = BillableItemId::create(10);
-        $billableItemId2 = BillableItemId::create(20);
+        $membershipId = MembershipId::create(2);
+        $adultBillableItemId1 = BillableItemId::create(10);
+        $kidsBillableItemId1 = BillableItemId::create(11);
+        $adultBillableItemId2 = BillableItemId::create(20);
+        $kidsBillableItemId2 = BillableItemId::create(21);
 
         $member = new Member(
             id: $memberId,
-            membershipId: $membershipId2,
+            membershipId: $membershipId,
             isVolunteer: false,
             householdId: null,
-            age: 19,
+            age: 18,
         );
 
-        $membership1 = new Membership($membershipId1, $billableItemId1);
-        $membership2 = new Membership($membershipId2, $billableItemId2);
+        $membership1 = new Membership(MembershipId::create(1), $adultBillableItemId1, $kidsBillableItemId1);
+        $membership2 = new Membership($membershipId, $adultBillableItemId2, $kidsBillableItemId2);
         $allMemberships = new MembershipList([$membership1, $membership2]);
-
-        $newMembership = $membership2;
 
         $this->memberRepo->expectsGetById($memberId, $member);
         $this->membershipRepo->expectsAll($allMemberships);
         $this->billableRepo->expectsRemove(
             $memberId,
-            new BillableItemIdList([$billableItemId1, $billableItemId2])
+            new BillableItemIdList([$adultBillableItemId1, $kidsBillableItemId1, $adultBillableItemId2, $kidsBillableItemId2])
         );
-        $this->membershipRepo->expectsGetById($membershipId2, $newMembership);
-        $this->billableRepo->expectsAdd($memberId, $billableItemId2, null, BillableItemInstanceId::create(12));
+        $this->membershipRepo->expectsGetById($membershipId, $membership2);
+        $this->billableRepo->expectsAdd($memberId, $adultBillableItemId2, null, BillableItemInstanceId::create(12));
 
-        $this->subject->apply($memberId, $membershipId2);
+        $this->subject->apply($memberId, $membershipId);
+    }
+
+    public function test_it_applies_kids_billable_item_for_youngster_member(): void
+    {
+        $memberId = MemberId::create(1);
+        $membershipId = MembershipId::create(2);
+        $adultBillableItemId1 = BillableItemId::create(10);
+        $kidsBillableItemId1 = BillableItemId::create(11);
+        $adultBillableItemId2 = BillableItemId::create(20);
+        $kidsBillableItemId2 = BillableItemId::create(21);
+
+        $member = new Member(
+            id: $memberId,
+            membershipId: $membershipId,
+            isVolunteer: false,
+            householdId: null,
+            age: 14,
+        );
+
+        $membership1 = new Membership(MembershipId::create(1), $adultBillableItemId1, $kidsBillableItemId1);
+        $membership2 = new Membership($membershipId, $adultBillableItemId2, $kidsBillableItemId2);
+        $allMemberships = new MembershipList([$membership1, $membership2]);
+
+        $this->memberRepo->expectsGetById($memberId, $member);
+        $this->membershipRepo->expectsAll($allMemberships);
+        $this->billableRepo->expectsRemove(
+            $memberId,
+            new BillableItemIdList([$adultBillableItemId1, $kidsBillableItemId1, $adultBillableItemId2, $kidsBillableItemId2])
+        );
+        $this->membershipRepo->expectsGetById($membershipId, $membership2);
+        $this->billableRepo->expectsAdd($memberId, $kidsBillableItemId2, null, BillableItemInstanceId::create(12));
+
+        $this->subject->apply($memberId, $membershipId);
     }
 }
