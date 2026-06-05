@@ -22,6 +22,8 @@ final class MembershipResource extends Resource
 {
     protected static ?string $model = Membership::class;
 
+    protected static bool $isGloballySearchable = false;
+
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::MemberAdministration;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;

@@ -19,6 +19,8 @@ use UnitEnum;
 
 final class HouseholdResource extends Resource
 {
+    protected static bool $isGloballySearchable = false;
+
     protected static ?string $model = Household::class;
 
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::MemberAdministration;

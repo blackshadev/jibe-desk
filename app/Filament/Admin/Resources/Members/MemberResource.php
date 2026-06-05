@@ -54,6 +54,11 @@ final class MemberResource extends Resource
         ];
     }
 
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['last_name', 'first_name', 'email'];
+    }
+
     public static function getPages(): array
     {
         return [

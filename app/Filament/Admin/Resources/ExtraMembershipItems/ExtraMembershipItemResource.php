@@ -20,6 +20,8 @@ use UnitEnum;
 
 final class ExtraMembershipItemResource extends Resource
 {
+    protected static bool $isGloballySearchable = false;
+
     protected static ?string $model = ExtraMembershipItem::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::PlusCircle;

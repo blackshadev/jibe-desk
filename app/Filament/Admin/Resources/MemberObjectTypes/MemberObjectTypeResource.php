@@ -20,6 +20,8 @@ use UnitEnum;
 
 final class MemberObjectTypeResource extends Resource
 {
+    protected static bool $isGloballySearchable = false;
+
     protected static ?string $model = MemberObjectType::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Tag;
