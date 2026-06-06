@@ -156,6 +156,7 @@ return [
     'uppercase' => ':Attribute mag alleen hoofdletters bevatten.',
     'url' => ':Attribute moet een geldige URL zijn.',
     'uuid' => ':Attribute moet een geldige UUID zijn.',
+    'no_overlapping_storage_space_rental' => 'Deze opslagruimte is al toegewezen in een overlappende periode aan :member',
     'attributes' => [
         'address' => 'adres',
         'affiliate_url' => 'partner-URL',

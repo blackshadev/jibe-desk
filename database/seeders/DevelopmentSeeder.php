@@ -11,8 +11,10 @@ use App\Models\ExtraMembershipItem;
 use App\Models\Invoice;
 use App\Models\Member;
 use App\Models\Membership;
+use App\Models\StorageSpace;
 use App\Models\User;
 use Hash;
+use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Seeder;
 
 final class DevelopmentSeeder extends Seeder
@@ -29,6 +31,30 @@ final class DevelopmentSeeder extends Seeder
             ['name' => 'Zeiler'],
             ['name' => 'Bestuurslid'],
         ]);
+
+        StorageSpace::factory()
+            ->state([
+                'location' => 'Container 3',
+            ])
+            ->sequence(static fn (Sequence $sequence) => ['number' => $sequence->index + 1])
+            ->count(30)
+            ->create();
+
+        StorageSpace::factory()
+            ->state([
+                'location' => 'Container 4',
+            ])
+            ->sequence(static fn (Sequence $sequence) => ['number' => $sequence->index + 1])
+            ->count(30)
+            ->create();
+
+        StorageSpace::factory()
+            ->state([
+                'location' => 'Container 5',
+            ])
+            ->sequence(static fn (Sequence $sequence) => ['number' => $sequence->index + 1])
+            ->count(20)
+            ->create();
 
         $activities = Activity::factory()
             ->createMany([

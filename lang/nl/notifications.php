@@ -19,4 +19,5 @@ return [
     'activity_detached' => 'Activiteit verwijderd van lid',
     'invoice_generated' => 'Factuur succesvol gegenereerd',
     'nothing_to_invoice' => 'Niets om te factureren',
+    'storage_spaces_generated' => 'Opslagruimten succesvol aangemaakt.',
 ];

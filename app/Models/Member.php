@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Domain\Members\Gender;
+use App\Domain\Members\MemberNameFormatter;
 use App\Models\Pivots\ActivityMember;
 use App\Observers\MemberObserver;
 use Carbon\Carbon;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -43,8 +45,8 @@ final class Member extends Model
         return $this->hasMany(BillableItemInstance::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Activity, $this, ActivityMember> */
-    public function activities(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    /** @return BelongsToMany<Activity, $this, ActivityMember> */
+    public function activities(): BelongsToMany
     {
         return $this
             ->belongsToMany(Activity::class)
@@ -57,6 +59,12 @@ final class Member extends Model
     public function memberObjects(): HasMany
     {
         return $this->hasMany(MemberObject::class);
+    }
+
+    /** @return HasMany<StorageSpaceRental, $this> */
+    public function storageSpaceRentals(): HasMany
+    {
+        return $this->hasMany(StorageSpaceRental::class);
     }
 
     /** @return BelongsTo<Household, $this> */
@@ -97,9 +105,7 @@ final class Member extends Model
     protected function name(): Attribute
     {
         return Attribute::get(static function (mixed $value, array $attributes) {
-            $firstName = empty($attributes['infix_name']) ? $attributes['first_name'] : "{$attributes['first_name']} {$attributes['infix_name']}";
-
-            return sprintf('%s, %s', $attributes['last_name'], $firstName);
+            return MemberNameFormatter::displayName($attributes['first_name'], $attributes['infix_name'], $attributes['last_name']);
         });
     }
 

@@ -54,6 +54,7 @@ final class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->login()
+            ->default()
             ->authMiddleware([
                 Authenticate::class,
             ]);
