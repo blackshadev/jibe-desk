@@ -83,25 +83,8 @@ function task:test:coverage { ## Run tests with code coverage
     echo ""
 }
 
-function task:test:mutations { ## Run mutation tests
-    docker:ensure-running
-    task:exec "./vendor/bin/infection --threads=max --initial-tests-php-options='-d zend_extension=xdebug.so' ${*}"
-    echo ""
-    echo "Mutation report: ./coverage/infection/infection.html"
-    echo ""
-}
-
-function task:test:mutations:diff { ## Run mutation tests on changes files
-    docker:ensure-running
-    task:exec "./vendor/bin/infection --git-diff-lines --git-diff-base=main --threads=max --initial-tests-php-options='-d zend_extension=xdebug.so' ${*}"
-    echo ""
-    echo "Mutation report: ./coverage/infection/infection.html"
-    echo ""
-}
-
-function task:lint { ## Run checks by Rector, ECS and PHPStan.
+function task:lint { ## Run checks ECS and PHPStan.
     task:psr
-    task:rector --dry-run
     task:ecs
     task:stan
 }
@@ -118,12 +101,6 @@ function task:stan { ## Run PHPStan static analysis checker
 function task:psr {
     title "Verifying PSR compliancy"
     task:exec "composer dump-autoload --optimize --strict-psr --dry-run"
-}
-
-function task:rector { ## Run rector code formatter
-    docker:ensure-running
-    title "Running rector"
-    task:exec "./vendor/bin/rector process ${*}"
 }
 
 function task:stan:clear { ## Run PHPStan static analysis checker
@@ -148,20 +125,6 @@ function task:seed { ## Run database seeders
 function task:migrate { ## Migrate the database
     title "Running database migrations"
     task:artisan migrate
-}
-
-# =========================================================
-## Documentation
-# =========================================================
-
-function task:docs:generate { ## Generate svg's for all the mermaid diagrams
-    title "Building documentation diagrams"
-    find ./docs/diagrams -type f -name "*.mermaid" -exec docker run --rm -u `id -u`:`id -g` -v .:/data minlag/mermaid-cli -i {} \;
-}
-
-function task:docs:clean { ## Remove svg's for all the mermaid diagrams
-    title "Cleaning documentation generated files"
-    find ./docs/diagrams -type f -name "*.svg" -exec rm {} \;
 }
 
 # =========================================================
