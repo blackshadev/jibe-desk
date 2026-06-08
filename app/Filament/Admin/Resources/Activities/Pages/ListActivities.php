@@ -23,7 +23,7 @@ final class ListActivities extends ListRecords
                     /** @phpstan-ignore-next-line method.notFound */
                     static fn (Builder $query) => $query->active()
                 ),
-            'inactive' => Tabs\Tab::make(__('labels.active'))
+            'inactive' => Tabs\Tab::make(__('labels.inactive'))
                 ->modifyQueryUsing(
                     /** @phpstan-ignore-next-line method.notFound */
                     static fn (Builder $query) => $query->inactive()
