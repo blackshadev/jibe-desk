@@ -25,7 +25,7 @@ final class StorageSpaceResource extends Resource
 
     protected static ?string $model = StorageSpace::class;
 
-    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::MemberAdministration;
+    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Rental;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Squares2x2;
 

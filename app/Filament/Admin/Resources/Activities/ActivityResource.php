@@ -23,7 +23,7 @@ final class ActivityResource extends Resource
 {
     protected static ?string $model = Activity::class;
 
-    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::MemberAdministration;
+    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Activities;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::CalendarDays;
 

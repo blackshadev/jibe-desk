@@ -41,8 +41,10 @@ return [
     'personal_information' => 'Persoonlijke informatie',
     'invoice_information' => 'Factuur informatie',
     'navigation_groups' => [
+        'activities' => 'Activiteiten',
         'member_administration' => 'Ledenbeheer',
         'invoicing' => 'Facturatie',
+        'rental' => 'Verhuur',
     ],
     'members_count' => 'Aantal leden',
     'billing' => 'Facturering',

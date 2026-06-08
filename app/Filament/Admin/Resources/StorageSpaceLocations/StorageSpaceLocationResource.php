@@ -26,7 +26,7 @@ final class StorageSpaceLocationResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::MapPin;
 
-    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::MemberAdministration;
+    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Rental;
 
     public static function form(Schema $schema): Schema
     {

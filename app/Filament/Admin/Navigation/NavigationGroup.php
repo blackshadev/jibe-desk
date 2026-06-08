@@ -10,6 +10,8 @@ enum NavigationGroup: string implements HasLabel
 {
     case MemberAdministration = 'member_administration';
     case Invoicing = 'invoicing';
+    case Rental = 'rental';
+    case Activities = 'activities';
 
     public function getLabel(): string
     {
