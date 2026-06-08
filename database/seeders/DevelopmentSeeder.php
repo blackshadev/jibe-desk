@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Domain\Members\ExtraMembershipItemCode;
 use App\Models\Activity;
-use App\Models\BillableItem;
-use App\Models\ExtraMembershipItem;
 use App\Models\Invoice;
 use App\Models\Member;
 use App\Models\Membership;
 use App\Models\StorageSpace;
+use App\Models\StorageSpaceLocation;
 use App\Models\User;
 use Hash;
 use Illuminate\Database\Eloquent\Factories\Sequence;
@@ -26,89 +24,36 @@ final class DevelopmentSeeder extends Seeder
             'password' => Hash::make('password'),
         ]);
 
-        $memberships = Membership::factory()->createMany([
-            ['name' => 'Windsurfer'],
-            ['name' => 'Zeiler'],
-            ['name' => 'Bestuurslid'],
-        ]);
-
+        $location3 = StorageSpaceLocation::where('name', 'Container 3')->firstOrFail();
         StorageSpace::factory()
             ->state([
-                'location' => 'Container 3',
+                'storage_space_location_id' => $location3->id,
             ])
             ->sequence(static fn (Sequence $sequence) => ['number' => $sequence->index + 1])
             ->count(30)
             ->create();
 
+        $location4 = StorageSpaceLocation::where('name', 'Container 4')->firstOrFail();
         StorageSpace::factory()
             ->state([
-                'location' => 'Container 4',
+                'storage_space_location_id' => $location4->id,
             ])
             ->sequence(static fn (Sequence $sequence) => ['number' => $sequence->index + 1])
             ->count(30)
             ->create();
 
+        $location5 = StorageSpaceLocation::where('name', 'Container 5')->firstOrFail();
         StorageSpace::factory()
             ->state([
-                'location' => 'Container 5',
+                'storage_space_location_id' => $location5->id,
             ])
             ->sequence(static fn (Sequence $sequence) => ['number' => $sequence->index + 1])
             ->count(20)
             ->create();
 
-        $activities = Activity::factory()
-            ->createMany([
-                ['name' => 'Reguliere les volwassenen', 'start_date' => '2026-04-01', 'end_date' => '2026-10-30'],
-                ['name' => 'Reguliere les kinderen', 'start_date' => '2026-04-01', 'end_date' => '2026-10-30'],
-                ['name' => 'RTC 1', 'start_date' => '2026-01-01', 'end_date' => '2026-11-30'],
-                ['name' => 'RTC 2', 'start_date' => '2026-01-01', 'end_date' => '2026-11-30'],
-                ['name' => 'RTC 4', 'start_date' => '2026-01-01', 'end_date' => '2026-11-30'],
-            ]);
 
-        ExtraMembershipItem::factory()
-            ->for(BillableItem::factory()->state([
-                'price' => 20,
-                'vat' => 4.2,
-                'bill_period' => 'annually',
-                'description' => 'Vrijwilligersbijdrage',
-            ]))
-            ->create([
-                'code' => ExtraMembershipItemCode::VolunteerContribution,
-            ]);
-
-        ExtraMembershipItem::factory()
-            ->for(BillableItem::factory()->state([
-                'price' => -22,
-                'vat' => -4.62,
-                'bill_period' => 'annually',
-                'description' => 'Vrijwilligersbijdrage restitutie',
-            ]))
-            ->create([
-                'code' => ExtraMembershipItemCode::VolunteerRestitution,
-            ]);
-
-        ExtraMembershipItem::factory()
-            ->for(BillableItem::factory()->state([
-                'price' => -4.5,
-                'vat' => -0.945,
-                'bill_period' => 'annually',
-                'description' => 'Zelfde huishouden korting jeugd',
-            ]))
-            ->create([
-                'code' => 'zelfde_huishouden_korting_jeugd',
-            ]);
-
-        ExtraMembershipItem::factory()
-            ->for(BillableItem::factory()->state([
-                'price' => -8,
-                'vat' => -1.68,
-                'bill_period' => 'annually',
-                'description' => 'Zelfde huishouden korting volwassenen',
-            ]))
-            ->create([
-                'code' => 'zelfde_huishouden_korting_volwassen',
-            ]);
-
+        $activities = Activity::all();
+        $memberships = Membership::all();
         $members = collect();
         foreach ($memberships as $membership) {
             $members = $members->merge(
@@ -116,6 +61,11 @@ final class DevelopmentSeeder extends Seeder
                     ->count(10)
                     ->for($membership)
                     ->withRandomActivity($activities)
+                    ->has(
+                        Invoice::factory()
+                            ->withLines()
+                            ->randomCount()
+                    )
                     ->createMany()
             );
         }
@@ -127,13 +77,5 @@ final class DevelopmentSeeder extends Seeder
                 'membership_id' => $memberships->first()->id,
             ])
             ->createQuietly();
-
-        foreach ($members as $member) {
-            Invoice::factory()
-                ->forMember($member)
-                ->withLines()
-                ->randomCount()
-                ->create();
-        }
     }
 }

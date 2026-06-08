@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Models\StorageSpace;
+use App\Models\StorageSpaceLocation;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,11 +19,7 @@ final class StorageSpaceFactory extends Factory
     public function definition(): array
     {
         return [
-            'location' => $this->faker->randomElement([
-                'Container 3',
-                'Container 4',
-                'Container 5',
-            ]),
+            'storage_space_location_id' => StorageSpaceLocation::factory(),
             'number' => $this->faker->numberBetween(1, 30),
         ];
     }

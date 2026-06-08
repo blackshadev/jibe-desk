@@ -13,9 +13,11 @@ interface BillableItemInstanceRepository
 {
     public function removeMany(MemberId $memberId, BillableItemIdList $billableItemIds): void;
 
-    public function add(MemberId $memberId, BillableItemId $billableItemId, ?DateTimeInterface $endDate = null): BillableItemInstanceId;
+    public function add(MemberId $memberId, BillableItemId $billableItemId, ?DateTimeInterface $endDate = null, ?DateTimeInterface $startDate = null): BillableItemInstanceId;
 
     public function ensure(MemberId $memberId, BillableItemId $contributionId): void;
 
     public function stop(BillableItemInstanceId $instanceId): void;
+
+    public function updateEndDate(BillableItemInstanceId $instanceId, ?DateTimeInterface $endDate): void;
 }

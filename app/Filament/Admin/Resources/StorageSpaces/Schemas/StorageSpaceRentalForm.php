@@ -6,6 +6,7 @@ namespace App\Filament\Admin\Resources\StorageSpaces\Schemas;
 
 use App\Models\Member;
 use App\Models\StorageSpace;
+use App\Models\StorageSpaceLocation;
 use App\Models\StorageSpaceRental;
 use App\Rules\NoOverlappingStorageSpaceRental;
 use Carbon\CarbonImmutable;
@@ -40,28 +41,26 @@ final class StorageSpaceRentalForm
     public static function forMember(Schema $schema): Schema
     {
         return $schema->components([
-            Select::make('location')
+            Select::make('storage_space_location_id')
                 ->label(__('labels.location'))
                 ->options(
                     static fn (): array =>
-                        StorageSpace::query()
-                            ->distinct()
-                            ->orderBy('location')
-                            ->pluck('location', 'location')
+                        StorageSpaceLocation::query()
+                            ->orderBy('name')
+                            ->pluck('name', 'id')
                             ->toArray()
                 )
                 ->required()
                 ->live()
                 ->dehydrated(false)
-                ->searchable()
-                ->formatStateUsing(static fn (?StorageSpaceRental $record): ?string => $record?->storageSpace?->location)
+                ->formatStateUsing(static fn (?StorageSpaceRental $record): ?string => $record?->storageSpace?->location?->name)
                 ->afterStateUpdated(static fn (Set $set) => $set('storage_space_id', null)),
             Select::make('storage_space_id')
                 ->label(__('labels.space_number'))
                 ->options(
                     static fn (Get $get): array =>
                         StorageSpace::query()
-                            ->where('location', $get('location'))
+                            ->where('storage_space_location_id', $get('storage_space_location_id'))
                             ->pluck('number', 'id')
                             ->toArray()
                 )
@@ -69,7 +68,7 @@ final class StorageSpaceRentalForm
                 ->getSearchResultsUsing(
                     static fn (string $search, Get $get): array =>
                     StorageSpace::query()
-                        ->where('location', $get('location'))
+                        ->where('storage_space_location_id', $get('storage_space_location_id'))
                         ->where('number', 'like', "%{$search}%")
                         ->pluck('number', 'id')
                         ->toArray()

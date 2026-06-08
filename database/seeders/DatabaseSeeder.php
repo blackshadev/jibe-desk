@@ -10,8 +10,12 @@ final class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->call(MembershipSeeder::class);
+
         $this->call(MemberObjectTypeSeeder::class);
-        
+
+        $this->call(StorageSpaceLocationSeeder::class);
+
         if (app()->environment('local')) {
             $this->call(DevelopmentSeeder::class);
         }

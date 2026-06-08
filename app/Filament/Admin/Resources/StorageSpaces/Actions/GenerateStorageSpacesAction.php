@@ -6,6 +6,7 @@ namespace App\Filament\Admin\Resources\StorageSpaces\Actions;
 
 use App\Models\StorageSpace;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Support\Icons\Heroicon;
 
@@ -17,8 +18,9 @@ final class GenerateStorageSpacesAction
             ->label(__('labels.generate_storage_spaces'))
             ->icon(Heroicon::SquaresPlus)
             ->schema([
-                TextInput::make('location')
+                Select::make('storage_space_location_id')
                     ->label(__('labels.location'))
+                    ->relationship('location', 'name')
                     ->required(),
                 TextInput::make('from_number')
                     ->label(__('labels.from_number'))
@@ -33,13 +35,13 @@ final class GenerateStorageSpacesAction
                     ->gte('from_number'),
             ])
             ->action(static function (array $data): void {
-                $location = $data['location'];
+                $locationId = (int) $data['storage_space_location_id'];
                 $fromNumber = (int) $data['from_number'];
                 $toNumber = (int) $data['to_number'];
 
                 for ($number = $fromNumber; $number <= $toNumber; $number++) {
                     StorageSpace::firstOrCreate([
-                        'location' => $location,
+                        'storage_space_location_id' => $locationId,
                         'number' => $number,
                     ]);
                 }

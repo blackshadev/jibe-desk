@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\BillableItem;
 use App\Models\BillableItemInstance;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -17,7 +18,8 @@ final class BillableItemInstanceFactory extends Factory
     {
         return [
             'member_id' => null,
-            'billable_item_id' => null,
+            'billable_item_id' => BillableItem::factory(),
+            'bill_cycle_in_months' => 12,
             'start_date' => $this->faker->date(),
             'end_date' => null,
         ];

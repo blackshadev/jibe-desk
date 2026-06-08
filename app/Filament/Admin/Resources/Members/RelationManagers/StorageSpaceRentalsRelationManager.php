@@ -23,7 +23,7 @@ final class StorageSpaceRentalsRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                TextColumn::make('storageSpace.location')->label(__('labels.location')),
+                TextColumn::make('storageSpace.location.name')->label(__('labels.location')),
                 TextColumn::make('storageSpace.number')->label(__('labels.space_number')),
                 TextColumn::make('start_date')->label(__('labels.start_date'))->date(),
                 TextColumn::make('end_date')->label(__('labels.end_date'))->date(),

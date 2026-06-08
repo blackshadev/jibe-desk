@@ -29,13 +29,13 @@ final class BillableItemDbInstanceRepository implements BillableItemInstanceRepo
             );
     }
 
-    public function add(MemberId $memberId, BillableItemId $billableItemId, ?DateTimeInterface $endDate = null): BillableItemInstanceId
+    public function add(MemberId $memberId, BillableItemId $billableItemId, ?DateTimeInterface $endDate = null, ?DateTimeInterface $startDate = null): BillableItemInstanceId
     {
         $billableItem = BillableItem::findOrFail($billableItemId->value);
         $instance = BillableItemInstance::create([
             'member_id' => $memberId->value,
             'billable_item_id' => $billableItemId->value,
-            'start_date' => CarbonImmutable::now(),
+            'start_date' => $startDate ?? CarbonImmutable::now(),
             'end_date' => $endDate,
             'bill_cycle_in_months' => $billableItem->bill_period->toBillPeriodInMonths(),
         ]);
@@ -66,5 +66,12 @@ final class BillableItemDbInstanceRepository implements BillableItemInstanceRepo
                     'end_date' => CarbonImmutable::now(),
                 ]
             );
+    }
+
+    public function updateEndDate(BillableItemInstanceId $instanceId, ?DateTimeInterface $endDate): void
+    {
+        BillableItemInstance::query()
+            ->where('id', $instanceId->value)
+            ->update(['end_date' => $endDate]);
     }
 }

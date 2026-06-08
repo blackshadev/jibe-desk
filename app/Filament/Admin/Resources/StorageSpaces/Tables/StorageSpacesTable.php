@@ -17,7 +17,7 @@ final class StorageSpacesTable
     {
         return $table
             ->columns([
-                TextColumn::make('location')
+                TextColumn::make('location.name')
                     ->label(__('labels.location'))
                     ->sortable()
                     ->searchable(),
@@ -26,7 +26,7 @@ final class StorageSpacesTable
                     ->sortable()
                     ->numeric(),
             ])
-            ->defaultSort('location')
+            ->defaultSort('location.name')
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),

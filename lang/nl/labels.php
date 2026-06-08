@@ -108,4 +108,6 @@ return [
     'to_number' => 'Tot nummer',
     'generate_storage_spaces' => 'Opslagplekken genereren',
     'rentals_count' => 'Aantal verhuren',
+    'storage_space_location' => 'Opslaglocatie',
+    'storage_space_locations' => 'Opslaglocaties',
 ];
