@@ -10,6 +10,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
 
@@ -115,29 +116,36 @@ final class MemberForm
 
                         Tabs\Tab::make(__('labels.payment_information'))
                             ->schema([
-                                TextInput::make('paymentInformation.banking_account_number')
-                                    ->label(__('labels.banking_account_number'))
-                                    ->maxLength(34),
+                                Grid::make()
+                                    ->relationship('paymentInformation')
+                                    ->columns(2)
+                                    ->columnSpanFull()
+                                    ->schema([
+                                        TextInput::make('banking_account_number')
+                                            ->label(__('labels.banking_account_number'))
+                                            ->maxLength(34),
 
-                                TextInput::make('paymentInformation.banking_bic')
-                                    ->label(__('labels.banking_bic'))
-                                    ->maxLength(11),
+                                        TextInput::make('banking_bic')
+                                            ->label(__('labels.banking_bic'))
+                                            ->maxLength(11),
 
-                                TextInput::make('paymentInformation.banking_account_holder_name')
-                                    ->label(__('labels.banking_account_holder_name'))
-                                    ->maxLength(255),
+                                        TextInput::make('banking_account_holder_name')
+                                            ->label(__('labels.banking_account_holder_name'))
+                                            ->columnSpanFull()
+                                            ->maxLength(255),
 
-                                DatePicker::make('paymentInformation.mandate_accepted_date')
-                                    ->format('d-m-Y')
-                                    ->native(false)
-                                    ->disabled()
-                                    ->dehydrated(false)
-                                    ->label(__('labels.mandate_date')),
+                                        DatePicker::make('mandate_accepted_date')
+                                            ->format('d-m-Y')
+                                            ->native(false)
+                                            ->disabled()
+                                            ->dehydrated(false)
+                                            ->label(__('labels.mandate_date')),
 
-                                TextInput::make('paymentInformation.uuid')
-                                    ->label(__('labels.uuid'))
-                                    ->disabled()
-                                    ->dehydrated(false),
+                                        TextInput::make('uuid')
+                                            ->label(__('labels.reference'))
+                                            ->disabled()
+                                            ->dehydrated(false),
+                                    ]),
                             ]),
                 ]),
             ]);

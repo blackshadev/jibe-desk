@@ -47,7 +47,7 @@ return [
     'mandate_accepted' => 'Ik ga akkoord met de SEPA machtiging',
     'payment_information' => 'Betaalgegevens',
     'mandate_date' => 'Machtigingsdatum',
-    'uuid' => 'UUID',
+    'reference' => 'Referentie',
     'invoice_information' => 'Factuur informatie',
     'navigation_groups' => [
         'activities' => 'Activiteiten',

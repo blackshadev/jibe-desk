@@ -60,6 +60,7 @@ final class DevelopmentSeeder extends Seeder
                 Member::factory()
                     ->count(10)
                     ->for($membership)
+                    ->withPaymentInfo()
                     ->withRandomActivity($activities)
                     ->has(
                         Invoice::factory()
@@ -76,6 +77,7 @@ final class DevelopmentSeeder extends Seeder
             ->state([
                 'membership_id' => $memberships->first()->id,
             ])
+            ->withPaymentInfo()
             ->createQuietly();
     }
 }

@@ -9,6 +9,7 @@ use App\Models\Activity;
 use App\Models\Household;
 use App\Models\Member;
 use App\Models\Membership;
+use App\Models\PaymentInformation;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /** @extends Factory<Member> */
@@ -44,6 +45,11 @@ final class MemberFactory extends Factory
                 'deleted_at' => $this->faker->dateTimeBetween($attributes['created_at'], 'now'),
             ];
         });
+    }
+
+    public function withPaymentInfo(): self
+    {
+        return $this->has(PaymentInformation::factory());
     }
 
     /** @param iterable<Activity> $activities */
