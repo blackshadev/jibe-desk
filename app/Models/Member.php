@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -65,6 +66,12 @@ final class Member extends Model
     public function storageSpaceRentals(): HasMany
     {
         return $this->hasMany(StorageSpaceRental::class);
+    }
+
+    /** @return HasOne<PaymentInformation, $this> */
+    public function paymentInformation(): HasOne
+    {
+        return $this->hasOne(PaymentInformation::class);
     }
 
     /** @return BelongsTo<Household, $this> */

@@ -20,7 +20,6 @@ final class MemberFactory extends Factory
         $firstName = $this->faker->firstName($nameGender);
 
         return [
-            'initials' => $firstName[0],
             'first_name' => $firstName,
             'infix_name' => $this->faker->randomElement(['van', 'de', 'den', 'van de', 'van den', '']),
             'last_name' => $this->faker->lastName(),

@@ -13,7 +13,6 @@ return new class() extends Migration {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
 
-            $table->string('initials');
             $table->string('first_name')->index();
             $table->string('infix_name')->index();
             $table->string('last_name')->index();

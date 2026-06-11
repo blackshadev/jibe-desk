@@ -39,6 +39,15 @@ return [
     'quantity' => 'Aantal',
     'price' => 'Prijs',
     'personal_information' => 'Persoonlijke informatie',
+    'personal_details' => 'Persoonlijke gegevens',
+    'email' => 'E-mailadres',
+    'banking_account_number' => 'IBAN rekeningnummer',
+    'banking_bic' => 'BIC / SWIFT code',
+    'banking_account_holder_name' => 'Ten name van',
+    'mandate_accepted' => 'Ik ga akkoord met de SEPA machtiging',
+    'payment_information' => 'Betaalgegevens',
+    'mandate_date' => 'Machtigingsdatum',
+    'uuid' => 'UUID',
     'invoice_information' => 'Factuur informatie',
     'navigation_groups' => [
         'activities' => 'Activiteiten',
@@ -119,4 +128,17 @@ return [
     'unavailable' => 'Niet beschikbaar',
     'storage_space_location' => 'Opslaglocatie',
     'storage_space_locations' => 'Opslaglocaties',
+    'next' => 'Volgende',
+    'back' => 'Vorige',
+    'registration' => [
+        'membership_information' => [
+            'activities' => 'Activiteiten',
+            'windsurfing_lessons' => 'Windsurf lessen',
+            'rtc_lessons' => 'Deelnemen aan het RTC',
+            'club_access' => 'Toegangssleutel tot het clubhuis',
+            'storage' => 'Container stalling',
+            'watersport_federation' => 'Watersportverbond',
+            'watersport_federation_number' => 'Watersportverbond nummer',
+        ],
+    ],
 ];

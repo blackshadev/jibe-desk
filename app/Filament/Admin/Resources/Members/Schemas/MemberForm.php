@@ -112,6 +112,33 @@ final class MemberForm
                                     ->columnSpan(6)
                                     ->label(__('labels.address_city')),
                             ]),
+
+                        Tabs\Tab::make(__('labels.payment_information'))
+                            ->schema([
+                                TextInput::make('paymentInformation.banking_account_number')
+                                    ->label(__('labels.banking_account_number'))
+                                    ->maxLength(34),
+
+                                TextInput::make('paymentInformation.banking_bic')
+                                    ->label(__('labels.banking_bic'))
+                                    ->maxLength(11),
+
+                                TextInput::make('paymentInformation.banking_account_holder_name')
+                                    ->label(__('labels.banking_account_holder_name'))
+                                    ->maxLength(255),
+
+                                DatePicker::make('paymentInformation.mandate_accepted_date')
+                                    ->format('d-m-Y')
+                                    ->native(false)
+                                    ->disabled()
+                                    ->dehydrated(false)
+                                    ->label(__('labels.mandate_date')),
+
+                                TextInput::make('paymentInformation.uuid')
+                                    ->label(__('labels.uuid'))
+                                    ->disabled()
+                                    ->dehydrated(false),
+                            ]),
                 ]),
             ]);
     }
