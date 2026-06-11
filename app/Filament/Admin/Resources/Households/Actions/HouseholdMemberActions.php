@@ -10,6 +10,7 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Icons\Heroicon;
 
 final class HouseholdMemberActions
@@ -67,8 +68,15 @@ final class HouseholdMemberActions
                     return $member->household_id === null;
                 })
                 ->schema([
+                    Toggle::make('create_new')
+                        ->label(__('labels.create_new_household'))
+                        ->helperText(__('labels.create_new_household_helper'))
+                        ->default(false)
+                        ->live(),
+
                     Select::make('existing_household_id')
                         ->label(__('labels.select_household'))
+                        ->visible(static fn (Get $get): bool => !$get('create_new'))
                         ->options(fn (): array => Household::with('members')
                             ->get()
                             ->mapWithKeys(static fn (Household $h) => [ $h->id => $h->member_names ])
@@ -76,10 +84,6 @@ final class HouseholdMemberActions
                         ->searchable()
                         ->nullable(),
 
-                    Toggle::make('create_new')
-                        ->label(__('labels.create_new_household'))
-                        ->helperText(__('labels.create_new_household_helper'))
-                        ->default(false),
                 ])
                 ->action(static function (RelationManager $livewire, array $data): void {
                     if (!empty($data['create_new'])) {
@@ -132,7 +136,7 @@ final class HouseholdMemberActions
                     $member = $livewire->getOwnerRecord();
                     $targetMember = Member::findOrFail($data['member_id']);
 
-                    $member->update([ 'household_id' => $targetMember->household_id ]);
+                    $targetMember->update([ 'household_id' => $member->household_id ]);
                 })
                 ->successNotificationTitle(__('notifications.member_added_to_household')),
         ];
