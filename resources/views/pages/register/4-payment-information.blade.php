@@ -27,7 +27,7 @@
                 description="{{ __('texts.register.payment_information.mandate_description') }}"
             />
 
-            <x-molecule.form-buttons/>
+            <x-molecule.form-buttons back="{{route('register.personal-information')}}" />
         </form>
     </x-atoms.container>
 </x-layout.default>

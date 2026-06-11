@@ -9,5 +9,6 @@ return [
     'membership_information' => 'Lidmaatschap informatie',
     'personal_information' => 'Persoonlijke informatie',
     'payment_information' => 'Betaling informatie',
-    'confirmation' => 'Bevestiging',
+    'confirmation' => 'Bevestigen',
+    'success' => 'Gelukt!',
 ];

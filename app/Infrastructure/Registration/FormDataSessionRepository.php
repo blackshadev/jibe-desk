@@ -27,4 +27,9 @@ final readonly class FormDataSessionRepository implements FormDataRepository
     {
         Session::put(self::SESSION_KEY, $formData->toArray());
     }
+
+    public function clear(): void
+    {
+        Session::forget(self::SESSION_KEY);
+    }
 }

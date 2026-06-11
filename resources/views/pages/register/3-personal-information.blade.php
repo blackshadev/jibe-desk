@@ -60,7 +60,7 @@
                 </x-molecule.form-row>
             </div>
 
-            <x-molecule.form-buttons/>
+            <x-molecule.form-buttons back="{{route('register.membership')}}"/>
         </form>
     </x-atoms.container>
 </x-layout.default>

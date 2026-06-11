@@ -30,5 +30,14 @@ return [
             'explainer' => 'Vul je bankgegevens in voor de automatische incasso van de contributie.',
             'mandate_description' => 'Door dit aan te vinken geef je toestemming voor automatische afschrijving via SEPA.',
         ],
+        'confirmation' => [
+            'explainer' => 'Controleer onderstaande gegevens. Klopt er iets niet? Klik dan op "Wijzigen" om terug te gaan naar het betreffende onderdeel.',
+            'confirm_data_correct_description' => 'Door dit aan te vinken bevestig je dat alle gegevens naar waarheid zijn ingevuld.',
+            'confirm_membership_description' => 'Door dit aan te vinken ga je akkoord met het lidmaatschap van de vereniging en de bijbehorende voorwaarden.',
+        ],
+        'success' => [
+            'title' => 'Je inschrijving is ontvangen!',
+            'message' => 'Bedankt voor je inschrijving. We nemen zo snel mogelijk contact met je op.',
+        ],
     ],
 ];

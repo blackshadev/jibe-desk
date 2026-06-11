@@ -1,4 +1,7 @@
-@props([ 'back' => true ])
+@props([ 'back' => null, 'nextLabel' => null ])
+@php
+    $nextLabel = $nextLabel ?? __('labels.next');
+@endphp
 
 <div @class([
     "flex",
@@ -6,8 +9,8 @@
     "justify-end" => !$back,
 ])>
     @if ($back)
-       <x-atoms.button class="self-start" type="back">{{__('labels.back')}}</x-atoms.button>
+       <x-atoms.button class="self-start" url="{{$back}}">{{__('labels.back')}}</x-atoms.button>
     @endif
 
-    <x-atoms.button class="self-end" type="submit">{{__('labels.next')}}</x-atoms.button>
+    <x-atoms.button class="self-end" type="submit">{{$nextLabel}}</x-atoms.button>
 </div>

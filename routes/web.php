@@ -17,4 +17,7 @@ Route::post('/registratie/persoonlijke-informatie', [Controllers\Registration\Re
 Route::get('/registratie/betaalgegevens', [Controllers\Registration\RegistrationController::class, 'showPaymentInformationForm'])->name('register.payment-information');
 Route::post('/registratie/betaalgegevens', [Controllers\Registration\RegistrationController::class, 'savePaymentInformationForm']);
 
-Route::get('/registratie/bevestiging', fn () => view('pages.register.5-confirmation'))->name('register.confirmation');
+Route::get('/registratie/bevestigen', [Controllers\Registration\RegistrationController::class, 'showConfirmationForm'])->name('register.confirmation');
+Route::post('/registratie/bevestigen', [Controllers\Registration\RegistrationController::class, 'confirmRegistration']);
+
+Route::get('/registratie/succes', static fn () => view('pages.register.6-success'))->name('register.success');

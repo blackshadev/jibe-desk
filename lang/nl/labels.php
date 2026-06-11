@@ -130,6 +130,12 @@ return [
     'storage_space_locations' => 'Opslaglocaties',
     'next' => 'Volgende',
     'back' => 'Vorige',
+    'edit' => 'Wijzigen',
+    'yes' => 'Ja',
+    'no' => 'Nee',
+    'confirm_data_correct' => 'Ik bevestig dat alle bovenstaande gegevens correct zijn ingevuld',
+    'confirm_membership' => 'Ik wil lid worden van Watersportvereniging Almere Centraal',
+    'confirm_registration' => 'Bevestig inschrijving',
     'registration' => [
         'membership_information' => [
             'activities' => 'Activiteiten',

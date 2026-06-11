@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Registration;
 use App\Domain\Registration\FormDataRepository;
 use App\Domain\Registration\Step;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Registration\ConfirmRegistrationRequest;
 use App\Http\Requests\Registration\StoreMembershipRequest;
 use App\Http\Requests\Registration\StorePaymentInformationRequest;
 use App\Http\Requests\Registration\StorePersonalInformationRequest;
@@ -86,5 +87,26 @@ final class RegistrationController extends Controller
         $this->formDataRepository->save($formData->paymentInfo($request->toPaymentInfoData()));
 
         return redirect()->route('register.confirmation');
+    }
+
+    public function showConfirmationForm(): View | RedirectResponse
+    {
+        $formData = $this->formDataRepository->get();
+        if ($formData->isStepDisallowed(Step::Confirmation)) {
+            return redirect()->route('register.welcome');
+        }
+
+        return view('pages.register.5-confirmation', compact('formData'));
+    }
+
+    public function confirmRegistration(ConfirmRegistrationRequest $request): RedirectResponse
+    {
+        $formData = $this->formDataRepository->get();
+
+        // TODO: Save registration data to models (Member, Membership, PaymentInfo, etc.)
+
+        $this->formDataRepository->clear();
+
+        return redirect()->route('register.success');
     }
 }

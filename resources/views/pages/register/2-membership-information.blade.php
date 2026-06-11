@@ -48,13 +48,17 @@
 
             <x-molecule.form-row
                 label="{{ __('labels.registration.membership_information.watersport_federation_number') }}"
-                :value="$formData->membership->watersportFederationNumber"
+
                 description="Heb je reeds een watersport verbond nummer, dan kun je deze hier invullen. Zo niet dan mag deze leeg blijven."
                 name="watersport_federation_number">
-                <x-atoms.inputs.text name="watersport_federation_number" placeholder="12345"/>
+                <x-atoms.inputs.text
+                    name="watersport_federation_number"
+                    placeholder="12345"
+                    :value="$formData->membership->watersportFederationNumber"
+                />
             </x-molecule.form-row>
 
-            <x-molecule.form-buttons/>
+            <x-molecule.form-buttons back="{{route('register.welcome')}}" />
         </form>
     </x-atoms.container>
 </x-layout.default>
