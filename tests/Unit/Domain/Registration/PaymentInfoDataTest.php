@@ -36,18 +36,6 @@ final class PaymentInfoDataTest extends UnitTestCase
         self::assertSame('2024-02-01T03:04:05+00:00', $data->mandateAcceptedDate->format('c'));
     }
 
-    public function test_create_from_array_uses_defaults_for_missing_keys(): void
-    {
-        $data = PaymentInfoData::createFromArray([
-            'bankingAccountNumber' => 'NL91ABNA0417164300',
-        ]);
-
-        self::assertSame('NL91ABNA0417164300', $data->bankingAccountNumber);
-        self::assertSame('', $data->bankingBic);
-        self::assertSame('', $data->bankingAccountHolderName);
-        self::assertNull($data->mandateAcceptedDate);
-    }
-
     public function test_to_array_returns_expected_structure(): void
     {
         $data = PaymentInfoData::createFromArray(self::DEFAULT_DATA);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Registration;
 
+use App\Domain\Members\Gender;
 use App\Domain\Registration\PersonalInfoData;
 use Tests\UnitTestCase;
 
@@ -31,8 +32,8 @@ final class PersonalInfoDataTest extends UnitTestCase
         self::assertSame('', $data->infixName);
         self::assertSame('', $data->lastName);
         self::assertSame('', $data->email);
-        self::assertSame('', $data->gender);
-        self::assertSame('', $data->birthdate);
+        self::assertSame(Gender::Unknown, $data->gender);
+        self::assertSame('2000-01-01', $data->birthdate->format('Y-m-d'));
         self::assertSame('', $data->addressStreet);
         self::assertSame('', $data->addressHousenumber);
         self::assertSame('', $data->addressHousenumberAddition);
@@ -48,33 +49,13 @@ final class PersonalInfoDataTest extends UnitTestCase
         self::assertSame('de', $data->infixName);
         self::assertSame('Vries', $data->lastName);
         self::assertSame('jan@example.com', $data->email);
-        self::assertSame('M', $data->gender);
-        self::assertSame('1990-01-15', $data->birthdate);
+        self::assertSame(Gender::Male, $data->gender);
+        self::assertSame('1990-01-15', $data->birthdate->format('Y-m-d'));
         self::assertSame('Surfstrand', $data->addressStreet);
         self::assertSame('2', $data->addressHousenumber);
         self::assertSame('A', $data->addressHousenumberAddition);
         self::assertSame('1324CT', $data->addressPostalcode);
         self::assertSame('Almere', $data->addressCity);
-    }
-
-    public function test_create_from_array_uses_defaults_for_missing_keys(): void
-    {
-        $data = PersonalInfoData::createFromArray([
-            'firstName' => 'Jan',
-            'lastName' => 'Vries',
-        ]);
-
-        self::assertSame('Jan', $data->firstName);
-        self::assertSame('', $data->infixName);
-        self::assertSame('Vries', $data->lastName);
-        self::assertSame('', $data->email);
-        self::assertSame('', $data->gender);
-        self::assertSame('', $data->birthdate);
-        self::assertSame('', $data->addressStreet);
-        self::assertSame('', $data->addressHousenumber);
-        self::assertSame('', $data->addressHousenumberAddition);
-        self::assertSame('', $data->addressPostalcode);
-        self::assertSame('', $data->addressCity);
     }
 
     public function test_to_array_returns_expected_structure(): void

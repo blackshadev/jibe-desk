@@ -13,7 +13,7 @@ final class GenderTest extends UnitTestCase
     #[TestWith(['Male', 'M'])]
     #[TestWith(['Female', 'F'])]
     #[TestWith(['NonBinary', 'NB'])]
-    #[TestWith(['Undetermined', 'U'])]
+    #[TestWith(['Unknown', 'U'])]
     #[TestWith(['Other', 'O'])]
     public function test_all_cases_have_expected_values(string $caseName, string $value): void
     {
@@ -29,7 +29,7 @@ final class GenderTest extends UnitTestCase
         self::assertSame('M', Gender::Male->value);
         self::assertSame('F', Gender::Female->value);
         self::assertSame('NB', Gender::NonBinary->value);
-        self::assertSame('U', Gender::Undetermined->value);
+        self::assertSame('U', Gender::Unknown->value);
         self::assertSame('O', Gender::Other->value);
     }
 }

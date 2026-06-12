@@ -1,6 +1,9 @@
 @props([ 'name', 'value' => '', 'id' => '', 'placeholder' => ''])
 @php
     $id ??= $name;
+    if ($value instanceof \DateTimeInterface) {
+        $value = $value->format('Y-m-d');
+    }
 @endphp
 
 <div

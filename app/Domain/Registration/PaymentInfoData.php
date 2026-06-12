@@ -9,9 +9,9 @@ use DateTimeInterface;
 
 /**
  * @phpstan-type PaymentInfoDataArray array{
- *     bankingAccountNumber?: string,
- *     bankingBic?: string,
- *     bankingAccountHolderName?: string,
+ *     bankingAccountNumber: string,
+ *     bankingBic: string,
+ *     bankingAccountHolderName: string,
  *     mandateAcceptedDate?: string,
  * }
  */
@@ -40,10 +40,10 @@ final class PaymentInfoData
     public static function createFromArray(array $data): self
     {
         return new self(
-            bankingAccountNumber: $data['bankingAccountNumber'] ?? '',
-            bankingBic: $data['bankingBic'] ?? '',
-            bankingAccountHolderName: $data['bankingAccountHolderName'] ?? '',
-            mandateAcceptedDate: !empty($data['mandateAcceptedDate']) ? DateTimeImmutable::createFromFormat(DateTimeInterface::ATOM, $data['mandateAcceptedDate']) : null,
+            bankingAccountNumber: $data['bankingAccountNumber'],
+            bankingBic: $data['bankingBic'],
+            bankingAccountHolderName: $data['bankingAccountHolderName'],
+            mandateAcceptedDate: $data['mandateAcceptedDate'] ? DateTimeImmutable::createFromFormat(DateTimeInterface::ATOM, $data['mandateAcceptedDate']) : null,
         );
     }
 

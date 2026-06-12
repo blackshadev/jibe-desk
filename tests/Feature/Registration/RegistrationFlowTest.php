@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Registration;
 
-use Illuminate\Support\Facades\Session;
+use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\TestWith;
 use Tests\FeatureTestCase;
 
@@ -217,7 +217,7 @@ final class RegistrationFlowTest extends FeatureTestCase
         $response->assertSee(self::VALID_PERSONAL_INFO['first_name']);
         $response->assertSee(self::VALID_PERSONAL_INFO['last_name']);
         $response->assertSee(self::VALID_PERSONAL_INFO['email']);
-        $response->assertSee(self::VALID_PERSONAL_INFO['birthdate']);
+        $response->assertSee(DateTimeImmutable::createFromFormat('Y-m-d', self::VALID_PERSONAL_INFO['birthdate'])->format('d-m-Y'));
         $response->assertSee(self::VALID_PERSONAL_INFO['address_street']);
         $response->assertSee(self::VALID_PERSONAL_INFO['address_city']);
         $response->assertSee(self::VALID_PERSONAL_INFO['address_postalcode']);

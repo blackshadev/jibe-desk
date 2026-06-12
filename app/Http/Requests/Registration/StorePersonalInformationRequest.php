@@ -6,6 +6,7 @@ namespace App\Http\Requests\Registration;
 
 use App\Domain\Members\Gender;
 use App\Domain\Registration\PersonalInfoData;
+use DateTimeImmutable;
 use Illuminate\Foundation\Http\FormRequest;
 
 final class StorePersonalInformationRequest extends FormRequest
@@ -37,8 +38,8 @@ final class StorePersonalInformationRequest extends FormRequest
             infixName: (string) $this->string('infix_name'),
             lastName: (string) $this->string('last_name'),
             email: (string) $this->string('email'),
-            gender: (string) $this->string('gender'),
-            birthdate: (string) $this->string('birthdate'),
+            gender: Gender::from((string) $this->string('gender')),
+            birthdate: DateTimeImmutable::createFromFormat('Y-m-d', (string) $this->string('birthdate')),
             addressStreet: (string) $this->string('address_street'),
             addressHousenumber: (string) $this->string('address_housenumber'),
             addressHousenumberAddition: (string) $this->string('address_housenumber_addition'),

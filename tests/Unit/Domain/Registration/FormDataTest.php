@@ -13,6 +13,35 @@ use Tests\UnitTestCase;
 
 final class FormDataTest extends UnitTestCase
 {
+    private const PERSONAL_INFO_DATA = [
+        'firstName' => 'Jan',
+        'infixName' => '',
+        'lastName' => 'Vries',
+        'email' => 'jan@example.com',
+        'gender' => 'M',
+        'birthdate' => '1990-01-15',
+        'addressStreet' => 'Surfstrand',
+        'addressHousenumber' => '2',
+        'addressHousenumberAddition' => 'A',
+        'addressPostalcode' => '1324CT',
+        'addressCity' => 'Almere',
+    ];
+
+    private const PAYMENT_INFO_DATA = [
+        'bankingAccountNumber' => 'NL91ABNA0417164300',
+        'bankingBic' => 'ABNANL2A',
+        'bankingAccountHolderName' => 'J. de Vries',
+        'mandateAcceptedDate' => '2024-02-01T03:04:05+00:00',
+    ];
+
+    private const MEMBERSHIP_DATA = [
+        'regularWindsurfingLessons' => true,
+        'rtc' => false,
+        'clubhouseAccess' => true,
+        'boardStorage' => false,
+        'watersportFederationNumber' => '12345',
+    ];
+
     public function test_create_default_has_initial_step_and_empty_data(): void
     {
         $formData = FormData::createDefault();
@@ -27,24 +56,9 @@ final class FormDataTest extends UnitTestCase
     {
         $formData = FormData::create([
             'step' => Step::Membership->value,
-            'membership' => [
-                'regularWindsurfingLessons' => true,
-                'rtc' => false,
-                'clubhouseAccess' => true,
-                'boardStorage' => false,
-                'watersportFederationNumber' => '12345',
-            ],
-            'personalInfo' => [
-                'firstName' => 'Jan',
-                'lastName' => 'Vries',
-                'email' => 'jan@example.com',
-            ],
-            'paymentInfo' => [
-                'bankingAccountNumber' => 'NL91ABNA0417164300',
-                'bankingBic' => 'ABNANL2A',
-                'bankingAccountHolderName' => 'J. de Vries',
-                'mandateAcceptedDate' => '2024-02-01T03:04:05+00:00',
-            ],
+            'membership' => self::MEMBERSHIP_DATA,
+            'personalInfo' => self::PERSONAL_INFO_DATA,
+            'paymentInfo' => self::PAYMENT_INFO_DATA,
         ]);
 
         self::assertSame(Step::Membership, $formData->step);
@@ -87,10 +101,7 @@ final class FormDataTest extends UnitTestCase
             ->welcome()
             ->membership(MembershipData::createDefault());
 
-        $personalInfo = PersonalInfoData::createFromArray([
-            'firstName' => 'Jan',
-            'lastName' => 'Vries',
-        ]);
+        $personalInfo = PersonalInfoData::createFromArray(self::PERSONAL_INFO_DATA);
 
         $updated = $formData->personalInfo($personalInfo);
 
@@ -105,10 +116,7 @@ final class FormDataTest extends UnitTestCase
             ->membership(MembershipData::createDefault())
             ->personalInfo(PersonalInfoData::createDefault());
 
-        $paymentInfo = PaymentInfoData::createFromArray([
-            'bankingAccountNumber' => 'NL91ABNA0417164300',
-            'mandateAcceptedDate' => '2024-02-01T03:04:05+00:00',
-        ]);
+        $paymentInfo = PaymentInfoData::createFromArray(self::PAYMENT_INFO_DATA);
 
         $updated = $formData->paymentInfo($paymentInfo);
 
@@ -150,17 +158,8 @@ final class FormDataTest extends UnitTestCase
         $original = FormData::createDefault()
             ->welcome()
             ->membership(MembershipData::createDefault())
-            ->personalInfo(PersonalInfoData::createFromArray([
-                'firstName' => 'Jan',
-                'lastName' => 'Vries',
-                'email' => 'jan@example.com',
-            ]))
-            ->paymentInfo(PaymentInfoData::createFromArray([
-                'bankingAccountNumber' => 'NL91ABNA0417164300',
-                'bankingBic' => 'ABNANL2A',
-                'bankingAccountHolderName' => 'J. de Vries',
-                'mandateAccepted' => true,
-            ]));
+            ->personalInfo(PersonalInfoData::createFromArray(self::PERSONAL_INFO_DATA))
+            ->paymentInfo(PaymentInfoData::createFromArray(self::PAYMENT_INFO_DATA));
 
         $array = $original->toArray();
         $restored = FormData::create($array);

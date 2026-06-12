@@ -44,7 +44,7 @@ final class MemberForm
                                 Gender::Male->value => __('labels.genders.' . Gender::Male->value),
                                 Gender::Female->value => __('labels.genders.' . Gender::Female->value),
                                 Gender::NonBinary->value => __('labels.genders.' . Gender::NonBinary->value),
-                                Gender::Undetermined->value => __('labels.genders.' . Gender::Undetermined->value),
+                                Gender::Unknown->value => __('labels.genders.' . Gender::Unknown->value),
                                 Gender::Other->value => __('labels.genders.' . Gender::Other->value),
                             ])
                             ->required(),

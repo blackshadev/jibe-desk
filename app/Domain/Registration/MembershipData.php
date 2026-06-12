@@ -5,7 +5,13 @@ declare(strict_types=1);
 namespace App\Domain\Registration;
 
 /**
- * @phpstan-type MembershipDataArray array{ regularWindsurfingLessons?: boolean, rtc?: boolean, clubhouseAccess?: boolean, boardStorage?: boolean, watersportFederationNumber?: string }
+ * @phpstan-type MembershipDataArray array{
+ *     regularWindsurfingLessons?: boolean,
+ *     rtc?: boolean,
+ *     clubhouseAccess?: boolean,
+ *     boardStorage?: boolean,
+ *     watersportFederationNumber?: string
+ *  }
  */
 
 final class MembershipData

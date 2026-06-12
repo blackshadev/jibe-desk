@@ -67,11 +67,11 @@
                         </div>
                         <div class="flex justify-between">
                             <dt class="text-gray-600">{{ __('labels.gender') }}</dt>
-                            <dd class="font-medium">{{ __('labels.genders')[$formData->personalInfo->gender] ?? $formData->personalInfo->gender }}</dd>
+                            <dd class="font-medium">{{ __('labels.genders.' . $formData->personalInfo->gender->value) }}</dd>
                         </div>
                         <div class="flex justify-between">
                             <dt class="text-gray-600">{{ __('labels.birthdate') }}</dt>
-                            <dd class="font-medium">{{ $formData->personalInfo->birthdate }}</dd>
+                            <dd class="font-medium">{{ $formData->personalInfo->birthdate->format('d-m-Y') }}</dd>
                         </div>
                         <div class="flex justify-between">
                             <dt class="text-gray-600">{{ __('labels.address_information') }}</dt>
