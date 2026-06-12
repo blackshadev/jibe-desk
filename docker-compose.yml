@@ -11,10 +11,10 @@ services:
       - ./:/www:delegated
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.almerecentraal.rule=Host(`local.leden.almerecentraal.nl`)"
-      - "traefik.http.services.almerecentraal.loadbalancer.server.port=80"
-      - "traefik.http.routers.almerecentraal.tls=true"
-      - "traefik.http.routers.almerecentraal.entrypoints=web-secure"
+      - "traefik.http.routers.leden-almerecentraal.rule=Host(`local.leden.almerecentraal.nl`)"
+      - "traefik.http.services.leden-almerecentraal.loadbalancer.server.port=80"
+      - "traefik.http.routers.leden-almerecentraal.tls=true"
+      - "traefik.http.routers.leden-almerecentraal.entrypoints=web-secure"
     extra_hosts:
       - "host.docker.internal:host-gateway"
       - "local.leden.almerecentraal.nl:host-gateway"
@@ -31,8 +31,26 @@ services:
     ports:
       - "5432:5432"
 
+  mail:
+      platform: linux/amd64
+      image: axllent/mailpit
+      restart: unless-stopped
+      volumes:
+          - mailpit-data:/data:rw
+      labels:
+          - "traefik.enable=true"
+          - "traefik.http.routers.mail-almerecentraal.rule=Host(`local.mail.almerecentraal.nl`)"
+          - "traefik.http.services.mail-almerecentraal.loadbalancer.server.port=8025"
+          - "traefik.http.routers.mail-almerecentraal.tls=true"
+          - "traefik.http.routers.mail-almerecentraal.entrypoints=web-secure"
+      extra_hosts:
+          - "host.docker.internal:host-gateway"
+          - "local.mail.almerecentraal.nl:host-gateway"
+
+
 volumes:
   pg-volume:
+  mailpit-data:
 
 networks:
   default:
