@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cce604fe757ed39e658f7eee4beec9c5",
+    "content-hash": "01d35f964ce48f85cf97f949c2ad9822",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -12856,6 +12856,86 @@
                 }
             ],
             "time": "2025-12-08T11:19:18+00:00"
+        },
+        {
+            "name": "xammie/mailbook",
+            "version": "1.11.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Xammie/mailbook.git",
+                "reference": "d98244ef1b081bf3d45f43b3d7631fa4a8d432f5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Xammie/mailbook/zipball/d98244ef1b081bf3d45f43b3d7631fa4a8d432f5",
+                "reference": "d98244ef1b081bf3d45f43b3d7631fa4a8d432f5",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "^9.0 || ^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "php": "^8.0",
+                "spatie/laravel-package-tools": "^1.9.2"
+            },
+            "require-dev": {
+                "infection/infection": "^0.32.6",
+                "larastan/larastan": "^3.0 || dev-l13",
+                "laravel/pint": "^v1.4.1",
+                "nunomaduro/collision": "^6.0 || ^7.0 || ^8.0",
+                "nunomaduro/phpinsights": "^2.6",
+                "orchestra/testbench": "^9.0 || ^10.0 || ^11.0",
+                "phpstan/extension-installer": "^1.4",
+                "phpstan/phpstan": "^2.1",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpunit/phpunit": "11.*",
+                "rector/rector": "^2.0",
+                "spatie/invade": "^1.1 || ^2.1",
+                "tomasvotruba/bladestan": "^0.10.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Mailbook": "Xammie\\Mailbook\\Facades\\Mailbook"
+                    },
+                    "providers": [
+                        "Xammie\\Mailbook\\MailbookServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Xammie\\Mailbook\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Max Hoogenbosch",
+                    "email": "max@hoogenbos.ch",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Laravel Mail Explorer",
+            "homepage": "https://github.com/xammie/mailbook",
+            "keywords": [
+                "laravel",
+                "mailbook"
+            ],
+            "support": {
+                "issues": "https://github.com/Xammie/mailbook/issues",
+                "source": "https://github.com/Xammie/mailbook/tree/1.11.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/xammie",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-04-07T17:34:35+00:00"
         }
     ],
     "aliases": [],

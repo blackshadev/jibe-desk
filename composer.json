@@ -29,7 +29,8 @@
         "phpstan/phpstan": "^2.1",
         "phpstan/phpstan-mockery": "^2.0",
         "phpunit/phpunit": "^12.5.12",
-        "symplify/coding-standard": "^13.0"
+        "symplify/coding-standard": "^13.0",
+        "xammie/mailbook": "^1.11"
     },
     "autoload": {
         "psr-4": {
