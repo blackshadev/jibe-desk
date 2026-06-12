@@ -9,7 +9,7 @@ namespace App\Domain\Registration;
  * @phpstan-import-type PersonalInfoDataArray from PersonalInfoData
  * @phpstan-import-type PaymentInfoDataArray from PaymentInfoData
  *
- * @phpstan-type FormDataArray array{ step?: integer, membership?: MembershipDataArray, personalInfo?: PersonalInfoDataArray, paymentInfo?: PaymentInfoDataArray }
+ * @phpstan-type FormDataArray array{ step: integer, membership: MembershipDataArray, personalInfo: PersonalInfoDataArray, paymentInfo: PaymentInfoDataArray }
  */
 
 final class FormData
@@ -26,10 +26,10 @@ final class FormData
     public static function create(array $data): self
     {
         return new self(
-            step: Step::tryFrom($data['step'] ?? Step::Initial->value) ?? Step::Initial,
-            membership: MembershipData::createFromArray($data['membership'] ?? []),
-            personalInfo: PersonalInfoData::createFromArray($data['personalInfo'] ?? []),
-            paymentInfo: PaymentInfoData::createFromArray($data['paymentInfo'] ?? []),
+            step: Step::tryFrom($data['step']) ?? throw new \InvalidArgumentException('Invalid step value.'),
+            membership: MembershipData::createFromArray($data['membership']),
+            personalInfo: PersonalInfoData::createFromArray($data['personalInfo']),
+            paymentInfo: PaymentInfoData::createFromArray($data['paymentInfo']),
         );
     }
 

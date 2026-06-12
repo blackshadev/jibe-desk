@@ -157,6 +157,7 @@ return [
     'url' => ':Attribute moet een geldige URL zijn.',
     'uuid' => ':Attribute moet een geldige UUID zijn.',
     'no_overlapping_storage_space_rental' => 'Deze opslagruimte is al toegewezen in een overlappende periode aan :member',
+    'unique_default_membership' => 'Er is al een standaard lidmaatschap. Er mag maar één lidmaatschap standaard zijn.',
     'accept_atleast_one' => 'Op zijn minst een van de :attribute moet geselecteerd zijn.',
     'attributes' => [
         'address' => 'adres',

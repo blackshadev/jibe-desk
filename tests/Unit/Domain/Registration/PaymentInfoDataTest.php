@@ -33,7 +33,7 @@ final class PaymentInfoDataTest extends UnitTestCase
         self::assertSame('NL91ABNA0417164300', $data->bankingAccountNumber);
         self::assertSame('ABNANL2A', $data->bankingBic);
         self::assertSame('J. de Vries', $data->bankingAccountHolderName);
-        self::assertSame('2024-02-01T03:04:05+00:00', $data->mandateAcceptedDate->format('c'));
+        self::assertSame('2024-02-01T03:04:05+00:00', $data->mandateAcceptedDate?->format('c'));
     }
 
     public function test_to_array_returns_expected_structure(): void

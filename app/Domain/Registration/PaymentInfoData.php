@@ -6,13 +6,14 @@ namespace App\Domain\Registration;
 
 use DateTimeImmutable;
 use DateTimeInterface;
+use InvalidArgumentException;
 
 /**
  * @phpstan-type PaymentInfoDataArray array{
  *     bankingAccountNumber: string,
  *     bankingBic: string,
  *     bankingAccountHolderName: string,
- *     mandateAcceptedDate?: string,
+ *     mandateAcceptedDate: non-falsy-string|null,
  * }
  */
 
@@ -39,11 +40,16 @@ final class PaymentInfoData
     /** @param PaymentInfoDataArray $data */
     public static function createFromArray(array $data): self
     {
+        $mandateAcceptedDate = null;
+        if (!empty($data['mandateAcceptedDate'])) {
+            $mandateAcceptedDate = DateTimeImmutable::createFromFormat(DateTimeInterface::ATOM, $data['mandateAcceptedDate']) ?: throw new InvalidArgumentException('Invalid mandate accepted date.');
+        }
+
         return new self(
             bankingAccountNumber: $data['bankingAccountNumber'],
             bankingBic: $data['bankingBic'],
             bankingAccountHolderName: $data['bankingAccountHolderName'],
-            mandateAcceptedDate: $data['mandateAcceptedDate'] ? DateTimeImmutable::createFromFormat(DateTimeInterface::ATOM, $data['mandateAcceptedDate']) : null,
+            mandateAcceptedDate: $mandateAcceptedDate,
         );
     }
 

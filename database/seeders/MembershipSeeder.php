@@ -14,7 +14,7 @@ use Illuminate\Database\Seeder;
 final class MembershipSeeder extends Seeder
 {
     private const MEMBERSHIPS = [
-        ['name' => 'Windsurfer', 'adult_price' => 68, 'kids_price' => 43.5 ],
+        ['name' => 'Windsurfer', 'adult_price' => 68, 'kids_price' => 43.5, 'is_default' => true ],
         ['name' => 'Zeiler', 'adult_price' => 68, 'kids_price' => 43.5 ],
         ['name' => 'Bestuurslid', 'adult_price' => 0, 'kids_price' => 0 ],
     ];
@@ -39,6 +39,7 @@ final class MembershipSeeder extends Seeder
                 'name' => $membership['name'],
                 'adult_billable_item_id' => $adultBillableItem->id,
                 'kids_billable_item_id' => $kidsBillableItem->id,
+                'is_default' => $membership['is_default'] ?? false,
             ]);
         }
 

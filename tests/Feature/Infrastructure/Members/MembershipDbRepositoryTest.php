@@ -49,4 +49,24 @@ final class MembershipDbRepositoryTest extends FeatureTestCase
 
         $repo->getById(MembershipId::create(999999));
     }
+
+    public function test_get_default_returns_default_membership_id(): void
+    {
+        $model = MembershipModel::factory()->createQuietly(['is_default' => true]);
+
+        $repo = new MembershipDbRepository();
+
+        $defaultId = $repo->getDefault();
+
+        self::assertSame($model->id, $defaultId->value);
+    }
+
+    public function test_get_default_throws_when_no_default_exists(): void
+    {
+        $this->expectException(ModelNotFoundException::class);
+
+        $repo = new MembershipDbRepository();
+
+        $repo->getDefault();
+    }
 }

@@ -105,6 +105,7 @@ final class Member extends Model
             'birthdate' => 'date',
             'is_volunteer' => 'boolean',
             'gender' => Gender::class,
+            'registration_data' => 'array',
         ];
     }
 

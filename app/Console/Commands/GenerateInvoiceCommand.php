@@ -21,7 +21,6 @@ final class GenerateInvoiceCommand extends Command
         $command = new GenerateInvoice(
             memberId: MemberId::create((int) $this->argument('memberId')),
             invoiceDate: CarbonImmutable::createFromFormat('Y-m-d', $this->argument('date')),
-            invoiceBatchId: null,
         );
 
         $invoiceGenerator->generate($command);

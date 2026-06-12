@@ -12,4 +12,6 @@ interface MembershipRepository
     public function getById(MembershipId $membershipId): Membership;
 
     public function all(): MembershipList;
+
+    public function getDefault(): MembershipId;
 }

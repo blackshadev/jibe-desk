@@ -7,6 +7,7 @@ namespace App\Domain\Registration;
 use App\Domain\Members\Gender;
 use DateTimeImmutable;
 use DateTimeInterface;
+use InvalidArgumentException;
 
 /**
  * @phpstan-type PersonalInfoDataArray array{
@@ -67,7 +68,7 @@ final class PersonalInfoData
             lastName: $data['lastName'],
             email: $data['email'],
             gender: Gender::from($data['gender']),
-            birthdate: DateTimeImmutable::createFromFormat('Y-m-d', $data['birthdate']),
+            birthdate: DateTimeImmutable::createFromFormat('Y-m-d', $data['birthdate']) ?: throw new InvalidArgumentException('Invalid birthdate'),
             addressStreet: $data['addressStreet'],
             addressHousenumber: $data['addressHousenumber'],
             addressHousenumberAddition: $data['addressHousenumberAddition'],

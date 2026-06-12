@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\Memberships\Schemas;
 
 use App\Filament\Admin\Labels\BillPeriodLabels;
+use App\Models\Membership;
+use App\Rules\UniqueDefaultMembership;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -22,6 +25,9 @@ final class MembershipForm
                         TextInput::make('name')
                             ->label(__('labels.name'))
                             ->required(),
+                        Toggle::make('is_default')
+                            ->rule(fn (?Membership $record) => new UniqueDefaultMembership($record?->id))
+                            ->label(__('labels.default_membership')),
                     ]),
                 Section::make(__('labels.billing_adults'))
                     ->relationship('adultBillableItem')

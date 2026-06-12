@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Registration;
 
+use App\Domain\Members\NewMemberService;
 use App\Domain\Registration\FormDataRepository;
 use App\Domain\Registration\Step;
 use App\Http\Controllers\Controller;
@@ -99,11 +100,11 @@ final class RegistrationController extends Controller
         return view('pages.register.5-confirmation', compact('formData'));
     }
 
-    public function confirmRegistration(ConfirmRegistrationRequest $request): RedirectResponse
+    public function confirmRegistration(ConfirmRegistrationRequest $request, NewMemberService $newMemberService): RedirectResponse
     {
         $formData = $this->formDataRepository->get();
 
-        // TODO: Save registration data to models (Member, Membership, PaymentInfo, etc.)
+        $newMemberService->fromRegistration($formData);
 
         $this->formDataRepository->clear();
 

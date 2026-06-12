@@ -73,7 +73,7 @@ final class FormDataTest extends UnitTestCase
         self::assertSame('NL91ABNA0417164300', $formData->paymentInfo->bankingAccountNumber);
         self::assertSame('ABNANL2A', $formData->paymentInfo->bankingBic);
         self::assertSame('J. de Vries', $formData->paymentInfo->bankingAccountHolderName);
-        self::assertSame('2024-02-01T03:04:05+00:00', $formData->paymentInfo->mandateAcceptedDate->format('c'));
+        self::assertSame('2024-02-01T03:04:05+00:00', $formData->paymentInfo->mandateAcceptedDate?->format('c'));
     }
 
     public function test_welcome_advances_step_to_welcome(): void
@@ -122,7 +122,7 @@ final class FormDataTest extends UnitTestCase
 
         self::assertSame(Step::PaymentInfo, $updated->step);
         self::assertSame('NL91ABNA0417164300', $updated->paymentInfo->bankingAccountNumber);
-        self::assertSame('2024-02-01T03:04:05+00:00', $updated->paymentInfo->mandateAcceptedDate->format('c'));
+        self::assertSame('2024-02-01T03:04:05+00:00', $updated->paymentInfo->mandateAcceptedDate?->format('c'));
     }
 
     public function test_step_does_not_go_backwards(): void

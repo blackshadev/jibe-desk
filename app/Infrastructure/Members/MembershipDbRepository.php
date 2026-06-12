@@ -13,6 +13,16 @@ use App\Models\Membership as MembershipModel;
 
 final class MembershipDbRepository implements MembershipRepository
 {
+    public function getDefault(): MembershipId
+    {
+        $default = MembershipModel::query()
+            ->select('id')
+            ->where('is_default', true)
+            ->firstOrFail();
+
+        return MembershipId::create($default->id);
+    }
+
     public function getById(MembershipId $membershipId): Membership
     {
         $model = MembershipModel::findOrFail($membershipId->value);

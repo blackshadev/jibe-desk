@@ -7,6 +7,7 @@ namespace App\Filament\Admin\Resources\Members\Schemas;
 use App\Domain\Members\Gender;
 use App\Models\Member;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -145,6 +146,40 @@ final class MemberForm
                                             ->label(__('labels.reference'))
                                             ->disabled()
                                             ->dehydrated(false),
+                                    ]),
+                            ]),
+                        Tabs\Tab::make(__('labels.registration_details'))
+                            ->schema([
+                                DatePicker::make('created_at')
+                                    ->label(__('labels.created_at'))
+                                    ->native(false)
+                                    ->required()
+                                    ->disabled(),
+                                Tabs::make()
+                                    ->vertical()
+                                    ->columnSpanFull()
+                                    ->schema([
+                                        Tabs\Tab::make(__('labels.membership_information'))
+                                            ->schema([
+                                                KeyValue::make('registration_data.membership')
+                                                    ->columnSpanFull()
+                                                    ->hiddenLabel()
+                                                    ->disabled(),
+                                            ]),
+                                        Tabs\Tab::make(__('labels.personal_information'))
+                                            ->schema([
+                                                KeyValue::make('registration_data.personalInfo')
+                                                    ->columnSpanFull()
+                                                    ->hiddenLabel()
+                                                    ->disabled(),
+                                            ]),
+                                            Tabs\Tab::make(__('labels.payment_information'))
+                                                ->schema([
+                                                    KeyValue::make('registration_data.paymentInfo')
+                                                        ->columnSpanFull()
+                                                        ->hiddenLabel()
+                                                        ->disabled(),
+                                                ]),
                                     ]),
                             ]),
                 ]),

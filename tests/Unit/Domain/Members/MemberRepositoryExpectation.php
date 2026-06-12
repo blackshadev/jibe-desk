@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Members;
 
+use App\Domain\Members\Dto\NewMember;
 use App\Domain\Members\Member;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MemberRepository;
@@ -28,5 +29,13 @@ final readonly class MemberRepositoryExpectation
             ->expects('getById')
             ->with(equalTo($memberId))
             ->andReturn($member);
+    }
+
+    public function expectsNewMember(NewMember $newMember, MemberId $result): void
+    {
+        $this->mock
+            ->expects('newMember')
+            ->with(equalTo($newMember))
+            ->andReturn($result);
     }
 }

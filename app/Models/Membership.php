@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'adult_billable_item_id', 'kids_billable_item_id'])]
+#[Fillable(['name', 'adult_billable_item_id', 'kids_billable_item_id', 'is_default'])]
 final class Membership extends Model
 {
     use HasFactory;

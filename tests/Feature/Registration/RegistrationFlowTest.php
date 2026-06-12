@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Registration;
 
+use Database\Seeders\MembershipSeeder;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\TestWith;
 use Tests\FeatureTestCase;
@@ -32,6 +33,13 @@ final class RegistrationFlowTest extends FeatureTestCase
         'banking_account_holder_name' => 'J. de Vries',
         'mandate_accepted' => '1',
     ];
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->seed(MembershipSeeder::class);
+    }
 
     public function test_welcome_page_renders(): void
     {
@@ -202,6 +210,17 @@ final class RegistrationFlowTest extends FeatureTestCase
             'confirm_data_correct' => '1',
             'confirm_membership' => '1',
         ])->assertRedirect(route('register.success'));
+
+        $this->assertDatabaseHas('members', [
+            'first_name' => self::VALID_PERSONAL_INFO['first_name'],
+            'last_name' => self::VALID_PERSONAL_INFO['last_name'],
+            'email' => self::VALID_PERSONAL_INFO['email'],
+        ]);
+        $this->assertDatabaseHas('payment_information', [
+            'banking_account_number' => self::VALID_PAYMENT_INFO['banking_account_number'],
+            'banking_bic' => self::VALID_PAYMENT_INFO['banking_bic'],
+            'banking_account_holder_name' => self::VALID_PAYMENT_INFO['banking_account_holder_name'],
+        ]);
     }
 
     public function test_confirmation_page_renders_after_payment_info(): void

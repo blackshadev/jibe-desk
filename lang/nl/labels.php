@@ -22,6 +22,7 @@ return [
         Gender::Other->value => 'Anders',
         Gender::Unknown->value => 'Zeg ik liever niet',
     ],
+    'default_membership' => 'Standaard lidmaatschap voor nieuwe leden',
     'membership' => 'Lidmaatschap',
     'memberships' => 'Lidmaatschappen',
     'created_at' => 'Aangemaakt op',
@@ -40,6 +41,7 @@ return [
     'price' => 'Prijs',
     'personal_information' => 'Persoonlijke informatie',
     'personal_details' => 'Persoonlijke gegevens',
+    'registration_details' => 'Registratie details',
     'email' => 'E-mailadres',
     'banking_account_number' => 'IBAN rekeningnummer',
     'banking_bic' => 'BIC / SWIFT code',
@@ -49,6 +51,7 @@ return [
     'mandate_date' => 'Machtigingsdatum',
     'reference' => 'Referentie',
     'invoice_information' => 'Factuur informatie',
+    'registration_data' => 'Inschrijving gegevens',
     'navigation_groups' => [
         'activities' => 'Activiteiten',
         'member_administration' => 'Ledenbeheer',

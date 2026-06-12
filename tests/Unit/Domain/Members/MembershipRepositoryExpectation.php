@@ -38,4 +38,11 @@ final readonly class MembershipRepositoryExpectation
             ->expects('all')
             ->andReturn($result);
     }
+
+    public function expectsGetDefault(MembershipId $result): void
+    {
+        $this->mock
+            ->expects('getDefault')
+            ->andReturn($result);
+    }
 }
