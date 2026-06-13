@@ -8,7 +8,9 @@ use App\Domain\Members\Dto\NewMember;
 use App\Domain\Members\Dto\NewMemberMembershipInformation;
 use App\Domain\Members\Dto\NewMemberPaymentInformation;
 use App\Domain\Members\Dto\NewMemberPersonalInformation;
+use App\Domain\Members\Events\NewMemberRegistration;
 use App\Domain\Members\MemberId;
+use App\Domain\Members\MemberNameFormatter;
 use App\Domain\Members\MembershipId;
 use App\Domain\Members\NewMemberService;
 use App\Domain\Registration\FormData;
@@ -16,6 +18,7 @@ use App\Domain\Registration\MembershipData;
 use App\Domain\Registration\PaymentInfoData;
 use App\Domain\Registration\PersonalInfoData;
 use RuntimeException;
+use Tests\Unit\Laravel\EventDispatcherExpectation;
 use Tests\UnitTestCase;
 
 final class NewMemberServiceTest extends UnitTestCase
@@ -23,6 +26,8 @@ final class NewMemberServiceTest extends UnitTestCase
     private MemberRepositoryExpectation $memberRepo;
 
     private MembershipRepositoryExpectation $membershipRepo;
+
+    private EventDispatcherExpectation $eventDispatcher;
 
     private NewMemberService $subject;
 
@@ -32,10 +37,12 @@ final class NewMemberServiceTest extends UnitTestCase
 
         $this->memberRepo = MemberRepositoryExpectation::create();
         $this->membershipRepo = MembershipRepositoryExpectation::create();
+        $this->eventDispatcher = EventDispatcherExpectation::create();
 
         $this->subject = new NewMemberService(
             $this->memberRepo->mock,
             $this->membershipRepo->mock,
+            $this->eventDispatcher->mock,
         );
     }
 
@@ -51,6 +58,19 @@ final class NewMemberServiceTest extends UnitTestCase
             $expectedMemberId,
         );
 
+        $expectedRegistration = new NewMemberRegistration(
+            $expectedMemberId,
+            MemberNameFormatter::presentationName(
+                $formData->personalInfo->firstName,
+                $formData->personalInfo->infixName,
+                $formData->personalInfo->lastName,
+            ),
+            $formData->personalInfo->email,
+            $formData->membership
+        );
+
+        $this->eventDispatcher->expectsDispatchWith($expectedRegistration);
+
         $result = $this->subject->fromRegistration($formData);
 
         self::assertSame(42, $result->value);
@@ -59,6 +79,8 @@ final class NewMemberServiceTest extends UnitTestCase
     public function test_it_throws_when_mandate_date_is_missing(): void
     {
         $this->expectException(RuntimeException::class);
+
+        $this->eventDispatcher->expectsNotToDispatch();
 
         $formData = FormData::createDefault()
             ->welcome()

@@ -72,15 +72,8 @@ final class MemberForm
                             ->relationship('membership', 'name')
                             ->required(),
 
-                        Select::make('household_id')
-                            ->label(__('labels.household'))
-                            ->relationship('household', 'id')
-                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->member_names ?? (string) $record->id)
-                            ->searchable()
-                            ->preload()
-                            ->nullable(),
-
                             Toggle::make('is_volunteer')
+                                ->columnSpanFull()
                                 ->label(__('labels.is_volunteer')),
                         ]),
 

@@ -117,4 +117,10 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    'theme' => 'custom',
+
+    'admin' => [
+        'address' => env('MAIL_ADMIN_ADDRESS', 'ledenadministratie@almerecentraal.nl'),
+    ],
+
 ];

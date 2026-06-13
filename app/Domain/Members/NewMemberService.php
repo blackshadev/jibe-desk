@@ -8,14 +8,17 @@ use App\Domain\Members\Dto\NewMember;
 use App\Domain\Members\Dto\NewMemberMembershipInformation;
 use App\Domain\Members\Dto\NewMemberPaymentInformation;
 use App\Domain\Members\Dto\NewMemberPersonalInformation;
+use App\Domain\Members\Events\NewMemberRegistration;
 use App\Domain\Registration\FormData;
+use Illuminate\Contracts\Events\Dispatcher;
 use RuntimeException;
 
 final readonly class NewMemberService
 {
     public function __construct(
         private MemberRepository $memberRepository,
-        private MembershipRepository $membershipRepository
+        private MembershipRepository $membershipRepository,
+        private Dispatcher $eventDispatcher,
     ) {
     }
 
@@ -51,6 +54,19 @@ final readonly class NewMemberService
             $formData->toArray(),
         );
 
-        return $this->memberRepository->newMember($newMember);
+        $memberId = $this->memberRepository->newMember($newMember);
+
+        $this->eventDispatcher->dispatch(new NewMemberRegistration(
+            memberId: $memberId,
+            memberName: MemberNameFormatter::presentationName(
+                $formData->personalInfo->firstName,
+                $formData->personalInfo->infixName,
+                $formData->personalInfo->lastName,
+            ),
+            memberEmail: $formData->personalInfo->email,
+            membershipData: $formData->membership,
+        ));
+
+        return $memberId;
     }
 }
