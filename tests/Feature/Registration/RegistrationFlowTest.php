@@ -6,9 +6,9 @@ namespace Tests\Feature\Registration;
 
 use Database\Seeders\MembershipSeeder;
 use DateTimeImmutable;
+use Override;
 use PHPUnit\Framework\Attributes\TestWith;
 use Tests\FeatureTestCase;
-use Override;
 
 // @mago-expect too-many-methods
 final class RegistrationFlowTest extends FeatureTestCase

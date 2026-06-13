@@ -12,7 +12,7 @@ final class MemberIdList
     public function __construct(
         public array $ids,
     ) {
-        /** @phpstan-ignore-next-line staticMethod.alreadyNarrowedType */
+        /** @mago-expect analysis:redundant-type-comparison */
         Assert::allIsInstanceOf($ids, MemberId::class);
     }
 

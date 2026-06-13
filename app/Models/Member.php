@@ -111,7 +111,7 @@ final class Member extends Model
     }
 
     /** @return Attribute<non-falsy-string, never> */
-    protected function _name(): Attribute
+    protected function name(): Attribute
     {
         return Attribute::get(static fn (mixed $_value, array $attributes) => MemberNameFormatter::displayName(
             $attributes['first_name'],
@@ -121,13 +121,13 @@ final class Member extends Model
     }
 
     /** @return Attribute<int, never> */
-    protected function _age(): Attribute
+    protected function age(): Attribute
     {
         return Attribute::get(static fn (mixed $_value, array $attributes) => (int) floor(new Carbon($attributes['birthdate'])->diffInYears()));
     }
 
     /** @return Attribute<non-falsy-string, never> */
-    protected function _address(): Attribute
+    protected function address(): Attribute
     {
         return Attribute::get(static function (mixed $_value, array $attributes): string {
             $lineOne = sprintf('%s %s', $attributes['address_street'], $attributes['address_housenumber']);

@@ -18,9 +18,9 @@ use App\Models\MemberObject;
 use App\Models\MemberObjectType;
 use App\Observers\MemberObjectObserver;
 use Carbon\CarbonImmutable;
+use Override;
 use Tests\FeatureTestCase;
 use Tests\Unit\Domain\Invoices\CreateInvoiceExpectation;
-use Override;
 
 final class MemberObjectObserverTest extends FeatureTestCase
 {

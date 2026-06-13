@@ -6,9 +6,9 @@ namespace Tests\Unit\Domain\Invoices;
 
 use App\Domain\Invoices\InvoiceNumberGeneratorImpl;
 use DateTimeImmutable;
+use Override;
 use Tests\Unit\Domain\Clock\ClockExpectation;
 use Tests\UnitTestCase;
-use Override;
 
 final class InvoiceNumberGeneratorImplTest extends UnitTestCase
 {

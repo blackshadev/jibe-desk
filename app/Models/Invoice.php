@@ -44,7 +44,7 @@ final class Invoice extends Model
     }
 
     /** @return Attribute<CompoundPrice, never> */
-    protected function _total(): Attribute
+    protected function total(): Attribute
     {
         return Attribute::get(
             fn () => $this->lines->reduce(

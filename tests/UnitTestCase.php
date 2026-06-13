@@ -6,8 +6,8 @@ namespace Tests;
 
 use Illuminate\Foundation\Testing\WithFaker;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
-use PHPUnit\Framework\TestCase;
 use Override;
+use PHPUnit\Framework\TestCase;
 
 abstract class UnitTestCase extends TestCase
 {

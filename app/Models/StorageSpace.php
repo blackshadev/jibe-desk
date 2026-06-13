@@ -41,13 +41,13 @@ final class StorageSpace extends Model
     }
 
     #[Scope]
-    protected function _available(Builder $query): Builder
+    protected function available(Builder $query): Builder
     {
         return $query->whereDoesntHave('currentRental');
     }
 
     #[Scope]
-    protected function _unavailable(Builder $query): Builder
+    protected function unavailable(Builder $query): Builder
     {
         return $query->whereHas('currentRental');
     }

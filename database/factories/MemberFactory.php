@@ -42,7 +42,8 @@ final class MemberFactory extends Factory
 
     public function deleted(): self
     {
-        return $this->state(static fn (array $attributes) => [
+        // @mago-expect lint:prefer-static-closure
+        return $this->state(fn (array $attributes) => [
             'deleted_at' => fake()->dateTimeBetween($attributes['created_at'], 'now'),
         ]);
     }

@@ -13,11 +13,11 @@ use App\Domain\Members\MemberId;
 use App\Domain\Members\Membership;
 use App\Domain\Members\MembershipId;
 use App\Domain\Members\MembershipList;
+use Override;
 use Tests\Unit\Domain\Invoices\BillableItemRepositoryExpectation;
 use Tests\Unit\Domain\Members\MemberRepositoryExpectation;
 use Tests\Unit\Domain\Members\MembershipRepositoryExpectation;
 use Tests\UnitTestCase;
-use Override;
 
 final class ApplyMembershipBillingImplTest extends UnitTestCase
 {

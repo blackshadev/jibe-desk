@@ -10,11 +10,11 @@ use App\Models\Household;
 use App\Models\Member;
 use App\Models\Membership;
 use App\Observers\MemberObserver;
+use Override;
 use Tests\FeatureTestCase;
 use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplyMembershipBillingExpectation;
 use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplyMemberVolunteerBillingExpectation;
 use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplySameHouseholdBillingExpectation;
-use Override;
 
 final class MemberObserverTest extends FeatureTestCase
 {

@@ -20,6 +20,7 @@ function banner {
 
 function task:init { ## Initialise the project for local development
     app:ensure docker
+    app:ensure mago
     title "Ensuring required files are present"
     task:update:env
 #	project:git-config
@@ -87,30 +88,6 @@ function task:lint { ## Run checks ECS and PHPStan.
     task:psr
     task:ecs
     task:stan
-}
-
-function task:stan { ## Run PHPStan static analysis checker
-    docker:ensure-running
-    docker exec wsv-admin-app-1 /bin/sh -c 'chown -R php:nginx /tmp/phpstan'
-    title "Analysing domain code"
-    task:exec "./vendor/bin/phpstan analyse --configuration=phpstan-domain.neon --memory-limit=2G"
-    title "Analysing infrastructure code"
-    task:exec "./vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=2G"
-}
-
-function task:psr {
-    title "Verifying PSR compliancy"
-    task:exec "composer dump-autoload --optimize --strict-psr --dry-run"
-}
-
-function task:stan:clear { ## Run PHPStan static analysis checker
-    docker:ensure-running
-    task:exec "./vendor/bin/phpstan clear-result-cache --configuration=phpstan.neon --memory-limit=2G"
-}
-
-function task:ecs { ## Run EasyCodingStandard
-    title "Running easy coding standard"
-    ./vendor/bin/ecs --config=ecs.php check ${*}
 }
 
 function task:fix { ## Run Codestyle fixer

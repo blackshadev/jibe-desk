@@ -17,10 +17,10 @@ use App\Domain\Registration\FormData;
 use App\Domain\Registration\MembershipData;
 use App\Domain\Registration\PaymentInfoData;
 use App\Domain\Registration\PersonalInfoData;
+use Override;
 use RuntimeException;
 use Tests\Unit\Laravel\EventDispatcherExpectation;
 use Tests\UnitTestCase;
-use Override;
 
 final class NewMemberServiceTest extends UnitTestCase
 {

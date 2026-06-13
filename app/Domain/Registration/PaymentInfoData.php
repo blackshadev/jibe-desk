@@ -13,7 +13,7 @@ use InvalidArgumentException;
  *     bankingAccountNumber: string,
  *     bankingBic: string,
  *     bankingAccountHolderName: string,
- *     mandateAcceptedDate: non-falsy-string|null,
+ *     mandateAcceptedDate: non-empty-string|null,
  * }
  */
 

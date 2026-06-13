@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Domain\Invoices;
 
 use App\Formatters\PriceFormatter;
-use Stringable;
 use Override;
+use Stringable;
 
 final readonly class CompoundPrice implements Stringable
 {

@@ -21,6 +21,7 @@ final readonly class NewMemberService
         private Dispatcher $eventDispatcher,
     ) {}
 
+    /** @throws RuntimeException */
     public function fromRegistration(FormData $formData): MemberId
     {
         $newMember = $this->toNewMember($formData);
@@ -47,9 +48,11 @@ final readonly class NewMemberService
         );
     }
 
+    /** @throws RuntimeException */
     private function toNewMember(FormData $formData): NewMember
     {
-        if ($formData->paymentInfo->mandateAcceptedDate === null) {
+        $mandateAcceptedDate = $formData->paymentInfo->mandateAcceptedDate;
+        if ($mandateAcceptedDate === null) {
             throw new RuntimeException('Unable to create new member without mandate accepted date.');
         }
 
@@ -74,7 +77,7 @@ final readonly class NewMemberService
                 $formData->paymentInfo->bankingAccountNumber,
                 $formData->paymentInfo->bankingBic,
                 $formData->paymentInfo->bankingAccountHolderName,
-                $formData->paymentInfo->mandateAcceptedDate,
+                $mandateAcceptedDate,
             ),
             $formData->toArray(),
         );

@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Observers;
 
 use App\Domain\Invoices\ApplyInvoiceLines;
+use App\Domain\Invoices\Billing\BillableItem;
 use App\Domain\Invoices\Billing\BillableItemList;
 use App\Domain\Invoices\InvoiceRepository;
 use App\Domain\Members\MemberId;
 use App\Models\MemberObject;
 use Carbon\CarbonImmutable;
+use RuntimeException;
 
 final readonly class MemberObjectObserver
 {
@@ -17,25 +19,29 @@ final readonly class MemberObjectObserver
         private InvoiceRepository $invoiceRepository,
     ) {}
 
+    /** @throws RuntimeException */
     public function created(MemberObject $memberObject): void
     {
         if ($memberObject->memberObjectType->billableItem === null) {
             return;
         }
 
-        $billableItem = $memberObject->memberObjectType->billableItem;
+        /** @var BillableItem[] $billableItems */
+        $billableItems = [$memberObject->memberObjectType->billableItem->toInvoiceBillableItem()];
 
         $apply = new ApplyInvoiceLines(
             MemberId::create($memberObject->member_id),
             new CarbonImmutable(),
-            new BillableItemList([
-                $billableItem->toInvoiceBillableItem(),
-            ]),
+            new BillableItemList($billableItems),
         );
 
         $invoice = $this->invoiceRepository->applyLines($apply);
 
-        $memberObject->invoice_line_id = $invoice->lineIds[0]?->value;
+        if (!isset($invoice->lineIds[0])) {
+            throw new RuntimeException('Invoice line was not created for member object');
+        }
+
+        $memberObject->invoice_line_id = $invoice->lineIds[0]->value;
         $memberObject->save();
     }
 
@@ -45,6 +51,6 @@ final readonly class MemberObjectObserver
             return;
         }
 
-        $memberObject->invoiceLine->delete();
+        $memberObject->invoiceLine?->delete();
     }
 }

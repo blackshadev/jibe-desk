@@ -52,13 +52,13 @@ final class Activity extends Model
     }
 
     #[Scope]
-    protected function _active(Builder $query): Builder
+    protected function active(Builder $query): Builder
     {
         return $query->whereNull('end_date')->orWhereFuture('end_date');
     }
 
     #[Scope]
-    protected function _inactive(Builder $query): Builder
+    protected function inactive(Builder $query): Builder
     {
         return $query->orWhereNowOrPast('end_date');
     }

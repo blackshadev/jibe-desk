@@ -12,7 +12,7 @@ final class CreateMember extends CreateRecord
 {
     protected static string $resource = MemberResource::class;
 
-    protected function _mutateFormDataBeforeSave(array $data): array
+    protected function mutateFormDataBeforeSave(array $data): array
     {
         if ($data['infix_name'] === null) {
             $data['infix_name'] = '';

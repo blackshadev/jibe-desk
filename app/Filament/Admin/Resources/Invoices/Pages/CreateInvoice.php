@@ -31,7 +31,7 @@ final class CreateInvoice extends CreateRecord
         return $data;
     }
 
-    protected function _afterFill(): void
+    protected function afterFill(): void
     {
         $this->data['date'] = CarbonImmutable::now();
         $this->data['status'] = InvoiceStatus::Open;

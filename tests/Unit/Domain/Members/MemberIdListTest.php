@@ -7,8 +7,8 @@ namespace Tests\Unit\Domain\Members;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MemberIdList;
 use InvalidArgumentException;
-use Tests\UnitTestCase;
 use stdClass;
+use Tests\UnitTestCase;
 
 final class MemberIdListTest extends UnitTestCase
 {

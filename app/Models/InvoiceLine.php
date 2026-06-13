@@ -40,13 +40,13 @@ final class InvoiceLine extends Model
     }
 
     /** @return Attribute<CompoundPrice, never> */
-    protected function _compoundPrice(): Attribute
+    protected function compoundPrice(): Attribute
     {
         return Attribute::get(static fn ($_value, array $attributes) => new CompoundPrice($attributes['price'], $attributes['vat']));
     }
 
     /** @return Attribute<CompoundPrice, never> */
-    protected function _subTotal(): Attribute
+    protected function subTotal(): Attribute
     {
         return Attribute::get(static fn (mixed $_value, array $attributes) => new CompoundPrice(
             $attributes['price'] * $attributes['quantity'],

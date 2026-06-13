@@ -6,8 +6,8 @@ namespace App\Filament\Admin\Utils;
 
 use Closure;
 use Filament\Resources\Resource;
-use Illuminate\Database\Eloquent\Model;
 use Gate;
+use Illuminate\Database\Eloquent\Model;
 
 final class ViewOrEdit
 {

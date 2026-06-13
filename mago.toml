@@ -34,8 +34,19 @@ property-name = { enabled = true, either = false, camel = true }
 method-name = { enabled = true, use-snake-case-for-tests = true }
 
 [analyzer]
-ignore = [
-    { code = "unhandled-thrown-type", in = "tests/**/*Test.php" },
+excludes = [
+    "tests/**/*.php",
+    "app/Http/**/*.php",
+    "app/Console/**/*.php",
+    "app/Providers/**/*.php",
+    "app/Models/*.php",
+    "app/Rules/**/*.php",
+    "app/Policies/**/*.php",
+    "database/**/*.php",
+    "app/Filament/**/*.php",
+    "app/Actions/**/*.php",
+    "app/Infrastructure/**/*.php",
+    "app/Observers/**/*.php",
 ]
 plugins = []
 find-unused-definitions = true

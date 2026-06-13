@@ -15,7 +15,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Override;
 
-/** @property BillPeriod $bill_period */
+/**
+ * @property BillPeriod $bill_period
+ * @property int $id
+ */
 #[Fillable(['description', 'price', 'vat', 'bill_period'])]
 final class BillableItem extends Model
 {
@@ -49,7 +52,7 @@ final class BillableItem extends Model
     }
 
     /** @return Attribute<CompoundPrice, never> */
-    protected function _compoundPrice(): Attribute
+    protected function compoundPrice(): Attribute
     {
         return Attribute::get(
             static fn ($_value, array $attributes): CompoundPrice => new CompoundPrice((float) $attributes['price'], (float) $attributes['vat']),

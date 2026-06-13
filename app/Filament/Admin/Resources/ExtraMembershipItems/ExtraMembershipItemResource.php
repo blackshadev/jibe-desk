@@ -16,8 +16,8 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
-use UnitEnum;
 use Override;
+use UnitEnum;
 
 final class ExtraMembershipItemResource extends Resource
 {
@@ -35,7 +35,7 @@ final class ExtraMembershipItemResource extends Resource
     public static function getRecordTitle(?Model $record): string
     {
         /** @var ExtraMembershipItem $record */
-        return $record->code->value ;
+        return $record->code->value;
     }
 
     #[Override]

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Invoices;
 
-use Psr\Clock\ClockInterface;
 use Override;
+use Psr\Clock\ClockInterface;
 
 final readonly class InvoiceNumberGeneratorImpl implements InvoiceNumberGenerator
 {

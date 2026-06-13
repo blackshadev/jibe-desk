@@ -9,9 +9,9 @@ use App\Domain\Invoices\Billing\BillableItemInstanceId;
 use App\Domain\Members\MemberId;
 use App\Models\Pivots\ActivityMember;
 use App\Observers\ActivityMemberObserver;
+use Override;
 use Tests\FeatureTestCase;
 use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplyActivityBillingExpectation;
-use Override;
 
 final class ActivityMemberObserverTest extends FeatureTestCase
 {

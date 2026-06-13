@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domain\Invoices;
 
+use Override;
 use Stringable;
 use Webmozart\Assert\Assert;
-use Override;
 
 final readonly class InvoiceNumber implements Stringable
 {

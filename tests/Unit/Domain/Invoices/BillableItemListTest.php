@@ -9,8 +9,8 @@ use App\Domain\Invoices\Billing\BillableItemId;
 use App\Domain\Invoices\Billing\BillableItemList;
 use App\Domain\Invoices\CompoundPrice;
 use InvalidArgumentException;
-use Tests\UnitTestCase;
 use stdClass;
+use Tests\UnitTestCase;
 
 final class BillableItemListTest extends UnitTestCase
 {

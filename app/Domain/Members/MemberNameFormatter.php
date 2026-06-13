@@ -14,7 +14,7 @@ final class MemberNameFormatter
         return sprintf('%s, %s', $lastName, $firstName);
     }
 
-    /** @return non-falsy-string */
+    /** @return non-empty-string */
     public static function presentationName(string $firstName, ?string $infixName, string $lastName): string
     {
         $firstName = $infixName === '' || $infixName === null ? $firstName : "{$firstName} {$infixName}";

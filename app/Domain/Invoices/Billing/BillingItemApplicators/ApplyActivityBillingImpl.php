@@ -29,8 +29,8 @@ final readonly class ApplyActivityBillingImpl implements ApplyActivityBilling
     }
 
     #[Override]
-    public function stop(BillableItemInstanceId $instanceId): void
+    public function stop(BillableItemInstanceId $billableItemInstanceId): void
     {
-        $this->billableItemInstanceRepository->stop($instanceId);
+        $this->billableItemInstanceRepository->stop($billableItemInstanceId);
     }
 }

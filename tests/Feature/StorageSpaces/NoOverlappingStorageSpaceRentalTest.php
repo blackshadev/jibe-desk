@@ -11,8 +11,8 @@ use App\Rules\NoOverlappingStorageSpaceRental;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Translation\PotentiallyTranslatedString;
-use Tests\FeatureTestCase;
 use Override;
+use Tests\FeatureTestCase;
 
 final class NoOverlappingStorageSpaceRentalTest extends FeatureTestCase
 {
