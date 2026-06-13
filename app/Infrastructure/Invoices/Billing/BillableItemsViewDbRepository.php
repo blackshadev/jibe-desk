@@ -14,13 +14,16 @@ use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Override;
 
 final class BillableItemsViewDbRepository implements BillableItemsViewRepository
 {
+    #[Override]
     public function listBillableMembers(DateTimeInterface $when): MemberIdList
     {
         /** @var int[] $all */
-        $all = $this->billableItemQuery($when)
+        $all = $this
+            ->billableItemQuery($when)
             ->select('billable_item_instances.member_id')
             ->distinct()
             ->pluck('member_id')
@@ -29,9 +32,11 @@ final class BillableItemsViewDbRepository implements BillableItemsViewRepository
         return MemberIdList::fromArray($all);
     }
 
+    #[Override]
     public function listBillableItemsForMember(DateTimeInterface $when, MemberId $memberId): BillableItemList
     {
-        $billingItems = $this->billableItemQuery($when)
+        $billingItems = $this
+            ->billableItemQuery($when)
             ->with('billableItem')
             ->where('member_id', $memberId->value)
             ->get()
@@ -44,7 +49,9 @@ final class BillableItemsViewDbRepository implements BillableItemsViewRepository
     /** @return Builder<BillableItemInstance> */
     private function billableItemQuery(DateTimeInterface $when): Builder
     {
-        $date = new Carbon($when)->firstOfMonth()->format('Y-m-d');
+        $date = new Carbon($when)
+            ->firstOfMonth()
+            ->format('Y-m-d');
 
         return BillableItemInstance::query()
             ->select('billable_item_instances.*')
@@ -53,7 +60,7 @@ final class BillableItemsViewDbRepository implements BillableItemsViewRepository
             ->where(
                 static fn (Builder $query) => $query
                     ->whereNull('billable_item_instances.end_date')
-                    ->orWhere('billable_item_instances.end_date', '>', $when)
+                    ->orWhere('billable_item_instances.end_date', '>', $when),
             )
             ->whereNotExists(
                 InvoiceLine::query()
@@ -66,15 +73,15 @@ final class BillableItemsViewDbRepository implements BillableItemsViewRepository
                         static function (Builder $query) use ($date): void {
                             $query->whereRaw(
                                 "strftime('%Y-%m-01', invoices.date) > date(?, '-' || billable_item_instances.bill_cycle_in_months || ' months')",
-                                [$date]
+                                [$date],
                             );
                         },
                         static function (Builder $query) use ($date): void {
                             $query->whereRaw(
-                                "DATE_TRUNC('month', invoices.date) > '{$date}'::date - MAKE_INTERVAL(0, billable_item_instances.bill_cycle_in_months)"
+                                "DATE_TRUNC('month', invoices.date) > '{$date}'::date - MAKE_INTERVAL(0, billable_item_instances.bill_cycle_in_months)",
                             );
-                        }
-                    )
+                        },
+                    ),
             );
     }
 }

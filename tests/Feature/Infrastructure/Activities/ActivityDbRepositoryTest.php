@@ -21,10 +21,10 @@ final class ActivityDbRepositoryTest extends FeatureTestCase
 
         $activity = $repo->getById(ActivityId::create($model->id));
 
-        self::assertSame($model->id, $activity->id->value);
-        self::assertSame($model->billable_item_id, $activity->billableItemId->value);
-        self::assertSame($model->start_date->toDateString(), $activity->startDate->format('Y-m-d'));
-        self::assertSame($model->end_date?->toDateString(), $activity->endDate?->format('Y-m-d'));
+        static::assertSame($model->id, $activity->id->value);
+        static::assertSame($model->billable_item_id, $activity->billableItemId->value);
+        static::assertSame($model->start_date->toDateString(), $activity->startDate->format('Y-m-d'));
+        static::assertSame($model->end_date?->toDateString(), $activity->endDate?->format('Y-m-d'));
     }
 
     public function test_get_by_id_throws_when_not_found(): void
@@ -33,6 +33,6 @@ final class ActivityDbRepositoryTest extends FeatureTestCase
 
         $repo = new ActivityDbRepository();
 
-        $repo->getById(ActivityId::create(999999));
+        $repo->getById(ActivityId::create(999_999));
     }
 }

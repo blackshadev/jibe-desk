@@ -37,7 +37,7 @@ final class InvoicesTable
                     ->formatStateUsing(static fn (InvoiceStatus $state) => __('labels.invoice_status.' . $state->value)),
                 TextColumn::make('total')
                     ->label(__('labels.total'))
-                    ->formatStateUsing(static fn (CompoundPrice $state) => (string)$state)
+                    ->formatStateUsing(static fn (CompoundPrice $state) => (string) $state)
                     ->alignEnd(),
                 TextColumn::make('created_at')
                     ->label(__('labels.created_at'))

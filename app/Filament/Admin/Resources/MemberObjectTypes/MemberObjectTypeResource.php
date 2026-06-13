@@ -17,6 +17,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
+use Override;
 
 final class MemberObjectTypeResource extends Resource
 {
@@ -28,26 +29,31 @@ final class MemberObjectTypeResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Rental;
 
+    #[Override]
     public static function form(Schema $schema): Schema
     {
         return MemberObjectTypeForm::configure($schema);
     }
 
+    #[Override]
     public static function table(Table $table): Table
     {
         return MemberObjectTypesTable::configure($table);
     }
 
+    #[Override]
     public static function getLabel(): string
     {
         return __('labels.member_object_type');
     }
 
+    #[Override]
     public static function getPluralLabel(): string
     {
         return __('labels.member_object_types');
     }
 
+    #[Override]
     public static function getPages(): array
     {
         return [

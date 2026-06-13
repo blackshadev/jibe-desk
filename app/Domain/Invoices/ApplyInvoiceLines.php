@@ -14,6 +14,5 @@ final readonly class ApplyInvoiceLines
         public MemberId $memberId,
         public DateTimeInterface $date,
         public BillableItemList $items,
-    ) {
-    }
+    ) {}
 }

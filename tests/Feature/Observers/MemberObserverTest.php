@@ -14,6 +14,7 @@ use Tests\FeatureTestCase;
 use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplyMembershipBillingExpectation;
 use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplyMemberVolunteerBillingExpectation;
 use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplySameHouseholdBillingExpectation;
+use Override;
 
 final class MemberObserverTest extends FeatureTestCase
 {
@@ -25,6 +26,7 @@ final class MemberObserverTest extends FeatureTestCase
 
     private MemberObserver $subject;
 
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();

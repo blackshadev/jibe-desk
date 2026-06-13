@@ -22,10 +22,10 @@ final class MembershipDbRepositoryTest extends FeatureTestCase
 
         $ids = $repo->all()->asBillingIdList()->toIntArray();
 
-        self::assertContains($model1->adult_billable_item_id, $ids);
-        self::assertContains($model1->kids_billable_item_id, $ids);
-        self::assertContains($model2->adult_billable_item_id, $ids);
-        self::assertContains($model2->kids_billable_item_id, $ids);
+        static::assertContains($model1->adult_billable_item_id, $ids);
+        static::assertContains($model1->kids_billable_item_id, $ids);
+        static::assertContains($model2->adult_billable_item_id, $ids);
+        static::assertContains($model2->kids_billable_item_id, $ids);
     }
 
     public function test_get_by_id_returns_membership_domain_object(): void
@@ -36,9 +36,9 @@ final class MembershipDbRepositoryTest extends FeatureTestCase
 
         $domain = $repo->getById(MembershipId::create($model->id));
 
-        self::assertSame($model->id, $domain->id->value);
-        self::assertSame($model->adult_billable_item_id, $domain->adultBillableItemId->value);
-        self::assertSame($model->kids_billable_item_id, $domain->kidsBillableItemId->value);
+        static::assertSame($model->id, $domain->id->value);
+        static::assertSame($model->adult_billable_item_id, $domain->adultBillableItemId->value);
+        static::assertSame($model->kids_billable_item_id, $domain->kidsBillableItemId->value);
     }
 
     public function test_get_by_id_throws_when_membership_not_found(): void
@@ -47,7 +47,7 @@ final class MembershipDbRepositoryTest extends FeatureTestCase
 
         $repo = new MembershipDbRepository();
 
-        $repo->getById(MembershipId::create(999999));
+        $repo->getById(MembershipId::create(999_999));
     }
 
     public function test_get_default_returns_default_membership_id(): void
@@ -58,7 +58,7 @@ final class MembershipDbRepositoryTest extends FeatureTestCase
 
         $defaultId = $repo->getDefault();
 
-        self::assertSame($model->id, $defaultId->value);
+        static::assertSame($model->id, $defaultId->value);
     }
 
     public function test_get_default_throws_when_no_default_exists(): void

@@ -22,6 +22,6 @@ final class BillPeriodTest extends UnitTestCase
     #[DataProvider('billPeriodProvider')]
     public function test_it_converts_to_months(BillPeriod $billPeriod, int $expected): void
     {
-        self::assertSame($expected, $billPeriod->toBillPeriodInMonths());
+        static::assertSame($expected, $billPeriod->toBillPeriodInMonths());
     }
 }

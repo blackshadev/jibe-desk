@@ -6,18 +6,20 @@ namespace Database\Factories;
 
 use App\Models\InvoiceLine;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Override;
 
 /** @extends Factory<InvoiceLine> */
 final class InvoiceLineFactory extends Factory
 {
+    #[Override]
     public function definition(): array
     {
-        $price = $this->faker->randomFloat(2, 5, 100);
+        $price = fake()->randomFloat(2, 5, 100);
 
         return [
-            'description' => $this->faker->sentence(),
+            'description' => fake()->sentence(),
             'price' => $price,
-            'quantity' => $this->faker->randomFloat(2, 1, 5),
+            'quantity' => fake()->randomFloat(2, 1, 5),
             'vat' => $price * 0.21,
         ];
     }

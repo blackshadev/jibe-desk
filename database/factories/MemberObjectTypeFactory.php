@@ -6,14 +6,16 @@ namespace Database\Factories;
 
 use App\Models\MemberObject;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Override;
 
 /** @extends Factory<MemberObject> */
 final class MemberObjectTypeFactory extends Factory
 {
+    #[Override]
     public function definition(): array
     {
         return [
-            'name' => $this->faker->word(),
+            'name' => fake()->word(),
             'billable_item_id' => null,
         ];
     }

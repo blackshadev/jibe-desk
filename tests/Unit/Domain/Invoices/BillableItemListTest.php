@@ -10,6 +10,7 @@ use App\Domain\Invoices\Billing\BillableItemList;
 use App\Domain\Invoices\CompoundPrice;
 use InvalidArgumentException;
 use Tests\UnitTestCase;
+use stdClass;
 
 final class BillableItemListTest extends UnitTestCase
 {
@@ -19,7 +20,7 @@ final class BillableItemListTest extends UnitTestCase
 
         $subject = new BillableItemList($items);
 
-        self::assertSame($items, $subject->items);
+        static::assertSame($items, $subject->items);
     }
 
     public function test_it_rejects_non_billable_items(): void
@@ -27,6 +28,6 @@ final class BillableItemListTest extends UnitTestCase
         $this->expectException(InvalidArgumentException::class);
 
         /** @phpstan-ignore-next-line argument.type */
-        new BillableItemList([new \stdClass()]);
+        new BillableItemList([new stdClass()]);
     }
 }

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Override;
 
 /**
  * @property DateTimeInterface $mandate_accepted_date
@@ -29,16 +30,18 @@ final class PaymentInformation extends Model
         return $this->belongsTo(Member::class);
     }
 
+    #[Override]
     protected static function booted(): void
     {
         static::creating(static function (PaymentInformation $paymentInformation) {
-            if (empty($paymentInformation->uuid)) {
+            if ($paymentInformation->uuid === null) {
                 $paymentInformation->uuid = (string) Str::uuid();
             }
         });
     }
 
     /** @return array<string, string> */
+    #[Override]
     protected function casts(): array
     {
         return [

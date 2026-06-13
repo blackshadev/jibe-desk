@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Override;
 
 /**
  * @property CarbonInterface $start_date
@@ -41,6 +42,7 @@ final class Activity extends Model
             ->withTimestamps();
     }
 
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -50,13 +52,13 @@ final class Activity extends Model
     }
 
     #[Scope]
-    protected function active(Builder $query): Builder
+    protected function _active(Builder $query): Builder
     {
         return $query->whereNull('end_date')->orWhereFuture('end_date');
     }
 
     #[Scope]
-    protected function inactive(Builder $query): Builder
+    protected function _inactive(Builder $query): Builder
     {
         return $query->orWhereNowOrPast('end_date');
     }

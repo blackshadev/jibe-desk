@@ -13,9 +13,9 @@ use Carbon\CarbonImmutable;
 
 final readonly class MemberObjectObserver
 {
-    public function __construct(private InvoiceRepository $invoiceRepository)
-    {
-    }
+    public function __construct(
+        private InvoiceRepository $invoiceRepository,
+    ) {}
 
     public function created(MemberObject $memberObject): void
     {
@@ -35,7 +35,7 @@ final readonly class MemberObjectObserver
 
         $invoice = $this->invoiceRepository->applyLines($apply);
 
-        $memberObject->invoice_line_id = $invoice->lineIds[0]->value;
+        $memberObject->invoice_line_id = $invoice->lineIds[0]?->value;
         $memberObject->save();
     }
 

@@ -15,7 +15,9 @@ final class StorageSpaceLocationsTable
         return $table->columns([
             TextColumn::make('name'),
             TextColumn::make('billableItem.description')->label(__('labels.description')),
-            TextColumn::make('billableItem.price')->label(__('labels.price'))->formatStateUsing(PriceFormatter::format(...)),
+            TextColumn::make('billableItem.price')
+                ->label(__('labels.price'))
+                ->formatStateUsing(PriceFormatter::format(...)),
         ]);
     }
 }

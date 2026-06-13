@@ -9,11 +9,13 @@ use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs;
 use Illuminate\Database\Eloquent\Builder;
+use Override;
 
 final class ListActivities extends ListRecords
 {
     protected static string $resource = ActivityResource::class;
 
+    #[Override]
     public function getTabs(): array
     {
         return [
@@ -21,16 +23,17 @@ final class ListActivities extends ListRecords
             'active' => Tabs\Tab::make(__('labels.active'))
                 ->modifyQueryUsing(
                     /** @phpstan-ignore-next-line method.notFound */
-                    static fn (Builder $query) => $query->active()
+                    static fn (Builder $query) => $query->active(),
                 ),
             'inactive' => Tabs\Tab::make(__('labels.inactive'))
                 ->modifyQueryUsing(
                     /** @phpstan-ignore-next-line method.notFound */
-                    static fn (Builder $query) => $query->inactive()
+                    static fn (Builder $query) => $query->inactive(),
                 ),
         ];
     }
 
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [

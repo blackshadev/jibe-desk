@@ -20,6 +20,7 @@ use App\Observers\MemberObjectObserver;
 use Carbon\CarbonImmutable;
 use Tests\FeatureTestCase;
 use Tests\Unit\Domain\Invoices\CreateInvoiceExpectation;
+use Override;
 
 final class MemberObjectObserverTest extends FeatureTestCase
 {
@@ -27,12 +28,13 @@ final class MemberObjectObserverTest extends FeatureTestCase
 
     private MemberObjectObserver $subject;
 
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();
 
         CarbonImmutable::setTestNow('2026-06-01 00:00:00');
-        
+
         $this->invoiceRepository = CreateInvoiceExpectation::create();
         $this->subject = new MemberObjectObserver($this->invoiceRepository->mock);
     }
@@ -70,7 +72,7 @@ final class MemberObjectObserverTest extends FeatureTestCase
                 CarbonImmutable::now(),
                 new BillableItemList([
                     $billable->toInvoiceBillableItem(),
-                ])
+                ]),
             ),
             new AppliedInvoiceWithLineIds(
                 false,
@@ -83,7 +85,7 @@ final class MemberObjectObserverTest extends FeatureTestCase
 
         $memberObject->refresh();
 
-        self::assertSame($invoiceLine->id, $memberObject->invoice_line_id);
+        static::assertSame($invoiceLine->id, $memberObject->invoice_line_id);
     }
 
     public function test_it_deletes_invoice_line_on_deleted_member_object(): void
@@ -114,6 +116,6 @@ final class MemberObjectObserverTest extends FeatureTestCase
         ]);
 
         $memberObject->refresh();
-        self::assertNull($memberObject->invoice_line_id);
+        static::assertNull($memberObject->invoice_line_id);
     }
 }

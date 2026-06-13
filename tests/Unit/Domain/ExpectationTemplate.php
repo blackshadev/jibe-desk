@@ -23,9 +23,9 @@ use Psr\SimpleCache\CacheInterface;
  */
 final readonly class ExpectationTemplate
 {
-    private function __construct(public MockInterface&CacheInterface $mock)
-    {
-    }
+    private function __construct(
+        public MockInterface&CacheInterface $mock,
+    ) {}
 
     /**
      * Create a new expectation instance.

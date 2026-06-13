@@ -11,6 +11,5 @@ final readonly class InvoiceBatch
     public function __construct(
         public InvoiceBatchId $id,
         public DateTimeInterface $invoiceDate,
-    ) {
-    }
+    ) {}
 }

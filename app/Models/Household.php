@@ -20,6 +20,6 @@ final class Household extends Model
 
     public function getMemberNamesAttribute(): string
     {
-        return $this->members->map(fn (Member $m) => $m->name)->join(', ');
+        return $this->members->map(static fn (Member $m) => $m->name)->join(', ');
     }
 }

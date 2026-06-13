@@ -27,60 +27,56 @@ final class MemberForm
                     ->tabs([
                         Tabs\Tab::make(__('labels.personal_information'))
                             ->schema([
+                                TextInput::make('first_name')
+                                    ->label(__('labels.first_name'))
+                                    ->required(),
 
-                        TextInput::make('first_name')
-                            ->label(__('labels.first_name'))
-                            ->required(),
+                                TextInput::make('infix_name')
+                                    ->label(__('labels.infix_name')),
 
-                        TextInput::make('infix_name')
-                            ->label(__('labels.infix_name')),
+                                TextInput::make('last_name')
+                                    ->label(__('labels.last_name'))
+                                    ->required(),
 
-                        TextInput::make('last_name')
-                            ->label(__('labels.last_name'))
-                            ->required(),
+                                Select::make('gender')
+                                    ->label(__('labels.gender'))
+                                    ->options([
+                                        Gender::Male->value => __('labels.genders.' . Gender::Male->value),
+                                        Gender::Female->value => __('labels.genders.' . Gender::Female->value),
+                                        Gender::NonBinary->value => __('labels.genders.' . Gender::NonBinary->value),
+                                        Gender::Unknown->value => __('labels.genders.' . Gender::Unknown->value),
+                                        Gender::Other->value => __('labels.genders.' . Gender::Other->value),
+                                    ])
+                                    ->required(),
 
-                        Select::make('gender')
-                            ->label(__('labels.gender'))
-                            ->options([
-                                Gender::Male->value => __('labels.genders.' . Gender::Male->value),
-                                Gender::Female->value => __('labels.genders.' . Gender::Female->value),
-                                Gender::NonBinary->value => __('labels.genders.' . Gender::NonBinary->value),
-                                Gender::Unknown->value => __('labels.genders.' . Gender::Unknown->value),
-                                Gender::Other->value => __('labels.genders.' . Gender::Other->value),
-                            ])
-                            ->required(),
+                                DatePicker::make('birthdate')
+                                    ->format('d-m-Y')
+                                    ->native(false)
+                                    ->label(__('labels.birthdate'))
+                                    ->required(),
 
-                        DatePicker::make('birthdate')
-                            ->format('d-m-Y')
-                            ->native(false)
-                            ->label(__('labels.birthdate'))
-                            ->required(),
-
-                        TextInput::make('age')
-                            ->formatStateUsing(static fn (?Member $record) => $record?->age)
-                            ->disabled()
-                            ->label(__('labels.age'))
-                            ->required(),
-
-                    ]),
+                                TextInput::make('age')
+                                    ->formatStateUsing(static fn (?Member $record) => $record?->age)
+                                    ->disabled()
+                                    ->label(__('labels.age'))
+                                    ->required(),
+                            ]),
 
                         Tabs\Tab::make(__('labels.membership_information'))
-                        ->schema([
+                            ->schema([
+                                Select::make('membership')
+                                    ->label(__('labels.membership'))
+                                    ->relationship('membership', 'name')
+                                    ->required(),
 
-                        Select::make('membership')
-                            ->label(__('labels.membership'))
-                            ->relationship('membership', 'name')
-                            ->required(),
-
-                            Toggle::make('is_volunteer')
-                                ->columnSpanFull()
-                                ->label(__('labels.is_volunteer')),
-                        ]),
+                                Toggle::make('is_volunteer')
+                                    ->columnSpanFull()
+                                    ->label(__('labels.is_volunteer')),
+                            ]),
 
                         Tabs\Tab::make(__('labels.address_information'))
                             ->columns(12)
                             ->schema([
-
                                 TextInput::make('address_street')
                                     ->columnSpan(6)
                                     ->required()
@@ -166,16 +162,16 @@ final class MemberForm
                                                     ->hiddenLabel()
                                                     ->disabled(),
                                             ]),
-                                            Tabs\Tab::make(__('labels.payment_information'))
-                                                ->schema([
-                                                    KeyValue::make('registration_data.paymentInfo')
-                                                        ->columnSpanFull()
-                                                        ->hiddenLabel()
-                                                        ->disabled(),
-                                                ]),
+                                        Tabs\Tab::make(__('labels.payment_information'))
+                                            ->schema([
+                                                KeyValue::make('registration_data.paymentInfo')
+                                                    ->columnSpanFull()
+                                                    ->hiddenLabel()
+                                                    ->disabled(),
+                                            ]),
                                     ]),
                             ]),
-                ]),
+                    ]),
             ]);
     }
 }

@@ -24,10 +24,13 @@ final class HouseholdMemberActions
                 ->schema([
                     Select::make('member_id')
                         ->label(__('labels.member'))
-                        ->options(fn (): array => Member::whereNull('household_id')
-                            ->get()
-                            ->mapWithKeys(static fn (Member $m) => [$m->id => $m->name])
-                            ->toArray())
+                        ->options(
+                            static fn (): array => Member::query()
+                                ->whereNull('household_id')
+                                ->get()
+                                ->mapWithKeys(static fn (Member $m) => [$m->id => $m->name])
+                                ->toArray(),
+                        )
                         ->searchable()
                         ->required(),
                 ])
@@ -77,18 +80,20 @@ final class HouseholdMemberActions
                     Select::make('existing_household_id')
                         ->label(__('labels.select_household'))
                         ->visible(static fn (Get $get): bool => !$get('create_new'))
-                        ->options(fn (): array => Household::with('members')
-                            ->get()
-                            ->mapWithKeys(static fn (Household $h) => [ $h->id => $h->member_names ])
-                            ->toArray())
+                        ->options(
+                            static fn (): array => Household::query()
+                                ->with('members')
+                                ->get()
+                                ->mapWithKeys(static fn (Household $h) => [$h->id => $h->member_names])
+                                ->toArray(),
+                        )
                         ->searchable()
                         ->nullable(),
-
                 ])
                 ->action(static function (RelationManager $livewire, array $data): void {
-                    if (!empty($data['create_new'])) {
+                    if ($data['create_new'] === true) {
                         $household = Household::create();
-                        $livewire->getOwnerRecord()->update([ 'household_id' => $household->id ]);
+                        $livewire->getOwnerRecord()->update(['household_id' => $household->id]);
 
                         return;
                     }
@@ -101,15 +106,11 @@ final class HouseholdMemberActions
                     $livewire->getOwnerRecord()->update(['household_id' => $selected]);
                 })
                 ->successNotificationTitle(static function (array $data): ?string {
-                    if (empty($data['create_new'])) {
-                        return __('notifications.member_added_to_household');
-                    }
-
-                    if (!empty($data['existing_household_id'])) {
+                    if ($data['create_new'] === true) {
                         return __('notifications.household_created');
                     }
 
-                    return null;
+                    return __('notifications.member_added_to_household');
                 }),
 
             Action::make('add_member')
@@ -124,10 +125,13 @@ final class HouseholdMemberActions
                 ->schema([
                     Select::make('member_id')
                         ->label(__('labels.member'))
-                        ->options(static fn (): array => Member::whereNull('household_id')
-                            ->get()
-                            ->mapWithKeys(static fn (Member $m) => [ $m->id => $m->name ])
-                            ->toArray())
+                        ->options(
+                            static fn (): array => Member::query()
+                                ->whereNull('household_id')
+                                ->get()
+                                ->mapWithKeys(static fn (Member $m) => [$m->id => $m->name])
+                                ->toArray(),
+                        )
                         ->searchable()
                         ->required(),
                 ])
@@ -136,7 +140,7 @@ final class HouseholdMemberActions
                     $member = $livewire->getOwnerRecord();
                     $targetMember = Member::findOrFail($data['member_id']);
 
-                    $targetMember->update([ 'household_id' => $member->household_id ]);
+                    $targetMember->update(['household_id' => $member->household_id]);
                 })
                 ->successNotificationTitle(__('notifications.member_added_to_household')),
         ];

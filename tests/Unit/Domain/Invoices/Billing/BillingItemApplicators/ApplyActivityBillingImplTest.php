@@ -13,6 +13,8 @@ use App\Domain\Members\MemberId;
 use Tests\Unit\Domain\Activities\ActivityRepositoryExpectation;
 use Tests\Unit\Domain\Invoices\BillableItemRepositoryExpectation;
 use Tests\UnitTestCase;
+use DateTimeImmutable;
+use Override;
 
 final class ApplyActivityBillingImplTest extends UnitTestCase
 {
@@ -22,6 +24,7 @@ final class ApplyActivityBillingImplTest extends UnitTestCase
 
     private ApplyActivityBillingImpl $subject;
 
+    #[Override]
     protected function setup(): void
     {
         parent::setup();
@@ -38,7 +41,7 @@ final class ApplyActivityBillingImplTest extends UnitTestCase
         $billableItemId = BillableItemId::create(10);
         $instanceId = BillableItemInstanceId::create(11);
 
-        $activity = new ActivityDomain($activityId, $billableItemId, new \DateTimeImmutable('2023-01-01'), new \DateTimeImmutable('2023-12-31'));
+        $activity = new ActivityDomain($activityId, $billableItemId, new DateTimeImmutable('2023-01-01'), new DateTimeImmutable('2023-12-31'));
 
         $this->activities->expectsGetById($activityId, $activity);
         $this->billableItems->expectsAdd($memberId, $activity->billableItemId, $activity->endDate, $instanceId);
@@ -54,7 +57,7 @@ final class ApplyActivityBillingImplTest extends UnitTestCase
         $billableItemId = BillableItemId::create(10);
         $instanceId = BillableItemInstanceId::create(11);
 
-        $activity = new ActivityDomain($activityId, $billableItemId, new \DateTimeImmutable('2023-01-01'), null);
+        $activity = new ActivityDomain($activityId, $billableItemId, new DateTimeImmutable('2023-01-01'), null);
 
         $this->activities->expectsGetById($activityId, $activity);
         $this->billableItems->expectsAdd($memberId, $activity->billableItemId, null, $instanceId);

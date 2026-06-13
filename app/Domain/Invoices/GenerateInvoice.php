@@ -12,6 +12,5 @@ final readonly class GenerateInvoice
     public function __construct(
         public MemberId $memberId,
         public DateTimeInterface $invoiceDate,
-    ) {
-    }
+    ) {}
 }

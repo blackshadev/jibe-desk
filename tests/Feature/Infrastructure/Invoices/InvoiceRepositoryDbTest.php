@@ -32,9 +32,11 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
             'address_city' => 'Amsterdam',
             'address_postalcode' => '1234 AB',
         ]);
-        Invoice::factory()->forMember($member)->createQuietly([
-            'invoice_number' => 'I-2026000000',
-        ]);
+        Invoice::factory()
+            ->forMember($member)
+            ->createQuietly([
+                'invoice_number' => 'I-2026000000',
+            ]);
         $billableItemOne = BillableItemModel::factory()->createQuietly();
         $billableItemTwo = BillableItemModel::factory()->createQuietly();
 
@@ -71,15 +73,17 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
             'address_postalcode' => '1234 AB',
         ]);
 
-        self::assertSame("Main Street 12B\n1234 AB, Amsterdam", $member->address);
+        static::assertSame("Main Street 12B\n1234 AB, Amsterdam", $member->address);
     }
 
     public function test_create_persists_invoice_batch_id_when_provided(): void
     {
         $member = Member::factory()->createQuietly();
-        Invoice::factory()->forMember($member)->create([
-            'invoice_number' => 'I-2026000000',
-        ]);
+        Invoice::factory()
+            ->forMember($member)
+            ->create([
+                'invoice_number' => 'I-2026000000',
+            ]);
         $billableItem = BillableItemModel::factory()->createQuietly();
         /** @var InvoiceBatch $batch */
         $batch = InvoiceBatch::factory()->createQuietly();
@@ -105,9 +109,11 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
     public function test_create_leaves_invoice_batch_id_null_when_not_provided(): void
     {
         $member = Member::factory()->createQuietly();
-        Invoice::factory()->forMember($member)->createQuietly([
-            'invoice_number' => 'I-2026000000',
-        ]);
+        Invoice::factory()
+            ->forMember($member)
+            ->createQuietly([
+                'invoice_number' => 'I-2026000000',
+            ]);
         $billableItem = BillableItemModel::factory()->createQuietly();
 
         $subject = app(InvoiceRepositoryDb::class);
@@ -129,11 +135,13 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
     public function test_apply_to_existing_month_invoice_and_returns_line_ids(): void
     {
         $member = Member::factory()->createQuietly();
-        $existing = Invoice::factory()->forMember($member)->createQuietly([
-            'invoice_number' => 'I-2026000000',
-            'status' => InvoiceStatus::Open,
-            'date' => new DateTimeImmutable('2026-05-10'),
-        ]);
+        $existing = Invoice::factory()
+            ->forMember($member)
+            ->createQuietly([
+                'invoice_number' => 'I-2026000000',
+                'status' => InvoiceStatus::Open,
+                'date' => new DateTimeImmutable('2026-05-10'),
+            ]);
 
         $billableItemOne = BillableItemModel::factory()->createQuietly();
         $billableItemTwo = BillableItemModel::factory()->createQuietly();
@@ -146,14 +154,14 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
             new BillableItemList([
                 new BillableItem(BillableItemId::create($billableItemOne->id), new CompoundPrice(10.0, 2.1), 1.0, 'First'),
                 new BillableItem(BillableItemId::create($billableItemTwo->id), new CompoundPrice(20.0, 4.2), 2.0, 'Second'),
-            ])
+            ]),
         );
 
         $result = $subject->applyLines($apply);
 
         // should return the existing invoice id and two new line ids
-        self::assertSame($existing->id, $result->invoiceId->value);
-        self::assertCount(2, $result->lineIds);
+        static::assertSame($existing->id, $result->invoiceId->value);
+        static::assertCount(2, $result->lineIds);
 
         $this->assertDatabaseCount('invoice_lines', 2);
         $this->assertDatabaseHas('invoice_lines', ['description' => 'First']);
@@ -173,7 +181,7 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
             new DateTimeImmutable('2026-06-05'),
             new BillableItemList([
                 new BillableItem(BillableItemId::create($billableItemOne->id), new CompoundPrice(15.0, 3.0), 1.0, 'Only'),
-            ])
+            ]),
         );
 
         $result = $subject->applyLines($apply);
@@ -185,11 +193,13 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
     public function test_it_creates_new_invoice_when_current_month_invoice_is_not_open(): void
     {
         $member = Member::factory()->createQuietly();
-        $existing = Invoice::factory()->forMember($member)->createQuietly([
-            'invoice_number' => 'I-2026000000',
-            'status' => InvoiceStatus::Pending,
-            'date' => new DateTimeImmutable('2026-05-10'),
-        ]);
+        $existing = Invoice::factory()
+            ->forMember($member)
+            ->createQuietly([
+                'invoice_number' => 'I-2026000000',
+                'status' => InvoiceStatus::Pending,
+                'date' => new DateTimeImmutable('2026-05-10'),
+            ]);
 
         $billableItem = BillableItemModel::factory()->createQuietly();
 
@@ -200,23 +210,25 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
             new DateTimeImmutable('2026-05-25'),
             new BillableItemList([
                 new BillableItem(BillableItemId::create($billableItem->id), new CompoundPrice(12.0, 2.4), 1.0, 'New'),
-            ])
+            ]),
         );
 
         $result = $subject->applyLines($apply);
 
-        self::assertNotSame($existing->id, $result->invoiceId->value);
+        static::assertNotSame($existing->id, $result->invoiceId->value);
         $this->assertDatabaseCount('invoice_lines', 1);
     }
 
     public function test_it_creates_new_invoice_when_previous_open_invoice_is_too_old(): void
     {
         $member = Member::factory()->createQuietly();
-        $old = Invoice::factory()->forMember($member)->createQuietly([
-            'invoice_number' => 'I-2026000000',
-            'status' => InvoiceStatus::Open,
-            'date' => new DateTimeImmutable('2026-04-10'),
-        ]);
+        $old = Invoice::factory()
+            ->forMember($member)
+            ->createQuietly([
+                'invoice_number' => 'I-2026000000',
+                'status' => InvoiceStatus::Open,
+                'date' => new DateTimeImmutable('2026-04-10'),
+            ]);
 
         $billableItem = BillableItemModel::factory()->create();
 
@@ -227,13 +239,13 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
             new DateTimeImmutable('2026-05-05'),
             new BillableItemList([
                 new BillableItem(BillableItemId::create($billableItem->id), new CompoundPrice(8.0, 1.68), 1.0, 'Later'),
-            ])
+            ]),
         );
 
         $result = $subject->applyLines($apply);
 
         // should create a new invoice because the open one is in April
-        self::assertNotSame($old->id, $result->invoiceId->value);
+        static::assertNotSame($old->id, $result->invoiceId->value);
         $this->assertDatabaseCount('invoice_lines', 1);
     }
 }

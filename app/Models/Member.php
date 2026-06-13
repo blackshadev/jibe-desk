@@ -18,8 +18,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Override;
 
 #[Guarded('id', 'updated_at', 'created_at')]
 #[ObservedBy([MemberObserver::class])]
@@ -99,6 +99,7 @@ final class Member extends Model
     }
 
     /** @return array<string, string> */
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -110,28 +111,28 @@ final class Member extends Model
     }
 
     /** @return Attribute<non-falsy-string, never> */
-    protected function name(): Attribute
+    protected function _name(): Attribute
     {
-        return Attribute::get(static function (mixed $value, array $attributes) {
-            return MemberNameFormatter::displayName($attributes['first_name'], $attributes['infix_name'], $attributes['last_name']);
-        });
+        return Attribute::get(static fn (mixed $_value, array $attributes) => MemberNameFormatter::displayName(
+            $attributes['first_name'],
+            $attributes['infix_name'],
+            $attributes['last_name'],
+        ));
     }
 
     /** @return Attribute<int, never> */
-    protected function age(): Attribute
+    protected function _age(): Attribute
     {
-        return Attribute::get(static function (mixed $value, array $attributes) {
-            return (int) floor(new Carbon($attributes['birthdate'])->diffInYears());
-        });
+        return Attribute::get(static fn (mixed $_value, array $attributes) => (int) floor(new Carbon($attributes['birthdate'])->diffInYears()));
     }
 
     /** @return Attribute<non-falsy-string, never> */
-    protected function address(): Attribute
+    protected function _address(): Attribute
     {
-        return Attribute::get(static function (mixed $value, array $attributes): string {
+        return Attribute::get(static function (mixed $_value, array $attributes): string {
             $lineOne = sprintf('%s %s', $attributes['address_street'], $attributes['address_housenumber']);
 
-            if (!empty($attributes['address_housenumber_addition'])) {
+            if ($attributes['address_housenumber_addition'] !== null) {
                 $lineOne .= $attributes['address_housenumber_addition'];
             }
 

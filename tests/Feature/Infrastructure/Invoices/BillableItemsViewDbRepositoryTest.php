@@ -53,8 +53,8 @@ final class BillableItemsViewDbRepositoryTest extends FeatureTestCase
 
         $members = $repo->listBillableMembers($when)->ids;
 
-        self::assertCount(2, $members);
-        self::assertEqualsCanonicalizing([$memberOne->id, $memberTwo->id], array_map(static fn (MemberId $memberId): int => $memberId->value, $members));
+        static::assertCount(2, $members);
+        static::assertEqualsCanonicalizing([$memberOne->id, $memberTwo->id], array_map(static fn (MemberId $memberId): int => $memberId->value, $members));
     }
 
     public function test_list_billable_members_excludes_future_and_ended_instances(): void
@@ -84,7 +84,7 @@ final class BillableItemsViewDbRepositoryTest extends FeatureTestCase
 
         $members = $repo->listBillableMembers($when)->ids;
 
-        self::assertCount(0, $members);
+        static::assertCount(0, $members);
     }
 
     public function test_list_billable_items_for_member_returns_domain_items(): void
@@ -111,13 +111,13 @@ final class BillableItemsViewDbRepositoryTest extends FeatureTestCase
 
         $items = $repo->listBillableItemsForMember($when, MemberId::create($member->id))->items;
 
-        self::assertCount(1, $items);
-        self::assertInstanceOf(BillableItemEntity::class, $items[0]);
-        self::assertSame($billable->id, $items[0]->id->value);
-        self::assertSame(10.0, $items[0]->price->price);
-        self::assertSame(2.1, $items[0]->price->vat);
-        self::assertSame(1.0, $items[0]->quantity);
-        self::assertSame('Member fee', $items[0]->description);
+        static::assertCount(1, $items);
+        static::assertInstanceOf(BillableItemEntity::class, $items[0]);
+        static::assertSame($billable->id, $items[0]->id->value);
+        static::assertSame(10.0, $items[0]->price->price);
+        static::assertSame(2.1, $items[0]->price->vat);
+        static::assertSame(1.0, $items[0]->quantity);
+        static::assertSame('Member fee', $items[0]->description);
     }
 
     public function test_list_billable_items_for_member_excludes_already_invoiced_items_within_cycle(): void
@@ -135,9 +135,11 @@ final class BillableItemsViewDbRepositoryTest extends FeatureTestCase
             'end_date' => null,
         ]);
 
-        $invoice = Invoice::factory()->forMember($member)->create([
-            'date' => '2026-05-05',
-        ]);
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->create([
+                'date' => '2026-05-05',
+            ]);
         InvoiceLine::factory()->create([
             'invoice_id' => $invoice->id,
             'billable_item_id' => $billable->id,
@@ -151,7 +153,7 @@ final class BillableItemsViewDbRepositoryTest extends FeatureTestCase
 
         $items = $repo->listBillableItemsForMember($when, MemberId::create($member->id))->items;
 
-        self::assertCount(0, $items);
+        static::assertCount(0, $items);
     }
 
     public function test_list_billable_items_for_member_includes_items_outside_cycle_window(): void
@@ -169,9 +171,11 @@ final class BillableItemsViewDbRepositoryTest extends FeatureTestCase
             'end_date' => null,
         ]);
 
-        $invoice = Invoice::factory()->forMember($member)->create([
-            'date' => '2026-01-05',
-        ]);
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->create([
+                'date' => '2026-01-05',
+            ]);
         InvoiceLine::factory()->create([
             'invoice_id' => $invoice->id,
             'billable_item_id' => $billable->id,
@@ -185,6 +189,6 @@ final class BillableItemsViewDbRepositoryTest extends FeatureTestCase
 
         $items = $repo->listBillableItemsForMember($when, MemberId::create($member->id))->items;
 
-        self::assertCount(1, $items);
+        static::assertCount(1, $items);
     }
 }

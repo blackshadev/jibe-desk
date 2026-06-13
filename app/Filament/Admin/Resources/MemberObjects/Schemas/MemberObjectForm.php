@@ -21,12 +21,12 @@ final class MemberObjectForm
                 ->relationship(
                     'memberObjectType',
                     'name',
-                    static fn (Builder $query) => $query->orderBy('id')
+                    static fn (Builder $query) => $query->orderBy('id'),
                 )
                 ->required()
                 ->live(),
             TextInput::make('name')
-                ->label(function (Get $get) {
+                ->label(static function (Get $get) {
                     $id = $get('member_object_type_id');
                     $object = $id !== null ? MemberObjectType::find($id) : null;
 
@@ -41,7 +41,7 @@ final class MemberObjectForm
 
                     return __('labels.description');
                 })
-                ->regex(function (Get $get) {
+                ->regex(static function (Get $get) {
                     $id = $get('member_object_type_id');
                     $object = $id !== null ? MemberObjectType::find($id) : null;
 

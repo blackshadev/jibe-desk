@@ -6,9 +6,11 @@ namespace Tests\Unit\Domain\Invoices;
 
 use App\Domain\Invoices\InvoiceId;
 use Tests\Unit\Domain\NumericIdTestCase;
+use Override;
 
 final class InvoiceIdTest extends NumericIdTestCase
 {
+    #[Override]
     protected function getSubject(): string
     {
         return InvoiceId::class;

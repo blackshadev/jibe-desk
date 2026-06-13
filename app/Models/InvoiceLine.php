@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 #[Fillable(['description', 'vat', 'price', 'quantity', 'member_id', 'billable_item_id'])]
 final class InvoiceLine extends Model
@@ -28,6 +29,7 @@ final class InvoiceLine extends Model
         return $this->belongsTo(BillableItem::class);
     }
 
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -38,19 +40,17 @@ final class InvoiceLine extends Model
     }
 
     /** @return Attribute<CompoundPrice, never> */
-    protected function compoundPrice(): Attribute
+    protected function _compoundPrice(): Attribute
     {
-        return Attribute::get(static fn ($value, array $attributes) => new CompoundPrice($attributes['price'], $attributes['vat']));
+        return Attribute::get(static fn ($_value, array $attributes) => new CompoundPrice($attributes['price'], $attributes['vat']));
     }
 
     /** @return Attribute<CompoundPrice, never> */
-    protected function subTotal(): Attribute
+    protected function _subTotal(): Attribute
     {
-        return Attribute::get(static function (mixed $value, array $attributes) {
-            return new CompoundPrice(
-                $attributes['price'] * $attributes['quantity'],
-                $attributes['vat'] * $attributes['quantity']
-            );
-        });
+        return Attribute::get(static fn (mixed $_value, array $attributes) => new CompoundPrice(
+            $attributes['price'] * $attributes['quantity'],
+            $attributes['vat'] * $attributes['quantity'],
+        ));
     }
 }

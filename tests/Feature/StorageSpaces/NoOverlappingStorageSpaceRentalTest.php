@@ -12,6 +12,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Translation\PotentiallyTranslatedString;
 use Tests\FeatureTestCase;
+use Override;
 
 final class NoOverlappingStorageSpaceRentalTest extends FeatureTestCase
 {
@@ -19,6 +20,7 @@ final class NoOverlappingStorageSpaceRentalTest extends FeatureTestCase
 
     private Member $member;
 
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();
@@ -212,11 +214,12 @@ final class NoOverlappingStorageSpaceRentalTest extends FeatureTestCase
         self::assertValidateRule(true, $rule, 'start_date', '2026-06-30');
     }
 
+    // @mago-ignore lint:no-boolean-flag-parameter
     private static function assertValidateRule(bool $passes, ValidationRule $rule, string $attr, string $value): void
     {
         $failed = false;
         $reason = null;
-        $rule->validate($attr, $value, function (string $r) use (&$failed, &$reason): PotentiallyTranslatedString {
+        $rule->validate($attr, $value, static function (string $r) use (&$failed, &$reason): PotentiallyTranslatedString {
             $failed = true;
             $reason = $r;
 
@@ -225,8 +228,9 @@ final class NoOverlappingStorageSpaceRentalTest extends FeatureTestCase
 
         if ($passes) {
             self::assertFalse($failed, 'Expected rule to pass, but it failed with message: ' . $reason);
-        } else {
-            self::assertTrue($failed, 'Expected rule to fail, but it passed');
+            return;
         }
+
+        self::assertTrue($failed, 'Expected rule to fail, but it passed');
     }
 }

@@ -105,7 +105,7 @@ final class StorageSpaceResourceTest extends FeatureTestCase
 
         Livewire::test(ListStorageSpaces::class)
             ->assertCanSeeTableRecords([$available, $rented])
-            ->tap(fn (mixed $livewire) => $livewire->set('activeTab', 'available'))
+            ->tap(static fn (mixed $livewire) => $livewire->set('activeTab', 'available'))
             ->assertCanSeeTableRecords([$available])
             ->assertCanNotSeeTableRecords([$rented]);
     }
@@ -124,7 +124,7 @@ final class StorageSpaceResourceTest extends FeatureTestCase
 
         Livewire::test(ListStorageSpaces::class)
             ->assertCanSeeTableRecords([$available, $rented])
-            ->tap(fn (mixed $livewire) => $livewire->set('activeTab', 'unavailable'))
+            ->tap(static fn (mixed $livewire) => $livewire->set('activeTab', 'unavailable'))
             ->assertCanSeeTableRecords([$rented])
             ->assertCanNotSeeTableRecords([$available]);
     }

@@ -10,6 +10,5 @@ final readonly class NewMemberMembershipInformation
 {
     public function __construct(
         public MembershipId $membershipId,
-    ) {
-    }
+    ) {}
 }

@@ -8,6 +8,7 @@ use App\Domain\Invoices\InvoiceNumberGeneratorImpl;
 use DateTimeImmutable;
 use Tests\Unit\Domain\Clock\ClockExpectation;
 use Tests\UnitTestCase;
+use Override;
 
 final class InvoiceNumberGeneratorImplTest extends UnitTestCase
 {
@@ -17,6 +18,7 @@ final class InvoiceNumberGeneratorImplTest extends UnitTestCase
 
     private InvoiceNumberGeneratorImpl $subject;
 
+    #[Override]
     protected function setup(): void
     {
         parent::setup();
@@ -32,7 +34,7 @@ final class InvoiceNumberGeneratorImplTest extends UnitTestCase
         $this->clock->expectsNow(new DateTimeImmutable('2026-05-16'));
         $this->repo->expectsGetLatestInvoiceNumber('I-2025000199');
 
-        self::assertSame('I-2026000001', $this->subject->generate()->value);
+        static::assertSame('I-2026000001', $this->subject->generate()->value);
     }
 
     public function test_it_increments_latest_number_when_same_year(): void
@@ -40,6 +42,6 @@ final class InvoiceNumberGeneratorImplTest extends UnitTestCase
         $this->clock->expectsNow(new DateTimeImmutable('2026-01-01'));
         $this->repo->expectsGetLatestInvoiceNumber('I-2026000012');
 
-        self::assertSame('I-2026000013', $this->subject->generate()->value);
+        static::assertSame('I-2026000013', $this->subject->generate()->value);
     }
 }

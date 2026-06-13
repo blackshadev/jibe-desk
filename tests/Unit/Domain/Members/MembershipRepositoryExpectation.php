@@ -15,9 +15,9 @@ use function PHPUnit\Framework\equalTo;
 
 final readonly class MembershipRepositoryExpectation
 {
-    private function __construct(public MockInterface&MembershipRepository $mock)
-    {
-    }
+    private function __construct(
+        public MockInterface&MembershipRepository $mock,
+    ) {}
 
     public static function create(): self
     {

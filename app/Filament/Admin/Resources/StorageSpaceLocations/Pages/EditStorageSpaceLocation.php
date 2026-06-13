@@ -8,11 +8,13 @@ use App\Filament\Admin\Resources\StorageSpaceLocations\StorageSpaceLocationResou
 use App\Models\StorageSpaceLocation;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Override;
 
 final class EditStorageSpaceLocation extends EditRecord
 {
     protected static string $resource = StorageSpaceLocationResource::class;
 
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [

@@ -11,14 +11,14 @@ use Tests\UnitTestCase;
 
 final class InvoiceWithLineIdsTest extends UnitTestCase
 {
-    public function testInvoicesWithLineIds(): void
+    public function test_invoices_with_line_ids(): void
     {
         $id = InvoiceId::create(42);
         $lines = [InvoiceLineId::create(11)];
 
         $subject = new AppliedInvoiceWithLineIds(true, $id, $lines);
 
-        self::assertSame($id, $subject->invoiceId);
-        self::assertSame($lines, $subject->lineIds);
+        static::assertSame($id, $subject->invoiceId);
+        static::assertSame($lines, $subject->lineIds);
     }
 }

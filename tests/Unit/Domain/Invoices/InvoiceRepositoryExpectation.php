@@ -10,9 +10,9 @@ use Mockery\MockInterface;
 
 final readonly class InvoiceRepositoryExpectation
 {
-    private function __construct(public MockInterface&InvoiceNumberRepository $mock)
-    {
-    }
+    private function __construct(
+        public MockInterface&InvoiceNumberRepository $mock,
+    ) {}
 
     public static function create(): self
     {

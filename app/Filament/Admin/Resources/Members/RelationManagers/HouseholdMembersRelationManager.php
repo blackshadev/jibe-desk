@@ -9,6 +9,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 final class HouseholdMembersRelationManager extends RelationManager
 {
@@ -16,6 +17,7 @@ final class HouseholdMembersRelationManager extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    #[Override]
     public function table(Table $table): Table
     {
         return $table
@@ -28,16 +30,19 @@ final class HouseholdMembersRelationManager extends RelationManager
             ->recordActions(HouseholdMemberActions::recordActions());
     }
 
+    #[Override]
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('labels.household');
     }
 
+    #[Override]
     public static function getModelLabel(): string
     {
         return mb_strtolower(__('labels.household_member'));
     }
 
+    #[Override]
     public static function getPluralModelLabel(): string
     {
         return mb_strtolower(__('labels.household_members'));

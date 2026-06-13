@@ -21,6 +21,5 @@ final readonly class NewMemberPersonalInformation
         public string $addressHousenumberAddition,
         public string $addressPostalcode,
         public string $addressCity,
-    ) {
-    }
+    ) {}
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Registration;
 
+use InvalidArgumentException;
+
 /**
  * @phpstan-import-type MembershipDataArray from MembershipData
  * @phpstan-import-type PersonalInfoDataArray from PersonalInfoData
@@ -19,14 +21,13 @@ final class FormData
         public MembershipData $membership,
         public PersonalInfoData $personalInfo,
         public PaymentInfoData $paymentInfo,
-    ) {
-    }
+    ) {}
 
     /** @param FormDataArray $data */
     public static function create(array $data): self
     {
         return new self(
-            step: Step::tryFrom($data['step']) ?? throw new \InvalidArgumentException('Invalid step value.'),
+            step: Step::tryFrom($data['step']) ?? throw new InvalidArgumentException('Invalid step value.'),
             membership: MembershipData::createFromArray($data['membership']),
             personalInfo: PersonalInfoData::createFromArray($data['personalInfo']),
             paymentInfo: PaymentInfoData::createFromArray($data['paymentInfo']),
@@ -45,7 +46,7 @@ final class FormData
 
     public function isStepDisallowed(Step $step): bool
     {
-        return $this->step->value + 1 < $step->value;
+        return ($this->step->value + 1) < $step->value;
     }
 
     public function welcome(): self

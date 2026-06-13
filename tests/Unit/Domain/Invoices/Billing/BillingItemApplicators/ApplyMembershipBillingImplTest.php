@@ -17,6 +17,7 @@ use Tests\Unit\Domain\Invoices\BillableItemRepositoryExpectation;
 use Tests\Unit\Domain\Members\MemberRepositoryExpectation;
 use Tests\Unit\Domain\Members\MembershipRepositoryExpectation;
 use Tests\UnitTestCase;
+use Override;
 
 final class ApplyMembershipBillingImplTest extends UnitTestCase
 {
@@ -28,6 +29,7 @@ final class ApplyMembershipBillingImplTest extends UnitTestCase
 
     private ApplyMembershipBillingImpl $subject;
 
+    #[Override]
     protected function setup(): void
     {
         parent::setup();
@@ -68,7 +70,7 @@ final class ApplyMembershipBillingImplTest extends UnitTestCase
         $this->membershipRepo->expectsAll($allMemberships);
         $this->billableRepo->expectsRemove(
             $memberId,
-            new BillableItemIdList([$adultBillableItemId1, $kidsBillableItemId1, $adultBillableItemId2, $kidsBillableItemId2])
+            new BillableItemIdList([$adultBillableItemId1, $kidsBillableItemId1, $adultBillableItemId2, $kidsBillableItemId2]),
         );
         $this->membershipRepo->expectsGetById($membershipId, $membership2);
         $this->billableRepo->expectsAdd($memberId, $adultBillableItemId2, null, BillableItemInstanceId::create(12));
@@ -101,7 +103,7 @@ final class ApplyMembershipBillingImplTest extends UnitTestCase
         $this->membershipRepo->expectsAll($allMemberships);
         $this->billableRepo->expectsRemove(
             $memberId,
-            new BillableItemIdList([$adultBillableItemId1, $kidsBillableItemId1, $adultBillableItemId2, $kidsBillableItemId2])
+            new BillableItemIdList([$adultBillableItemId1, $kidsBillableItemId1, $adultBillableItemId2, $kidsBillableItemId2]),
         );
         $this->membershipRepo->expectsGetById($membershipId, $membership2);
         $this->billableRepo->expectsAdd($memberId, $kidsBillableItemId2, null, BillableItemInstanceId::create(12));

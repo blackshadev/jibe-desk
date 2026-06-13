@@ -16,9 +16,9 @@ use function PHPUnit\Framework\equalTo;
 
 final readonly class BillableItemsViewRepositoryExpectation
 {
-    private function __construct(public MockInterface&BillableItemsViewRepository $mock)
-    {
-    }
+    private function __construct(
+        public MockInterface&BillableItemsViewRepository $mock,
+    ) {}
 
     public static function create(): self
     {

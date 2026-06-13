@@ -13,6 +13,5 @@ final readonly class NewMemberPaymentInformation
         public string $bic,
         public string $accountHolderName,
         public DateTimeInterface $mandateAcceptedDate,
-    ) {
-    }
+    ) {}
 }

@@ -10,13 +10,14 @@ use App\Domain\Invoices\Billing\BillingItemApplicators\ApplyActivityBilling;
 use App\Domain\Members\MemberId;
 use Mockery;
 use Mockery\MockInterface;
+
 use function PHPUnit\Framework\equalTo;
 
 final readonly class ApplyActivityBillingExpectation
 {
-    private function __construct(public MockInterface&ApplyActivityBilling $mock)
-    {
-    }
+    private function __construct(
+        public MockInterface&ApplyActivityBilling $mock,
+    ) {}
 
     public static function create(): self
     {

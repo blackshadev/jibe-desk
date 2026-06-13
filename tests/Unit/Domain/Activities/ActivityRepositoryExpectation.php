@@ -16,9 +16,9 @@ use function PHPUnit\Framework\equalTo;
 
 final readonly class ActivityRepositoryExpectation
 {
-    private function __construct(public MockInterface&ActivityRepository $mock)
-    {
-    }
+    private function __construct(
+        public MockInterface&ActivityRepository $mock,
+    ) {}
 
     public static function create(): self
     {

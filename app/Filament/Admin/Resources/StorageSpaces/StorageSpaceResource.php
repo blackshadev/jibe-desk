@@ -18,6 +18,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
+use Override;
 
 final class StorageSpaceResource extends Resource
 {
@@ -29,16 +30,19 @@ final class StorageSpaceResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Squares2x2;
 
+    #[Override]
     public static function form(Schema $schema): Schema
     {
         return StorageSpaceForm::configure($schema);
     }
 
+    #[Override]
     public static function table(Table $table): Table
     {
         return StorageSpacesTable::configure($table);
     }
 
+    #[Override]
     public static function getRelations(): array
     {
         return [
@@ -46,6 +50,7 @@ final class StorageSpaceResource extends Resource
         ];
     }
 
+    #[Override]
     public static function getPages(): array
     {
         return [
@@ -55,11 +60,13 @@ final class StorageSpaceResource extends Resource
         ];
     }
 
+    #[Override]
     public static function getLabel(): string
     {
         return __('labels.storage_space');
     }
 
+    #[Override]
     public static function getPluralLabel(): string
     {
         return __('labels.storage_spaces');

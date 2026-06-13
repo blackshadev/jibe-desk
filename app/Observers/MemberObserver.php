@@ -17,8 +17,7 @@ final readonly class MemberObserver
         private ApplyMemberVolunteerBilling $applyMemberVolunteerBilling,
         private ApplyMembershipBilling $applyMembershipBilling,
         private ApplySameHouseholdBilling $applySameHouseholdBilling,
-    ) {
-    }
+    ) {}
 
     public function created(Member $member): void
     {

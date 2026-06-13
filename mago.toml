@@ -1,0 +1,55 @@
+#:schema https://mago.carthage.software/1.30.0/schema.json
+# Welcome to Mago!
+# For full documentation, see https://mago.carthage.software/1.30.0/en/tools/overview/
+version = "1"
+php-version = "8.5.0"
+
+[source]
+workspace = "."
+paths = ["app/", "database/factories/", "database/seeders/", "tests/"]
+includes = ["vendor"]
+excludes = []
+
+[source.glob]
+literal-separator = true
+
+[formatter]
+preset = "tempest"
+space-after-logical-not-unary-prefix-operator = false
+
+[linter]
+integrations = ["laravel", "phpunit"]
+
+[linter.rules]
+ambiguous-function-call = { enabled = false }
+literal-named-argument = { enabled = false }
+halstead = { effort-threshold = 7000 }
+excessive-parameter-list = { enabled = false }
+too-many-methods = { exclude = ["tests/**/*Test.php", "app/Models/*.php"] }
+no-fully-qualified-global-class-like = { enabled = true }
+no-fully-qualified-global-constant = { enabled = true }
+no-fully-qualified-global-function = { enabled = true }
+variable-name = { enabled = true, either = false, camel = true }
+property-name = { enabled = true, either = false, camel = true }
+method-name = { enabled = true, use-snake-case-for-tests = true }
+
+[analyzer]
+ignore = [
+    { code = "unhandled-thrown-type", in = "tests/**/*Test.php" },
+]
+plugins = []
+find-unused-definitions = true
+find-unused-expressions = true
+analyze-dead-code = true
+memoize-properties = true
+check-throws = true
+unchecked-exceptions = ["Error", "LogicException"]
+unchecked-exception-classes = []
+check-missing-override = true
+find-unused-parameters = true
+strict-list-index-checks = true
+strict-array-index-existence = true
+allow-array-truthy-operand = false
+no-boolean-literal-comparison = true
+check-missing-type-hints = true
+register-super-globals = false

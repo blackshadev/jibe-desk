@@ -11,9 +11,11 @@ use App\Domain\Members\MemberId;
 use App\Domain\Members\MemberRepository;
 use App\Domain\Members\MembershipId;
 use App\Models\Member;
+use Override;
 
 final class MemberDbRepository implements MemberRepository
 {
+    #[Override]
     public function getById(MemberId $memberId): MemberEntity
     {
         $model = Member::findOrFail($memberId->value);
@@ -29,6 +31,7 @@ final class MemberDbRepository implements MemberRepository
         );
     }
 
+    #[Override]
     public function newMember(NewMember $newMember): MemberId
     {
         /** @var Member $member */
@@ -49,12 +52,14 @@ final class MemberDbRepository implements MemberRepository
             'registration_data' => $newMember->registrationData,
         ]);
 
-        $member->paymentInformation()->create([
-            'banking_account_number' => $newMember->paymentInformation->iban,
-            'banking_bic' => $newMember->paymentInformation->bic,
-            'banking_account_holder_name' => $newMember->paymentInformation->accountHolderName,
-            'mandate_accepted_date' => $newMember->paymentInformation->mandateAcceptedDate,
-        ]);
+        $member
+            ->paymentInformation()
+            ->create([
+                'banking_account_number' => $newMember->paymentInformation->iban,
+                'banking_bic' => $newMember->paymentInformation->bic,
+                'banking_account_holder_name' => $newMember->paymentInformation->accountHolderName,
+                'mandate_accepted_date' => $newMember->paymentInformation->mandateAcceptedDate,
+            ]);
 
         return MemberId::create($member->id);
     }

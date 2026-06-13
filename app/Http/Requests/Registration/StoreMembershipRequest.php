@@ -32,10 +32,7 @@ final class StoreMembershipRequest extends FormRequest
     {
         return [
             function (Validator $validator) {
-                $hasSelection = $this->boolean('windsurfing_lessons')
-                    || $this->boolean('rtc_lessons')
-                    || $this->boolean('club_access')
-                    || $this->boolean('storage');
+                $hasSelection = $this->boolean('windsurfing_lessons') || $this->boolean('rtc_lessons') || $this->boolean('club_access') || $this->boolean('storage');
 
                 if (!$hasSelection) {
                     $validator->errors()->add(
@@ -54,7 +51,7 @@ final class StoreMembershipRequest extends FormRequest
             rtc: $this->boolean('rtc_lessons'),
             clubhouseAccess: $this->boolean('club_access'),
             boardStorage: $this->boolean('storage'),
-            watersportFederationNumber: (string)$this->string('watersport_federation_number'),
+            watersportFederationNumber: (string) $this->string('watersport_federation_number'),
         );
     }
 }

@@ -10,18 +10,22 @@ use Carbon\CarbonPeriodImmutable;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Builder;
+use Override;
 
 final class MemberOverview extends StatsOverviewWidget
 {
+    #[Override]
     protected function getStats(): array
     {
         return [
             Stat::make(
                 label: __('labels.members'),
                 value: Member::query()->count(),
-            )->chart(
-                $this->getMembersByCreatedByMonth()
-            )->color('primary'),
+            )
+                ->chart(
+                    $this->getMembersByCreatedByMonth(),
+                )
+                ->color('primary'),
         ];
     }
 
@@ -32,17 +36,16 @@ final class MemberOverview extends StatsOverviewWidget
         return iterator_to_array(
             CarbonPeriodImmutable::create($start, CarbonImmutable::now())
                 ->map(
-                    fn (CarbonImmutable $date) =>
-                        Member::query()
-                            ->withTrashed()
-                            ->where('created_at', '<=', $date)
-                            ->where(
-                                static fn (Builder $query) => $query
-                                    ->whereNull('deleted_at')
-                                    ->orWhere('deleted_at', '<=', $date)
-                            )
-                            ->count()
-                )
+                    static fn (CarbonImmutable $date) => Member::query()
+                        ->withTrashed()
+                        ->where('created_at', '<=', $date)
+                        ->where(
+                            static fn (Builder $query) => $query
+                                ->whereNull('deleted_at')
+                                ->orWhere('deleted_at', '<=', $date),
+                        )
+                        ->count(),
+                ),
         );
     }
 }

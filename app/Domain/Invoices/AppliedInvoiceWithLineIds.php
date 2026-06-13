@@ -12,7 +12,6 @@ final readonly class AppliedInvoiceWithLineIds
     public function __construct(
         public bool $isNew,
         public InvoiceId $invoiceId,
-        public array $lineIds
-    ) {
-    }
+        public array $lineIds,
+    ) {}
 }

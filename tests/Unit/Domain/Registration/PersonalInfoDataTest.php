@@ -28,41 +28,41 @@ final class PersonalInfoDataTest extends UnitTestCase
     {
         $data = PersonalInfoData::createDefault();
 
-        self::assertSame('', $data->firstName);
-        self::assertSame('', $data->infixName);
-        self::assertSame('', $data->lastName);
-        self::assertSame('', $data->email);
-        self::assertSame(Gender::Unknown, $data->gender);
-        self::assertSame('2000-01-01', $data->birthdate->format('Y-m-d'));
-        self::assertSame('', $data->addressStreet);
-        self::assertSame('', $data->addressHousenumber);
-        self::assertSame('', $data->addressHousenumberAddition);
-        self::assertSame('', $data->addressPostalcode);
-        self::assertSame('', $data->addressCity);
+        static::assertSame('', $data->firstName);
+        static::assertSame('', $data->infixName);
+        static::assertSame('', $data->lastName);
+        static::assertSame('', $data->email);
+        static::assertSame(Gender::Unknown, $data->gender);
+        static::assertSame('2000-01-01', $data->birthdate->format('Y-m-d'));
+        static::assertSame('', $data->addressStreet);
+        static::assertSame('', $data->addressHousenumber);
+        static::assertSame('', $data->addressHousenumberAddition);
+        static::assertSame('', $data->addressPostalcode);
+        static::assertSame('', $data->addressCity);
     }
 
     public function test_create_from_array_hydrates_all_fields(): void
     {
         $data = PersonalInfoData::createFromArray(self::DEFAULT_DATA);
 
-        self::assertSame('Jan', $data->firstName);
-        self::assertSame('de', $data->infixName);
-        self::assertSame('Vries', $data->lastName);
-        self::assertSame('jan@example.com', $data->email);
-        self::assertSame(Gender::Male, $data->gender);
-        self::assertSame('1990-01-15', $data->birthdate->format('Y-m-d'));
-        self::assertSame('Surfstrand', $data->addressStreet);
-        self::assertSame('2', $data->addressHousenumber);
-        self::assertSame('A', $data->addressHousenumberAddition);
-        self::assertSame('1324CT', $data->addressPostalcode);
-        self::assertSame('Almere', $data->addressCity);
+        static::assertSame('Jan', $data->firstName);
+        static::assertSame('de', $data->infixName);
+        static::assertSame('Vries', $data->lastName);
+        static::assertSame('jan@example.com', $data->email);
+        static::assertSame(Gender::Male, $data->gender);
+        static::assertSame('1990-01-15', $data->birthdate->format('Y-m-d'));
+        static::assertSame('Surfstrand', $data->addressStreet);
+        static::assertSame('2', $data->addressHousenumber);
+        static::assertSame('A', $data->addressHousenumberAddition);
+        static::assertSame('1324CT', $data->addressPostalcode);
+        static::assertSame('Almere', $data->addressCity);
     }
 
     public function test_to_array_returns_expected_structure(): void
     {
         $data = PersonalInfoData::createFromArray(self::DEFAULT_DATA);
 
-        self::assertSame(self::DEFAULT_DATA, $data->toArray());
+        static::assertSame(self::DEFAULT_DATA, $data->toArray());
     }
 
     public function test_to_and_from_array_roundtrip(): void
@@ -70,6 +70,6 @@ final class PersonalInfoDataTest extends UnitTestCase
         $original = PersonalInfoData::createFromArray(self::DEFAULT_DATA);
         $data = PersonalInfoData::createFromArray($original->toArray());
 
-        self::assertSame($original->toArray(), $data->toArray());
+        static::assertSame($original->toArray(), $data->toArray());
     }
 }

@@ -14,6 +14,5 @@ final readonly class NewMemberRegistration
         public string $memberName,
         public string $memberEmail,
         public MembershipData $membershipData,
-    ) {
-    }
+    ) {}
 }

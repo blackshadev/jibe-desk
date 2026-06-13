@@ -11,16 +11,16 @@ final class MemberNameFormatterTest extends UnitTestCase
 {
     public function test_it_formats_name_with_infix(): void
     {
-        self::assertSame('Doe, John van', MemberNameFormatter::displayName('John', 'van', 'Doe'));
+        static::assertSame('Doe, John van', MemberNameFormatter::displayName('John', 'van', 'Doe'));
     }
 
     public function test_it_formats_name_without_infix(): void
     {
-        self::assertSame('Doe, John', MemberNameFormatter::displayName('John', null, 'Doe'));
+        static::assertSame('Doe, John', MemberNameFormatter::displayName('John', null, 'Doe'));
     }
 
     public function test_it_formats_name_with_empty_infix(): void
     {
-        self::assertSame('Doe, John', MemberNameFormatter::displayName('John', '', 'Doe'));
+        static::assertSame('Doe, John', MemberNameFormatter::displayName('John', '', 'Doe'));
     }
 }

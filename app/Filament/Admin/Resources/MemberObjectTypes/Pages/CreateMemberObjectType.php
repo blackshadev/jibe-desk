@@ -9,11 +9,13 @@ use App\Filament\Admin\Resources\MemberObjectTypes\MemberObjectTypeResource;
 use App\Models\BillableItem;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 final class CreateMemberObjectType extends CreateRecord
 {
     protected static string $resource = MemberObjectTypeResource::class;
 
+    #[Override]
     protected function handleRecordCreation(array $data): Model
     {
         $item = BillableItem::createDefault([

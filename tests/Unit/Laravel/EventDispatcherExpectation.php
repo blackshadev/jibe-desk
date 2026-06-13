@@ -8,13 +8,14 @@ use App\Domain\Members\Events\NewMemberRegistration;
 use Illuminate\Contracts\Events\Dispatcher;
 use Mockery;
 use Mockery\MockInterface;
+
 use function PHPUnit\Framework\equalTo;
 
 final readonly class EventDispatcherExpectation
 {
-    private function __construct(public MockInterface&Dispatcher $mock)
-    {
-    }
+    private function __construct(
+        public MockInterface&Dispatcher $mock,
+    ) {}
 
     public static function create(): self
     {
@@ -25,9 +26,7 @@ final readonly class EventDispatcherExpectation
     {
         $this->mock
             ->expects('dispatch')
-            ->with(Mockery::on(static function (mixed $event) use ($expectedEvent): bool {
-                return $event === $expectedEvent;
-            }))
+            ->with(Mockery::on(static fn (mixed $event) => $event === $expectedEvent))
             ->andReturnNull();
     }
 

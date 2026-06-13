@@ -12,9 +12,11 @@ use App\Domain\Invoices\Billing\BillableItemInstanceId;
 use App\Domain\Members\MemberId;
 use App\Models\Activity;
 use App\Models\Pivots\ActivityMember;
+use Override;
 
 final class ActivityDbRepository implements ActivityRepository
 {
+    #[Override]
     public function getById(ActivityId $activityId): ActivityEntity
     {
         $model = Activity::findOrFail($activityId->value);
@@ -27,6 +29,7 @@ final class ActivityDbRepository implements ActivityRepository
         );
     }
 
+    #[Override]
     public function attach(ActivityId $activityId, MemberId $memberId, BillableItemInstanceId $instanceId): void
     {
         ActivityMember::query()
@@ -34,7 +37,8 @@ final class ActivityDbRepository implements ActivityRepository
                 'activity_id' => $activityId->value,
                 'member_id' => $memberId->value,
                 'billable_item_instance_id' => null,
-            ])->update([
+            ])
+            ->update([
                 'billable_item_instance_id' => $instanceId->value,
             ]);
     }

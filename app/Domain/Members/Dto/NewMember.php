@@ -12,6 +12,5 @@ final readonly class NewMember
         public NewMemberPersonalInformation $personalInformation,
         public NewMemberPaymentInformation $paymentInformation,
         public array $registrationData = [],
-    ) {
-    }
+    ) {}
 }

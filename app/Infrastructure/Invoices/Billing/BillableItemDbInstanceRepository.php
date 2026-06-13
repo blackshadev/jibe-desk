@@ -13,9 +13,11 @@ use App\Models\BillableItem;
 use App\Models\BillableItemInstance;
 use Carbon\CarbonImmutable;
 use DateTimeInterface;
+use Override;
 
 final class BillableItemDbInstanceRepository implements BillableItemInstanceRepository
 {
+    #[Override]
     public function removeMany(MemberId $memberId, BillableItemIdList $billableItemIds): void
     {
         BillableItemInstance::query()
@@ -25,10 +27,11 @@ final class BillableItemDbInstanceRepository implements BillableItemInstanceRepo
             ->update(
                 [
                     'end_date' => CarbonImmutable::now(),
-                ]
+                ],
             );
     }
 
+    #[Override]
     public function add(MemberId $memberId, BillableItemId $billableItemId, ?DateTimeInterface $endDate = null, ?DateTimeInterface $startDate = null): BillableItemInstanceId
     {
         $billableItem = BillableItem::findOrFail($billableItemId->value);
@@ -43,6 +46,7 @@ final class BillableItemDbInstanceRepository implements BillableItemInstanceRepo
         return BillableItemInstanceId::create($instance->id);
     }
 
+    #[Override]
     public function ensure(MemberId $memberId, BillableItemId $billableItemId): void
     {
         $billableItem = BillableItem::findOrFail($billableItemId->value);
@@ -57,6 +61,7 @@ final class BillableItemDbInstanceRepository implements BillableItemInstanceRepo
         ]);
     }
 
+    #[Override]
     public function stop(BillableItemInstanceId $instanceId): void
     {
         BillableItemInstance::query()
@@ -64,10 +69,11 @@ final class BillableItemDbInstanceRepository implements BillableItemInstanceRepo
             ->update(
                 [
                     'end_date' => CarbonImmutable::now(),
-                ]
+                ],
             );
     }
 
+    #[Override]
     public function updateEndDate(BillableItemInstanceId $instanceId, ?DateTimeInterface $endDate): void
     {
         BillableItemInstance::query()

@@ -24,8 +24,7 @@ final class PaymentInfoData
         public string $bankingBic,
         public string $bankingAccountHolderName,
         public ?DateTimeInterface $mandateAcceptedDate,
-    ) {
-    }
+    ) {}
 
     public static function createDefault(): self
     {
@@ -41,8 +40,11 @@ final class PaymentInfoData
     public static function createFromArray(array $data): self
     {
         $mandateAcceptedDate = null;
-        if (!empty($data['mandateAcceptedDate'])) {
-            $mandateAcceptedDate = DateTimeImmutable::createFromFormat(DateTimeInterface::ATOM, $data['mandateAcceptedDate']) ?: throw new InvalidArgumentException('Invalid mandate accepted date.');
+        if ($data['mandateAcceptedDate'] !== null) {
+            $mandateAcceptedDate = DateTimeImmutable::createFromFormat(DateTimeInterface::ATOM, $data['mandateAcceptedDate']);
+            if ($mandateAcceptedDate === false) {
+                throw new InvalidArgumentException('Invalid mandateAcceptedDate format');
+            }
         }
 
         return new self(

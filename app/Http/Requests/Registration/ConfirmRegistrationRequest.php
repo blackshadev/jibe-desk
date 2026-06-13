@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Registration;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Override;
 
 final class ConfirmRegistrationRequest extends FormRequest
 {
@@ -22,6 +23,7 @@ final class ConfirmRegistrationRequest extends FormRequest
     /**
      * @return array<string, string>
      */
+    #[Override]
     public function messages(): array
     {
         return [

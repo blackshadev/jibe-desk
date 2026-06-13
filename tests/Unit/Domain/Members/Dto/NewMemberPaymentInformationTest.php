@@ -21,9 +21,9 @@ final class NewMemberPaymentInformationTest extends UnitTestCase
             mandateAcceptedDate: $mandateDate,
         );
 
-        self::assertSame('NL91ABNA0417164300', $dto->iban);
-        self::assertSame('ABNANL2A', $dto->bic);
-        self::assertSame('J. de Vries', $dto->accountHolderName);
-        self::assertSame($mandateDate, $dto->mandateAcceptedDate);
+        static::assertSame('NL91ABNA0417164300', $dto->iban);
+        static::assertSame('ABNANL2A', $dto->bic);
+        static::assertSame('J. de Vries', $dto->accountHolderName);
+        static::assertSame($mandateDate, $dto->mandateAcceptedDate);
     }
 }

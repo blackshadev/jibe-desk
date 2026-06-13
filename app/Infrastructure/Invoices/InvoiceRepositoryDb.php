@@ -19,13 +19,15 @@ use App\Models\Member;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Override;
 
 final class InvoiceRepositoryDb implements InvoiceRepository
 {
-    public function __construct(private InvoiceNumberGenerator $invoiceNumberGenerator)
-    {
-    }
+    public function __construct(
+        private InvoiceNumberGenerator $invoiceNumberGenerator,
+    ) {}
 
+    #[Override]
     public function create(NewInvoice $invoice): InvoiceId
     {
         DB::beginTransaction();
@@ -43,24 +45,27 @@ final class InvoiceRepositoryDb implements InvoiceRepository
             'date' => $invoice->invoiceDate,
         ]);
 
-        $model->lines()->createMany(
-            array_map(
-                static fn (BillableItem $item) => [
-                    'description' => $item->description,
-                    'price' => $item->price->price,
-                    'vat' => $item->price->vat,
-                    'quantity' => $item->quantity,
-                    'billable_item_id' => $item->id->value,
-                ],
-                $invoice->items->items
-            )
-        );
+        $model
+            ->lines()
+            ->createMany(
+                array_map(
+                    static fn (BillableItem $item) => [
+                        'description' => $item->description,
+                        'price' => $item->price->price,
+                        'vat' => $item->price->vat,
+                        'quantity' => $item->quantity,
+                        'billable_item_id' => $item->id->value,
+                    ],
+                    $invoice->items->items,
+                ),
+            );
 
         DB::commit();
 
         return new InvoiceId($model->id);
     }
 
+    #[Override]
     public function applyLines(ApplyInvoiceLines $invoice): AppliedInvoiceWithLineIds
     {
         DB::beginTransaction();
@@ -77,7 +82,8 @@ final class InvoiceRepositoryDb implements InvoiceRepository
                     $date->startOfMonth(),
                     $date->endOfMonth(),
                 ],
-            )->firstOrCreate(
+            )
+            ->firstOrCreate(
                 [
                     'status' => InvoiceStatus::Open,
                     'member_id' => $invoice->memberId->value,
@@ -87,22 +93,24 @@ final class InvoiceRepositoryDb implements InvoiceRepository
                     'recipient_address' => $member->address,
                     'invoice_number' => $invoiceNumber,
                     'date' => $invoice->date,
-                ]
+                ],
             );
 
         /** @var Collection<InvoiceLine> $lines */
-        $lines = $model->lines()->createMany(
-            array_map(
-                static fn (BillableItem $item) => [
-                    'description' => $item->description,
-                    'price' => $item->price->price,
-                    'vat' => $item->price->vat,
-                    'quantity' => $item->quantity,
-                    'billable_item_id' => $item->id->value,
-                ],
-                $invoice->items->items
-            )
-        );
+        $lines = $model
+            ->lines()
+            ->createMany(
+                array_map(
+                    static fn (BillableItem $item) => [
+                        'description' => $item->description,
+                        'price' => $item->price->price,
+                        'vat' => $item->price->vat,
+                        'quantity' => $item->quantity,
+                        'billable_item_id' => $item->id->value,
+                    ],
+                    $invoice->items->items,
+                ),
+            );
 
         DB::commit();
 

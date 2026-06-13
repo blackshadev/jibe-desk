@@ -9,8 +9,9 @@ use Webmozart\Assert\Assert;
 final class MemberIdList
 {
     /** @param MemberId[] $ids */
-    public function __construct(public array $ids)
-    {
+    public function __construct(
+        public array $ids,
+    ) {
         /** @phpstan-ignore-next-line staticMethod.alreadyNarrowedType */
         Assert::allIsInstanceOf($ids, MemberId::class);
     }
@@ -20,9 +21,9 @@ final class MemberIdList
     {
         return new self(
             array_map(
-                static fn (int $id) => MemberId::create($id),
-                $array
-            )
+                MemberId::create(...),
+                $array,
+            ),
         );
     }
 }

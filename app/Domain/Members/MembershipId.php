@@ -6,6 +6,4 @@ namespace App\Domain\Members;
 
 use App\Domain\NumericId;
 
-final readonly class MembershipId extends NumericId
-{
-}
+final readonly class MembershipId extends NumericId {}

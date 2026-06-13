@@ -10,11 +10,13 @@ use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs;
 use Illuminate\Database\Eloquent\Builder;
+use Override;
 
 final class ListStorageSpaces extends ListRecords
 {
     protected static string $resource = StorageSpaceResource::class;
 
+    #[Override]
     public function getTabs(): array
     {
         return [
@@ -22,16 +24,17 @@ final class ListStorageSpaces extends ListRecords
             'available' => Tabs\Tab::make(__('labels.available'))
                 ->modifyQueryUsing(
                     /** @phpstan-ignore-next-line method.notFound */
-                    static fn (Builder $query) => $query->available()
+                    static fn (Builder $query) => $query->available(),
                 ),
             'unavailable' => Tabs\Tab::make(__('labels.unavailable'))
                 ->modifyQueryUsing(
                     /** @phpstan-ignore-next-line method.notFound */
-                    static fn (Builder $query) => $query->unavailable()
+                    static fn (Builder $query) => $query->unavailable(),
                 ),
         ];
     }
 
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [

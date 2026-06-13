@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature\Mail;
 
 use App\Domain\Members\MemberId;
-use App\Mail\NewMemberAdminNotification;
 use App\Domain\Registration\MembershipData;
+use App\Mail\NewMemberAdminNotification;
 use Tests\FeatureTestCase;
 
 final class NewMemberAdminNotificationTest extends FeatureTestCase
@@ -29,14 +29,14 @@ final class NewMemberAdminNotificationTest extends FeatureTestCase
 
         $rendered = $mail->render();
 
-        self::assertStringContainsString('Nieuwe aanmelding', $rendered);
-        self::assertStringContainsString('Vries, Jan de', $rendered);
-        self::assertStringContainsString('Reguliere surflessen: Ja', $rendered);
-        self::assertStringContainsString('RTC: Nee', $rendered);
-        self::assertStringContainsString('Clubhuis toegang: Ja', $rendered);
-        self::assertStringContainsString('Board opslag: Nee', $rendered);
-        self::assertStringContainsString('Watersportbond nummer: 12345', $rendered);
-        self::assertStringContainsString('Bekijk lid in administratie', $rendered);
+        static::assertStringContainsString('Nieuwe aanmelding', $rendered);
+        static::assertStringContainsString('Vries, Jan de', $rendered);
+        static::assertStringContainsString('Reguliere surflessen: Ja', $rendered);
+        static::assertStringContainsString('RTC: Nee', $rendered);
+        static::assertStringContainsString('Clubhuis toegang: Ja', $rendered);
+        static::assertStringContainsString('Board opslag: Nee', $rendered);
+        static::assertStringContainsString('Watersportbond nummer: 12345', $rendered);
+        static::assertStringContainsString('Bekijk lid in administratie', $rendered);
     }
 
     public function test_it_shows_default_text_for_empty_federation_number(): void
@@ -49,6 +49,6 @@ final class NewMemberAdminNotificationTest extends FeatureTestCase
 
         $rendered = $mail->render();
 
-        self::assertStringContainsString('Watersportbond nummer: Niet opgegeven', $rendered);
+        static::assertStringContainsString('Watersportbond nummer: Niet opgegeven', $rendered);
     }
 }

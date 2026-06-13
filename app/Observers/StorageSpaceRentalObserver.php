@@ -11,9 +11,9 @@ use App\Models\StorageSpaceRental;
 
 final readonly class StorageSpaceRentalObserver
 {
-    public function __construct(private ApplyStorageSpaceRentalBilling $applyStorageSpaceRentalBilling)
-    {
-    }
+    public function __construct(
+        private ApplyStorageSpaceRentalBilling $applyStorageSpaceRentalBilling,
+    ) {}
 
     public function created(StorageSpaceRental $rental): void
     {
@@ -39,7 +39,7 @@ final readonly class StorageSpaceRentalObserver
         }
 
         $this->applyStorageSpaceRentalBilling->stop(
-            BillableItemInstanceId::create($rental->billable_item_instance_id)
+            BillableItemInstanceId::create($rental->billable_item_instance_id),
         );
     }
 }

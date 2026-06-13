@@ -5,15 +5,16 @@ declare(strict_types=1);
 namespace App\Domain\Invoices;
 
 use App\Domain\Invoices\Billing\BillableItemsViewRepository;
+use Override;
 
 final readonly class InvoiceBatchGeneratorImpl implements InvoiceBatchGenerator
 {
     public function __construct(
         private InvoiceGenerator $invoiceGenerator,
         private BillableItemsViewRepository $billableItemRepository,
-    ) {
-    }
+    ) {}
 
+    #[Override]
     public function generate(InvoiceBatch $invoiceBatch): void
     {
         $billableMembers = $this->billableItemRepository->listBillableMembers($invoiceBatch->invoiceDate);

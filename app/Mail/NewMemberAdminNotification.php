@@ -21,8 +21,7 @@ final class NewMemberAdminNotification extends Mailable
         public readonly MemberId $memberId,
         public readonly string $memberName,
         public readonly MembershipData $membershipData,
-    ) {
-    }
+    ) {}
 
     public function envelope(): Envelope
     {

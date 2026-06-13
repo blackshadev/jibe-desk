@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Members\Events;
 
-use App\Domain\Members\MemberId;
 use App\Domain\Members\Events\NewMemberRegistration;
+use App\Domain\Members\MemberId;
 use App\Domain\Registration\MembershipData;
 use Tests\UnitTestCase;
 
@@ -25,9 +25,9 @@ final class NewMemberRegistrationTest extends UnitTestCase
             membershipData: $membershipData,
         );
 
-        self::assertSame($memberId, $event->memberId);
-        self::assertSame($memberName, $event->memberName);
-        self::assertSame($memberEmail, $event->memberEmail);
-        self::assertSame($membershipData, $event->membershipData);
+        static::assertSame($memberId, $event->memberId);
+        static::assertSame($memberName, $event->memberName);
+        static::assertSame($memberEmail, $event->memberEmail);
+        static::assertSame($membershipData, $event->membershipData);
     }
 }

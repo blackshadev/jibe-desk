@@ -26,7 +26,7 @@ final class MembershipForm
                             ->label(__('labels.name'))
                             ->required(),
                         Toggle::make('is_default')
-                            ->rule(fn (?Membership $record) => new UniqueDefaultMembership($record?->id))
+                            ->rule(static fn (?Membership $record) => new UniqueDefaultMembership($record?->id))
                             ->label(__('labels.default_membership')),
                     ]),
                 Section::make(__('labels.billing_adults'))

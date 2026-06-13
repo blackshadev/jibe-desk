@@ -19,6 +19,6 @@ final class MembershipListTest extends UnitTestCase
             new Membership(MembershipId::create(2), BillableItemId::create(30), BillableItemId::create(40)),
         ]);
 
-        self::assertSame([10, 20, 30, 40], $subject->asBillingIdList()->toIntArray());
+        static::assertSame([10, 20, 30, 40], $subject->asBillingIdList()->toIntArray());
     }
 }

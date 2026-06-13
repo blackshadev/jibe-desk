@@ -11,40 +11,40 @@ use App\Models\Member;
 use App\Models\Membership;
 use App\Models\PaymentInformation;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Override;
 
 /** @extends Factory<Member> */
 final class MemberFactory extends Factory
 {
+    #[Override]
     public function definition(): array
     {
-        $nameGender = $this->faker->randomElement(['male', 'female']);
-        $firstName = $this->faker->firstName($nameGender);
+        $nameGender = fake()->randomElement(['male', 'female']);
+        $firstName = fake()->firstName($nameGender);
 
         return [
             'first_name' => $firstName,
-            'infix_name' => $this->faker->randomElement(['van', 'de', 'den', 'van de', 'van den', '']),
-            'last_name' => $this->faker->lastName(),
-            'email' => $this->faker ->safeEmail(),
-            'address_street' => $this->faker->streetName(),
-            'address_housenumber' => (string) $this->faker->numberBetween(1, 200),
-            'address_housenumber_addition' => $this->faker->optional()->randomElement(['A', 'B', 'C', 'bis']),
-            'address_city' => $this->faker->city(),
-            'address_postalcode' => $this->faker->postcode(),
-            'birthdate' => $this->faker->date(),
-            'gender' => $this->faker->randomElement(Gender::cases()),
+            'infix_name' => fake()->randomElement(['van', 'de', 'den', 'van de', 'van den', '']),
+            'last_name' => fake()->lastName(),
+            'email' => fake()->safeEmail(),
+            'address_street' => fake()->streetName(),
+            'address_housenumber' => (string) fake()->numberBetween(1, 200),
+            'address_housenumber_addition' => fake()->optional()->randomElement(['A', 'B', 'C', 'bis']),
+            'address_city' => fake()->city(),
+            'address_postalcode' => fake()->postcode(),
+            'birthdate' => fake()->date(),
+            'gender' => fake()->randomElement(Gender::cases()),
             'membership_id' => Membership::factory(),
-            'is_volunteer' => $this->faker->boolean(),
-            'created_at' => $this->faker->dateTimeBetween('-1 years', 'now'),
+            'is_volunteer' => fake()->boolean(),
+            'created_at' => fake()->dateTimeBetween('-1 years', 'now'),
         ];
     }
 
     public function deleted(): self
     {
-        return $this->state(function (array $attributes) {
-            return [
-                'deleted_at' => $this->faker->dateTimeBetween($attributes['created_at'], 'now'),
-            ];
-        });
+        return $this->state(static fn (array $attributes) => [
+            'deleted_at' => fake()->dateTimeBetween($attributes['created_at'], 'now'),
+        ]);
     }
 
     public function withPaymentInfo(): self
@@ -55,20 +55,20 @@ final class MemberFactory extends Factory
     /** @param iterable<Activity> $activities */
     public function withRandomActivity(iterable $activities): self
     {
-        $activity = $this->faker->optional()->randomElement($activities);
+        $activity = fake()->optional()->randomElement($activities);
 
         if (!$activity) {
             return $this;
         }
 
-        return $this->afterCreating(function (Member $member) use ($activity) {
+        return $this->afterCreating(static function (Member $member) use ($activity) {
             $member->activities()->attach($activity);
         });
     }
 
     public function inHousehold(Household $household): self
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(static fn (array $_attributes) => [
             'household_id' => $household->id,
         ]);
     }

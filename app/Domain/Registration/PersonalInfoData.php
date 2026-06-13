@@ -39,8 +39,7 @@ final class PersonalInfoData
         public string $addressHousenumberAddition,
         public string $addressPostalcode,
         public string $addressCity,
-    ) {
-    }
+    ) {}
 
     public static function createDefault(): self
     {
@@ -62,13 +61,18 @@ final class PersonalInfoData
     /** @param PersonalInfoDataArray $data */
     public static function createFromArray(array $data): self
     {
+        $birthdate = DateTimeImmutable::createFromFormat('Y-m-d', $data['birthdate']);
+        if ($birthdate === false) {
+            throw new InvalidArgumentException('Invalid birthdate');
+        }
+
         return new self(
             firstName: $data['firstName'],
             infixName: $data['infixName'] ?? '',
             lastName: $data['lastName'],
             email: $data['email'],
             gender: Gender::from($data['gender']),
-            birthdate: DateTimeImmutable::createFromFormat('Y-m-d', $data['birthdate']) ?: throw new InvalidArgumentException('Invalid birthdate'),
+            birthdate: $birthdate,
             addressStreet: $data['addressStreet'],
             addressHousenumber: $data['addressHousenumber'],
             addressHousenumberAddition: $data['addressHousenumberAddition'],

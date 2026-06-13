@@ -11,12 +11,14 @@ use App\Domain\StorageSpaceRentals\StorageSpaceRental as StorageSpaceRentalEntit
 use App\Domain\StorageSpaceRentals\StorageSpaceRentalId;
 use App\Domain\StorageSpaceRentals\StorageSpaceRentalRepository;
 use App\Models\StorageSpaceRental;
+use Override;
 
 final class StorageSpaceRentalDbRepository implements StorageSpaceRentalRepository
 {
+    #[Override]
     public function getById(StorageSpaceRentalId $rentalId): StorageSpaceRentalEntity
     {
-        $model = StorageSpaceRental::with('storageSpace.location.billableItem')->findOrFail($rentalId->value);
+        $model = StorageSpaceRental::query()->with('storageSpace.location.billableItem')->findOrFail($rentalId->value);
 
         return new StorageSpaceRentalEntity(
             id: StorageSpaceRentalId::create($model->id),
@@ -27,6 +29,7 @@ final class StorageSpaceRentalDbRepository implements StorageSpaceRentalReposito
         );
     }
 
+    #[Override]
     public function attachBillableItemInstance(StorageSpaceRentalId $rentalId, BillableItemInstanceId $instanceId): void
     {
         StorageSpaceRental::query()

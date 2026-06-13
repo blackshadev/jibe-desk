@@ -11,6 +11,7 @@ use App\Models\Pivots\ActivityMember;
 use App\Observers\ActivityMemberObserver;
 use Tests\FeatureTestCase;
 use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplyActivityBillingExpectation;
+use Override;
 
 final class ActivityMemberObserverTest extends FeatureTestCase
 {
@@ -18,6 +19,7 @@ final class ActivityMemberObserverTest extends FeatureTestCase
 
     private ActivityMemberObserver $subject;
 
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();

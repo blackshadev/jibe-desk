@@ -10,13 +10,14 @@ use App\Domain\StorageSpaceRentals\StorageSpaceRentalId;
 use DateTimeInterface;
 use Mockery;
 use Mockery\MockInterface;
+
 use function PHPUnit\Framework\equalTo;
 
 final readonly class ApplyStorageSpaceRentalBillingExpectation
 {
-    private function __construct(public MockInterface&ApplyStorageSpaceRentalBilling $mock)
-    {
-    }
+    private function __construct(
+        public MockInterface&ApplyStorageSpaceRentalBilling $mock,
+    ) {}
 
     public static function create(): self
     {

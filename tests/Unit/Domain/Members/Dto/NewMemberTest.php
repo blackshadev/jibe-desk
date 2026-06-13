@@ -44,10 +44,10 @@ final class NewMemberTest extends UnitTestCase
             paymentInformation: $payment,
         );
 
-        self::assertSame($membership, $dto->membershipInformation);
-        self::assertSame($personal, $dto->personalInformation);
-        self::assertSame($payment, $dto->paymentInformation);
-        self::assertSame([], $dto->registrationData);
+        static::assertSame($membership, $dto->membershipInformation);
+        static::assertSame($personal, $dto->personalInformation);
+        static::assertSame($payment, $dto->paymentInformation);
+        static::assertSame([], $dto->registrationData);
     }
 
     public function test_registration_answers_defaults_to_empty_array(): void
@@ -75,7 +75,7 @@ final class NewMemberTest extends UnitTestCase
             ),
         );
 
-        self::assertSame([], $dto->registrationData);
+        static::assertSame([], $dto->registrationData);
     }
 
     public function test_registration_answers_can_be_provided(): void
@@ -106,6 +106,6 @@ final class NewMemberTest extends UnitTestCase
             registrationData: $answers,
         );
 
-        self::assertSame($answers, $dto->registrationData);
+        static::assertSame($answers, $dto->registrationData);
     }
 }

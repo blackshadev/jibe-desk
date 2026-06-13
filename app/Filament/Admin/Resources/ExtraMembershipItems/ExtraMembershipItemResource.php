@@ -17,6 +17,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
+use Override;
 
 final class ExtraMembershipItemResource extends Resource
 {
@@ -30,32 +31,38 @@ final class ExtraMembershipItemResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'code';
 
+    #[Override]
     public static function getRecordTitle(?Model $record): string
     {
         /** @var ExtraMembershipItem $record */
-        return $record?->code->value ?? "";
+        return $record->code->value ;
     }
 
+    #[Override]
     public static function form(Schema $schema): Schema
     {
         return ExtraMembershipItemForm::configure($schema);
     }
 
+    #[Override]
     public static function table(Table $table): Table
     {
         return ExtraMembershipItemsTable::configure($table);
     }
 
+    #[Override]
     public static function getLabel(): string
     {
         return __('labels.extra_membership_item');
     }
 
+    #[Override]
     public static function getPluralLabel(): string
     {
         return __('labels.extra_membership_items');
     }
 
+    #[Override]
     public static function getPages(): array
     {
         return [

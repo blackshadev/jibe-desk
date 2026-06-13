@@ -44,11 +44,10 @@ final class StorageSpaceRentalForm
             Select::make('storage_space_location_id')
                 ->label(__('labels.location'))
                 ->options(
-                    static fn (): array =>
-                        StorageSpaceLocation::query()
-                            ->orderBy('name')
-                            ->pluck('name', 'id')
-                            ->toArray()
+                    static fn (): array => StorageSpaceLocation::query()
+                        ->orderBy('name')
+                        ->pluck('name', 'id')
+                        ->toArray(),
                 )
                 ->required()
                 ->live()
@@ -58,20 +57,18 @@ final class StorageSpaceRentalForm
             Select::make('storage_space_id')
                 ->label(__('labels.space_number'))
                 ->options(
-                    static fn (Get $get): array =>
-                        StorageSpace::query()
-                            ->where('storage_space_location_id', $get('storage_space_location_id'))
-                            ->pluck('number', 'id')
-                            ->toArray()
+                    static fn (Get $get): array => StorageSpace::query()
+                        ->where('storage_space_location_id', $get('storage_space_location_id'))
+                        ->pluck('number', 'id')
+                        ->toArray(),
                 )
                 ->searchable()
                 ->getSearchResultsUsing(
-                    static fn (string $search, Get $get): array =>
-                    StorageSpace::query()
+                    static fn (string $search, Get $get): array => StorageSpace::query()
                         ->where('storage_space_location_id', $get('storage_space_location_id'))
                         ->where('number', 'like', "%{$search}%")
                         ->pluck('number', 'id')
-                        ->toArray()
+                        ->toArray(),
                 )
                 ->required()
                 ->live(),
@@ -112,7 +109,7 @@ final class StorageSpaceRentalForm
                                 excludeRentalIds: $record instanceof StorageSpaceRental ? [$record->id] : [],
                             ),
                         ];
-                    }
+                    },
                 ),
             DatePicker::make('end_date')
                 ->label(__('labels.end_date'))

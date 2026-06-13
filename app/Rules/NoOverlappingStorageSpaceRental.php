@@ -11,6 +11,7 @@ use Closure;
 use DateTimeInterface;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Builder;
+use Override;
 
 final readonly class NoOverlappingStorageSpaceRental implements ValidationRule
 {
@@ -22,9 +23,9 @@ final readonly class NoOverlappingStorageSpaceRental implements ValidationRule
         private ?DateTimeInterface $startDate,
         private ?DateTimeInterface $endDate,
         private array $excludeRentalIds = [],
-    ) {
-    }
+    ) {}
 
+    #[Override]
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $effectiveEndDate = $this->endDate ?? CarbonImmutable::create('9999-12-31 23:59:59');
@@ -39,7 +40,7 @@ final readonly class NoOverlappingStorageSpaceRental implements ValidationRule
                     ->orWhere('storage_space_rentals.end_date', '>', $effectiveStartDate);
             });
 
-        if (!empty($this->excludeRentalIds)) {
+        if ($this->excludeRentalIds !== []) {
             $query->whereNotIn('storage_space_rentals.id', $this->excludeRentalIds);
         }
 
@@ -48,7 +49,7 @@ final readonly class NoOverlappingStorageSpaceRental implements ValidationRule
         if ($member !== null) {
             $fullName = MemberNameFormatter::displayName($member['first_name'], $member['infix_name'], $member['last_name']);
 
-            $fail(__('validation.no_overlapping_storage_space_rental', [ 'member' => $fullName ]));
+            $fail(__('validation.no_overlapping_storage_space_rental', ['member' => $fullName]));
         }
     }
 }

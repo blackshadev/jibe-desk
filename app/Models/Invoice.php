@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Override;
 
 /**
  * @property InvoiceStatus $status
@@ -33,6 +34,7 @@ final class Invoice extends Model
         return $this->hasMany(InvoiceLine::class);
     }
 
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -42,13 +44,13 @@ final class Invoice extends Model
     }
 
     /** @return Attribute<CompoundPrice, never> */
-    protected function total(): Attribute
+    protected function _total(): Attribute
     {
         return Attribute::get(
             fn () => $this->lines->reduce(
                 static fn (CompoundPrice $total, InvoiceLine $line): CompoundPrice => $total->add($line->subTotal),
                 CompoundPrice::empty(),
-            )
+            ),
         );
     }
 }

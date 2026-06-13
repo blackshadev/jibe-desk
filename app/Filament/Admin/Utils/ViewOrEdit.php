@@ -7,6 +7,7 @@ namespace App\Filament\Admin\Utils;
 use Closure;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Model;
+use Gate;
 
 final class ViewOrEdit
 {
@@ -16,6 +17,6 @@ final class ViewOrEdit
      */
     public static function route(string $resource): Closure
     {
-        return static fn (Model $record) => $resource::getUrl(\Gate::allows('update', $record) ? 'edit' : 'view', ['record' => $record]);
+        return static fn (Model $record) => $resource::getUrl(Gate::allows('update', $record) ? 'edit' : 'view', ['record' => $record]);
     }
 }

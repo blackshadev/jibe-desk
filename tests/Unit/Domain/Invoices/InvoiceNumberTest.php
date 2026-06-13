@@ -14,8 +14,8 @@ final class InvoiceNumberTest extends UnitTestCase
     {
         $subject = new InvoiceNumber('I-2026000001');
 
-        self::assertSame('I-2026000001', $subject->value);
-        self::assertSame('I-2026000001', (string) $subject);
+        static::assertSame('I-2026000001', $subject->value);
+        static::assertSame('I-2026000001', (string) $subject);
     }
 
     public function test_it_rejects_invalid_prefix(): void

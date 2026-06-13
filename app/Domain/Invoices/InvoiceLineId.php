@@ -6,6 +6,4 @@ namespace App\Domain\Invoices;
 
 use App\Domain\NumericId;
 
-final readonly class InvoiceLineId extends NumericId
-{
-}
+final readonly class InvoiceLineId extends NumericId {}

@@ -16,6 +16,7 @@ use Tests\Unit\Domain\Invoices\BillableItemRepositoryExpectation;
 use Tests\Unit\Domain\Members\ExtraMembershipBillingItemRepositoryExpectation;
 use Tests\Unit\Domain\Members\MemberRepositoryExpectation;
 use Tests\UnitTestCase;
+use Override;
 
 final class ApplyMemberVolunteerBillingImplTest extends UnitTestCase
 {
@@ -27,6 +28,7 @@ final class ApplyMemberVolunteerBillingImplTest extends UnitTestCase
 
     private ApplyMemberVolunteerBillingImpl $subject;
 
+    #[Override]
     protected function setup(): void
     {
         parent::setup();
@@ -49,7 +51,7 @@ final class ApplyMemberVolunteerBillingImplTest extends UnitTestCase
 
         $this->memberRepository->expectsGetById(
             $memberId,
-            new Member($memberId, MembershipId::create(2), true, null, 22)
+            new Member($memberId, MembershipId::create(2), true, null, 22),
         );
         $this->extraMembershipBillingItemRepository->expectsGetByCode(ExtraMembershipItemCode::VolunteerContribution, $contributionId);
         $this->extraMembershipBillingItemRepository->expectsGetByCode(ExtraMembershipItemCode::VolunteerRestitution, $restitutionId);
@@ -67,7 +69,7 @@ final class ApplyMemberVolunteerBillingImplTest extends UnitTestCase
 
         $this->memberRepository->expectsGetById(
             $memberId,
-            new Member($memberId, MembershipId::create(2), false, null, 22)
+            new Member($memberId, MembershipId::create(2), false, null, 22),
         );
         $this->extraMembershipBillingItemRepository->expectsGetByCode(ExtraMembershipItemCode::VolunteerContribution, $contributionId);
         $this->extraMembershipBillingItemRepository->expectsGetByCode(ExtraMembershipItemCode::VolunteerRestitution, $restitutionId);

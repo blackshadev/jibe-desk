@@ -17,9 +17,9 @@ final class NewMemberWelcomeTest extends FeatureTestCase
 
         $rendered = $mail->render();
 
-        self::assertStringContainsString('Welkom bij Almere Centraal!', $rendered);
-        self::assertStringContainsString('Beste Vries, Jan de', $rendered);
-        self::assertStringContainsString('Wat leuk dat je lid wilt worden', $rendered);
-        self::assertStringContainsString('twee weken', $rendered);
+        static::assertStringContainsString('Welkom bij Almere Centraal!', $rendered);
+        static::assertStringContainsString('Beste Vries, Jan de', $rendered);
+        static::assertStringContainsString('Wat leuk dat je lid wilt worden', $rendered);
+        static::assertStringContainsString('twee weken', $rendered);
     }
 }

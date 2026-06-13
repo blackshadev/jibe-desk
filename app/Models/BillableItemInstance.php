@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 #[Fillable(['member_id', 'billable_item_id', 'start_date', 'end_date', 'bill_cycle_in_months'])]
 final class BillableItemInstance extends Model
@@ -30,7 +31,7 @@ final class BillableItemInstance extends Model
 
     public function stop(): void
     {
-        $this->update([ 'end_date' => now() ]);
+        $this->update(['end_date' => now()]);
     }
 
     public function isStopped(): bool
@@ -40,9 +41,10 @@ final class BillableItemInstance extends Model
 
     public function resume(): void
     {
-        $this->update([ 'end_date' => null ]);
+        $this->update(['end_date' => null]);
     }
 
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -52,13 +54,13 @@ final class BillableItemInstance extends Model
     }
 
     #[Scope]
-    protected function active(Builder $query): Builder
+    protected function _active(Builder $query): Builder
     {
         return $query->whereNull('end_date')->orWhereFuture('end_date');
     }
 
     #[Scope]
-    protected function inactive(Builder $query): Builder
+    protected function _inactive(Builder $query): Builder
     {
         return $query->whereNowOrPast('end_date');
     }

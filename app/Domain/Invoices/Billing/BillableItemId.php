@@ -6,6 +6,4 @@ namespace App\Domain\Invoices\Billing;
 
 use App\Domain\NumericId;
 
-final readonly class BillableItemId extends NumericId
-{
-}
+final readonly class BillableItemId extends NumericId {}

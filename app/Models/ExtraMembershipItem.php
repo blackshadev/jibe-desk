@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 /** @property ExtraMembershipItemCode $code */
 #[Fillable(['billable_item_id', 'code'])]
@@ -22,6 +23,7 @@ final class ExtraMembershipItem extends Model
         return $this->belongsTo(BillableItem::class);
     }
 
+    #[Override]
     protected function casts(): array
     {
         return [

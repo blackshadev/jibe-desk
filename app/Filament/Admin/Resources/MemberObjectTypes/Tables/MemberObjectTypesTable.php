@@ -6,6 +6,7 @@ namespace App\Filament\Admin\Resources\MemberObjectTypes\Tables;
 
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use App\Formatters\PriceFormatter;
 
 final class MemberObjectTypesTable
 {
@@ -14,7 +15,9 @@ final class MemberObjectTypesTable
         return $table->columns([
             TextColumn::make('name'),
             TextColumn::make('billableItem.description')->label(__('labels.description')),
-            TextColumn::make('billableItem.price')->label(__('labels.price'))->formatStateUsing(\App\Formatters\PriceFormatter::format(...)),
+            TextColumn::make('billableItem.price')
+                ->label(__('labels.price'))
+                ->formatStateUsing(PriceFormatter::format(...)),
         ]);
     }
 }

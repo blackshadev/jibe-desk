@@ -8,9 +8,11 @@ use App\Domain\Invoices\Billing\BillableItemId;
 use App\Domain\Members\ExtraMembershipBillingItemRepository;
 use App\Domain\Members\ExtraMembershipItemCode;
 use App\Models\ExtraMembershipItem;
+use Override;
 
 final class ExtraMembershipBillingItemDbRepository implements ExtraMembershipBillingItemRepository
 {
+    #[Override]
     public function getByCode(ExtraMembershipItemCode $code): BillableItemId
     {
         $model = ExtraMembershipItem::query()->where('code', $code)->firstOrFail();

@@ -9,15 +9,16 @@ use App\Domain\Activities\ActivityRepository;
 use App\Domain\Invoices\Billing\BillableItemInstanceId;
 use App\Domain\Invoices\Billing\BillableItemInstanceRepository;
 use App\Domain\Members\MemberId;
+use Override;
 
 final readonly class ApplyActivityBillingImpl implements ApplyActivityBilling
 {
     public function __construct(
         private ActivityRepository $activityRepository,
         private BillableItemInstanceRepository $billableItemInstanceRepository,
-    ) {
-    }
+    ) {}
 
+    #[Override]
     public function apply(MemberId $memberId, ActivityId $activityId): void
     {
         $activity = $this->activityRepository->getById(ActivityId::create($activityId->value));
@@ -27,6 +28,7 @@ final readonly class ApplyActivityBillingImpl implements ApplyActivityBilling
         $this->activityRepository->attach($activityId, $memberId, $instanceId);
     }
 
+    #[Override]
     public function stop(BillableItemInstanceId $instanceId): void
     {
         $this->billableItemInstanceRepository->stop($instanceId);

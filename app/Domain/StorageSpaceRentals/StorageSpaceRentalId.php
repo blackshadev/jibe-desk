@@ -6,6 +6,4 @@ namespace App\Domain\StorageSpaceRentals;
 
 use App\Domain\NumericId;
 
-final readonly class StorageSpaceRentalId extends NumericId
-{
-}
+final readonly class StorageSpaceRentalId extends NumericId {}

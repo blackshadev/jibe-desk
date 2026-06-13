@@ -46,10 +46,10 @@ final class FormDataTest extends UnitTestCase
     {
         $formData = FormData::createDefault();
 
-        self::assertSame(Step::Initial, $formData->step);
-        self::assertSame('', $formData->membership->watersportFederationNumber);
-        self::assertSame('', $formData->personalInfo->firstName);
-        self::assertSame('', $formData->paymentInfo->bankingAccountNumber);
+        static::assertSame(Step::Initial, $formData->step);
+        static::assertSame('', $formData->membership->watersportFederationNumber);
+        static::assertSame('', $formData->personalInfo->firstName);
+        static::assertSame('', $formData->paymentInfo->bankingAccountNumber);
     }
 
     public function test_create_from_array_hydrates_all_data(): void
@@ -61,19 +61,19 @@ final class FormDataTest extends UnitTestCase
             'paymentInfo' => self::PAYMENT_INFO_DATA,
         ]);
 
-        self::assertSame(Step::Membership, $formData->step);
-        self::assertTrue($formData->membership->regularWindsurfingLessons);
-        self::assertFalse($formData->membership->rtc);
-        self::assertTrue($formData->membership->clubhouseAccess);
-        self::assertFalse($formData->membership->boardStorage);
-        self::assertSame('12345', $formData->membership->watersportFederationNumber);
-        self::assertSame('Jan', $formData->personalInfo->firstName);
-        self::assertSame('Vries', $formData->personalInfo->lastName);
-        self::assertSame('jan@example.com', $formData->personalInfo->email);
-        self::assertSame('NL91ABNA0417164300', $formData->paymentInfo->bankingAccountNumber);
-        self::assertSame('ABNANL2A', $formData->paymentInfo->bankingBic);
-        self::assertSame('J. de Vries', $formData->paymentInfo->bankingAccountHolderName);
-        self::assertSame('2024-02-01T03:04:05+00:00', $formData->paymentInfo->mandateAcceptedDate?->format('c'));
+        static::assertSame(Step::Membership, $formData->step);
+        static::assertTrue($formData->membership->regularWindsurfingLessons);
+        static::assertFalse($formData->membership->rtc);
+        static::assertTrue($formData->membership->clubhouseAccess);
+        static::assertFalse($formData->membership->boardStorage);
+        static::assertSame('12345', $formData->membership->watersportFederationNumber);
+        static::assertSame('Jan', $formData->personalInfo->firstName);
+        static::assertSame('Vries', $formData->personalInfo->lastName);
+        static::assertSame('jan@example.com', $formData->personalInfo->email);
+        static::assertSame('NL91ABNA0417164300', $formData->paymentInfo->bankingAccountNumber);
+        static::assertSame('ABNANL2A', $formData->paymentInfo->bankingBic);
+        static::assertSame('J. de Vries', $formData->paymentInfo->bankingAccountHolderName);
+        static::assertSame('2024-02-01T03:04:05+00:00', $formData->paymentInfo->mandateAcceptedDate?->format('c'));
     }
 
     public function test_welcome_advances_step_to_welcome(): void
@@ -82,7 +82,7 @@ final class FormDataTest extends UnitTestCase
 
         $updated = $formData->welcome();
 
-        self::assertSame(Step::Welcome, $updated->step);
+        static::assertSame(Step::Welcome, $updated->step);
     }
 
     public function test_membership_advances_step_and_stores_data(): void
@@ -92,7 +92,7 @@ final class FormDataTest extends UnitTestCase
         $membershipData = $formData->membership;
         $updated = $formData->membership($membershipData);
 
-        self::assertSame(Step::Membership, $updated->step);
+        static::assertSame(Step::Membership, $updated->step);
     }
 
     public function test_personal_info_advances_step_and_stores_data(): void
@@ -105,8 +105,8 @@ final class FormDataTest extends UnitTestCase
 
         $updated = $formData->personalInfo($personalInfo);
 
-        self::assertSame(Step::PersonalInfo, $updated->step);
-        self::assertSame('Jan', $updated->personalInfo->firstName);
+        static::assertSame(Step::PersonalInfo, $updated->step);
+        static::assertSame('Jan', $updated->personalInfo->firstName);
     }
 
     public function test_payment_info_advances_step_and_stores_data(): void
@@ -120,9 +120,9 @@ final class FormDataTest extends UnitTestCase
 
         $updated = $formData->paymentInfo($paymentInfo);
 
-        self::assertSame(Step::PaymentInfo, $updated->step);
-        self::assertSame('NL91ABNA0417164300', $updated->paymentInfo->bankingAccountNumber);
-        self::assertSame('2024-02-01T03:04:05+00:00', $updated->paymentInfo->mandateAcceptedDate?->format('c'));
+        static::assertSame(Step::PaymentInfo, $updated->step);
+        static::assertSame('NL91ABNA0417164300', $updated->paymentInfo->bankingAccountNumber);
+        static::assertSame('2024-02-01T03:04:05+00:00', $updated->paymentInfo->mandateAcceptedDate?->format('c'));
     }
 
     public function test_step_does_not_go_backwards(): void
@@ -131,26 +131,26 @@ final class FormDataTest extends UnitTestCase
             ->welcome()
             ->membership(MembershipData::createDefault());
 
-        self::assertSame(Step::Membership, $formData->step);
+        static::assertSame(Step::Membership, $formData->step);
 
         $updated = $formData->welcome();
 
-        self::assertSame(Step::Membership, $updated->step);
+        static::assertSame(Step::Membership, $updated->step);
     }
 
     public function test_is_step_disallowed_returns_true_when_skipping_steps(): void
     {
         $formData = FormData::createDefault()->welcome();
 
-        self::assertTrue($formData->isStepDisallowed(Step::PersonalInfo));
-        self::assertTrue($formData->isStepDisallowed(Step::PaymentInfo));
+        static::assertTrue($formData->isStepDisallowed(Step::PersonalInfo));
+        static::assertTrue($formData->isStepDisallowed(Step::PaymentInfo));
     }
 
     public function test_is_step_disallowed_returns_false_for_next_step(): void
     {
         $formData = FormData::createDefault()->welcome();
 
-        self::assertFalse($formData->isStepDisallowed(Step::Membership));
+        static::assertFalse($formData->isStepDisallowed(Step::Membership));
     }
 
     public function test_to_array_and_create_roundtrip(): void
@@ -164,9 +164,9 @@ final class FormDataTest extends UnitTestCase
         $array = $original->toArray();
         $restored = FormData::create($array);
 
-        self::assertSame($original->step->value, $restored->step->value);
-        self::assertSame($original->membership->toArray(), $restored->membership->toArray());
-        self::assertSame($original->personalInfo->toArray(), $restored->personalInfo->toArray());
-        self::assertSame($original->paymentInfo->toArray(), $restored->paymentInfo->toArray());
+        static::assertSame($original->step->value, $restored->step->value);
+        static::assertSame($original->membership->toArray(), $restored->membership->toArray());
+        static::assertSame($original->personalInfo->toArray(), $restored->personalInfo->toArray());
+        static::assertSame($original->paymentInfo->toArray(), $restored->paymentInfo->toArray());
     }
 }

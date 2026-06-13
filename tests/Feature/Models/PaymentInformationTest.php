@@ -16,7 +16,7 @@ final class PaymentInformationTest extends FeatureTestCase
         $member = Member::factory()->createQuietly();
         $paymentInformation = PaymentInformation::factory()->create(['member_id' => $member->id]);
 
-        self::assertNotEmpty($paymentInformation->uuid);
-        self::assertTrue(Str::isUuid($paymentInformation->uuid));
+        static::assertNotEmpty($paymentInformation->uuid);
+        static::assertTrue(Str::isUuid($paymentInformation->uuid));
     }
 }

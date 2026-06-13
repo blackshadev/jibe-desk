@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Override;
 
 /** @property BillPeriod $bill_period */
 #[Fillable(['description', 'price', 'vat', 'bill_period'])]
@@ -48,14 +49,15 @@ final class BillableItem extends Model
     }
 
     /** @return Attribute<CompoundPrice, never> */
-    protected function compoundPrice(): Attribute
+    protected function _compoundPrice(): Attribute
     {
         return Attribute::get(
-            static fn ($value, array $attributes): CompoundPrice => new CompoundPrice((float) $attributes['price'], (float) $attributes['vat'])
+            static fn ($_value, array $attributes): CompoundPrice => new CompoundPrice((float) $attributes['price'], (float) $attributes['vat']),
         );
     }
 
     /** @return array<string, string> */
+    #[Override]
     protected function casts(): array
     {
         return [

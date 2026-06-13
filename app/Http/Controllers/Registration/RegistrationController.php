@@ -15,11 +15,13 @@ use App\Http\Requests\Registration\StorePersonalInformationRequest;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 
+// TODO(vhagen): split this up
+// @mago-expect lint:too-many-methods
 final class RegistrationController extends Controller
 {
-    public function __construct(private readonly FormDataRepository $formDataRepository)
-    {
-    }
+    public function __construct(
+        private readonly FormDataRepository $formDataRepository,
+    ) {}
 
     public function showWelcomeForm(): View
     {
@@ -36,7 +38,7 @@ final class RegistrationController extends Controller
         return redirect()->route('register.membership');
     }
 
-    public function showMembershipForm(): View | RedirectResponse
+    public function showMembershipForm(): View|RedirectResponse
     {
         $formData = $this->formDataRepository->get();
         if ($formData->isStepDisallowed(Step::Membership)) {
@@ -54,7 +56,7 @@ final class RegistrationController extends Controller
         return redirect()->route('register.personal-information');
     }
 
-    public function showPersonalInformationForm(): RedirectResponse | View
+    public function showPersonalInformationForm(): RedirectResponse|View
     {
         $formData = $this->formDataRepository->get();
         if ($formData->isStepDisallowed(Step::PersonalInfo)) {
@@ -72,7 +74,7 @@ final class RegistrationController extends Controller
         return redirect()->route('register.payment-information');
     }
 
-    public function showPaymentInformationForm(): RedirectResponse | View
+    public function showPaymentInformationForm(): RedirectResponse|View
     {
         $formData = $this->formDataRepository->get();
         if ($formData->isStepDisallowed(Step::PaymentInfo)) {
@@ -90,7 +92,7 @@ final class RegistrationController extends Controller
         return redirect()->route('register.confirmation');
     }
 
-    public function showConfirmationForm(): View | RedirectResponse
+    public function showConfirmationForm(): View|RedirectResponse
     {
         $formData = $this->formDataRepository->get();
         if ($formData->isStepDisallowed(Step::Confirmation)) {
@@ -100,7 +102,7 @@ final class RegistrationController extends Controller
         return view('pages.register.5-confirmation', compact('formData'));
     }
 
-    public function confirmRegistration(ConfirmRegistrationRequest $request, NewMemberService $newMemberService): RedirectResponse
+    public function confirmRegistration(ConfirmRegistrationRequest $_request, NewMemberService $newMemberService): RedirectResponse
     {
         $formData = $this->formDataRepository->get();
 

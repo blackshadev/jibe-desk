@@ -9,6 +9,7 @@ use App\Domain\Members\MemberId;
 use App\Domain\Members\MemberRepository;
 use App\Domain\Members\MembershipId;
 use App\Domain\Members\MembershipRepository;
+use Override;
 
 final readonly class ApplyMembershipBillingImpl implements ApplyMembershipBilling
 {
@@ -16,9 +17,9 @@ final readonly class ApplyMembershipBillingImpl implements ApplyMembershipBillin
         private MemberRepository $memberRepository,
         private MembershipRepository $membershipRepository,
         private BillableItemInstanceRepository $billableItemRepository,
-    ) {
-    }
+    ) {}
 
+    #[Override]
     public function apply(MemberId $memberId, MembershipId $membershipId): void
     {
         $member = $this->memberRepository->getById($memberId);

@@ -8,7 +8,9 @@ use Database\Seeders\MembershipSeeder;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\TestWith;
 use Tests\FeatureTestCase;
+use Override;
 
+// @mago-expect too-many-methods
 final class RegistrationFlowTest extends FeatureTestCase
 {
     private const VALID_ACTIVITIES = [
@@ -34,6 +36,7 @@ final class RegistrationFlowTest extends FeatureTestCase
         'mandate_accepted' => '1',
     ];
 
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();
@@ -173,10 +176,13 @@ final class RegistrationFlowTest extends FeatureTestCase
         $this->post(route('register.membership'), self::VALID_ACTIVITIES);
         $this->post(route('register.personal-information'), self::VALID_PERSONAL_INFO);
 
-        $response = $this->post(route('register.payment-information'), [
-            ...self::VALID_PAYMENT_INFO,
-            ...$invalidData,
-        ]);
+        $response = $this->post(
+            route('register.payment-information'),
+            [
+                ...self::VALID_PAYMENT_INFO,
+                ...$invalidData,
+            ],
+        );
 
         $response->assertSessionHasErrors($errorField);
     }

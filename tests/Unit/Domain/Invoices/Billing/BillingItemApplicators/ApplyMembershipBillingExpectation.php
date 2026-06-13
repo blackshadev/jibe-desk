@@ -9,6 +9,7 @@ use App\Domain\Members\MemberId;
 use App\Domain\Members\MembershipId;
 use Mockery;
 use Mockery\MockInterface;
+
 use function PHPUnit\Framework\equalTo;
 
 /**
@@ -18,9 +19,9 @@ use function PHPUnit\Framework\equalTo;
  */
 final readonly class ApplyMembershipBillingExpectation
 {
-    private function __construct(public MockInterface&ApplyMembershipBilling $mock)
-    {
-    }
+    private function __construct(
+        public MockInterface&ApplyMembershipBilling $mock,
+    ) {}
 
     public static function create(): self
     {

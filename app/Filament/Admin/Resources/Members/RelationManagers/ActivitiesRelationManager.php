@@ -15,6 +15,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 final class ActivitiesRelationManager extends RelationManager
 {
@@ -24,6 +25,7 @@ final class ActivitiesRelationManager extends RelationManager
 
     protected static ?string $relatedResource = ActivityResource::class;
 
+    #[Override]
     public function table(Table $table): Table
     {
         return $table
@@ -38,13 +40,13 @@ final class ActivitiesRelationManager extends RelationManager
                     ->date(),
             ])
             ->recordUrl(
-                static fn (ActivityModel $record): string => ActivityResource::getUrl('edit', ['record' => $record])
+                static fn (ActivityModel $record): string => ActivityResource::getUrl('edit', ['record' => $record]),
             )
             ->headerActions([
                 AttachAction::make()
                     ->recordSelectOptionsQuery(
                         /** @phpstan-ignore-next-line method.notFound */
-                        static fn (Builder $query) => $query->active()
+                        static fn (Builder $query) => $query->active(),
                     )
                     ->successNotificationTitle(__('notifications.activity_attached')),
             ])
@@ -59,16 +61,19 @@ final class ActivitiesRelationManager extends RelationManager
             ]);
     }
 
+    #[Override]
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('labels.activities');
     }
 
+    #[Override]
     public static function getModelLabel(): string
     {
         return mb_strtolower(__('labels.activities'));
     }
 
+    #[Override]
     public static function getPluralModelLabel(): string
     {
         return mb_strtolower(__('labels.activity'));

@@ -8,6 +8,7 @@ use App\Domain\Members\MemberId;
 use App\Domain\Members\MemberIdList;
 use InvalidArgumentException;
 use Tests\UnitTestCase;
+use stdClass;
 
 final class MemberIdListTest extends UnitTestCase
 {
@@ -15,7 +16,7 @@ final class MemberIdListTest extends UnitTestCase
     {
         $subject = MemberIdList::fromArray([1, 2, 3]);
 
-        self::assertSame([1, 2, 3], array_map(static fn (MemberId $id): int => $id->value, $subject->ids));
+        static::assertSame([1, 2, 3], array_map(static fn (MemberId $id): int => $id->value, $subject->ids));
     }
 
     public function test_it_rejects_invalid_items(): void
@@ -23,6 +24,6 @@ final class MemberIdListTest extends UnitTestCase
         $this->expectException(InvalidArgumentException::class);
 
         /** @phpstan-ignore-next-line argument.type */
-        new MemberIdList([new \stdClass()]);
+        new MemberIdList([new stdClass()]);
     }
 }

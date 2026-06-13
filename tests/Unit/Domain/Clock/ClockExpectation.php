@@ -11,9 +11,9 @@ use Psr\Clock\ClockInterface;
 
 final readonly class ClockExpectation
 {
-    private function __construct(public MockInterface&ClockInterface $mock)
-    {
-    }
+    private function __construct(
+        public MockInterface&ClockInterface $mock,
+    ) {}
 
     public static function create(): self
     {

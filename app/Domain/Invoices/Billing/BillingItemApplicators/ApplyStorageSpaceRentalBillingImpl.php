@@ -9,15 +9,16 @@ use App\Domain\Invoices\Billing\BillableItemInstanceRepository;
 use App\Domain\StorageSpaceRentals\StorageSpaceRentalId;
 use App\Domain\StorageSpaceRentals\StorageSpaceRentalRepository;
 use DateTimeInterface;
+use Override;
 
 final readonly class ApplyStorageSpaceRentalBillingImpl implements ApplyStorageSpaceRentalBilling
 {
     public function __construct(
         private StorageSpaceRentalRepository $storageSpaceRentalRepository,
         private BillableItemInstanceRepository $billableItemInstanceRepository,
-    ) {
-    }
+    ) {}
 
+    #[Override]
     public function apply(StorageSpaceRentalId $rentalId): void
     {
         $rental = $this->storageSpaceRentalRepository->getById($rentalId);
@@ -32,11 +33,13 @@ final readonly class ApplyStorageSpaceRentalBillingImpl implements ApplyStorageS
         $this->storageSpaceRentalRepository->attachBillableItemInstance($rentalId, $instanceId);
     }
 
+    #[Override]
     public function updateEndDate(BillableItemInstanceId $billableItemInstanceId, ?DateTimeInterface $endDate): void
     {
         $this->billableItemInstanceRepository->updateEndDate($billableItemInstanceId, $endDate);
     }
 
+    #[Override]
     public function stop(BillableItemInstanceId $billableItemInstanceId): void
     {
         $this->billableItemInstanceRepository->stop($billableItemInstanceId);

@@ -6,9 +6,11 @@ namespace Tests\Unit\Domain\Activities;
 
 use App\Domain\Activities\ActivityId;
 use Tests\Unit\Domain\NumericIdTestCase;
+use Override;
 
 final class ActivityIdTest extends NumericIdTestCase
 {
+    #[Override]
     protected function getSubject(): string
     {
         return ActivityId::class;

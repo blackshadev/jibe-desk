@@ -12,6 +12,5 @@ final readonly class Membership
         public MembershipId $id,
         public BillableItemId $adultBillableItemId,
         public BillableItemId $kidsBillableItemId,
-    ) {
-    }
+    ) {}
 }

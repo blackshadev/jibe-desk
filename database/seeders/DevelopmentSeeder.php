@@ -24,7 +24,7 @@ final class DevelopmentSeeder extends Seeder
             'password' => Hash::make('password'),
         ]);
 
-        $location3 = StorageSpaceLocation::where('name', 'Container 3')->firstOrFail();
+        $location3 = StorageSpaceLocation::query()->where('name', 'Container 3')->firstOrFail();
         StorageSpace::factory()
             ->state([
                 'storage_space_location_id' => $location3->id,
@@ -33,7 +33,7 @@ final class DevelopmentSeeder extends Seeder
             ->count(30)
             ->create();
 
-        $location4 = StorageSpaceLocation::where('name', 'Container 4')->firstOrFail();
+        $location4 = StorageSpaceLocation::query()->where('name', 'Container 4')->firstOrFail();
         StorageSpace::factory()
             ->state([
                 'storage_space_location_id' => $location4->id,
@@ -42,7 +42,7 @@ final class DevelopmentSeeder extends Seeder
             ->count(30)
             ->create();
 
-        $location5 = StorageSpaceLocation::where('name', 'Container 5')->firstOrFail();
+        $location5 = StorageSpaceLocation::query()->where('name', 'Container 5')->firstOrFail();
         StorageSpace::factory()
             ->state([
                 'storage_space_location_id' => $location5->id,
@@ -50,7 +50,6 @@ final class DevelopmentSeeder extends Seeder
             ->sequence(static fn (Sequence $sequence) => ['number' => $sequence->index + 1])
             ->count(20)
             ->create();
-
 
         $activities = Activity::all();
         $memberships = Membership::all();
@@ -65,9 +64,9 @@ final class DevelopmentSeeder extends Seeder
                     ->has(
                         Invoice::factory()
                             ->withLines()
-                            ->randomCount()
+                            ->randomCount(),
                     )
-                    ->createMany()
+                    ->createMany(),
             );
         }
 
@@ -75,7 +74,7 @@ final class DevelopmentSeeder extends Seeder
             ->deleted()
             ->count(100)
             ->state([
-                'membership_id' => $memberships->first()->id,
+                'membership_id' => $memberships->first()?->id,
             ])
             ->withPaymentInfo()
             ->createQuietly();

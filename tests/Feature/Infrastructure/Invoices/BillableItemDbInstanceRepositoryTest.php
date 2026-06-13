@@ -13,11 +13,14 @@ use App\Models\BillableItemInstance;
 use App\Models\Member;
 use Carbon\CarbonImmutable;
 use Tests\FeatureTestCase;
+use App\Domain\Invoices\Billing\BillableItemInstanceId;
+use Override;
 
 final class BillableItemDbInstanceRepositoryTest extends FeatureTestCase
 {
     private const NOW = '2023-01-01 00:00:00';
 
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();
@@ -52,7 +55,7 @@ final class BillableItemDbInstanceRepositoryTest extends FeatureTestCase
         $billable = BillableItem::factory()->create();
 
         BillableItemInstance::factory()->create(['member_id' => $member->id, 'billable_item_id' => $billable->id, 'bill_cycle_in_months' => 12, 'start_date' => '2023-01-01']);
-        BillableItemInstance::factory()->create(['member_id' => $other->id, 'billable_item_id' => $billable->id,  'bill_cycle_in_months' => 12]);
+        BillableItemInstance::factory()->create(['member_id' => $other->id, 'billable_item_id' => $billable->id, 'bill_cycle_in_months' => 12]);
 
         $repo = new BillableItemDbInstanceRepository();
 
@@ -112,7 +115,7 @@ final class BillableItemDbInstanceRepositoryTest extends FeatureTestCase
 
         $repo->ensure(MemberId::create($member->id), BillableItemId::create($billable->id));
 
-        self::assertSame(1, BillableItemInstance::query()->where('member_id', $member->id)->where('billable_item_id', $billable->id)->whereNull('end_date')->count());
+        static::assertSame(1, BillableItemInstance::query()->where('member_id', $member->id)->where('billable_item_id', $billable->id)->whereNull('end_date')->count());
     }
 
     public function test_stop_updates_end_date_for_instance(): void
@@ -131,7 +134,7 @@ final class BillableItemDbInstanceRepositoryTest extends FeatureTestCase
 
         $repo = new BillableItemDbInstanceRepository();
 
-        $repo->stop(\App\Domain\Invoices\Billing\BillableItemInstanceId::create($instance->id));
+        $repo->stop(BillableItemInstanceId::create($instance->id));
 
         $this->assertDatabaseHas('billable_item_instances', ['id' => $instance->id, 'end_date' => self::NOW]);
     }

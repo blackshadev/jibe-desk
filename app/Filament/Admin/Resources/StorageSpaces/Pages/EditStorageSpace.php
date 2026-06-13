@@ -7,21 +7,25 @@ namespace App\Filament\Admin\Resources\StorageSpaces\Pages;
 use App\Filament\Admin\Resources\StorageSpaces\StorageSpaceResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Override;
 
 final class EditStorageSpace extends EditRecord
 {
     protected static string $resource = StorageSpaceResource::class;
 
+    #[Override]
     public function hasCombinedRelationManagerTabsWithContent(): bool
     {
         return true;
     }
 
+    #[Override]
     public function getContentTabLabel(): string
     {
         return __('labels.storage_space');
     }
 
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [

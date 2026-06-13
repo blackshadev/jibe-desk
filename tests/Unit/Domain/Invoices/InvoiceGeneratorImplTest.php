@@ -31,7 +31,7 @@ final class InvoiceGeneratorImplTest extends UnitTestCase
         $billableItemsViewRepository->expectsListBillableItemsForMember(
             $invoiceDate,
             $memberId,
-            new BillableItemList([])
+            new BillableItemList([]),
         );
 
         $subject = new InvoiceGeneratorImpl($billableItemsViewRepository->mock, $invoiceRepository->mock);

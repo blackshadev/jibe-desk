@@ -10,13 +10,14 @@ use App\Domain\Members\MemberId;
 use App\Domain\Members\MemberRepository;
 use Mockery;
 use Mockery\MockInterface;
+
 use function PHPUnit\Framework\equalTo;
 
 final readonly class MemberRepositoryExpectation
 {
-    private function __construct(public MockInterface&MemberRepository $mock)
-    {
-    }
+    private function __construct(
+        public MockInterface&MemberRepository $mock,
+    ) {}
 
     public static function create(): self
     {

@@ -9,7 +9,7 @@ final class MemberNameFormatter
     /** @return non-falsy-string */
     public static function displayName(string $firstName, ?string $infixName, string $lastName): string
     {
-        $firstName = empty($infixName) ? $firstName : "{$firstName} {$infixName}";
+        $firstName = $infixName === '' || $infixName === null ? $firstName : "{$firstName} {$infixName}";
 
         return sprintf('%s, %s', $lastName, $firstName);
     }
@@ -17,7 +17,7 @@ final class MemberNameFormatter
     /** @return non-falsy-string */
     public static function presentationName(string $firstName, ?string $infixName, string $lastName): string
     {
-        $firstName = empty($infixName) ? $firstName : "{$firstName} {$infixName}";
+        $firstName = $infixName === '' || $infixName === null ? $firstName : "{$firstName} {$infixName}";
 
         return sprintf('%s %s', $firstName, $lastName);
     }

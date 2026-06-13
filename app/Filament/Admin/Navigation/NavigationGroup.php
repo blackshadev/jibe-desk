@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Navigation;
 
 use Filament\Support\Contracts\HasLabel;
+use Override;
 
 enum NavigationGroup: string implements HasLabel
 {
@@ -13,6 +14,7 @@ enum NavigationGroup: string implements HasLabel
     case Rental = 'rental';
     case Activities = 'activities';
 
+    #[Override]
     public function getLabel(): string
     {
         return __('labels.navigation_groups.' . $this->value);

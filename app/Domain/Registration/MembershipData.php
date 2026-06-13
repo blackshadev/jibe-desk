@@ -21,9 +21,8 @@ final class MembershipData
         public bool $rtc,
         public bool $clubhouseAccess,
         public bool $boardStorage,
-        public string $watersportFederationNumber
-    ) {
-    }
+        public string $watersportFederationNumber,
+    ) {}
 
     public static function createDefault(): self
     {

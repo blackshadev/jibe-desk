@@ -20,6 +20,6 @@ final class ExtraMembershipItemCodeTest extends UnitTestCase
     #[DataProvider('codeProvider')]
     public function test_it_has_expected_value(ExtraMembershipItemCode $code, string $expected): void
     {
-        self::assertSame($expected, $code->value);
+        static::assertSame($expected, $code->value);
     }
 }

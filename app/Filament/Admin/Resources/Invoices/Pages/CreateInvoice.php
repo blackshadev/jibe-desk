@@ -9,6 +9,7 @@ use App\Domain\Invoices\InvoiceStatus;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use Carbon\CarbonImmutable;
 use Filament\Resources\Pages\CreateRecord;
+use Override;
 
 final class CreateInvoice extends CreateRecord
 {
@@ -21,6 +22,7 @@ final class CreateInvoice extends CreateRecord
         $this->invoiceNumberGenerator = app(InvoiceNumberGenerator::class);
     }
 
+    #[Override]
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['date'] = CarbonImmutable::now();
@@ -29,13 +31,14 @@ final class CreateInvoice extends CreateRecord
         return $data;
     }
 
-    protected function afterFill(): void
+    protected function _afterFill(): void
     {
         $this->data['date'] = CarbonImmutable::now();
         $this->data['status'] = InvoiceStatus::Open;
         $this->data['invoice_number'] = '';
     }
 
+    #[Override]
     protected function getCreatedNotificationTitle(): string
     {
         return __('notifications.invoice_created');

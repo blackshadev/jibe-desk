@@ -17,6 +17,6 @@ final class BillableItemIdListTest extends UnitTestCase
             BillableItemId::create(2),
         ]);
 
-        self::assertSame([1, 2], $subject->toIntArray());
+        static::assertSame([1, 2], $subject->toIntArray());
     }
 }

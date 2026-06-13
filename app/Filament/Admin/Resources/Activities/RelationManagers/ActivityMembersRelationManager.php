@@ -14,6 +14,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 final class ActivityMembersRelationManager extends RelationManager
 {
@@ -21,6 +22,7 @@ final class ActivityMembersRelationManager extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    #[Override]
     public function table(Table $table): Table
     {
         return $table
@@ -40,7 +42,7 @@ final class ActivityMembersRelationManager extends RelationManager
                         'infix_name',
                     ]),
             ])
-            ->recordUrl(static fn (Member $record): string => MemberResource::getUrl('edit', [ 'record' => $record ]))
+            ->recordUrl(static fn (Member $record): string => MemberResource::getUrl('edit', ['record' => $record]))
             ->recordActions([
                 DetachAction::make(),
             ])
@@ -51,16 +53,19 @@ final class ActivityMembersRelationManager extends RelationManager
             ]);
     }
 
+    #[Override]
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('labels.participants');
     }
 
+    #[Override]
     public static function getModelLabel(): string
     {
         return mb_strtolower(__('labels.participant'));
     }
 
+    #[Override]
     public static function getPluralModelLabel(): string
     {
         return mb_strtolower(__('labels.participants'));

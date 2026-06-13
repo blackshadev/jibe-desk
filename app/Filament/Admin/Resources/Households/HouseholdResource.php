@@ -16,6 +16,7 @@ use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
+use Override;
 
 final class HouseholdResource extends Resource
 {
@@ -27,6 +28,7 @@ final class HouseholdResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Home;
 
+    #[Override]
     public static function getRelations(): array
     {
         return [
@@ -34,6 +36,7 @@ final class HouseholdResource extends Resource
         ];
     }
 
+    #[Override]
     public static function getPages(): array
     {
         return [
@@ -43,16 +46,19 @@ final class HouseholdResource extends Resource
         ];
     }
 
+    #[Override]
     public static function table(Table $table): Table
     {
         return HouseholdTable::configure($table);
     }
 
+    #[Override]
     public static function getPluralLabel(): string
     {
         return __('labels.households');
     }
 
+    #[Override]
     public static function getLabel(): string
     {
         return __('labels.household');

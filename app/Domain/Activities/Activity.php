@@ -14,6 +14,5 @@ final readonly class Activity
         public BillableItemId $billableItemId,
         public DateTimeImmutable $startDate,
         public ?DateTimeImmutable $endDate,
-    ) {
-    }
+    ) {}
 }

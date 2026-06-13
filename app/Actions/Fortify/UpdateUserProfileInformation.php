@@ -35,12 +35,13 @@ final class UpdateUserProfileInformation implements UpdatesUserProfileInformatio
 
         if ($input['email'] !== $user->email) {
             $this->updateVerifiedUser($user, $input);
-        } else {
-            $user->forceFill([
-                'name' => $input['name'],
-                'email' => $input['email'],
-            ])->save();
+            return;
         }
+
+        $user->forceFill([
+            'name' => $input['name'],
+            'email' => $input['email'],
+        ])->save();
     }
 
     /**

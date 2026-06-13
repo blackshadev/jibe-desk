@@ -6,9 +6,11 @@ namespace Tests\Unit\Domain\Invoices;
 
 use App\Domain\Invoices\Billing\BillableItemId;
 use Tests\Unit\Domain\NumericIdTestCase;
+use Override;
 
 final class BillableItemIdTest extends NumericIdTestCase
 {
+    #[Override]
     protected function getSubject(): string
     {
         return BillableItemId::class;

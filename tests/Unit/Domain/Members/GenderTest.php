@@ -19,17 +19,17 @@ final class GenderTest extends UnitTestCase
     {
         $case = Gender::from($value);
 
-        self::assertSame($value, $case->value);
-        self::assertSame($caseName, $case->name);
-        self::assertSame($value, $case->value);
+        static::assertSame($value, $case->value);
+        static::assertSame($caseName, $case->name);
+        static::assertSame($value, $case->value);
     }
 
     public function test_values_cast_to_string(): void
     {
-        self::assertSame('M', Gender::Male->value);
-        self::assertSame('F', Gender::Female->value);
-        self::assertSame('NB', Gender::NonBinary->value);
-        self::assertSame('U', Gender::Unknown->value);
-        self::assertSame('O', Gender::Other->value);
+        static::assertSame('M', Gender::Male->value);
+        static::assertSame('F', Gender::Female->value);
+        static::assertSame('NB', Gender::NonBinary->value);
+        static::assertSame('U', Gender::Unknown->value);
+        static::assertSame('O', Gender::Other->value);
     }
 }

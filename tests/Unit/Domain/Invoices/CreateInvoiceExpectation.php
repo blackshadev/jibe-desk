@@ -16,9 +16,9 @@ use function PHPUnit\Framework\equalTo;
 
 final readonly class CreateInvoiceExpectation
 {
-    private function __construct(public MockInterface&InvoiceRepository $mock)
-    {
-    }
+    private function __construct(
+        public MockInterface&InvoiceRepository $mock,
+    ) {}
 
     public static function create(): self
     {

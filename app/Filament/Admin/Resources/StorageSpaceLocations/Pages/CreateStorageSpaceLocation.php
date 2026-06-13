@@ -8,11 +8,13 @@ use App\Filament\Admin\Resources\StorageSpaceLocations\StorageSpaceLocationResou
 use App\Models\BillableItem;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 final class CreateStorageSpaceLocation extends CreateRecord
 {
     protected static string $resource = StorageSpaceLocationResource::class;
 
+    #[Override]
     protected function handleRecordCreation(array $data): Model
     {
         $item = BillableItem::createDefault([

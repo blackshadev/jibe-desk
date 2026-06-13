@@ -10,9 +10,11 @@ use App\Domain\Members\MembershipId;
 use App\Domain\Members\MembershipList;
 use App\Domain\Members\MembershipRepository;
 use App\Models\Membership as MembershipModel;
+use Override;
 
 final class MembershipDbRepository implements MembershipRepository
 {
+    #[Override]
     public function getDefault(): MembershipId
     {
         $default = MembershipModel::query()
@@ -23,6 +25,7 @@ final class MembershipDbRepository implements MembershipRepository
         return MembershipId::create($default->id);
     }
 
+    #[Override]
     public function getById(MembershipId $membershipId): Membership
     {
         $model = MembershipModel::findOrFail($membershipId->value);
@@ -34,6 +37,7 @@ final class MembershipDbRepository implements MembershipRepository
         );
     }
 
+    #[Override]
     public function all(): MembershipList
     {
         $memberships = MembershipModel::all()->map(
@@ -41,7 +45,7 @@ final class MembershipDbRepository implements MembershipRepository
                 id: MembershipId::create($model->id),
                 adultBillableItemId: BillableItemId::create($model->adult_billable_item_id),
                 kidsBillableItemId: BillableItemId::create($model->kids_billable_item_id),
-            )
+            ),
         )->all();
 
         return new MembershipList($memberships);

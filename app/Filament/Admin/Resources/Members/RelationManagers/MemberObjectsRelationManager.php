@@ -14,11 +14,13 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 final class MemberObjectsRelationManager extends RelationManager
 {
     protected static string $relationship = 'memberObjects';
 
+    #[Override]
     public function table(Table $table): Table
     {
         return $table
@@ -42,16 +44,19 @@ final class MemberObjectsRelationManager extends RelationManager
             ]);
     }
 
+    #[Override]
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('labels.member_objects');
     }
 
+    #[Override]
     public static function getModelLabel(): string
     {
         return mb_strtolower(__('labels.member_object'));
     }
 
+    #[Override]
     public static function getPluralModelLabel(): string
     {
         return mb_strtolower(__('labels.member_objects'));

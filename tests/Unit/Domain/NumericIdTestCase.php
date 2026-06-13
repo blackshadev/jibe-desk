@@ -10,12 +10,12 @@ use PHPUnit\Framework\TestCase;
 
 abstract class NumericIdTestCase extends TestCase
 {
-    public function test__construct(): void
+    public function test_construct(): void
     {
         $cls = $this->getSubject();
         $subject = new $cls(1);
 
-        self::assertSame(1, $subject->value);
+        static::assertSame(1, $subject->value);
     }
 
     public function test_throws_exception_when_id_is_negative(): void

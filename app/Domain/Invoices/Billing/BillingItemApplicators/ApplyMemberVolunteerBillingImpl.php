@@ -10,6 +10,7 @@ use App\Domain\Members\ExtraMembershipBillingItemRepository;
 use App\Domain\Members\ExtraMembershipItemCode;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MemberRepository;
+use Override;
 
 final readonly class ApplyMemberVolunteerBillingImpl implements ApplyMemberVolunteerBilling
 {
@@ -17,9 +18,9 @@ final readonly class ApplyMemberVolunteerBillingImpl implements ApplyMemberVolun
         private ExtraMembershipBillingItemRepository $extraMembershipBillingItemRepository,
         private BillableItemInstanceRepository $billableItemInstanceRepository,
         private MemberRepository $memberRepository,
-    ) {
-    }
+    ) {}
 
+    #[Override]
     public function apply(MemberId $memberId): void
     {
         $contributionId = $this->extraMembershipBillingItemRepository->getByCode(ExtraMembershipItemCode::VolunteerContribution);
@@ -31,8 +32,9 @@ final readonly class ApplyMemberVolunteerBillingImpl implements ApplyMemberVolun
         if ($member->isVolunteer) {
             // pass null endDate to match repository add signature
             $this->billableItemInstanceRepository->add($memberId, $restitutionId, null);
-        } else {
-            $this->billableItemInstanceRepository->removeMany($memberId, new BillableItemIdList([$restitutionId]));
+            return;
         }
+
+        $this->billableItemInstanceRepository->removeMany($memberId, new BillableItemIdList([$restitutionId]));
     }
 }

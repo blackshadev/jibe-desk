@@ -17,8 +17,7 @@ final class NewMemberWelcome extends Mailable
 
     public function __construct(
         public readonly string $memberName,
-    ) {
-    }
+    ) {}
 
     public function envelope(): Envelope
     {

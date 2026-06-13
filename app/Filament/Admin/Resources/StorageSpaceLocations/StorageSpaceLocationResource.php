@@ -17,6 +17,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
+use Override;
 
 final class StorageSpaceLocationResource extends Resource
 {
@@ -28,26 +29,31 @@ final class StorageSpaceLocationResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Rental;
 
+    #[Override]
     public static function form(Schema $schema): Schema
     {
         return StorageSpaceLocationForm::configure($schema);
     }
 
+    #[Override]
     public static function table(Table $table): Table
     {
         return StorageSpaceLocationsTable::configure($table);
     }
 
+    #[Override]
     public static function getLabel(): string
     {
         return __('labels.storage_space_location');
     }
 
+    #[Override]
     public static function getPluralLabel(): string
     {
         return __('labels.storage_space_locations');
     }
 
+    #[Override]
     public static function getPages(): array
     {
         return [

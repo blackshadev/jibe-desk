@@ -23,14 +23,14 @@ final class MemberObjectTypeSeeder extends Seeder
             ->for($billableItemFactory->state([
                 'description' => 'Borg tag',
             ]))
-            ->create(['name' => 'Tag' ]);
+            ->create(['name' => 'Tag']);
 
         MemberObjectType::factory()
             ->for($billableItemFactory->state([
                 'description' => 'Borg sleutel',
             ]))
-            ->create(['name' => 'Sleutel' ]);
+            ->create(['name' => 'Sleutel']);
 
-        MemberObjectType::factory()->create([ 'name' => 'Anders' ]);
+        MemberObjectType::factory()->create(['name' => 'Anders']);
     }
 }

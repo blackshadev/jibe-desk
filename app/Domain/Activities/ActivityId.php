@@ -6,6 +6,4 @@ namespace App\Domain\Activities;
 
 use App\Domain\NumericId;
 
-final readonly class ActivityId extends NumericId
-{
-}
+final readonly class ActivityId extends NumericId {}

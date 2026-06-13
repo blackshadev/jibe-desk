@@ -47,11 +47,11 @@ final class InvoiceForm
                                 Select::make('member_id')
                                     ->relationship(
                                         'member',
-                                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('last_name')->orderBy('first_name')->orderBy('infix_name')
+                                        modifyQueryUsing: static fn (Builder $query) => $query->orderBy('last_name')->orderBy('first_name')->orderBy('infix_name'),
                                     )
                                     ->label(__('labels.member'))
                                     ->live(onBlur: true)
-                                    ->getOptionLabelFromRecordUsing(fn (Member $record) => $record->name)
+                                    ->getOptionLabelFromRecordUsing(static fn (Member $record) => $record->name)
                                     ->searchable(['first_name', 'infix_name', 'last_name'])
                                     ->afterStateUpdated(static function (?int $state, Set $set) {
                                         if ($state === null) {
@@ -68,7 +68,7 @@ final class InvoiceForm
                             ->required(),
                         TextInput::make('recipient_name')
                             ->label(__('labels.recipient_name'))
-                            ->disabled(fn (Get $get) => $get('member_id') !== null)
+                            ->disabled(static fn (Get $get) => $get('member_id') !== null)
                             ->required(),
                     ]),
                 Section::make(__('labels.invoice_lines'))
@@ -78,7 +78,9 @@ final class InvoiceForm
                             ->hiddenLabel()
                             ->relationship()
                             ->collapsed()
-                            ->itemLabel(fn (array $state) => empty($state['description']) ? '(leeg)' : sprintf('(%.2fx) %s %s', $state['quantity'], $state['description'], PriceFormatter::format((float)$state['price'])))
+                            ->itemLabel(static fn (array $state) => $state['description'] === ''
+                                ? '(leeg)'
+                                : sprintf('(%.2fx) %s %s', $state['quantity'], $state['description'], PriceFormatter::format((float) $state['price'])))
                             ->columns(2)
                             ->schema([
                                 TextInput::make('description')
@@ -99,14 +101,14 @@ final class InvoiceForm
                                     $data['vat'] = $data['price'] * 0.21;
 
                                     return $data;
-                                }
+                                },
                             )
                             ->mutateRelationshipDataBeforeCreateUsing(
                                 static function (array $data): array {
                                     $data['vat'] = $data['price'] * 0.21;
 
                                     return $data;
-                                }
+                                },
                             ),
                     ]),
             ]);

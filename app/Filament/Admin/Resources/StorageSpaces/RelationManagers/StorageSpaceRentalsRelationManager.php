@@ -14,11 +14,13 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 final class StorageSpaceRentalsRelationManager extends RelationManager
 {
     protected static string $relationship = 'rentals';
 
+    #[Override]
     public function table(Table $table): Table
     {
         return $table
@@ -43,16 +45,19 @@ final class StorageSpaceRentalsRelationManager extends RelationManager
             ]);
     }
 
+    #[Override]
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('labels.storage_space_rentals');
     }
 
+    #[Override]
     public static function getModelLabel(): string
     {
         return mb_strtolower(__('labels.storage_space_rental'));
     }
 
+    #[Override]
     public static function getPluralModelLabel(): string
     {
         return mb_strtolower(__('labels.storage_space_rentals'));

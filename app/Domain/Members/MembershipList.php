@@ -9,9 +9,9 @@ use App\Domain\Invoices\Billing\BillableItemIdList;
 final readonly class MembershipList
 {
     /** @param Membership[] $memberships */
-    public function __construct(private array $memberships)
-    {
-    }
+    public function __construct(
+        private array $memberships,
+    ) {}
 
     public function asBillingIdList(): BillableItemIdList
     {

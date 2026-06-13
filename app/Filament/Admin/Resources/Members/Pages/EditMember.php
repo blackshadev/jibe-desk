@@ -8,40 +8,46 @@ use App\Filament\Admin\Resources\Members\MemberResource;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Override;
 
 final class EditMember extends EditRecord
 {
     protected static string $resource = MemberResource::class;
 
+    #[Override]
     public function hasCombinedRelationManagerTabsWithContent(): bool
     {
         return true;
     }
 
+    #[Override]
     public function getContentTabLabel(): string
     {
         return __('labels.member');
     }
 
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [
             DeleteAction::make()
-                ->after(function (): void {
+                ->after(static function (): void {
                     Notification::make()->success()->title(__('notifications.member_deleted'))->send();
                 }),
         ];
     }
 
+    #[Override]
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        if (empty($data['infix_name'])) {
+        if ($data['infix_name'] === null) {
             $data['infix_name'] = '';
         }
 
         return $data;
     }
 
+    #[Override]
     protected function getSavedNotification(): Notification
     {
         $record = $this->record;

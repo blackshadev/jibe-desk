@@ -18,6 +18,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Override;
 
 final class InvoicesRelationManager extends RelationManager
 {
@@ -25,6 +26,7 @@ final class InvoicesRelationManager extends RelationManager
 
     protected static ?string $relatedResource = InvoiceResource::class;
 
+    #[Override]
     public function table(Table $table): Table
     {
         return $table
@@ -66,7 +68,7 @@ final class InvoicesRelationManager extends RelationManager
                             $action->cancel();
                         }
 
-                        $livewire->redirect(InvoiceResource::getUrl('edit', ['record' => $id->value]));
+                        $livewire->redirect(InvoiceResource::getUrl('edit', ['record' => $id?->value]));
 
                         return true;
                     })
@@ -74,11 +76,13 @@ final class InvoicesRelationManager extends RelationManager
             ]);
     }
 
+    #[Override]
     public static function getModelLabel(): string
     {
         return mb_strtolower(__('labels.invoice'));
     }
 
+    #[Override]
     public static function getPluralModelLabel(): string
     {
         return mb_strtolower(__('labels.invoices'));

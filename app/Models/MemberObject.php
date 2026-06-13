@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 #[Fillable(['member_id', 'member_object_type_id', 'name', 'start_date', 'end_date', 'invoice_line_id'])]
 #[ObservedBy(MemberObjectObserver::class)]
@@ -36,6 +37,7 @@ final class MemberObject extends Model
     }
 
     /** @return array<string, string> */
+    #[Override]
     protected function casts(): array
     {
         return [

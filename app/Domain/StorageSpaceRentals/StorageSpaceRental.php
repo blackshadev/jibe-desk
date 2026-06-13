@@ -16,6 +16,5 @@ final readonly class StorageSpaceRental
         public BillableItemId $billableItemId,
         public DateTimeInterface $startDate,
         public ?DateTimeInterface $endDate,
-    ) {
-    }
+    ) {}
 }

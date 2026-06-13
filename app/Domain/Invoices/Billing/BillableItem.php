@@ -13,6 +13,5 @@ final readonly class BillableItem
         public CompoundPrice $price,
         public float $quantity,
         public string $description,
-    ) {
-    }
+    ) {}
 }

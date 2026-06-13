@@ -18,6 +18,6 @@ final class NewMemberMembershipInformationTest extends UnitTestCase
             membershipId: $membershipId,
         );
 
-        self::assertSame(42, $dto->membershipId->value);
+        static::assertSame(42, $dto->membershipId->value);
     }
 }

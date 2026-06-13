@@ -17,6 +17,7 @@ use Tests\Unit\Domain\Invoices\BillableItemRepositoryExpectation;
 use Tests\Unit\Domain\Members\ExtraMembershipBillingItemRepositoryExpectation;
 use Tests\Unit\Domain\Members\MemberRepositoryExpectation;
 use Tests\UnitTestCase;
+use Override;
 
 final class ApplySameHouseholdBillingImplTest extends UnitTestCase
 {
@@ -28,6 +29,7 @@ final class ApplySameHouseholdBillingImplTest extends UnitTestCase
 
     private ApplySameHouseholdBillingImpl $subject;
 
+    #[Override]
     protected function setup(): void
     {
         parent::setup();
@@ -51,7 +53,7 @@ final class ApplySameHouseholdBillingImplTest extends UnitTestCase
 
         $this->memberRepository->expectsGetById(
             $memberId,
-            new Member($memberId, MembershipId::create(2), false, HouseholdId::create(5), 15)
+            new Member($memberId, MembershipId::create(2), false, HouseholdId::create(5), 15),
         );
 
         $this->extraRepo->expectsGetByCode(ExtraMembershipItemCode::SameHouseholdDiscountYoungster, $youngsterId);
@@ -70,7 +72,7 @@ final class ApplySameHouseholdBillingImplTest extends UnitTestCase
 
         $this->memberRepository->expectsGetById(
             $memberId,
-            new Member($memberId, MembershipId::create(3), false, HouseholdId::create(6), 30)
+            new Member($memberId, MembershipId::create(3), false, HouseholdId::create(6), 30),
         );
 
         $this->extraRepo->expectsGetByCode(ExtraMembershipItemCode::SameHouseholdDiscountYoungster, $youngsterId);
@@ -89,7 +91,7 @@ final class ApplySameHouseholdBillingImplTest extends UnitTestCase
 
         $this->memberRepository->expectsGetById(
             $memberId,
-            new Member($memberId, MembershipId::create(4), false, null, 25)
+            new Member($memberId, MembershipId::create(4), false, null, 25),
         );
 
         $this->extraRepo->expectsGetByCode(ExtraMembershipItemCode::SameHouseholdDiscountYoungster, $youngsterId);

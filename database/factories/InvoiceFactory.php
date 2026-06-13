@@ -9,26 +9,29 @@ use App\Models\Invoice;
 use App\Models\InvoiceLine;
 use App\Models\Member;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Override;
 
 /** @extends Factory<Invoice> */
 final class InvoiceFactory extends Factory
 {
+    #[Override]
     public function definition(): array
     {
         $year = date('Y');
 
         return [
-            'date' => $this->faker->dateTimeBetween('-2 years', 'now'),
-            'invoice_number' => $this->faker->unique()->numerify("I-{$year}######"),
-            'recipient_name' => $this->faker->name(),
-            'recipient_address' => $this->faker->address(),
-            'status' => $this->faker->randomElement(InvoiceStatus::cases()),
+            'date' => fake()->dateTimeBetween('-2 years', 'now'),
+            'invoice_number' => fake()->unique()->numerify("I-{$year}######"),
+            'recipient_name' => fake()->name(),
+            'recipient_address' => fake()->address(),
+            'status' => fake()->randomElement(InvoiceStatus::cases()),
         ];
     }
 
     public function forMember(Member $member): self
     {
-        return $this->state(fn (array $attributes) => [
+        // @mago-expect lint:prefer-static-closure
+        return $this->state(fn (array $_attributes) => [
             'member_id' => $member->id,
             'recipient_name' => $member->name,
         ]);
@@ -36,14 +39,14 @@ final class InvoiceFactory extends Factory
 
     public function randomCount(): self
     {
-        $c = $this->faker->numberBetween(0, 5);
+        $c = fake()->numberBetween(0, 5);
 
         return $this->count($c);
     }
 
     public function withLines(?int $count = null): self
     {
-        $count ??= $this->faker->numberBetween(1, 5);
+        $count ??= fake()->numberBetween(1, 5);
 
         return $this->has(InvoiceLine::factory()->count($count), 'lines');
     }

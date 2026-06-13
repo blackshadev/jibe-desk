@@ -29,17 +29,17 @@ final class NewMemberPersonalInformationTest extends UnitTestCase
             addressCity: 'Almere',
         );
 
-        self::assertSame('Jan', $dto->firstName);
-        self::assertSame('de', $dto->infixName);
-        self::assertSame('Vries', $dto->lastName);
-        self::assertSame(Gender::Male, $dto->gender);
-        self::assertSame($birthdate, $dto->birthdate);
-        self::assertSame('jan@example.com', $dto->email);
-        self::assertSame('Surfstrand', $dto->addressStreet);
-        self::assertSame('2', $dto->addressHousenumber);
-        self::assertSame('A', $dto->addressHousenumberAddition);
-        self::assertSame('1324CT', $dto->addressPostalcode);
-        self::assertSame('Almere', $dto->addressCity);
+        static::assertSame('Jan', $dto->firstName);
+        static::assertSame('de', $dto->infixName);
+        static::assertSame('Vries', $dto->lastName);
+        static::assertSame(Gender::Male, $dto->gender);
+        static::assertSame($birthdate, $dto->birthdate);
+        static::assertSame('jan@example.com', $dto->email);
+        static::assertSame('Surfstrand', $dto->addressStreet);
+        static::assertSame('2', $dto->addressHousenumber);
+        static::assertSame('A', $dto->addressHousenumberAddition);
+        static::assertSame('1324CT', $dto->addressPostalcode);
+        static::assertSame('Almere', $dto->addressCity);
     }
 
     public function test_infix_name_can_be_empty(): void
@@ -58,6 +58,6 @@ final class NewMemberPersonalInformationTest extends UnitTestCase
             addressCity: 'Almere',
         );
 
-        self::assertSame('', $dto->infixName);
+        static::assertSame('', $dto->infixName);
     }
 }

@@ -19,16 +19,41 @@ final readonly class NewMemberService
         private MemberRepository $memberRepository,
         private MembershipRepository $membershipRepository,
         private Dispatcher $eventDispatcher,
-    ) {
-    }
+    ) {}
 
     public function fromRegistration(FormData $formData): MemberId
+    {
+        $newMember = $this->toNewMember($formData);
+
+        $memberId = $this->memberRepository->newMember($newMember);
+
+        $event = $this->toNewMemberRegistrationEvent($memberId, $formData);
+        $this->eventDispatcher->dispatch($event);
+
+        return $memberId;
+    }
+
+    private function toNewMemberRegistrationEvent(MemberId $id, FormData $formData): NewMemberRegistration
+    {
+        return new NewMemberRegistration(
+            memberId: $id,
+            memberName: MemberNameFormatter::presentationName(
+                $formData->personalInfo->firstName,
+                $formData->personalInfo->infixName,
+                $formData->personalInfo->lastName,
+            ),
+            memberEmail: $formData->personalInfo->email,
+            membershipData: $formData->membership,
+        );
+    }
+
+    private function toNewMember(FormData $formData): NewMember
     {
         if ($formData->paymentInfo->mandateAcceptedDate === null) {
             throw new RuntimeException('Unable to create new member without mandate accepted date.');
         }
 
-        $newMember = new NewMember(
+        return new NewMember(
             new NewMemberMembershipInformation(
                 $this->membershipRepository->getDefault(),
             ),
@@ -53,20 +78,5 @@ final readonly class NewMemberService
             ),
             $formData->toArray(),
         );
-
-        $memberId = $this->memberRepository->newMember($newMember);
-
-        $this->eventDispatcher->dispatch(new NewMemberRegistration(
-            memberId: $memberId,
-            memberName: MemberNameFormatter::presentationName(
-                $formData->personalInfo->firstName,
-                $formData->personalInfo->infixName,
-                $formData->personalInfo->lastName,
-            ),
-            memberEmail: $formData->personalInfo->email,
-            membershipData: $formData->membership,
-        ));
-
-        return $memberId;
     }
 }

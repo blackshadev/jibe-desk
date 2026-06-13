@@ -14,9 +14,9 @@ use Illuminate\Database\Seeder;
 final class MembershipSeeder extends Seeder
 {
     private const MEMBERSHIPS = [
-        ['name' => 'Windsurfer', 'adult_price' => 68, 'kids_price' => 43.5, 'is_default' => true ],
-        ['name' => 'Zeiler', 'adult_price' => 68, 'kids_price' => 43.5 ],
-        ['name' => 'Bestuurslid', 'adult_price' => 0, 'kids_price' => 0 ],
+        ['name' => 'Windsurfer', 'adult_price' => 68, 'kids_price' => 43.5, 'is_default' => true],
+        ['name' => 'Zeiler', 'adult_price' => 68, 'kids_price' => 43.5],
+        ['name' => 'Bestuurslid', 'adult_price' => 0, 'kids_price' => 0],
     ];
 
     public function run(): void

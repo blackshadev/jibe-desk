@@ -6,13 +6,16 @@ namespace App\Domain\Invoices;
 
 use App\Formatters\PriceFormatter;
 use Stringable;
+use Override;
 
 final readonly class CompoundPrice implements Stringable
 {
-    public function __construct(public float $price, public float $vat)
-    {
-    }
+    public function __construct(
+        public float $price,
+        public float $vat,
+    ) {}
 
+    #[Override]
     public function __toString(): string
     {
         return PriceFormatter::format($this->price);

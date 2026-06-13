@@ -15,6 +15,5 @@ final readonly class NewInvoice
         public DateTimeInterface $invoiceDate,
         public BillableItemList $items,
         public ?InvoiceBatchId $batchId = null,
-    ) {
-    }
+    ) {}
 }

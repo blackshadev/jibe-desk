@@ -20,6 +20,7 @@ use App\Domain\Registration\PersonalInfoData;
 use RuntimeException;
 use Tests\Unit\Laravel\EventDispatcherExpectation;
 use Tests\UnitTestCase;
+use Override;
 
 final class NewMemberServiceTest extends UnitTestCase
 {
@@ -31,6 +32,7 @@ final class NewMemberServiceTest extends UnitTestCase
 
     private NewMemberService $subject;
 
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();
@@ -66,14 +68,14 @@ final class NewMemberServiceTest extends UnitTestCase
                 $formData->personalInfo->lastName,
             ),
             $formData->personalInfo->email,
-            $formData->membership
+            $formData->membership,
         );
 
         $this->eventDispatcher->expectsDispatchWith($expectedRegistration);
 
         $result = $this->subject->fromRegistration($formData);
 
-        self::assertSame(42, $result->value);
+        static::assertSame(42, $result->value);
     }
 
     public function test_it_throws_when_mandate_date_is_missing(): void
@@ -136,6 +138,10 @@ final class NewMemberServiceTest extends UnitTestCase
 
     private function buildExpectedNewMember(FormData $formData, MembershipId $defaultMembershipId): NewMember
     {
+        if ($formData->paymentInfo->mandateAcceptedDate === null) {
+            throw new RuntimeException('Mandate date is missing');
+        }
+
         return new NewMember(
             new NewMemberMembershipInformation($defaultMembershipId),
             new NewMemberPersonalInformation(
@@ -155,7 +161,7 @@ final class NewMemberServiceTest extends UnitTestCase
                 $formData->paymentInfo->bankingAccountNumber,
                 $formData->paymentInfo->bankingBic,
                 $formData->paymentInfo->bankingAccountHolderName,
-                $formData->paymentInfo->mandateAcceptedDate ?: throw new RuntimeException('Mandate date is missing'),
+                $formData->paymentInfo->mandateAcceptedDate,
             ),
             $formData->toArray(),
         );

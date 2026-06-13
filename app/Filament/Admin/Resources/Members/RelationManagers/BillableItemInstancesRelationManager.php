@@ -15,11 +15,13 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 final class BillableItemInstancesRelationManager extends RelationManager
 {
     protected static string $relationship = 'billableItemInstances';
 
+    #[Override]
     public function table(Table $table): Table
     {
         return $table
@@ -48,42 +50,46 @@ final class BillableItemInstancesRelationManager extends RelationManager
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])->recordActions([
-                Action::make('stop')
-                    ->hidden(static fn (BillableItemInstance $record) => $record->isStopped())
-                    ->hiddenLabel()
-                    ->icon(Heroicon::StopCircle)
-                    ->requiresConfirmation()
-                    ->action(static function (BillableItemInstance $record) {
-                        $record->stop();
-                    })
-                    ->successNotificationTitle(__('notifications.billable_item_instance_stopped')),
-                Action::make('resume')
-                    ->hidden(static fn (BillableItemInstance $record) => !$record->isStopped())
-                    ->hiddenLabel()
-                    ->icon(Heroicon::PlayCircle)
-                    ->requiresConfirmation()
-                    ->action(static function (BillableItemInstance $record) {
-                        $record->resume();
-                    })
-                    ->successNotificationTitle(__('notifications.billable_item_instance_resumed')),
-            ]);
+            Action::make('stop')
+                ->hidden(static fn (BillableItemInstance $record) => $record->isStopped())
+                ->hiddenLabel()
+                ->icon(Heroicon::StopCircle)
+                ->requiresConfirmation()
+                ->action(static function (BillableItemInstance $record) {
+                    $record->stop();
+                })
+                ->successNotificationTitle(__('notifications.billable_item_instance_stopped')),
+            Action::make('resume')
+                ->hidden(static fn (BillableItemInstance $record) => !$record->isStopped())
+                ->hiddenLabel()
+                ->icon(Heroicon::PlayCircle)
+                ->requiresConfirmation()
+                ->action(static function (BillableItemInstance $record) {
+                    $record->resume();
+                })
+                ->successNotificationTitle(__('notifications.billable_item_instance_resumed')),
+        ]);
     }
 
+    #[Override]
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('labels.billable_item_instances');
     }
 
+    #[Override]
     public static function getModelLabel(): string
     {
         return mb_strtolower(__('labels.billable_item_instance'));
     }
 
+    #[Override]
     public static function getPluralModelLabel(): string
     {
         return mb_strtolower(__('labels.billable_item_instances'));
     }
 
+    #[Override]
     public function getTabs(): array
     {
         return [
@@ -91,21 +97,23 @@ final class BillableItemInstancesRelationManager extends RelationManager
             'active' => Tab::make(__('labels.active'))
                 ->modifyQueryUsing(
                     /** @phpstan-ignore-next-line method.notFound */
-                    static fn (Builder $query) => $query->active()
+                    static fn (Builder $query) => $query->active(),
                 ),
             'inactive' => Tab::make(__('labels.inactive'))
                 ->modifyQueryUsing(
                     /** @phpstan-ignore-next-line method.notFound */
-                    static fn (Builder $query) => $query->inactive()
+                    static fn (Builder $query) => $query->inactive(),
                 ),
         ];
     }
 
+    #[Override]
     protected function getDefaultTableSortColumn(): string
     {
         return 'created_at';
     }
 
+    #[Override]
     protected function getDefaultTableSortDirection(): string
     {
         return 'desc';

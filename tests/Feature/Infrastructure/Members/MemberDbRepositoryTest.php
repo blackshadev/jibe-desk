@@ -29,9 +29,9 @@ final class MemberDbRepositoryTest extends FeatureTestCase
 
         $domain = $repo->getById(MemberId::create($model->id));
 
-        self::assertSame($model->id, $domain->id->value);
-        self::assertSame($model->membership_id, $domain->membershipId->value);
-        self::assertTrue($domain->isVolunteer);
+        static::assertSame($model->id, $domain->id->value);
+        static::assertSame($model->membership_id, $domain->membershipId->value);
+        static::assertTrue($domain->isVolunteer);
     }
 
     public function test_get_by_id_throws_when_member_not_found(): void
@@ -40,7 +40,7 @@ final class MemberDbRepositoryTest extends FeatureTestCase
 
         $repo = new MemberDbRepository();
 
-        $repo->getById(MemberId::create(999999));
+        $repo->getById(MemberId::create(999_999));
     }
 
     public function test_new_member_creates_member_and_payment_information(): void
@@ -50,7 +50,7 @@ final class MemberDbRepositoryTest extends FeatureTestCase
         $membership = Membership::query()->first();
 
         $newMember = new NewMember(
-            new NewMemberMembershipInformation(MembershipId::create($membership->id)),
+            new NewMemberMembershipInformation(MembershipId::create($membership?->id)),
             new NewMemberPersonalInformation(
                 firstName: 'Jan',
                 infixName: 'de',
@@ -80,21 +80,21 @@ final class MemberDbRepositoryTest extends FeatureTestCase
         /** @var Member $member */
         $member = Member::findOrFail($memberId->value);
 
-        self::assertSame('Jan', $member->first_name);
-        self::assertSame('de', $member->infix_name);
-        self::assertSame('Vries', $member->last_name);
-        self::assertSame('jan@example.com', $member->email);
-        self::assertSame(Gender::Male, $member->gender);
-        self::assertSame($membership->id, $member->membership_id);
-        self::assertFalse($member->is_volunteer);
-        self::assertSame(['windsurfing_lessons' => true], $member->registration_data);
+        static::assertSame('Jan', $member->first_name);
+        static::assertSame('de', $member->infix_name);
+        static::assertSame('Vries', $member->last_name);
+        static::assertSame('jan@example.com', $member->email);
+        static::assertSame(Gender::Male, $member->gender);
+        static::assertSame($membership?->id, $member->membership_id);
+        static::assertFalse($member->is_volunteer);
+        static::assertSame(['windsurfing_lessons' => true], $member->registration_data);
 
         $paymentInfo = $member->paymentInformation;
-        self::assertNotNull($paymentInfo);
-        self::assertSame('NL91ABNA0417164300', $paymentInfo->banking_account_number);
-        self::assertSame('ABNANL2A', $paymentInfo->banking_bic);
-        self::assertSame('J. de Vries', $paymentInfo->banking_account_holder_name);
-        self::assertSame('2024-02-01', $paymentInfo->mandate_accepted_date->format('Y-m-d'));
+        static::assertNotNull($paymentInfo);
+        static::assertSame('NL91ABNA0417164300', $paymentInfo->banking_account_number);
+        static::assertSame('ABNANL2A', $paymentInfo->banking_bic);
+        static::assertSame('J. de Vries', $paymentInfo->banking_account_holder_name);
+        static::assertSame('2024-02-01', $paymentInfo->mandate_accepted_date->format('Y-m-d'));
     }
 
     public function test_new_member_returns_valid_member_id(): void
@@ -104,7 +104,7 @@ final class MemberDbRepositoryTest extends FeatureTestCase
         $membership = Membership::query()->first();
 
         $newMember = new NewMember(
-            new NewMemberMembershipInformation(MembershipId::create($membership->id)),
+            new NewMemberMembershipInformation(MembershipId::create($membership?->id)),
             new NewMemberPersonalInformation(
                 firstName: 'Jan',
                 infixName: '',

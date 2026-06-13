@@ -10,6 +10,7 @@ use App\Domain\Members\ExtraMembershipBillingItemRepository;
 use App\Domain\Members\ExtraMembershipItemCode;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MemberRepository;
+use Override;
 
 final readonly class ApplySameHouseholdBillingImpl implements ApplySameHouseholdBilling
 {
@@ -17,9 +18,9 @@ final readonly class ApplySameHouseholdBillingImpl implements ApplySameHousehold
         private ExtraMembershipBillingItemRepository $extraMembershipBillingItemRepository,
         private BillableItemInstanceRepository $billableItemInstanceRepository,
         private MemberRepository $memberRepository,
-    ) {
-    }
+    ) {}
 
+    #[Override]
     public function apply(MemberId $memberId): void
     {
         $youngsterId = $this->extraMembershipBillingItemRepository->getByCode(ExtraMembershipItemCode::SameHouseholdDiscountYoungster);

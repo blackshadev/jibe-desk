@@ -12,9 +12,9 @@ use App\Models\Pivots\ActivityMember;
 
 final readonly class ActivityMemberObserver
 {
-    public function __construct(private ApplyActivityBilling $applyActivityBilling)
-    {
-    }
+    public function __construct(
+        private ApplyActivityBilling $applyActivityBilling,
+    ) {}
 
     public function created(ActivityMember $member): void
     {
@@ -31,7 +31,7 @@ final readonly class ActivityMemberObserver
         }
 
         $this->applyActivityBilling->stop(
-            BillableItemInstanceId::create($member->billable_item_instance_id)
+            BillableItemInstanceId::create($member->billable_item_instance_id),
         );
     }
 }

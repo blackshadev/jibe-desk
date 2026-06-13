@@ -44,6 +44,7 @@ final class MembersTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ])->searchable(['first_name', 'last_name', 'infix_name']);
+            ])
+            ->searchable(['first_name', 'last_name', 'infix_name']);
     }
 }

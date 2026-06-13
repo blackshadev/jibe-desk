@@ -17,6 +17,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
+use Override;
 
 final class MembershipResource extends Resource
 {
@@ -30,21 +31,25 @@ final class MembershipResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'Membership';
 
+    #[Override]
     public static function form(Schema $schema): Schema
     {
         return MembershipForm::configure($schema);
     }
 
+    #[Override]
     public static function table(Table $table): Table
     {
         return MembershipsTable::configure($table);
     }
 
+    #[Override]
     public static function getRelations(): array
     {
         return [];
     }
 
+    #[Override]
     public static function getPages(): array
     {
         return [
@@ -54,11 +59,13 @@ final class MembershipResource extends Resource
         ];
     }
 
+    #[Override]
     public static function getPluralLabel(): string
     {
         return __('labels.memberships');
     }
 
+    #[Override]
     public static function getLabel(): string
     {
         return __('labels.membership');

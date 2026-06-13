@@ -25,13 +25,13 @@ final class ExtraMembershipBillingItemDbRepositoryTest extends FeatureTestCase
 
         $result = $subject->getByCode(ExtraMembershipItemCode::VolunteerContribution);
 
-        self::assertSame($billableItem->id, $result->value);
+        static::assertSame($billableItem->id, $result->value);
     }
 
     public function test_it_throws_when_code_is_missing(): void
     {
         $this->expectException(ModelNotFoundException::class);
 
-        (new ExtraMembershipBillingItemDbRepository())->getByCode(ExtraMembershipItemCode::VolunteerContribution);
+        new ExtraMembershipBillingItemDbRepository()->getByCode(ExtraMembershipItemCode::VolunteerContribution);
     }
 }

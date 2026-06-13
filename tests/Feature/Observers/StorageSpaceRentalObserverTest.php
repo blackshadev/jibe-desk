@@ -15,6 +15,7 @@ use Carbon\CarbonImmutable;
 use DateTimeInterface;
 use Tests\FeatureTestCase;
 use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplyStorageSpaceRentalBillingExpectation;
+use Override;
 
 final class StorageSpaceRentalObserverTest extends FeatureTestCase
 {
@@ -22,6 +23,7 @@ final class StorageSpaceRentalObserverTest extends FeatureTestCase
 
     private StorageSpaceRentalObserver $subject;
 
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();

@@ -18,6 +18,7 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Override;
 
 final class AdminPanelProvider extends PanelProvider
 {
@@ -26,6 +27,7 @@ final class AdminPanelProvider extends PanelProvider
         FilamentTimezone::set('Europe/Amsterdam');
     }
 
+    #[Override]
     public function panel(Panel $panel): Panel
     {
         return $panel

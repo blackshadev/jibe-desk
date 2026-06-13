@@ -12,8 +12,7 @@ final readonly class Member
         public bool $isVolunteer,
         public ?HouseholdId $householdId,
         public int $age,
-    ) {
-    }
+    ) {}
 
     public function isInHousehold(): bool
     {

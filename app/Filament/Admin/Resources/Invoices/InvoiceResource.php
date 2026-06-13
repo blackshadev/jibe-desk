@@ -18,6 +18,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
+use Override;
 
 final class InvoiceResource extends Resource
 {
@@ -29,26 +30,31 @@ final class InvoiceResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'invoice_number';
 
+    #[Override]
     public static function form(Schema $schema): Schema
     {
         return InvoiceForm::configure($schema);
     }
 
+    #[Override]
     public static function table(Table $table): Table
     {
         return InvoicesTable::configure($table);
     }
 
+    #[Override]
     public static function getPluralLabel(): string
     {
         return __('labels.invoices');
     }
 
+    #[Override]
     public static function getLabel(): string
     {
         return __('labels.invoice');
     }
 
+    #[Override]
     public static function getPages(): array
     {
         return [
