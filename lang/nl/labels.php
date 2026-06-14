@@ -154,6 +154,7 @@ return [
     'edit' => 'Wijzigen',
     'yes' => 'Ja',
     'no' => 'Nee',
+    'select_option' => 'Selecteer optie',
     'confirm_data_correct' => 'Ik bevestig dat alle bovenstaande gegevens correct zijn ingevuld',
     'confirm_membership' => 'Ik wil lid worden van Watersportvereniging Almere Centraal',
     'confirm_registration' => 'Bevestig inschrijving',

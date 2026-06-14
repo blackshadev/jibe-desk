@@ -48,7 +48,7 @@ final class PersonalInfoData
             infixName: '',
             lastName: '',
             email: '',
-            gender: Gender::Unknown,
+            gender: Gender::NotSpecified,
             birthdate: new DateTimeImmutable('2000-01-01'),
             addressStreet: '',
             addressHousenumber: '',

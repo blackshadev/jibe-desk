@@ -6,6 +6,7 @@ namespace App\Domain\Members;
 
 enum Gender: string
 {
+    case NotSpecified = '';
     case Male = 'M';
     case Female = 'F';
     case NonBinary = 'NB';
