@@ -11,6 +11,7 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
+
 use Filament\Tables\Table;
 
 final class StorageSpacesTable
@@ -49,6 +50,7 @@ final class StorageSpacesTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultGroup('location.name');
     }
 }
