@@ -20,4 +20,13 @@ return [
     'invoice_generated' => 'Factuur succesvol gegenereerd',
     'nothing_to_invoice' => 'Niets om te factureren',
     'storage_spaces_generated' => 'Opslagruimten succesvol aangemaakt.',
+    'batch_created' => 'Factuurbatch succesvol aangemaakt',
+    'invoices_added_to_batch' => 'Facturen succesvol toegevoegd aan batch',
+    'invoice_removed_from_batch' => 'Factuur succesvol verwijderd uit batch',
+    'batch_closed' => 'Factuurbatch succesvol gesloten',
+    'batch_completed' => 'Factuurbatch succesvol afgerond',
+    'batch_not_completable' => 'De batch kan niet worden afgerond: er zijn nog open of in behandeling zijnde facturen',
+    'invoice_status_updated' => 'Factuurstatus succesvol bijgewerkt',
+    'sepa_exported' => 'SEPA-bestand succesvol geëxporteerd',
+    'no_invoices_to_export' => 'Geen facturen om te exporteren',
 ];

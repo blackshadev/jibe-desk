@@ -14,6 +14,7 @@ final class InvoiceStatusLabels
             InvoiceStatus::Open->value => __('labels.invoice_status.open'),
             InvoiceStatus::Paid->value => __('labels.invoice_status.paid'),
             InvoiceStatus::Pending->value => __('labels.invoice_status.pending'),
+            InvoiceStatus::Declined->value => __('labels.invoice_status.declined'),
         ];
     }
 }

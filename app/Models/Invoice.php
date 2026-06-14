@@ -28,6 +28,12 @@ final class Invoice extends Model
         return $this->belongsTo(Member::class);
     }
 
+    /** @return BelongsTo<InvoiceBatch, $this> */
+    public function invoiceBatch(): BelongsTo
+    {
+        return $this->belongsTo(InvoiceBatch::class);
+    }
+
     /** @return HasMany<InvoiceLine, $this> */
     public function lines(): HasMany
     {

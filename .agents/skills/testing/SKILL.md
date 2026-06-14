@@ -33,7 +33,7 @@ Rules for writing and reviewing tests. Follow them to keep tests fast, readable,
 
 ## Assertion Style
 
-- Prefer static PHPUnit assertions where practical: use `self::assertSame(...)` rather than `$this->assertSame(...)` when possible. This makes tests clearer to static analysis tools and avoids accidental reliance on instance state — prefer the static form unless you specifically need an instance method.
+- Prefer static PHPUnit assertions where practical: use `static::assertSame(...)` rather than `$this->assertSame(...)` when possible. This makes tests clearer to static analysis tools and avoids accidental reliance on instance state — prefer the static form unless you specifically need an instance method.
 
 ## Test Placement
 

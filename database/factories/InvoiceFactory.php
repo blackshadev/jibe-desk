@@ -6,6 +6,7 @@ namespace Database\Factories;
 
 use App\Domain\Invoices\InvoiceStatus;
 use App\Models\Invoice;
+use App\Models\InvoiceBatch;
 use App\Models\InvoiceLine;
 use App\Models\Member;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -49,5 +50,10 @@ final class InvoiceFactory extends Factory
         $count ??= fake()->numberBetween(1, 5);
 
         return $this->has(InvoiceLine::factory()->count($count), 'lines');
+    }
+
+    public function forBatch(InvoiceBatch $batch): self
+    {
+        return $this->state(['invoice_batch_id' => $batch->id]);
     }
 }

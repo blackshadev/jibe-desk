@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Infrastructure\Invoices\SepaConfiguration;
 use Carbon\FactoryImmutable;
 use Illuminate\Support\ServiceProvider;
 use Override;
@@ -18,6 +19,13 @@ final class AppServiceProvider extends ServiceProvider
     #[Override]
     public function register(): void
     {
+        $this->app->bind(SepaConfiguration::class, static fn () => new SepaConfiguration(
+            creditorId: config('sepa.creditor_id') ?? '',
+            creditorName: config('sepa.creditor_name') ?? '',
+            creditorIban: config('sepa.creditor_iban') ?? '',
+            creditorBic: config('sepa.creditor_bic') ?? '',
+            painFormat: config('sepa.pain_format') ?? 'pain.008.001.02',
+        ));
     }
 
     public function boot(): void

@@ -89,13 +89,13 @@ function task:lint { ## Run checks ECS and PHPStan.
     task:stan
 }
 
-function task:stan { ## Run PHPStan}
+function task:stan { ## Run PHPStan
     mago analyze
 }
 
 function task:fix { ## Run Codestyle fixer
     mago format
-    mago lint --fix
+    mago lint --fix --unsafe
 }
 
 function task:seed { ## Run database seeders
