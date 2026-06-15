@@ -16,7 +16,6 @@ final class PaymentInformationFactory extends Factory
     public function definition(): array
     {
         return [
-            'uuid' => fake()->unique->uuid(),
             'member_id' => Member::factory(),
             'banking_account_number' => fake()->iban('NL'),
             'banking_bic' => fake()->swiftBicNumber(),

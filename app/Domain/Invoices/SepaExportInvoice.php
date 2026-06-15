@@ -15,7 +15,7 @@ final readonly class SepaExportInvoice
         public CompoundPrice $total,
         public string $iban,
         public string $bic,
-        public string $mandateId,
+        public MandateId $mandateId,
         public DateTimeInterface $mandateDate,
     ) {}
 

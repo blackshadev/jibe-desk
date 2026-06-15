@@ -47,7 +47,6 @@ final class SepaExportServiceImplTest extends FeatureTestCase
                 'member_id' => $member->id,
                 'banking_account_number' => 'NL20RABO0123456789',
                 'banking_bic' => 'RABONL2U',
-                'uuid' => 'test-mandate-123',
                 'mandate_accepted_date' => '2025-01-15',
             ]);
 
@@ -112,7 +111,6 @@ final class SepaExportServiceImplTest extends FeatureTestCase
                 'member_id' => $member->id,
                 'banking_account_number' => 'NL20RABO0123456789',
                 'banking_bic' => 'RABONL2U',
-                'uuid' => 'mandate-abc',
                 'mandate_accepted_date' => '2025-06-01',
             ]);
 
@@ -151,7 +149,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
         static::assertStringContainsString('EUR', $amountNode->attributes->getNamedItem('Ccy')->nodeValue);
 
         $mandateNode = $xpath->query('//pain:MndtRltdInf')->item(0);
-        static::assertStringContainsString('mandate-abc', $mandateNode->C14N());
+        static::assertStringContainsString('C000001-000001', $mandateNode->C14N());
         static::assertStringContainsString('2025-06-01', $mandateNode->C14N());
     }
 
@@ -164,7 +162,6 @@ final class SepaExportServiceImplTest extends FeatureTestCase
             'member_id' => $member1->id,
             'banking_account_number' => 'NL91ABNA0417164300',
             'banking_bic' => 'ABNANL2A',
-            'uuid' => 'mandate-1',
             'mandate_accepted_date' => '2025-01-01',
         ]);
         $invoice1 = Invoice::factory()->forMember($member1)->forBatch($batch)->createQuietly(['recipient_name' => 'Alice']);
@@ -175,7 +172,6 @@ final class SepaExportServiceImplTest extends FeatureTestCase
             'member_id' => $member2->id,
             'banking_account_number' => 'NL20RABO0123456789',
             'banking_bic' => 'RABONL2U',
-            'uuid' => 'mandate-2',
             'mandate_accepted_date' => '2025-02-01',
         ]);
         $invoice2 = Invoice::factory()->forMember($member2)->forBatch($batch)->createQuietly(['recipient_name' => 'Bob']);

@@ -49,7 +49,7 @@ final readonly class SepaExportServiceImpl implements SepaExportService
                 'debtorIban' => $invoice->iban,
                 'debtorName' => $invoice->recipientName,
                 'debtorBic' => $invoice->bic,
-                'debtorMandate' => $invoice->mandateId,
+                'debtorMandate' => $invoice->mandateId->value,
                 'debtorMandateSignDate' => $invoice->mandateDate,
                 'endToEndId' => $invoice->invoiceNumber,
                 'remittanceInformation' => $invoice->invoiceNumber,

@@ -165,7 +165,6 @@ final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
                 'member_id' => $member->id,
                 'banking_account_number' => 'NL91ABNA0417164300',
                 'banking_bic' => 'ABNANL2A',
-                'uuid' => 'test-mandate-uuid',
                 'mandate_accepted_date' => '2025-01-15',
             ]);
 
@@ -185,7 +184,7 @@ final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
         static::assertSame($member->name, $result[0]->recipientName);
         static::assertSame('NL91ABNA0417164300', $result[0]->iban);
         static::assertSame('ABNANL2A', $result[0]->bic);
-        static::assertSame('test-mandate-uuid', $result[0]->mandateId);
+        static::assertSame('C000001-000001', $result[0]->mandateId->value);
         static::assertGreaterThan(0.0, $result[0]->total->price);
         static::assertGreaterThan(0.0, $result[0]->total->vat);
         static::assertSame(

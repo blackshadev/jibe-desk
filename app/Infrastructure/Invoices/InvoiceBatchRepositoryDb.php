@@ -10,7 +10,10 @@ use App\Domain\Invoices\InvoiceBatchRepository;
 use App\Domain\Invoices\InvoiceBatchStatus;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceStatus;
+use App\Domain\Invoices\MandateId;
+use App\Domain\Invoices\PaymentInformationId;
 use App\Domain\Invoices\SepaExportInvoice;
+use App\Domain\Members\MemberId;
 use App\Models\Invoice;
 use App\Models\InvoiceBatch;
 use Carbon\CarbonImmutable;
@@ -53,15 +56,16 @@ final class InvoiceBatchRepositoryDb implements InvoiceBatchRepository
     {
         $invoices = Invoice::query()
             ->where('invoice_batch_id', $batchId->value)
-            ->join('invoice_lines', 'invoices.id', '=', 'invoice_lines.invoice_id')
-            ->join('payment_information', 'invoices.member_id', '=', 'payment_information.member_id')
+            ->joinRelationship('lines')
+            ->joinRelationship('member.paymentInformation')
             ->select(
                 'invoices.id as invoice_id',
                 'invoices.invoice_number',
+                'members.id as member_id',
+                'payment_information.id as payment_information_id',
                 'invoices.recipient_name',
                 'payment_information.banking_account_number as iban',
                 'payment_information.banking_bic as bic',
-                'payment_information.uuid as mandate_id',
                 'payment_information.mandate_accepted_date as mandate_date',
                 DB::raw('SUM(invoice_lines.price * invoice_lines.quantity) as total_price'),
                 DB::raw('SUM(invoice_lines.vat * invoice_lines.quantity) as total_vat'),
@@ -70,9 +74,10 @@ final class InvoiceBatchRepositoryDb implements InvoiceBatchRepository
                 'invoices.id',
                 'invoices.invoice_number',
                 'invoices.recipient_name',
+                'members.id',
+                'payment_information.id',
                 'payment_information.banking_account_number',
                 'payment_information.banking_bic',
-                'payment_information.uuid',
                 'payment_information.mandate_accepted_date',
             )
             ->get();
@@ -84,7 +89,10 @@ final class InvoiceBatchRepositoryDb implements InvoiceBatchRepository
             total: new CompoundPrice((float) $row->total_price, (float) $row->total_vat),
             iban: $row->iban,
             bic: $row->bic,
-            mandateId: $row->mandate_id,
+            mandateId: new MandateId(
+                new MemberId((int) $row->member_id),
+                new PaymentInformationId((int) $row->payment_information_id)
+            ),
             mandateDate: CarbonImmutable::parse($row->mandate_date),
         ))->all();
     }

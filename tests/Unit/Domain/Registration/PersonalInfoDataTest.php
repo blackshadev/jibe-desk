@@ -32,7 +32,7 @@ final class PersonalInfoDataTest extends UnitTestCase
         static::assertSame('', $data->infixName);
         static::assertSame('', $data->lastName);
         static::assertSame('', $data->email);
-        static::assertSame(Gender::Unknown, $data->gender);
+        static::assertSame(Gender::NotSpecified, $data->gender);
         static::assertSame('2000-01-01', $data->birthdate->format('Y-m-d'));
         static::assertSame('', $data->addressStreet);
         static::assertSame('', $data->addressHousenumber);
