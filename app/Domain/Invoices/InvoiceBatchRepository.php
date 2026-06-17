@@ -22,4 +22,9 @@ interface InvoiceBatchRepository
     public function closeBatch(InvoiceBatchId $batchId): void;
 
     public function completeBatch(InvoiceBatchId $batchId): void;
+
+    /** @return list<InvoiceId> */
+    public function getPendingInvoicesForBatch(InvoiceBatchId $batchId): array;
+
+    public function getBatchDate(InvoiceBatchId $batchId): DateTimeInterface;
 }

@@ -28,6 +28,9 @@ final class SendNewMemberWelcomeTest extends FeatureTestCase
         $listener = new SendNewMemberWelcome();
         $listener->handle($event);
 
-        Mail::assertSent(NewMemberWelcome::class, static fn (NewMemberWelcome $mail): bool => $mail->hasTo('jan@example.com') && $mail->hasSubject('Welkom bij Almere Centraal!'));
+        Mail::assertQueued(
+            NewMemberWelcome::class,
+            static fn (NewMemberWelcome $mail): bool => $mail->hasTo('jan@example.com') && $mail->hasSubject('Welkom bij Almere Centraal!'),
+        );
     }
 }

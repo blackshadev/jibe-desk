@@ -6,6 +6,7 @@ namespace Tests\Feature\Infrastructure\Invoices;
 
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceBatchStatus;
+use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceStatus;
 use App\Infrastructure\Invoices\InvoiceBatchRepositoryDb;
 use App\Models\Invoice;
@@ -15,6 +16,7 @@ use App\Models\Member;
 use App\Models\PaymentInformation;
 use Carbon\CarbonImmutable;
 use DomainException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Tests\FeatureTestCase;
 
 final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
@@ -191,5 +193,101 @@ final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
             (int) round($result[0]->total->price * 100),
             $result[0]->amountInCents(),
         );
+    }
+
+    public function testGetPendingInvoicesForBatchReturnsPendingInvoices(): void
+    {
+        $batch = InvoiceBatch::factory()->create();
+
+        [$invoice1, $invoice2] = Invoice::factory()
+            ->forBatch($batch)
+            ->state(['status' => InvoiceStatus::Pending])
+            ->count(2)
+            ->createManyQuietly()
+            ->all();
+
+        $result = $this->repository->getPendingInvoicesForBatch(InvoiceBatchId::create($batch->id));
+
+        static::assertCount(2, $result);
+        static::assertEquals(
+            [InvoiceId::create($invoice1->id), InvoiceId::create($invoice2->id)],
+            $result,
+        );
+    }
+
+    public function testGetPendingInvoicesForBatchExcludesNonPendingInvoices(): void
+    {
+        $batch = InvoiceBatch::factory()->create();
+
+        $pending = Invoice::factory()
+            ->forBatch($batch)
+            ->createManyQuietly([
+                ['status' => InvoiceStatus::Pending],
+                ['status' => InvoiceStatus::Open],
+                ['status' => InvoiceStatus::Paid],
+                ['status' => InvoiceStatus::Declined],
+            ])
+            ->first();
+
+        $result = $this->repository->getPendingInvoicesForBatch(InvoiceBatchId::create($batch->id));
+
+        static::assertCount(1, $result);
+        static::assertEquals(InvoiceId::create($pending->id), $result[0]);
+    }
+
+    public function testGetPendingInvoicesForBatchExcludesInvoicesFromOtherBatches(): void
+    {
+        $batch = InvoiceBatch::factory()->create();
+        $otherBatch = InvoiceBatch::factory()->create();
+
+        $invoice = Invoice::factory()
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Pending]);
+
+        Invoice::factory()
+            ->forBatch($otherBatch)
+            ->createQuietly(['status' => InvoiceStatus::Pending]);
+
+        $result = $this->repository->getPendingInvoicesForBatch(InvoiceBatchId::create($batch->id));
+
+        static::assertCount(1, $result);
+        static::assertEquals(InvoiceId::create($invoice->id), $result[0]);
+    }
+
+    public function testGetPendingInvoicesForBatchReturnsEmptyArrayWhenNoPendingInvoices(): void
+    {
+        $batch = InvoiceBatch::factory()->create();
+
+        Invoice::factory()
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Open]);
+
+        $result = $this->repository->getPendingInvoicesForBatch(InvoiceBatchId::create($batch->id));
+
+        static::assertEmpty($result);
+    }
+
+    public function testGetPendingInvoicesForBatchReturnsEmptyArrayForNonexistentBatch(): void
+    {
+        $result = $this->repository->getPendingInvoicesForBatch(InvoiceBatchId::create(999_999));
+
+        static::assertEmpty($result);
+    }
+
+    public function testGetBatchDateReturnsInvoiceDate(): void
+    {
+        $date = CarbonImmutable::parse('2026-06-15');
+        $batch = InvoiceBatch::factory()->create(['invoice_date' => $date]);
+
+        $result = $this->repository->getBatchDate(InvoiceBatchId::create($batch->id));
+
+        static::assertEquals($date->toDateString(), $result->format('Y-m-d'));
+    }
+
+    public function testGetBatchDateThrowsForNonexistentBatch(): void
+    {
+        $this->expectException(ModelNotFoundException::class);
+
+        $this->repository->getBatchDate(InvoiceBatchId::create(999_999));
     }
 }

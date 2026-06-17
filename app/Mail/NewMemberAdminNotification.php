@@ -7,12 +7,14 @@ namespace App\Mail;
 use App\Domain\Members\MemberId;
 use App\Domain\Registration\MembershipData;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 
-final class NewMemberAdminNotification extends Mailable
+final class NewMemberAdminNotification extends Mailable implements ShouldQueue
 {
     use Queueable;
     use SerializesModels;
@@ -22,6 +24,15 @@ final class NewMemberAdminNotification extends Mailable
         public readonly string $memberName,
         public readonly MembershipData $membershipData,
     ) {}
+
+    public function headers(): Headers
+    {
+        return new Headers(
+            text: [
+                'X-Mailable-Class' => self::class,
+            ],
+        );
+    }
 
     public function envelope(): Envelope
     {

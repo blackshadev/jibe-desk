@@ -13,6 +13,7 @@ enum NavigationGroup: string implements HasLabel
     case Invoicing = 'invoicing';
     case Rental = 'rental';
     case Activities = 'activities';
+    case Technical = 'technical';
 
     #[Override]
     public function getLabel(): string

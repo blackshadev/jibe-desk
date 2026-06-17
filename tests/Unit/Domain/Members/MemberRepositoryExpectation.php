@@ -32,6 +32,14 @@ final readonly class MemberRepositoryExpectation
             ->andReturn($member);
     }
 
+    public function expectsGetByEmail(string $email, MemberId $result): void
+    {
+        $this->mock
+            ->expects('getByEmail')
+            ->with(equalTo($email))
+            ->andReturn($result);
+    }
+
     public function expectsNewMember(NewMember $newMember, MemberId $result): void
     {
         $this->mock

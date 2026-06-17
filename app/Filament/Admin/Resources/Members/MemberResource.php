@@ -13,6 +13,7 @@ use App\Filament\Admin\Resources\Members\RelationManagers\BillableItemInstancesR
 use App\Filament\Admin\Resources\Members\RelationManagers\HouseholdMembersRelationManager;
 use App\Filament\Admin\Resources\Members\RelationManagers\InvoicesRelationManager;
 use App\Filament\Admin\Resources\Members\RelationManagers\MemberObjectsRelationManager;
+use App\Filament\Admin\Resources\Members\RelationManagers\OutgoingEmailsRelationManager;
 use App\Filament\Admin\Resources\Members\RelationManagers\StorageSpaceRentalsRelationManager;
 use App\Filament\Admin\Resources\Members\Schemas\MemberForm;
 use App\Filament\Admin\Resources\Members\Tables\MembersTable;
@@ -57,6 +58,7 @@ final class MemberResource extends Resource
             ActivitiesRelationManager::make(),
             MemberObjectsRelationManager::make(),
             StorageSpaceRentalsRelationManager::make(),
+            OutgoingEmailsRelationManager::make(),
         ];
     }
 

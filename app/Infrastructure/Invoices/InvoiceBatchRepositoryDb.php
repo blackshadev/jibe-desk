@@ -91,7 +91,7 @@ final class InvoiceBatchRepositoryDb implements InvoiceBatchRepository
             bic: $row->bic,
             mandateId: new MandateId(
                 new MemberId((int) $row->member_id),
-                new PaymentInformationId((int) $row->payment_information_id)
+                new PaymentInformationId((int) $row->payment_information_id),
             ),
             mandateDate: CarbonImmutable::parse($row->mandate_date),
         ))->all();
@@ -129,5 +129,25 @@ final class InvoiceBatchRepositoryDb implements InvoiceBatchRepository
         }
 
         $batch->update(['status' => InvoiceBatchStatus::Completed]);
+    }
+
+    /** @return list<InvoiceId> */
+    #[Override]
+    public function getPendingInvoicesForBatch(InvoiceBatchId $batchId): array
+    {
+        return Invoice::query()
+            ->where('invoice_batch_id', $batchId->value)
+            ->where('status', InvoiceStatus::Pending)
+            ->pluck('id')
+            ->map(InvoiceId::create(...))
+            ->all();
+    }
+
+    #[Override]
+    public function getBatchDate(InvoiceBatchId $batchId): DateTimeInterface
+    {
+        /** @var InvoiceBatch $batch */
+        $batch = InvoiceBatch::findOrFail($batchId->value);
+        return $batch->invoice_date;
     }
 }

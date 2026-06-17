@@ -28,7 +28,7 @@ final class SendAdminNewMemberNotificationTest extends FeatureTestCase
         $listener = new SendAdminNewMemberNotification();
         $listener->handle($event);
 
-        Mail::assertSent(
+        Mail::assertQueued(
             NewMemberAdminNotification::class,
             static fn (NewMemberAdminNotification $mail): bool => $mail->hasTo(config('mail.admin.address')) && $mail->hasSubject('Nieuwe aanmelding: Vries, Jan de'),
         );

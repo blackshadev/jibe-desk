@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Domain\Invoices\Billing\BillPeriod;
+use App\Domain\Mail\OutgoingEmailStatus;
 use App\Domain\Members\Gender;
 
 return [
@@ -58,6 +59,7 @@ return [
         'member_administration' => 'Ledenbeheer',
         'invoicing' => 'Facturatie',
         'rental' => 'Verhuur',
+        'technical' => 'Technisch',
     ],
     'members_count' => 'Aantal leden',
     'billing' => 'Facturering',
@@ -72,6 +74,11 @@ return [
         BillPeriod::Quarterly->value => 'Kwartalijks',
         BillPeriod::Annually->value => 'Jaarlijks',
         BillPeriod::Once->value => 'Eenmalig',
+    ],
+    'outgoing_email_status' => [
+        OutgoingEmailStatus::Queued->value => 'Wachtend',
+        OutgoingEmailStatus::Sent->value => 'Verzonden',
+        OutgoingEmailStatus::Failed->value => 'Mislukt',
     ],
     'start_date' => 'Startdatum',
     'end_date' => 'Einddatum',
@@ -169,4 +176,16 @@ return [
             'watersport_federation_number' => 'Watersportverbond nummer',
         ],
     ],
+    'outgoing_email' => 'Verzonden e-mail',
+    'outgoing_emails' => 'Verzonden e-mails',
+    'mailable_type' => 'Type',
+    'mailable_class' => 'Class',
+    'recipient_email' => 'Ontvanger',
+    'recipient_name' => 'Naam ontvanger',
+    'subject' => 'Onderwerp',
+    'message_id' => 'Bericht ID',
+    'batch_id' => 'Batch ID',
+    'queued_at' => 'Gequeued op',
+    'sent_at' => 'Verzonden op',
+    'error_message' => 'Foutmelding',
 ];

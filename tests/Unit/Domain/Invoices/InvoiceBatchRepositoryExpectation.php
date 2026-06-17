@@ -68,4 +68,13 @@ final readonly class InvoiceBatchRepositoryExpectation
             ->expects('updateInvoiceStatus')
             ->with(equalTo($invoiceId), equalTo($status));
     }
+
+    /** @param list<InvoiceId> $return */
+    public function expectsGetPendingInvoicesForBatch(InvoiceBatchId $batchId, array $return): void
+    {
+        $this->mock
+            ->expects('getPendingInvoicesForBatch')
+            ->with(equalTo($batchId))
+            ->andReturn($return);
+    }
 }

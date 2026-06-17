@@ -63,4 +63,19 @@ final class MemberDbRepository implements MemberRepository
 
         return MemberId::create($member->id);
     }
+
+    #[Override]
+    public function getByEmail(string $email): ?MemberId
+    {
+        $member = Member::query()
+            ->where('email', $email)
+            ->select('id')
+            ->first();
+
+        if ($member === null) {
+            return null;
+        }
+
+        return MemberId::create($member->id);
+    }
 }

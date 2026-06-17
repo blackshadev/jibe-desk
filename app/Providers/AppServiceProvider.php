@@ -6,6 +6,8 @@ namespace App\Providers;
 
 use App\Infrastructure\Invoices\SepaConfiguration;
 use Carbon\FactoryImmutable;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Override;
 use Psr\Clock\ClockInterface;
@@ -30,5 +32,6 @@ final class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        RateLimiter::for('invoice-emails', static fn (): Limit => Limit::perMinute(20));
     }
 }

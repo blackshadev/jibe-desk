@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Domain\Invoices;
 
+use App\Domain\Invoices\Events\InvoiceBatchClosed;
 use DateTimeInterface;
+use Illuminate\Contracts\Events\Dispatcher;
 
 final readonly class InvoiceBatchService
 {
     public function __construct(
         private InvoiceBatchRepository $batchRepository,
+        private Dispatcher $eventDispatcher,
     ) {}
 
     public function createBatch(DateTimeInterface $invoiceDate): InvoiceBatchId
@@ -26,6 +29,8 @@ final readonly class InvoiceBatchService
     {
         $this->batchRepository->markInvoicesAsPending($batchId);
         $this->batchRepository->closeBatch($batchId);
+
+        $this->eventDispatcher->dispatch(new InvoiceBatchClosed(batchId: $batchId));
     }
 
     /**

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\QueuedResetPassword;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Override;
+use SensitiveParameter;
 
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
@@ -31,5 +33,10 @@ final class User extends Authenticatable
             // @mago-ignore lint:no-literal-password
             'password' => 'hashed',
         ];
+    }
+
+    public function sendPasswordResetNotification(#[SensitiveParameter] $token): void
+    {
+        $this->notify(new QueuedResetPassword($token));
     }
 }

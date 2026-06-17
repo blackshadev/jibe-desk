@@ -26,7 +26,7 @@ final readonly class EventDispatcherExpectation
     {
         $this->mock
             ->expects('dispatch')
-            ->with(Mockery::on(static fn (mixed $event) => $event === $expectedEvent))
+            ->with(equalTo($expectedEvent))
             ->andReturnNull();
     }
 

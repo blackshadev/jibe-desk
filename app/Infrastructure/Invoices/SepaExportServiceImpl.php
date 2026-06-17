@@ -22,6 +22,8 @@ final readonly class SepaExportServiceImpl implements SepaExportService
     #[Override]
     public function export(InvoiceBatchId $batchId): string
     {
+        $dueDate = $this->batchRepository->getBatchDate($batchId);
+
         /** @var list<SepaExportInvoice> $invoices */
         $invoices = $this->batchRepository->getInvoicesForExport($batchId);
 
@@ -41,6 +43,7 @@ final readonly class SepaExportServiceImpl implements SepaExportService
             'seqType' => PaymentInformation::S_RECURRING,
             'creditorId' => $this->configuration->creditorId,
             'batchBooking' => true,
+            'dueDate' => $dueDate,
         ]);
 
         foreach ($invoices as $invoice) {

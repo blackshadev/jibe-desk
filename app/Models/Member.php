@@ -98,6 +98,12 @@ final class Member extends Model
             ->where('id', '!=', $this->id);
     }
 
+    /** @return HasMany<OutgoingEmail, $this> */
+    public function outgoingEmails(): HasMany
+    {
+        return $this->hasMany(OutgoingEmail::class);
+    }
+
     /** @return array<string, string> */
     #[Override]
     protected function casts(): array

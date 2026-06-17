@@ -27,7 +27,7 @@ final class MemberObjectTypeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Tag;
 
-    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Rental;
+    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Technical;
 
     #[Override]
     public static function form(Schema $schema): Schema

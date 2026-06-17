@@ -132,4 +132,24 @@ final class MemberDbRepositoryTest extends FeatureTestCase
 
         self::assertDatabaseHas('members', ['id' => $memberId->value]);
     }
+
+    public function test_get_by_email_returns_member_id(): void
+    {
+        $model = Member::factory()->createQuietly(['email' => 'jan@example.com']);
+
+        $repo = new MemberDbRepository();
+
+        $memberId = $repo->getByEmail('jan@example.com');
+
+        static::assertSame($model->id, $memberId->value);
+    }
+
+    public function test_get_by_email_returns_null_when_member_not_found(): void
+    {
+        $repo = new MemberDbRepository();
+
+        $result = $repo->getByEmail('nonexistent@example.com');
+
+        static::assertNull($result);
+    }
 }

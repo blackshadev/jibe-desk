@@ -16,6 +16,7 @@ use App\Models\PaymentInformation;
 use DOMDocument;
 use DOMXPath;
 use Tests\FeatureTestCase;
+use function PHPUnit\Framework\assertStringContainsString;
 
 final class SepaExportServiceImplTest extends FeatureTestCase
 {
@@ -103,7 +104,9 @@ final class SepaExportServiceImplTest extends FeatureTestCase
 
     public function testExportContainsInvoiceInformation(): void
     {
-        $batch = InvoiceBatch::factory()->create();
+        $batch = InvoiceBatch::factory()->createQuietly([
+            'invoice_date' => '2026-06-30',
+        ]);
         $member = Member::factory()->createQuietly();
 
         PaymentInformation::factory()
@@ -151,6 +154,11 @@ final class SepaExportServiceImplTest extends FeatureTestCase
         $mandateNode = $xpath->query('//pain:MndtRltdInf')->item(0);
         static::assertStringContainsString('C000001-000001', $mandateNode->C14N());
         static::assertStringContainsString('2025-06-01', $mandateNode->C14N());
+        static::assertStringContainsString('2025-06-01', $mandateNode->C14N());
+
+
+        $collectionDateNode = $xpath->query('//pain:ReqdColltnDt')->item(0);
+        static::assertSame('2026-06-30', $collectionDateNode->nodeValue);
     }
 
     public function testExportMultipleInvoices(): void
