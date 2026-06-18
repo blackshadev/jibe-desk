@@ -7,7 +7,7 @@ namespace App\Domain\Invoices\Listeners;
 use App\Domain\Invoices\Events\InvoiceBatchClosed;
 use App\Domain\Invoices\InvoiceBatchRepository;
 use App\Domain\Jobs\JobDispatcher;
-use App\Jobs\SendInvoiceEmail;
+use App\Jobs\Invoices\SendInvoiceEmail;
 use Throwable;
 
 final readonly class QueueInvoiceEmails

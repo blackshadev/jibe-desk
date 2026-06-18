@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Invoices;
 
-use App\Domain\Invoices\GenerateInvoice;
 use App\Domain\Invoices\InvoiceGenerator;
+use App\Domain\Invoices\InvoiceTarget;
 use Mockery;
 use Mockery\MockInterface;
 
@@ -22,7 +22,7 @@ final readonly class InvoiceGeneratorExpectation
         return new self(Mockery::mock(InvoiceGenerator::class));
     }
 
-    public function expectsGenerate(GenerateInvoice $generateInvoice): void
+    public function expectsGenerate(InvoiceTarget $generateInvoice): void
     {
         $this->mock
             ->expects('generate')

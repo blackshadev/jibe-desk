@@ -8,7 +8,7 @@ use App\Domain\Invoices\Events\InvoiceBatchClosed;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\Listeners\QueueInvoiceEmails;
-use App\Jobs\SendInvoiceEmail;
+use App\Jobs\Invoices\SendInvoiceEmail;
 use Override;
 use Tests\Unit\Domain\Invoices\InvoiceBatchRepositoryExpectation;
 use Tests\Unit\Domain\Jobs\JobDispatcherExpectation;

@@ -77,4 +77,11 @@ final readonly class InvoiceBatchRepositoryExpectation
             ->with(equalTo($batchId))
             ->andReturn($return);
     }
+
+    public function expectsAttachInvoice(InvoiceId $invoiceId, InvoiceBatchId $batchId): void
+    {
+        $this->mock
+            ->expects('attachInvoice')
+            ->with(equalTo($batchId), equalTo($invoiceId));
+    }
 }

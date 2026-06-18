@@ -62,6 +62,12 @@ final class BillableItemsViewDbRepository implements BillableItemsViewRepository
                     ->whereNull('billable_item_instances.end_date')
                     ->orWhere('billable_item_instances.end_date', '>', $when),
             )
+            ->whereHas('member', static fn (Builder $query) =>
+                $query
+                    ->withTrashed()
+                    ->whereNull('deleted_at')
+                    ->orWhere('deleted_at', '>', $when)
+            )
             ->whereNotExists(
                 InvoiceLine::query()
                     ->select('invoice_lines.*')

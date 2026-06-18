@@ -5,25 +5,48 @@ declare(strict_types=1);
 namespace App\Domain\Invoices;
 
 use App\Domain\Invoices\Billing\BillableItemsViewRepository;
+use App\Domain\Jobs\JobDispatcher;
+use App\Domain\Members\MemberId;
+use App\Jobs\Invoices\GenerateInvoice;
 use Override;
+use Webmozart\Assert\Assert;
 
 final readonly class InvoiceBatchGeneratorImpl implements InvoiceBatchGenerator
 {
     public function __construct(
-        private InvoiceGenerator $invoiceGenerator,
+        private JobDispatcher $dispatcher,
         private BillableItemsViewRepository $billableItemRepository,
+        private InvoiceBatchService $batchService,
     ) {}
 
     #[Override]
     public function generate(InvoiceBatch $invoiceBatch): void
     {
+        $batchId = $this->batchService->createBatch($invoiceBatch->invoiceDate);
+        $this->batchService->attachBatchMonth($batchId);
+
         $billableMembers = $this->billableItemRepository->listBillableMembers($invoiceBatch->invoiceDate);
 
-        foreach ($billableMembers->ids as $billableMember) {
-            $this->invoiceGenerator->generate(new GenerateInvoice(
-                memberId: $billableMember,
-                invoiceDate: $invoiceBatch->invoiceDate,
-            ));
+        $batchName = sprintf('invoice-batch-%s-%s', $invoiceBatch->invoiceDate->format('Y-m-d'), $batchId->value);
+
+        if ($billableMembers->ids === []) {
+            return;
         }
+
+        $jobs = array_map(
+            static fn (MemberId $id) => new GenerateInvoice(
+                new InvoiceTarget(
+                    memberId: $id,
+                    invoiceDate: $invoiceBatch->invoiceDate,
+                    batchId: $batchId,
+                ),
+            ),
+            $billableMembers->ids,
+        );
+        Assert::isList($jobs);
+
+        $this->dispatcher->batch($batchName, $jobs);
+
+        // todo, sent mail after batch?
     }
 }

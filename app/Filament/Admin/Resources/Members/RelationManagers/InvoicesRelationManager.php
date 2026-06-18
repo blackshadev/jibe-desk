@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Members\RelationManagers;
 
-use App\Domain\Invoices\GenerateInvoice;
 use App\Domain\Invoices\InvoiceGenerator;
 use App\Domain\Invoices\InvoiceStatus;
+use App\Domain\Invoices\InvoiceTarget;
 use App\Domain\Members\MemberId;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Filament\Admin\Utils\ViewOrEdit;
@@ -52,7 +52,7 @@ final class InvoicesRelationManager extends RelationManager
                     ->action(static function (RelationManager $livewire, InvoiceGenerator $generator, Action $action): bool {
                         /** @var Member $member */
                         $member = $livewire->getOwnerRecord();
-                        $command = new GenerateInvoice(
+                        $command = new InvoiceTarget(
                             MemberId::create($member->id),
                             CarbonImmutable::now(),
                         );

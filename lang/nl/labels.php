@@ -181,7 +181,6 @@ return [
     'mailable_type' => 'Type',
     'mailable_class' => 'Class',
     'recipient_email' => 'Ontvanger',
-    'recipient_name' => 'Naam ontvanger',
     'subject' => 'Onderwerp',
     'message_id' => 'Bericht ID',
     'batch_id' => 'Batch ID',

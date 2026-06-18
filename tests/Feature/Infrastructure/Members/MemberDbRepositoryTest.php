@@ -130,7 +130,7 @@ final class MemberDbRepositoryTest extends FeatureTestCase
 
         $memberId = $repo->newMember($newMember);
 
-        self::assertDatabaseHas('members', ['id' => $memberId->value]);
+        $this->assertDatabaseHas('members', ['id' => $memberId->value]);
     }
 
     public function test_get_by_email_returns_member_id(): void

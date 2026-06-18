@@ -87,6 +87,50 @@ final class BillableItemsViewDbRepositoryTest extends FeatureTestCase
         static::assertCount(0, $members);
     }
 
+    public function test_list_billable_members_excludes_deleted_members(): void
+    {
+        $when = new DateTimeImmutable('2026-05-15');
+        $membership = Membership::factory()->create();
+        $futureMember = Member::factory()->createQuietly(['deleted_at' => '2026-05-15T00:00:00Z', 'membership_id' => $membership->id]);
+        $billable = BillableItem::factory()->create(['bill_period' => 'monthly']);
+
+        BillableItemInstance::factory()->create([
+            'member_id' => $futureMember->id,
+            'billable_item_id' => $billable->id,
+            'bill_cycle_in_months' => 1,
+            'start_date' => '2026-04-01',
+            'end_date' => null,
+        ]);
+
+        $repo = new BillableItemsViewDbRepository();
+
+        $members = $repo->listBillableMembers($when)->ids;
+
+        static::assertCount(0, $members);
+    }
+
+    public function test_list_billable_members_includes_future_deleted_members(): void
+    {
+        $when = new DateTimeImmutable('2026-05-15');
+        $membership = Membership::factory()->create();
+        $futureMember = Member::factory()->createQuietly(['deleted_at' => '2026-07-15T00:00:00Z', 'membership_id' => $membership->id]);
+        $billable = BillableItem::factory()->create(['bill_period' => 'monthly']);
+
+        BillableItemInstance::factory()->create([
+            'member_id' => $futureMember->id,
+            'billable_item_id' => $billable->id,
+            'bill_cycle_in_months' => 1,
+            'start_date' => '2026-04-01',
+            'end_date' => null,
+        ]);
+
+        $repo = new BillableItemsViewDbRepository();
+
+        $members = $repo->listBillableMembers($when)->ids;
+
+        static::assertCount(1, $members);
+    }
+
     public function test_list_billable_items_for_member_returns_domain_items(): void
     {
         $when = new DateTimeImmutable('2026-05-15');

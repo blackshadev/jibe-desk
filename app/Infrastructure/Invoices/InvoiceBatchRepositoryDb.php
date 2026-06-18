@@ -150,4 +150,12 @@ final class InvoiceBatchRepositoryDb implements InvoiceBatchRepository
         $batch = InvoiceBatch::findOrFail($batchId->value);
         return $batch->invoice_date;
     }
+
+    #[Override]
+    public function attachInvoice(InvoiceBatchId $batchId, InvoiceId $id): void
+    {
+        Invoice::query()
+            ->findOrFail($id->value)
+            ->update(['invoice_batch_id' => $batchId->value]);
+    }
 }

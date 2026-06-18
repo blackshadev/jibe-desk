@@ -35,6 +35,13 @@ Rules for writing and reviewing tests. Follow them to keep tests fast, readable,
 
 - Prefer static PHPUnit assertions where practical: use `static::assertSame(...)` rather than `$this->assertSame(...)` when possible. This makes tests clearer to static analysis tools and avoids accidental reliance on instance state — prefer the static form unless you specifically need an instance method.
 
+## Test method naming
+
+- All test should be written in `snake_case`
+- Test methods should be named `test_<Action>_<Subject>
+- If there is only one action you can use `test_it_<Subject>`
+- The subject should be the action under test. For example, `test_create_creates_a_new_user`
+
 ## Test Placement
 
 | Layer | Path |

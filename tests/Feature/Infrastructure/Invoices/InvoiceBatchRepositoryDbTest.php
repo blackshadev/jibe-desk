@@ -30,7 +30,7 @@ final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
         $this->repository = new InvoiceBatchRepositoryDb();
     }
 
-    public function testCreateBatch(): void
+    public function test_create_batch(): void
     {
         $date = CarbonImmutable::parse('2026-05-15');
 
@@ -42,7 +42,7 @@ final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
         ]);
     }
 
-    public function testAddOpenInvoicesFromBatchMonth(): void
+    public function test_add_open_invoices_from_batch_month(): void
     {
         $batch = InvoiceBatch::factory()->create([
             'invoice_date' => '2026-05-13',
@@ -99,7 +99,7 @@ final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
         }
     }
 
-    public function testCloseBatch(): void
+    public function test_close_batch(): void
     {
         $batch = InvoiceBatch::factory()->create(['status' => InvoiceBatchStatus::Open]);
 
@@ -111,7 +111,7 @@ final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
         ]);
     }
 
-    public function testCompleteBatch(): void
+    public function test_complete_batch(): void
     {
         $batch = InvoiceBatch::factory()->create(['status' => InvoiceBatchStatus::Pending]);
 
@@ -131,7 +131,7 @@ final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
         ]);
     }
 
-    public function testCompleteBatchFailsWithOpenInvoices(): void
+    public function test_complete_batch_fails_with_open_invoices(): void
     {
         $batch = InvoiceBatch::factory()->create(['status' => InvoiceBatchStatus::Pending]);
 
@@ -144,7 +144,7 @@ final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
         $this->repository->completeBatch(InvoiceBatchId::create($batch->id));
     }
 
-    public function testCompleteBatchFailsWithPendingInvoices(): void
+    public function test_complete_batch_fails_with_pending_invoices(): void
     {
         $batch = InvoiceBatch::factory()->create(['status' => InvoiceBatchStatus::Pending]);
 
@@ -157,7 +157,7 @@ final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
         $this->repository->completeBatch(InvoiceBatchId::create($batch->id));
     }
 
-    public function testGetInvoicesForExport(): void
+    public function test_get_invoices_for_export(): void
     {
         $batch = InvoiceBatch::factory()->create();
         $member = Member::factory()->createQuietly();
@@ -195,7 +195,7 @@ final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
         );
     }
 
-    public function testGetPendingInvoicesForBatchReturnsPendingInvoices(): void
+    public function test_get_pending_invoices_for_batch_returns_pending_invoices(): void
     {
         $batch = InvoiceBatch::factory()->create();
 
@@ -215,7 +215,7 @@ final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
         );
     }
 
-    public function testGetPendingInvoicesForBatchExcludesNonPendingInvoices(): void
+    public function test_get_pending_invoices_for_batch_excludes_non_pending_invoices(): void
     {
         $batch = InvoiceBatch::factory()->create();
 
@@ -235,7 +235,7 @@ final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
         static::assertEquals(InvoiceId::create($pending->id), $result[0]);
     }
 
-    public function testGetPendingInvoicesForBatchExcludesInvoicesFromOtherBatches(): void
+    public function test_get_pending_invoices_for_batch_excludes_invoices_from_other_batches(): void
     {
         $batch = InvoiceBatch::factory()->create();
         $otherBatch = InvoiceBatch::factory()->create();
@@ -254,7 +254,7 @@ final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
         static::assertEquals(InvoiceId::create($invoice->id), $result[0]);
     }
 
-    public function testGetPendingInvoicesForBatchReturnsEmptyArrayWhenNoPendingInvoices(): void
+    public function test_get_pending_invoices_for_batch_returns_empty_array_when_no_pending_invoices(): void
     {
         $batch = InvoiceBatch::factory()->create();
 
@@ -267,14 +267,14 @@ final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
         static::assertEmpty($result);
     }
 
-    public function testGetPendingInvoicesForBatchReturnsEmptyArrayForNonexistentBatch(): void
+    public function test_get_pending_invoices_for_batch_returns_empty_array_for_nonexistent_batch(): void
     {
         $result = $this->repository->getPendingInvoicesForBatch(InvoiceBatchId::create(999_999));
 
         static::assertEmpty($result);
     }
 
-    public function testGetBatchDateReturnsInvoiceDate(): void
+    public function test_get_batch_date_returns_invoice_date(): void
     {
         $date = CarbonImmutable::parse('2026-06-15');
         $batch = InvoiceBatch::factory()->create(['invoice_date' => $date]);
@@ -284,10 +284,25 @@ final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
         static::assertEquals($date->toDateString(), $result->format('Y-m-d'));
     }
 
-    public function testGetBatchDateThrowsForNonexistentBatch(): void
+    public function test_get_batch_date_throws_for_nonexistent_batch(): void
     {
         $this->expectException(ModelNotFoundException::class);
 
         $this->repository->getBatchDate(InvoiceBatchId::create(999_999));
+    }
+
+    public function test_attach_invoice(): void
+    {
+        $batch = InvoiceBatch::factory()->createQuietly();
+        $invoice = Invoice::factory()->createQuietly([
+            'invoice_batch_id' => null,
+        ]);
+
+        $this->repository->attachInvoice(new InvoiceBatchId($batch->id), new InvoiceId($invoice->id));
+
+        $this->assertDatabaseHas('invoices', [
+            'id' => $invoice->id,
+            'invoice_batch_id' => $batch->id,
+        ]);
     }
 }

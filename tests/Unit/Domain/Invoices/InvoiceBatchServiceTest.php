@@ -6,7 +6,7 @@ namespace Tests\Unit\Domain\Invoices;
 
 use App\Domain\Invoices\Events\InvoiceBatchClosed;
 use App\Domain\Invoices\InvoiceBatchId;
-use App\Domain\Invoices\InvoiceBatchService;
+use App\Domain\Invoices\InvoiceBatchServiceImpl;
 use App\Domain\Invoices\InvoiceBatchStatus;
 use Carbon\CarbonImmutable;
 use Override;
@@ -17,7 +17,7 @@ final class InvoiceBatchServiceTest extends UnitTestCase
 {
     private InvoiceBatchRepositoryExpectation $repo;
     private EventDispatcherExpectation $dispatcher;
-    private InvoiceBatchService $service;
+    private InvoiceBatchServiceImpl $service;
 
     #[Override]
     protected function setUp(): void
@@ -27,10 +27,10 @@ final class InvoiceBatchServiceTest extends UnitTestCase
         $this->repo = InvoiceBatchRepositoryExpectation::create();
         $this->dispatcher = EventDispatcherExpectation::create();
 
-        $this->service = new InvoiceBatchService($this->repo->mock, $this->dispatcher->mock);
+        $this->service = new InvoiceBatchServiceImpl($this->repo->mock, $this->dispatcher->mock);
     }
 
-    public function testCreateBatch(): void
+    public function test_create_batch(): void
     {
         $invoiceDate = CarbonImmutable::parse('2026-05-15');
         $expectedId = InvoiceBatchId::create(1);
@@ -42,7 +42,7 @@ final class InvoiceBatchServiceTest extends UnitTestCase
         static::assertSame($expectedId, $result);
     }
 
-    public function testAttachBatchMonth(): void
+    public function test_attach_batch_month(): void
     {
         $batchId = InvoiceBatchId::create(1);
 
@@ -51,7 +51,7 @@ final class InvoiceBatchServiceTest extends UnitTestCase
         $this->service->attachBatchMonth($batchId);
     }
 
-    public function testCloseBatch(): void
+    public function test_close_batch(): void
     {
         $batchId = InvoiceBatchId::create(5);
 
@@ -63,7 +63,7 @@ final class InvoiceBatchServiceTest extends UnitTestCase
         $this->service->closeBatch($batchId);
     }
 
-    public function testCompleteBatch(): void
+    public function test_complete_batch(): void
     {
         $batchId = InvoiceBatchId::create(5);
 
