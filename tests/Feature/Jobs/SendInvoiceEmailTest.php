@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Jobs;
 
 use App\Domain\Invoices\InvoiceId;
-use App\Jobs\SendInvoiceEmail;
+use App\Jobs\Invoices\SendInvoiceEmail;
 use App\Mail\InvoiceMail;
 use App\Models\Invoice;
 use App\Models\Member;

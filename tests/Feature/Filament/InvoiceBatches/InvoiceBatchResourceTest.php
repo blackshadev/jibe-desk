@@ -12,7 +12,7 @@ use Tests\FeatureTestCase;
 
 final class InvoiceBatchResourceTest extends FeatureTestCase
 {
-    public function testBatchCanBeCreated(): void
+    public function test_batch_can_be_created(): void
     {
         $batch = InvoiceBatch::factory()->create();
 
@@ -22,14 +22,14 @@ final class InvoiceBatchResourceTest extends FeatureTestCase
         ]);
     }
 
-    public function testBatchCanBeCreatedWithOpenStatus(): void
+    public function test_batch_can_be_created_with_open_status(): void
     {
         $batch = InvoiceBatch::factory()->create(['status' => InvoiceBatchStatus::Open]);
 
         static::assertSame(InvoiceBatchStatus::Open, $batch->status);
     }
 
-    public function testBatchCanBeMarkedAsPending(): void
+    public function test_batch_can_be_marked_as_pending(): void
     {
         $batch = InvoiceBatch::factory()->create(['status' => InvoiceBatchStatus::Open]);
         $batch->update(['status' => InvoiceBatchStatus::Pending]);
@@ -40,7 +40,7 @@ final class InvoiceBatchResourceTest extends FeatureTestCase
         ]);
     }
 
-    public function testBatchCanBeCompleted(): void
+    public function test_batch_can_be_completed(): void
     {
         $batch = InvoiceBatch::factory()->create(['status' => InvoiceBatchStatus::Pending]);
         $batch->update(['status' => InvoiceBatchStatus::Completed]);
@@ -51,7 +51,7 @@ final class InvoiceBatchResourceTest extends FeatureTestCase
         ]);
     }
 
-    public function testInvoicesCanBeAttachedToBatch(): void
+    public function test_invoices_can_be_attached_to_batch(): void
     {
         $batch = InvoiceBatch::factory()->create();
         $invoice = Invoice::factory()->createQuietly([
@@ -67,7 +67,7 @@ final class InvoiceBatchResourceTest extends FeatureTestCase
         ]);
     }
 
-    public function testInvoicesCanBeDetachedFromBatch(): void
+    public function test_invoices_can_be_detached_from_batch(): void
     {
         $batch = InvoiceBatch::factory()->create();
         $invoice = Invoice::factory()
@@ -82,7 +82,7 @@ final class InvoiceBatchResourceTest extends FeatureTestCase
         ]);
     }
 
-    public function testInvoiceStatusCanBeUpdatedToPaid(): void
+    public function test_invoice_status_can_be_updated_to_paid(): void
     {
         $invoice = Invoice::factory()->createQuietly(['status' => InvoiceStatus::Open]);
 
@@ -94,7 +94,7 @@ final class InvoiceBatchResourceTest extends FeatureTestCase
         ]);
     }
 
-    public function testInvoiceStatusCanBeUpdatedToDeclined(): void
+    public function test_invoice_status_can_be_updated_to_declined(): void
     {
         $invoice = Invoice::factory()->createQuietly(['status' => InvoiceStatus::Open]);
 
@@ -106,7 +106,7 @@ final class InvoiceBatchResourceTest extends FeatureTestCase
         ]);
     }
 
-    public function testBatchTotalCanBeCalculated(): void
+    public function test_batch_total_can_be_calculated(): void
     {
         $batch = InvoiceBatch::factory()->create();
 
@@ -120,7 +120,7 @@ final class InvoiceBatchResourceTest extends FeatureTestCase
         static::assertGreaterThan(0.0, $batch->total->price);
     }
 
-    public function testOpenTotalFiltersByStatus(): void
+    public function test_open_total_filters_by_status(): void
     {
         $batch = InvoiceBatch::factory()->create();
 

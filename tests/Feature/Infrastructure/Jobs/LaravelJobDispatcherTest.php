@@ -4,12 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Infrastructure\Jobs;
 
-use App\Domain\Jobs\Job;
 use App\Infrastructure\Jobs\LaravelJobDispatcher;
 use Illuminate\Bus\PendingBatch;
-use Illuminate\Bus\Queueable;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Bus;
 use Tests\FeatureTestCase;
 
@@ -60,15 +56,4 @@ final class LaravelJobDispatcherTest extends FeatureTestCase
 
         Bus::assertBatched(static fn (PendingBatch $batch): bool => $batch->name === 'my-custom-batch');
     }
-}
-
-final class DummyTestJob implements Job
-{
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-
-    public function __construct(
-        public string $value,
-    ) {}
 }

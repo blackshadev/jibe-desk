@@ -31,7 +31,7 @@ no-fully-qualified-global-constant = { enabled = true }
 no-fully-qualified-global-function = { enabled = true }
 variable-name = { enabled = true, either = false, camel = true }
 property-name = { enabled = true, either = false, camel = true }
-method-name = { enabled = true, use-snake-case-for-tests = true }
+method-name = { enabled = true, use-snake-case-for-tests = true, level = "error" }
 
 [analyzer]
 excludes = [

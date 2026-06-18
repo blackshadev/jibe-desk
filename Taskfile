@@ -85,7 +85,7 @@ function task:test:coverage { ## Run tests with code coverage
 }
 
 function task:lint { ## Run checks ECS and PHPStan.
-    task:fix
+    mago lint
     task:stan
 }
 
@@ -95,7 +95,7 @@ function task:stan { ## Run PHPStan
 
 function task:fix { ## Run Codestyle fixer
     mago format
-    mago lint --fix --unsafe
+    mago lint --fix --unsafe --format-after-fix
 }
 
 function task:seed { ## Run database seeders

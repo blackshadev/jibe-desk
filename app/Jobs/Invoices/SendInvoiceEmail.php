@@ -2,31 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\Jobs;
+namespace App\Jobs\Invoices;
 
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceMailRepository;
-use App\Domain\Jobs\Job;
+use App\Jobs\BaseJob;
 use App\Mail\InvoiceMail;
-use Illuminate\Bus\Batchable;
-use Illuminate\Bus\Queueable;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\RateLimited;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
 
-final class SendInvoiceEmail implements Job
+final class SendInvoiceEmail extends BaseJob
 {
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use Batchable;
-    use SerializesModels;
-
-    public int $tries = 3;
-
     public function __construct(
         public readonly InvoiceId $invoiceId,
     ) {}

@@ -16,7 +16,6 @@ use App\Models\PaymentInformation;
 use DOMDocument;
 use DOMXPath;
 use Tests\FeatureTestCase;
-use function PHPUnit\Framework\assertStringContainsString;
 
 final class SepaExportServiceImplTest extends FeatureTestCase
 {
@@ -38,7 +37,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
         $this->repo = new InvoiceBatchRepositoryDb();
     }
 
-    public function testExportGeneratesValidXml(): void
+    public function test_export_generates_valid_xml(): void
     {
         $batch = InvoiceBatch::factory()->create();
         $member = Member::factory()->createQuietly();
@@ -75,7 +74,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
         static::assertGreaterThan(0, $xpath->query('//pain:DrctDbtTxInf')->length);
     }
 
-    public function testExportWithEmptyBatchProducesValidXml(): void
+    public function test_export_with_empty_batch_produces_valid_xml(): void
     {
         $batch = InvoiceBatch::factory()->create();
 
@@ -89,7 +88,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
         static::assertTrue($dom->loadXML($xml));
     }
 
-    public function testExportContainsCreditorInformation(): void
+    public function test_export_contains_creditor_information(): void
     {
         $batch = InvoiceBatch::factory()->create();
 
@@ -102,7 +101,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
         static::assertStringContainsString('NL12ZZZ1234567890', $xml);
     }
 
-    public function testExportContainsInvoiceInformation(): void
+    public function test_export_contains_invoice_information(): void
     {
         $batch = InvoiceBatch::factory()->createQuietly([
             'invoice_date' => '2026-06-30',
@@ -156,12 +155,11 @@ final class SepaExportServiceImplTest extends FeatureTestCase
         static::assertStringContainsString('2025-06-01', $mandateNode->C14N());
         static::assertStringContainsString('2025-06-01', $mandateNode->C14N());
 
-
         $collectionDateNode = $xpath->query('//pain:ReqdColltnDt')->item(0);
         static::assertSame('2026-06-30', $collectionDateNode->nodeValue);
     }
 
-    public function testExportMultipleInvoices(): void
+    public function test_export_multiple_invoices(): void
     {
         $batch = InvoiceBatch::factory()->create();
 

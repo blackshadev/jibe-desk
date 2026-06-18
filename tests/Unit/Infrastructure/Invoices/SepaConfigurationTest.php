@@ -9,7 +9,7 @@ use Tests\UnitTestCase;
 
 final class SepaConfigurationTest extends UnitTestCase
 {
-    public function testValuesAreStoredCorrectly(): void
+    public function test_values_are_stored_correctly(): void
     {
         $config = new SepaConfiguration(
             creditorId: 'NL12ZZZ1234567890',
