@@ -6,6 +6,7 @@ namespace App\Domain\Invoices\Listeners;
 
 use App\Domain\Invoices\Events\InvoiceBatchClosed;
 use App\Domain\Invoices\InvoiceBatchRepository;
+use App\Domain\Jobs\JobBatch;
 use App\Domain\Jobs\JobDispatcher;
 use App\Jobs\Invoices\SendInvoiceEmail;
 use Throwable;
@@ -26,9 +27,11 @@ final readonly class QueueInvoiceEmails
             return;
         }
 
-        $this->dispatcher->batch(
-            name: 'invoice-emails-batch-' . $event->batchId->value,
-            jobs: array_map(static fn ($invoiceId) => new SendInvoiceEmail($invoiceId), $invoiceIds),
+        $this->dispatcher->dispatch(
+            new JobBatch(
+                'invoice-emails-batch-' . $event->batchId->value,
+                array_map(static fn ($invoiceId) => new SendInvoiceEmail($invoiceId), $invoiceIds),
+            )
         );
     }
 }

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit\Domain\Jobs;
 
 use App\Domain\Jobs\Job;
+use App\Domain\Jobs\JobBatch;
+use App\Domain\Jobs\JobChain;
 use App\Domain\Jobs\JobDispatcher;
 use Mockery;
 use Mockery\MockInterface;
@@ -22,18 +24,17 @@ final readonly class JobDispatcherExpectation
         return new self(Mockery::mock(JobDispatcher::class));
     }
 
-    /** @param list<Job> $jobs */
-    public function expectsBatch(string $name, array $jobs): void
+    public function expectsDispatch(Job|JobBatch|JobChain $arg): void
     {
         $this->mock
-            ->expects('batch')
-            ->with(equalTo($name), equalTo($jobs));
+            ->expects('dispatch')
+            ->with(equalTo($arg));
     }
 
-    public function expectsNoBatch(): void
+    public function expectsNoDispatch(): void
     {
         $this->mock
-            ->expects('batch')
+            ->expects('dispatch')
             ->never();
     }
 }

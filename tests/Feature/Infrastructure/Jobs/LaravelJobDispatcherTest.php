@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Infrastructure\Jobs;
 
+use App\Domain\Jobs\JobBatch;
+use App\Domain\Jobs\JobChain;
 use App\Infrastructure\Jobs\LaravelJobDispatcher;
 use Illuminate\Bus\PendingBatch;
 use Illuminate\Support\Facades\Bus;
@@ -31,7 +33,7 @@ final class LaravelJobDispatcherTest extends FeatureTestCase
         Bus::assertDispatched(DummyTestJob::class);
     }
 
-    public function test_batch_dispatches_batch_of_jobs(): void
+    public function test_dispatch_dispatches_batch_of_jobs(): void
     {
         Bus::fake();
 
@@ -40,20 +42,43 @@ final class LaravelJobDispatcherTest extends FeatureTestCase
             new DummyTestJob('job-2'),
             new DummyTestJob('job-3'),
         ];
+        $batch = new JobBatch(
+            'test-batch',
+            $jobs
+        );
 
-        $this->dispatcher->batch('test-batch', $jobs);
+        $this->dispatcher->dispatch($batch);
 
         Bus::assertBatched($jobs);
+        Bus::assertBatched(static fn (PendingBatch $batch): bool => $batch->name === 'test-batch');
     }
 
-    public function test_batch_applies_name(): void
+    public function test_dispatch_chains(): void
     {
         Bus::fake();
 
-        $this->dispatcher->batch('my-custom-batch', [
-            new DummyTestJob('job-1'),
-        ]);
+        $job1 = new DummyTestJob('job-1');
+        $job2 = new DummyTestJob('job-2');
+        $job3 = new DummyTestJob('job-3');
+        $job4 = new DummyTestJob('job-4');
 
-        Bus::assertBatched(static fn (PendingBatch $batch): bool => $batch->name === 'my-custom-batch');
+        $chain = new JobChain(
+            [
+                $job1,
+                new JobBatch('batch', [
+                    $job2,
+                    $job3,
+                ]),
+                $job4,
+            ]
+        );
+
+        $this->dispatcher->dispatch($chain);
+
+        Bus::assertChained([
+            DummyTestJob::class,
+            Bus::chainedBatch(static fn (PendingBatch $batch): bool => $batch->name === 'batch'),
+            DummyTestJob::class,
+        ]);
     }
 }

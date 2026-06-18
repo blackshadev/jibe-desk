@@ -8,6 +8,7 @@ use App\Domain\Invoices\Events\InvoiceBatchClosed;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\Listeners\QueueInvoiceEmails;
+use App\Domain\Jobs\JobBatch;
 use App\Jobs\Invoices\SendInvoiceEmail;
 use Override;
 use Tests\Unit\Domain\Invoices\InvoiceBatchRepositoryExpectation;
@@ -40,9 +41,11 @@ final class QueueInvoiceEmailsTest extends UnitTestCase
         $invoiceIds = [InvoiceId::create(1), InvoiceId::create(2), InvoiceId::create(3)];
 
         $this->batchRepo->expectsGetPendingInvoicesForBatch($batchId, $invoiceIds);
-        $this->dispatcher->expectsBatch(
-            'invoice-emails-batch-10',
-            array_map(static fn (InvoiceId $id) => new SendInvoiceEmail($id), $invoiceIds),
+        $this->dispatcher->expectsDispatch(
+            new JobBatch(
+                'invoice-emails-batch-10',
+                array_map(static fn (InvoiceId $id) => new SendInvoiceEmail($id), $invoiceIds),
+            ),
         );
 
         $this->listener->handle(new InvoiceBatchClosed($batchId));
@@ -53,7 +56,7 @@ final class QueueInvoiceEmailsTest extends UnitTestCase
         $batchId = InvoiceBatchId::create(10);
 
         $this->batchRepo->expectsGetPendingInvoicesForBatch($batchId, []);
-        $this->dispatcher->expectsNoBatch();
+        $this->dispatcher->expectsNoDispatch();
 
         $this->listener->handle(new InvoiceBatchClosed($batchId));
     }

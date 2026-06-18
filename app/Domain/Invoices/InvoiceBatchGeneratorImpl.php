@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Invoices;
 
 use App\Domain\Invoices\Billing\BillableItemsViewRepository;
+use App\Domain\Jobs\JobBatch;
 use App\Domain\Jobs\JobDispatcher;
 use App\Domain\Members\MemberId;
 use App\Jobs\Invoices\GenerateInvoice;
@@ -44,8 +45,9 @@ final readonly class InvoiceBatchGeneratorImpl implements InvoiceBatchGenerator
             $billableMembers->ids,
         );
         Assert::isList($jobs);
+        $batch = new JobBatch($batchName, $jobs);
 
-        $this->dispatcher->batch($batchName, $jobs);
+        $this->dispatcher->dispatch($batch);
 
         // todo, sent mail after batch?
     }

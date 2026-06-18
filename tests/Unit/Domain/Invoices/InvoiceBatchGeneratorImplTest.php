@@ -8,6 +8,7 @@ use App\Domain\Invoices\InvoiceBatch;
 use App\Domain\Invoices\InvoiceBatchGeneratorImpl;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceTarget;
+use App\Domain\Jobs\JobBatch;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MemberIdList;
 use App\Jobs\Invoices\GenerateInvoice;
@@ -47,16 +48,18 @@ final class InvoiceBatchGeneratorImplTest extends UnitTestCase
         $this->batchService->expectsCreateBatch($invoiceDate, $batchId);
         $this->billableItemsViewRepository->expectsListBillableMembers($invoiceDate, $memberIds);
         $this->batchService->expectsAttachBatchMonth($batchId);
-        $this->jobDispatcher->expectsBatch(
-            'invoice-batch-2026-05-25-9',
-            [
-                new GenerateInvoice(
-                    new InvoiceTarget(MemberId::create(1), $invoiceDate, $batchId),
-                ),
-                new GenerateInvoice(
-                    new InvoiceTarget(MemberId::create(2), $invoiceDate, $batchId),
-                ),
-            ],
+        $this->jobDispatcher->expectsDispatch(
+            new JobBatch(
+                'invoice-batch-2026-05-25-9',
+                [
+                    new GenerateInvoice(
+                        new InvoiceTarget(MemberId::create(1), $invoiceDate, $batchId),
+                    ),
+                    new GenerateInvoice(
+                        new InvoiceTarget(MemberId::create(2), $invoiceDate, $batchId),
+                    ),
+                ],
+            ),
         );
 
         $this->subject->generate($batch);
@@ -72,7 +75,7 @@ final class InvoiceBatchGeneratorImplTest extends UnitTestCase
         $this->batchService->expectsAttachBatchMonth($batchId);
 
         $this->billableItemsViewRepository->expectsListBillableMembers($invoiceDate, new MemberIdList([]));
-        $this->jobDispatcher->expectsNoBatch();
+        $this->jobDispatcher->expectsNoDispatch();
 
         $this->subject->generate($batch);
     }

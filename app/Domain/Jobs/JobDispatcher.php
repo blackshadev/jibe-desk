@@ -9,8 +9,5 @@ use JeroenG\Autowire\Attribute\Autowire;
 #[Autowire]
 interface JobDispatcher
 {
-    public function dispatch(Job $job): void;
-
-    /** @param list<Job> $jobs */
-    public function batch(string $name, array $jobs): void;
+    public function dispatch(Job|JobBatch|JobChain $job): void;
 }
