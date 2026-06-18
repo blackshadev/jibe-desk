@@ -21,7 +21,7 @@ final class OutgoingEmailTest extends UnitTestCase
 
         $email = new OutgoingEmail(
             $trackingId,
-            'App\Mail\InvoiceMail',
+            'App\Mail\Invoices\InvoiceMail',
             $recipient,
             'Test subject',
             MemberId::create(42),
@@ -29,7 +29,7 @@ final class OutgoingEmailTest extends UnitTestCase
         );
 
         static::assertSame($trackingId, $email->trackingId);
-        static::assertSame('App\Mail\InvoiceMail', $email->mailClass);
+        static::assertSame('App\Mail\Invoices\InvoiceMail', $email->mailClass);
         static::assertSame($recipient, $email->recipient);
         static::assertSame('Test subject', $email->subject);
         static::assertEquals(MemberId::create(42), $email->memberId);
@@ -40,7 +40,7 @@ final class OutgoingEmailTest extends UnitTestCase
     {
         $email = new OutgoingEmail(
             TrackingId::generate(),
-            'App\Mail\InvoiceMail',
+            'App\Mail\Invoices\InvoiceMail',
             new Recipient('Jan de Vries', 'jan@example.com'),
             'Test subject',
             null,

@@ -9,6 +9,7 @@ use App\Domain\Jobs\JobBatch;
 use App\Domain\Jobs\JobDispatcher;
 use App\Domain\Members\MemberId;
 use App\Jobs\Invoices\GenerateInvoice;
+use App\Jobs\Invoices\SendInvoiceBatchCreatedEmail;
 use Override;
 use Webmozart\Assert\Assert;
 
@@ -45,10 +46,9 @@ final readonly class InvoiceBatchGeneratorImpl implements InvoiceBatchGenerator
             $billableMembers->ids,
         );
         Assert::isList($jobs);
-        $batch = new JobBatch($batchName, $jobs);
+        $batch = new JobBatch($batchName, $jobs)
+            ->after(new SendInvoiceBatchCreatedEmail($batchId));
 
         $this->dispatcher->dispatch($batch);
-
-        // todo, sent mail after batch?
     }
 }

@@ -122,5 +122,7 @@ return [
     'admin' => [
         'address' => env('MAIL_ADMIN_ADDRESS', 'ledenadministratie@almerecentraal.nl'),
     ],
-
+    'invoicing' => [
+        'address' => env('MAIL_INVOICING_ADDRESS', 'penningmeester@almerecentraal.nl'),
+    ],
 ];

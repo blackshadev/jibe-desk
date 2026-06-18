@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Mail;
 
-use App\Mail\NewMemberWelcome;
+use App\Mail\Registration\NewMemberWelcome;
 use Tests\FeatureTestCase;
 
 final class NewMemberWelcomeTest extends FeatureTestCase

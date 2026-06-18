@@ -3,13 +3,16 @@
 declare(strict_types=1);
 
 use App\Domain\Invoices\CompoundPrice;
+use App\Domain\Invoices\InvoiceBatchEmailData;
+use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceMailData;
 use App\Domain\Invoices\InvoiceMailLine;
 use App\Domain\Members\MemberId;
 use App\Domain\Registration\MembershipData;
-use App\Mail\InvoiceMail;
-use App\Mail\NewMemberAdminNotification;
-use App\Mail\NewMemberWelcome;
+use App\Mail\Invoices\InvoiceBatchCreatedMail;
+use App\Mail\Invoices\InvoiceMail;
+use App\Mail\Registration\NewMemberAdminNotification;
+use App\Mail\Registration\NewMemberWelcome;
 use Xammie\Mailbook\Facades\Mailbook;
 
 Mailbook::add(static fn (): NewMemberAdminNotification =>
@@ -57,4 +60,14 @@ Mailbook::add(static function (): InvoiceMail {
     );
 
     return new InvoiceMail($data);
+});
+Mailbook::add(static function (): InvoiceBatchCreatedMail {
+    return new InvoiceBatchCreatedMail(
+        new InvoiceBatchEmailData(
+            id: InvoiceBatchId::create(1),
+            invoiceDate: new DateTimeImmutable('2026-06-15'),
+            invoiceCount: 12,
+            total: new CompoundPrice(1500.00, 315.00),
+        ),
+    );
 });

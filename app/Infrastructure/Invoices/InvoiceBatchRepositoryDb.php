@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Invoices;
 
 use App\Domain\Invoices\CompoundPrice;
+use App\Domain\Invoices\InvoiceBatchEmailData;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceBatchRepository;
 use App\Domain\Invoices\InvoiceBatchStatus;
@@ -149,6 +150,41 @@ final class InvoiceBatchRepositoryDb implements InvoiceBatchRepository
         /** @var InvoiceBatch $batch */
         $batch = InvoiceBatch::findOrFail($batchId->value);
         return $batch->invoice_date;
+    }
+
+    #[Override]
+    public function getBatchEmailData(InvoiceBatchId $batchId): InvoiceBatchEmailData
+    {
+        $row = DB::table('invoice_batches')
+            ->where('invoice_batches.id', $batchId->value)
+            ->join('invoices', 'invoices.invoice_batch_id', '=', 'invoice_batches.id')
+            ->join('invoice_lines', 'invoice_lines.invoice_id', '=', 'invoices.id')
+            ->select(
+                'invoice_batches.invoice_date',
+                DB::raw('COUNT(DISTINCT invoices.id) as invoice_count'),
+                DB::raw('SUM(invoice_lines.price * invoice_lines.quantity) as total_price'),
+                DB::raw('SUM(invoice_lines.vat * invoice_lines.quantity) as total_vat'),
+            )
+            ->groupBy('invoice_batches.id', 'invoice_batches.invoice_date')
+            ->first();
+
+        if ($row === null) {
+            $batch = InvoiceBatch::findOrFail($batchId->value);
+
+            return new InvoiceBatchEmailData(
+                id: $batchId,
+                invoiceDate: $batch->invoice_date,
+                invoiceCount: 0,
+                total: CompoundPrice::empty(),
+            );
+        }
+
+        return new InvoiceBatchEmailData(
+            id: $batchId,
+            invoiceDate: CarbonImmutable::parse($row->invoice_date),
+            invoiceCount: (int) $row->invoice_count,
+            total: new CompoundPrice((float) $row->total_price, (float) $row->total_vat),
+        );
     }
 
     #[Override]

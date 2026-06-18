@@ -28,5 +28,7 @@ interface InvoiceBatchRepository
 
     public function getBatchDate(InvoiceBatchId $batchId): DateTimeInterface;
 
+    public function getBatchEmailData(InvoiceBatchId $batchId): InvoiceBatchEmailData;
+
     public function attachInvoice(InvoiceBatchId $batchId, InvoiceId $id): void;
 }

@@ -12,6 +12,7 @@ use App\Domain\Jobs\JobBatch;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MemberIdList;
 use App\Jobs\Invoices\GenerateInvoice;
+use App\Jobs\Invoices\SendInvoiceBatchCreatedEmail;
 use DateTimeImmutable;
 use Tests\Unit\Domain\Jobs\JobDispatcherExpectation;
 use Tests\UnitTestCase;
@@ -59,7 +60,7 @@ final class InvoiceBatchGeneratorImplTest extends UnitTestCase
                         new InvoiceTarget(MemberId::create(2), $invoiceDate, $batchId),
                     ),
                 ],
-            ),
+            )->after(new SendInvoiceBatchCreatedEmail($batchId)),
         );
 
         $this->subject->generate($batch);

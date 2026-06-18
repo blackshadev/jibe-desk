@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Jobs;
 
-use App\Domain\Jobs\JobBatch;
 use App\Domain\Jobs\Job;
+use App\Domain\Jobs\JobBatch;
 use App\Domain\Jobs\JobChain;
 use App\Domain\Jobs\JobDispatcher;
 use Illuminate\Bus\PendingBatch;

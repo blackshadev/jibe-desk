@@ -291,6 +291,63 @@ final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
         $this->repository->getBatchDate(InvoiceBatchId::create(999_999));
     }
 
+    public function test_get_batch_email_data_returns_aggregated_data(): void
+    {
+        $date = CarbonImmutable::parse('2026-06-15');
+        $batch = InvoiceBatch::factory()->create(['invoice_date' => $date]);
+        $otherBatch = InvoiceBatch::factory()->create();
+
+        [$invoice1, $invoice2] = Invoice::factory()
+            ->forBatch($batch)
+            ->count(2)
+            ->createManyQuietly();
+
+        InvoiceLine::factory()
+            ->state(['invoice_id' => $invoice1->id])
+            ->createQuietly(['price' => 10.00, 'quantity' => 2, 'vat' => 4.20]);
+        InvoiceLine::factory()
+            ->state(['invoice_id' => $invoice1->id])
+            ->createQuietly(['price' => 5.00, 'quantity' => 1, 'vat' => 1.05]);
+        InvoiceLine::factory()
+            ->state(['invoice_id' => $invoice2->id])
+            ->createQuietly(['price' => 3.00, 'quantity' => 4, 'vat' => 0.63]);
+
+        Invoice::factory()
+            ->forBatch($otherBatch)
+            ->createQuietly();
+        InvoiceLine::factory()
+            ->state(['invoice_id' => Invoice::query()->where('invoice_batch_id', $otherBatch->id)->value('id')])
+            ->createQuietly(['price' => 99.00, 'quantity' => 1, 'vat' => 20.79]);
+
+        $result = $this->repository->getBatchEmailData(InvoiceBatchId::create($batch->id));
+
+        static::assertSame($batch->id, $result->id->value);
+        static::assertSame($date->toDateString(), $result->invoiceDate->format('Y-m-d'));
+        static::assertSame(2, $result->invoiceCount);
+        static::assertEqualsWithDelta((10.00 * 2) + 5.00 + (3.00 * 4), $result->total->price, 0.001);
+        static::assertEqualsWithDelta((4.20 * 2) + 1.05 + (0.63 * 4), $result->total->vat, 0.001);
+    }
+
+    public function test_get_batch_email_data_returns_empty_values_for_batch_without_invoices(): void
+    {
+        $date = CarbonImmutable::parse('2026-06-15');
+        $batch = InvoiceBatch::factory()->create(['invoice_date' => $date]);
+
+        $result = $this->repository->getBatchEmailData(InvoiceBatchId::create($batch->id));
+
+        static::assertSame($date->toDateString(), $result->invoiceDate->format('Y-m-d'));
+        static::assertSame(0, $result->invoiceCount);
+        static::assertSame(0.0, $result->total->price);
+        static::assertSame(0.0, $result->total->vat);
+    }
+
+    public function test_get_batch_email_data_throws_for_nonexistent_batch(): void
+    {
+        $this->expectException(ModelNotFoundException::class);
+
+        $this->repository->getBatchEmailData(InvoiceBatchId::create(999_999));
+    }
+
     public function test_attach_invoice(): void
     {
         $batch = InvoiceBatch::factory()->createQuietly();

@@ -68,6 +68,6 @@ final class InvoiceBatchResource extends Resource
 
     public static function getRecordTitle(?Model $record): string
     {
-        return $record === null ? 'N/A' : 'Batch-' . $record->id;
+        return $record === null ? 'N/A' : 'Facturatieronde ' . $record->id;
     }
 }

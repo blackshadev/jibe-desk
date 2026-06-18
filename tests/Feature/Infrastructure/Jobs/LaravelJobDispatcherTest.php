@@ -44,7 +44,7 @@ final class LaravelJobDispatcherTest extends FeatureTestCase
         ];
         $batch = new JobBatch(
             'test-batch',
-            $jobs
+            $jobs,
         );
 
         $this->dispatcher->dispatch($batch);
@@ -70,7 +70,7 @@ final class LaravelJobDispatcherTest extends FeatureTestCase
                     $job3,
                 ]),
                 $job4,
-            ]
+            ],
         );
 
         $this->dispatcher->dispatch($chain);

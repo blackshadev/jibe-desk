@@ -8,7 +8,7 @@ use App\Domain\Members\Events\NewMemberRegistration;
 use App\Domain\Members\Listeners\SendAdminNewMemberNotification;
 use App\Domain\Members\MemberId;
 use App\Domain\Registration\MembershipData;
-use App\Mail\NewMemberAdminNotification;
+use App\Mail\Registration\NewMemberAdminNotification;
 use Illuminate\Support\Facades\Mail;
 use Tests\FeatureTestCase;
 

@@ -7,7 +7,7 @@ namespace App\Jobs\Invoices;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceMailRepository;
 use App\Jobs\BaseJob;
-use App\Mail\InvoiceMail;
+use App\Mail\Invoices\InvoiceMail;
 use Illuminate\Queue\Middleware\RateLimited;
 use Illuminate\Support\Facades\Mail;
 use Throwable;

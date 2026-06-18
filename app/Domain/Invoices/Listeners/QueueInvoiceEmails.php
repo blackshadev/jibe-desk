@@ -31,7 +31,7 @@ final readonly class QueueInvoiceEmails
             new JobBatch(
                 'invoice-emails-batch-' . $event->batchId->value,
                 array_map(static fn ($invoiceId) => new SendInvoiceEmail($invoiceId), $invoiceIds),
-            )
+            ),
         );
     }
 }

@@ -12,7 +12,7 @@ final class JobBatch
         public array $jobs,
     ) {}
 
-    public function after(self $jobs): JobChain
+    public function after(self|Job $jobs): JobChain
     {
         return new JobChain([$this, $jobs]);
     }

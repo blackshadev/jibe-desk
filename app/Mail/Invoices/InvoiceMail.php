@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Mail;
+namespace App\Mail\Invoices;
 
 use App\Domain\Invoices\InvoiceMailData;
 use App\Models\Invoice;

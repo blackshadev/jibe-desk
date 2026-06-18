@@ -6,7 +6,7 @@ namespace Tests\Feature\Mail;
 
 use App\Domain\Members\MemberId;
 use App\Domain\Registration\MembershipData;
-use App\Mail\NewMemberAdminNotification;
+use App\Mail\Registration\NewMemberAdminNotification;
 use Tests\FeatureTestCase;
 
 final class NewMemberAdminNotificationTest extends FeatureTestCase

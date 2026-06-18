@@ -14,7 +14,7 @@ final class JobChain
     public function after(JobBatch|Job $after): self
     {
         return new JobChain(
-            [...$this->jobs, $after]
+            [...$this->jobs, $after],
         );
     }
 }

@@ -8,7 +8,7 @@ use App\Domain\Members\Events\NewMemberRegistration;
 use App\Domain\Members\Listeners\SendNewMemberWelcome;
 use App\Domain\Members\MemberId;
 use App\Domain\Registration\MembershipData;
-use App\Mail\NewMemberWelcome;
+use App\Mail\Registration\NewMemberWelcome;
 use Illuminate\Support\Facades\Mail;
 use Tests\FeatureTestCase;
 

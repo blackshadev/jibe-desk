@@ -6,7 +6,7 @@ namespace Tests\Feature\Jobs;
 
 use App\Domain\Invoices\InvoiceId;
 use App\Jobs\Invoices\SendInvoiceEmail;
-use App\Mail\InvoiceMail;
+use App\Mail\Invoices\InvoiceMail;
 use App\Models\Invoice;
 use App\Models\Member;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
