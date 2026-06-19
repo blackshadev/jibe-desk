@@ -8,6 +8,7 @@ use App\Filament\Admin\Navigation\NavigationGroup;
 use App\Filament\Admin\Resources\Members\Pages\CreateMember;
 use App\Filament\Admin\Resources\Members\Pages\EditMember;
 use App\Filament\Admin\Resources\Members\Pages\ListMembers;
+use App\Filament\Admin\Resources\Members\Pages\ViewMember;
 use App\Filament\Admin\Resources\Members\RelationManagers\ActivitiesRelationManager;
 use App\Filament\Admin\Resources\Members\RelationManagers\BillableItemInstancesRelationManager;
 use App\Filament\Admin\Resources\Members\RelationManagers\HouseholdMembersRelationManager;
@@ -75,6 +76,7 @@ final class MemberResource extends Resource
             'index' => ListMembers::route('/'),
             'create' => CreateMember::route('/create'),
             'edit' => EditMember::route('/{record}/edit'),
+            'view' => ViewMember::route('/{record}'),
         ];
     }
 

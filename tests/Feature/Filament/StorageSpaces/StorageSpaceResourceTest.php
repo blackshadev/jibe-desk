@@ -11,12 +11,17 @@ use App\Models\StorageSpaceLocation;
 use App\Models\StorageSpaceRental;
 use Carbon\Carbon;
 use Livewire\Livewire;
+use Tests\Concerns\WithAuthorizedUser;
 use Tests\FeatureTestCase;
 
 final class StorageSpaceResourceTest extends FeatureTestCase
 {
+    use WithAuthorizedUser;
+
     public function test_can_list_storage_spaces(): void
     {
+        $this->withAuthorizedUser();
+
         $location = StorageSpaceLocation::factory()->createOne(['name' => 'Container 3']);
 
         StorageSpace::factory()->createOne(['storage_space_location_id' => $location->id, 'number' => 1]);
@@ -28,6 +33,8 @@ final class StorageSpaceResourceTest extends FeatureTestCase
 
     public function test_can_create_storage_space(): void
     {
+        $this->withAuthorizedUser();
+
         $location = StorageSpaceLocation::factory()->createOne(['name' => 'Schuur Noord']);
 
         Livewire::test(ListStorageSpaces::class)
@@ -44,6 +51,8 @@ final class StorageSpaceResourceTest extends FeatureTestCase
 
     public function test_can_bulk_generate_storage_spaces(): void
     {
+        $this->withAuthorizedUser();
+
         $location = StorageSpaceLocation::factory()->createOne(['name' => 'Container 5']);
 
         Livewire::test(ListStorageSpaces::class)
@@ -64,6 +73,8 @@ final class StorageSpaceResourceTest extends FeatureTestCase
 
     public function test_shows_member_name_when_storage_space_is_rented(): void
     {
+        $this->withAuthorizedUser();
+
         $location = StorageSpaceLocation::factory()->createOne(['name' => 'Container 1']);
         $space = StorageSpace::factory()->createOne(['storage_space_location_id' => $location->id, 'number' => 5]);
         $member = Member::factory()->createOneQuietly(['first_name' => 'Jan', 'infix_name' => '', 'last_name' => 'Jansen']);
@@ -83,6 +94,8 @@ final class StorageSpaceResourceTest extends FeatureTestCase
 
     public function test_shows_dash_for_rented_until_when_no_rental(): void
     {
+        $this->withAuthorizedUser();
+
         $location = StorageSpaceLocation::factory()->createOne(['name' => 'Locatie']);
         $space = StorageSpace::factory()->createOne(['storage_space_location_id' => $location->id]);
 
@@ -93,6 +106,8 @@ final class StorageSpaceResourceTest extends FeatureTestCase
 
     public function test_available_tab_only_shows_available_spaces(): void
     {
+        $this->withAuthorizedUser();
+
         $location = StorageSpaceLocation::factory()->createOne(['name' => 'Container']);
         $available = StorageSpace::factory()->createOne(['storage_space_location_id' => $location->id, 'number' => 1]);
         $rented = StorageSpace::factory()->createOne(['storage_space_location_id' => $location->id, 'number' => 2]);
@@ -112,6 +127,8 @@ final class StorageSpaceResourceTest extends FeatureTestCase
 
     public function test_unavailable_tab_only_shows_rented_spaces(): void
     {
+        $this->withAuthorizedUser();
+
         $location = StorageSpaceLocation::factory()->createOne(['name' => 'Container']);
         $available = StorageSpace::factory()->createOne(['storage_space_location_id' => $location->id, 'number' => 1]);
         $rented = StorageSpace::factory()->createOne(['storage_space_location_id' => $location->id, 'number' => 2]);
@@ -131,6 +148,8 @@ final class StorageSpaceResourceTest extends FeatureTestCase
 
     public function test_location_filter_filters_by_location(): void
     {
+        $this->withAuthorizedUser();
+
         $locationA = StorageSpaceLocation::factory()->createOne(['name' => 'Locatie A']);
         $locationB = StorageSpaceLocation::factory()->createOne(['name' => 'Locatie B']);
 

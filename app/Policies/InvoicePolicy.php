@@ -7,31 +7,25 @@ namespace App\Policies;
 use App\Domain\Invoices\InvoiceStatus;
 use App\Models\Invoice;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
+use Webmozart\Assert\Assert;
 
-final class InvoicePolicy
+final class InvoicePolicy extends ResourcePolicy
 {
-    public function viewAny(User $_user): bool
+    protected static function permissionPrefix(): string
     {
-        return true;
+        return 'invoices';
     }
 
-    public function view(User $_user, Invoice $_invoice): bool
+    public function update(User $user, Model $invoice): bool
     {
-        return true;
+        Assert::isInstanceOf($invoice, Invoice::class);
+        return $user->can('update_invoices') && $invoice->status === InvoiceStatus::Open;
     }
 
-    public function create(User $_user): bool
+    public function delete(User $user, Model $invoice): bool
     {
-        return true;
-    }
-
-    public function update(User $_user, Invoice $invoice): bool
-    {
-        return $invoice->status === InvoiceStatus::Open;
-    }
-
-    public function delete(User $_user, Invoice $invoice): bool
-    {
-        return $invoice->status === InvoiceStatus::Open;
+        Assert::isInstanceOf($invoice, Invoice::class);
+        return $user->can('delete_invoices') && $invoice->status === InvoiceStatus::Open;
     }
 }

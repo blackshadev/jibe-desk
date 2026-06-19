@@ -10,6 +10,7 @@ use App\Domain\Invoices\InvoiceTarget;
 use App\Domain\Members\MemberId;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Filament\Admin\Utils\ViewOrEdit;
+use App\Models\Invoice;
 use App\Models\Member;
 use Carbon\CarbonImmutable;
 use Filament\Actions\Action;
@@ -49,6 +50,7 @@ final class InvoicesRelationManager extends RelationManager
                 CreateAction::make(),
                 Action::make('generate')
                     ->label(__('labels.generate_invoice'))
+                    ->visible(static fn (): bool => auth()->user()?->can('create', Invoice::class) ?? false)
                     ->action(static function (RelationManager $livewire, InvoiceGenerator $generator, Action $action): bool {
                         /** @var Member $member */
                         $member = $livewire->getOwnerRecord();

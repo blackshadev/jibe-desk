@@ -44,6 +44,7 @@ final class ActivitiesRelationManager extends RelationManager
             )
             ->headerActions([
                 AttachAction::make()
+                    ->visible(static fn (): bool => auth()->user()?->can('create', ActivityModel::class) ?? false)
                     ->recordSelectOptionsQuery(
                         /** @phpstan-ignore-next-line method.notFound */
                         static fn (Builder $query) => $query->active(),

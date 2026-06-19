@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Domain\Authorization\RoleName;
 use App\Models\Activity;
 use App\Models\Invoice;
 use App\Models\Member;
@@ -19,10 +20,19 @@ final class DevelopmentSeeder extends Seeder
 {
     public function run(): void
     {
-        User::factory()->createQuietly([
+        $testUser = User::factory()->createQuietly([
             'email' => 'test@test.nl',
             'password' => Hash::make('password'),
         ]);
+        $testUser->assignRole(array_map(static fn (RoleName $role) => $role->value, RoleName::cases()));
+
+        foreach (RoleName::cases() as $roleName) {
+            $user = User::factory()->createQuietly([
+                'email' => $roleName->value . '@test.nl',
+                'password' => Hash::make('password'),
+            ]);
+            $user->assignRole($roleName->value);
+        }
 
         $location3 = StorageSpaceLocation::query()->where('name', 'Container 3')->firstOrFail();
         StorageSpace::factory()

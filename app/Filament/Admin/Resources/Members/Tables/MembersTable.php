@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Members\Tables;
 
+use App\Filament\Admin\Resources\Members\MemberResource;
+use App\Filament\Admin\Utils\ViewOrEdit;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
@@ -34,6 +36,7 @@ final class MembersTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->recordUrl(ViewOrEdit::route(MemberResource::class))
             ->filters([
                 SelectFilter::make('membership')
                     ->label(__('labels.membership'))

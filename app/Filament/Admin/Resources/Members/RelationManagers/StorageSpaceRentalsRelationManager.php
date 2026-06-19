@@ -20,6 +20,11 @@ final class StorageSpaceRentalsRelationManager extends RelationManager
 {
     protected static string $relationship = 'storageSpaceRentals';
 
+    public function isReadOnly(): bool
+    {
+        return false;
+    }
+
     #[Override]
     public function table(Table $table): Table
     {

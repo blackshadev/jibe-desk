@@ -76,6 +76,7 @@ final class MemberForm
 
                         Tabs\Tab::make(__('labels.address_information'))
                             ->columns(12)
+                            ->disabled(static fn (): bool => !auth()->user()?->can('update_member_address_information'))
                             ->schema([
                                 TextInput::make('address_street')
                                     ->columnSpan(6)
@@ -102,7 +103,8 @@ final class MemberForm
                                     ->required()
                                     ->columnSpan(6)
                                     ->label(__('labels.address_city')),
-                            ]),
+                            ])
+                            ->visible(static fn (): bool => auth()->user()?->can('view_member_address_information') ?? false),
 
                         Tabs\Tab::make(__('labels.payment_information'))
                             ->schema([
@@ -110,6 +112,7 @@ final class MemberForm
                                     ->relationship('paymentInformation')
                                     ->columns(2)
                                     ->columnSpanFull()
+                                    ->disabled(static fn (): bool => !auth()->user()?->can('update_member_payment_information'))
                                     ->schema([
                                         TextInput::make('banking_account_number')
                                             ->label(__('labels.banking_account_number'))
@@ -136,7 +139,9 @@ final class MemberForm
                                             ->disabled()
                                             ->dehydrated(false),
                                     ]),
-                            ]),
+                            ])
+                            ->visible(static fn (): bool => auth()->user()?->can('view_member_payment_information') ?? false),
+
                         Tabs\Tab::make(__('labels.registration_details'))
                             ->schema([
                                 DatePicker::make('created_at')
@@ -170,7 +175,8 @@ final class MemberForm
                                                     ->disabled(),
                                             ]),
                                     ]),
-                            ]),
+                            ])
+                            ->visible(static fn (): bool => auth()->user()?->can('view_member_registration_data') ?? false),
                     ]),
             ]);
     }

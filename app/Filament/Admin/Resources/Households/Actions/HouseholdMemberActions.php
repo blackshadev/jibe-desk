@@ -40,6 +40,12 @@ final class HouseholdMemberActions
                     $member = Member::findOrFail($data['member_id']);
                     $member->update(['household_id' => $household->id]);
                 })
+                ->visible(static function (RelationManager $livewire): bool {
+                    /** @var Household $household */
+                    $household = $livewire->getOwnerRecord();
+
+                    return auth()->user()?->can('update', $household) ?? false;
+                })
                 ->successNotificationTitle(__('notifications.member_added_to_household')),
         ];
     }
@@ -53,6 +59,12 @@ final class HouseholdMemberActions
                 ->requiresConfirmation()
                 ->action(static function (Member $record): void {
                     $record->update(['household_id' => null]);
+                })
+                ->visible(static function (RelationManager $livewire): bool {
+                    /** @var Household $household */
+                    $household = $livewire->getOwnerRecord();
+
+                    return auth()->user()?->can('update', $household) ?? false;
                 })
                 ->successNotificationTitle(__('notifications.member_removed_from_household')),
         ];
@@ -68,7 +80,8 @@ final class HouseholdMemberActions
                     /** @var Member $member */
                     $member = $livewire->getOwnerRecord();
 
-                    return $member->household_id === null;
+                    $isAllowed = auth()->user()?->can('create', Household::class) ?? false;
+                    return $member->household_id === null && $isAllowed;
                 })
                 ->schema([
                     Toggle::make('create_new')
@@ -120,7 +133,8 @@ final class HouseholdMemberActions
                     /** @var Member $member */
                     $member = $livewire->getOwnerRecord();
 
-                    return $member->household_id !== null;
+                    $isAllowed = auth()->user()?->can('create', Household::class) ?? false;
+                    return $member->household_id !== null && $isAllowed;
                 })
                 ->schema([
                     Select::make('member_id')

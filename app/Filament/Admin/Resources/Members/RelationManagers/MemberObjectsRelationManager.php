@@ -44,6 +44,11 @@ final class MemberObjectsRelationManager extends RelationManager
             ]);
     }
 
+    public function isReadOnly(): bool
+    {
+        return false;
+    }
+
     #[Override]
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {

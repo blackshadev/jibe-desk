@@ -10,12 +10,17 @@ use App\Filament\Admin\Resources\StorageSpaceLocations\Pages\ListStorageSpaceLoc
 use App\Models\StorageSpace;
 use App\Models\StorageSpaceLocation;
 use Livewire\Livewire;
+use Tests\Concerns\WithAuthorizedUser;
 use Tests\FeatureTestCase;
 
 final class StorageSpaceLocationResourceTest extends FeatureTestCase
 {
+    use WithAuthorizedUser;
+
     public function test_can_list_storage_space_locations(): void
     {
+        $this->withAuthorizedUser();
+
         StorageSpaceLocation::factory()->createOne(['name' => 'Container 3']);
         StorageSpaceLocation::factory()->createOne(['name' => 'Container 4']);
 
@@ -25,6 +30,8 @@ final class StorageSpaceLocationResourceTest extends FeatureTestCase
 
     public function test_can_create_storage_space_location(): void
     {
+        $this->withAuthorizedUser();
+
         Livewire::test(CreateStorageSpaceLocation::class)
             ->fillForm([
                 'name' => 'Schuur Noord',
@@ -42,6 +49,8 @@ final class StorageSpaceLocationResourceTest extends FeatureTestCase
 
     public function test_can_edit_storage_space_location(): void
     {
+        $this->withAuthorizedUser();
+
         $location = StorageSpaceLocation::factory()->createOne(['name' => 'Container 3']);
 
         Livewire::test(EditStorageSpaceLocation::class, ['record' => $location->id])
@@ -59,6 +68,8 @@ final class StorageSpaceLocationResourceTest extends FeatureTestCase
 
     public function test_can_delete_storage_space_location(): void
     {
+        $this->withAuthorizedUser();
+
         $location = StorageSpaceLocation::factory()->createOne(['name' => 'Container 3']);
 
         Livewire::test(EditStorageSpaceLocation::class, ['record' => $location->id])
@@ -72,6 +83,8 @@ final class StorageSpaceLocationResourceTest extends FeatureTestCase
 
     public function test_can_not_delete_storage_space_location_with_spaces(): void
     {
+        $this->withAuthorizedUser();
+
         $location = StorageSpaceLocation::factory()
             ->has(StorageSpace::factory())
             ->createOne(['name' => 'Container 3']);

@@ -10,6 +10,8 @@ final class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->call(RolePermissionSeeder::class);
+
         $this->call(ActivitySeeder::class);
 
         $this->call(MembershipSeeder::class);
