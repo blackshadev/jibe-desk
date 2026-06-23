@@ -1,6 +1,6 @@
 tls:
   certificates:
-    - certFile: /var/certs/local.leden.almerecentraal.nl.pem
-      keyFile: /var/certs/local.leden.almerecentraal.nl-key.pem
+    - certFile: /var/certs/local.jibe-desk.almerecentraal.nl.pem
+      keyFile: /var/certs/local.jibe-desk.almerecentraal.nl-key.pem
     - certFile: /var/certs/local.mail.almerecentraal.nl.pem
       keyFile: /var/certs/local.mail.almerecentraal.nl-key.pem

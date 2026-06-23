@@ -80,6 +80,10 @@ return [
     'price_adults' => 'Prijs volwassenen',
     'price_kids' => 'Prijs jeugd',
     'billable_item_instances' => 'Terugkerende factuurregels',
+    'cost_center' => 'Kostenplaats',
+    'cost_centers' => 'Kostenplaatsen',
+    'number' => 'Nummer',
+    'title' => 'Titel',
     'bill_period' => 'Factuurperiode',
     'bill_periods' => [
         BillPeriod::Monthly->value => 'Maandelijks',
@@ -199,4 +203,7 @@ return [
     'queued_at' => 'Gequeued op',
     'sent_at' => 'Verzonden op',
     'error_message' => 'Foutmelding',
+    'book_year' => 'Boekjaar',
+    'bookkeeping_record' => 'boekhouding rij',
+    'bookkeeping_records' => 'boekhouding',
 ];

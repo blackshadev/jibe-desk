@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'WSV Almere Centraal '),
+    'name' => env('APP_NAME', 'JibeDesk '),
 
     /*
     |--------------------------------------------------------------------------

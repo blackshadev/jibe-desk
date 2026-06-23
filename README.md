@@ -1,6 +1,6 @@
 # WSV Admin
 
-Admin panel for [Watersportvereniging Almere Centraal](https://local.leden.almerecentraal.nl), built with [Laravel](https://laravel.com) 13 and [Filament](https://filamentphp.com) 5. It manages members, their objects, rentals, contributions, and other day-to-day operations of the club.
+Admin panel for [Watersportvereniging Almere Centraal](https://local.jibe-desk.almerecentraal.nl), built with [Laravel](https://laravel.com) 13 and [Filament](https://filamentphp.com) 5. It manages members, their objects, rentals, contributions, and other day-to-day operations of the club.
 
 The application is a member-facing administrative tool: member administration, invoicing and other bookkeeping for the windsurfing association.
 
@@ -21,8 +21,8 @@ All commands in this project are run through the `Taskfile`. To use it you need:
 - **Bash 5+** — the `Taskfile` checks the version on startup. On macOS the system `bash` is too old, install Bash 5 via Homebrew (`brew install bash`) and make sure your shell uses it.
 - **Docker** with **Docker Compose** — the application and its Postgres 18 database run as containers.
 - **curl** — used by the development proxy installer.
-- **mkcert** — used to create a locally trusted SSL certificate for `local.leden.almerecentraal.nl`. Install with `brew install mkcert` and run `mkcert -install` once.
-- A working `/etc/hosts` entry pointing `local.leden.almerecentraal.nl` to `127.0.0.1` (and `::1`). The `Taskfile` will tell you what to add on first run.
+- **mkcert** — used to create a locally trusted SSL certificate for `local.jibe-desk.almerecentraal.nl`. Install with `brew install mkcert` and run `mkcert -install` once.
+- A working `/etc/hosts` entry pointing `local.jibe-desk.almerecentraal.nl` to `127.0.0.1` (and `::1`). The `Taskfile` will tell you what to add on first run.
 - _(Optional)_ the [Development Proxy](https://github.com/Enrise/DevelopmentProxy) — the `Taskfile` will fetch and start it for you the first time.
 
 ## Setup

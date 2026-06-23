@@ -9,6 +9,7 @@ use App\Domain\Invoices\ApplyInvoiceLines;
 use App\Domain\Invoices\Billing\BillableItem;
 use App\Domain\Invoices\Billing\BillableItemId;
 use App\Domain\Invoices\Billing\BillableItemList;
+use App\Domain\Invoices\Billing\CostCenterId;
 use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceGeneratorImpl;
@@ -56,7 +57,7 @@ final class InvoiceGeneratorImplTest extends UnitTestCase
         $memberId = MemberId::create(1);
         $invoiceDate = new DateTimeImmutable('2026-05-25');
         $items = new BillableItemList([
-            new BillableItem(BillableItemId::create(10), new CompoundPrice(10.0, 2.1), 1.0, 'A'),
+            new BillableItem(BillableItemId::create(10), new CompoundPrice(10.0, 2.1), 1.0, 'A', CostCenterId::create(1)),
         ]);
 
         $expectedInvoice = new ApplyInvoiceLines($memberId, $invoiceDate, $items);
@@ -75,7 +76,7 @@ final class InvoiceGeneratorImplTest extends UnitTestCase
         $invoiceId = InvoiceId::create(9);
         $invoiceDate = new DateTimeImmutable('2026-05-25');
         $items = new BillableItemList([
-            new BillableItem(BillableItemId::create(10), new CompoundPrice(10.0, 2.1), 1.0, 'A'),
+            new BillableItem(BillableItemId::create(10), new CompoundPrice(10.0, 2.1), 1.0, 'A', CostCenterId::create(1)),
         ]);
 
         $expectedInvoice = new ApplyInvoiceLines($memberId, $invoiceDate, $items);

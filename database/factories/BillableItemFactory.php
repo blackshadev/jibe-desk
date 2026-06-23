@@ -6,6 +6,7 @@ namespace Database\Factories;
 
 use App\Domain\Invoices\Billing\BillPeriod;
 use App\Models\BillableItem;
+use App\Models\CostCenter;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Override;
 
@@ -25,6 +26,7 @@ final class BillableItemFactory extends Factory
             'price' => $price,
             'vat' => $price * 0.21,
             'bill_period' => fake()->randomElement(BillPeriod::cases())->value,
+            'cost_center_id' => CostCenter::factory(),
         ];
     }
 }

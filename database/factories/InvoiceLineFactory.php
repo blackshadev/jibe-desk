@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\CostCenter;
 use App\Models\InvoiceLine;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Override;
@@ -21,6 +22,7 @@ final class InvoiceLineFactory extends Factory
             'price' => $price,
             'quantity' => fake()->randomFloat(2, 1, 5),
             'vat' => $price * 0.21,
+            'cost_center_id' => CostCenter::factory(),
         ];
     }
 }

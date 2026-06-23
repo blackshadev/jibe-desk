@@ -6,7 +6,6 @@ namespace Database\Seeders;
 
 use App\Domain\Authorization\RoleName;
 use App\Models\Activity;
-use App\Models\Invoice;
 use App\Models\Member;
 use App\Models\Membership;
 use App\Models\StorageSpace;
@@ -71,11 +70,6 @@ final class DevelopmentSeeder extends Seeder
                     ->for($membership)
                     ->withPaymentInfo()
                     ->withRandomActivity($activities)
-                    ->has(
-                        Invoice::factory()
-                            ->withLines()
-                            ->randomCount(),
-                    )
                     ->createMany(),
             );
         }

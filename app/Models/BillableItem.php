@@ -7,11 +7,13 @@ namespace App\Models;
 use App\Domain\Invoices\Billing\BillableItem as InvoiceBillableItem;
 use App\Domain\Invoices\Billing\BillableItemId;
 use App\Domain\Invoices\Billing\BillPeriod;
+use App\Domain\Invoices\Billing\CostCenterId;
 use App\Domain\Invoices\CompoundPrice;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Override;
 
@@ -19,10 +21,16 @@ use Override;
  * @property BillPeriod $bill_period
  * @property int $id
  */
-#[Fillable(['description', 'price', 'vat', 'bill_period'])]
+#[Fillable(['description', 'price', 'vat', 'bill_period', 'cost_center_id'])]
 final class BillableItem extends Model
 {
     use HasFactory;
+
+    /** @return BelongsTo<CostCenter, $this> */
+    public function costCenter(): BelongsTo
+    {
+        return $this->belongsTo(CostCenter::class);
+    }
 
     /** @return HasMany<InvoiceLine, $this> */
     public function invoiceLines(): HasMany
@@ -37,6 +45,7 @@ final class BillableItem extends Model
             'price' => 0,
             'vat' => 0,
             'bill_period' => BillPeriod::Annually,
+            'cost_center_id' => CostCenter::factory()->create()->id,
             ...$data,
         ]);
     }
@@ -48,6 +57,7 @@ final class BillableItem extends Model
             $this->compound_price,
             1.0,
             $this->description,
+            CostCenterId::create($this->cost_center_id),
         );
     }
 

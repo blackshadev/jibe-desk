@@ -8,6 +8,7 @@ use App\Domain\Invoices\ApplyInvoiceLines;
 use App\Domain\Invoices\Billing\BillableItem;
 use App\Domain\Invoices\Billing\BillableItemId;
 use App\Domain\Invoices\Billing\BillableItemList;
+use App\Domain\Invoices\Billing\CostCenterId;
 use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceStatus;
@@ -46,8 +47,8 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
             memberId: MemberId::create($member->id),
             invoiceDate: new DateTimeImmutable('2026-05-25'),
             items: new BillableItemList([
-                new BillableItem(BillableItemId::create($billableItemOne->id), new CompoundPrice(10.0, 2.1), 1.0, 'First'),
-                new BillableItem(BillableItemId::create($billableItemTwo->id), new CompoundPrice(20.0, 4.2), 2.0, 'Second'),
+                new BillableItem(BillableItemId::create($billableItemOne->id), new CompoundPrice(10.0, 2.1), 1.0, 'First', CostCenterId::create($billableItemOne->cost_center_id)),
+                new BillableItem(BillableItemId::create($billableItemTwo->id), new CompoundPrice(20.0, 4.2), 2.0, 'Second', CostCenterId::create($billableItemTwo->cost_center_id)),
             ]),
         );
 
@@ -95,7 +96,7 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
             memberId: MemberId::create($member->id),
             invoiceDate: new DateTimeImmutable('2026-05-25'),
             items: new BillableItemList([
-                new BillableItem(BillableItemId::create($billableItem->id), new CompoundPrice(10.0, 2.1), 1.0, 'Only'),
+                new BillableItem(BillableItemId::create($billableItem->id), new CompoundPrice(10.0, 2.1), 1.0, 'Only', CostCenterId::create($billableItem->cost_center_id)),
             ]),
             batchId: $batchId,
         ));
@@ -122,7 +123,7 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
             memberId: MemberId::create($member->id),
             invoiceDate: new DateTimeImmutable('2026-05-25'),
             items: new BillableItemList([
-                new BillableItem(BillableItemId::create($billableItem->id), new CompoundPrice(10.0, 2.1), 1.0, 'Only'),
+                new BillableItem(BillableItemId::create($billableItem->id), new CompoundPrice(10.0, 2.1), 1.0, 'Only', CostCenterId::create($billableItem->cost_center_id)),
             ]),
         ));
 
@@ -152,8 +153,8 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
             MemberId::create($member->id),
             new DateTimeImmutable('2026-05-25'),
             new BillableItemList([
-                new BillableItem(BillableItemId::create($billableItemOne->id), new CompoundPrice(10.0, 2.1), 1.0, 'First'),
-                new BillableItem(BillableItemId::create($billableItemTwo->id), new CompoundPrice(20.0, 4.2), 2.0, 'Second'),
+                new BillableItem(BillableItemId::create($billableItemOne->id), new CompoundPrice(10.0, 2.1), 1.0, 'First', CostCenterId::create($billableItemOne->cost_center_id)),
+                new BillableItem(BillableItemId::create($billableItemTwo->id), new CompoundPrice(20.0, 4.2), 2.0, 'Second', CostCenterId::create($billableItemTwo->cost_center_id)),
             ]),
         );
 
@@ -180,7 +181,7 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
             MemberId::create($member->id),
             new DateTimeImmutable('2026-06-05'),
             new BillableItemList([
-                new BillableItem(BillableItemId::create($billableItemOne->id), new CompoundPrice(15.0, 3.0), 1.0, 'Only'),
+                new BillableItem(BillableItemId::create($billableItemOne->id), new CompoundPrice(15.0, 3.0), 1.0, 'Only', CostCenterId::create($billableItemOne->cost_center_id)),
             ]),
         );
 
@@ -209,7 +210,7 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
             MemberId::create($member->id),
             new DateTimeImmutable('2026-05-25'),
             new BillableItemList([
-                new BillableItem(BillableItemId::create($billableItem->id), new CompoundPrice(12.0, 2.4), 1.0, 'New'),
+                new BillableItem(BillableItemId::create($billableItem->id), new CompoundPrice(12.0, 2.4), 1.0, 'New', CostCenterId::create($billableItem->cost_center_id)),
             ]),
         );
 
@@ -238,7 +239,7 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
             MemberId::create($member->id),
             new DateTimeImmutable('2026-05-05'),
             new BillableItemList([
-                new BillableItem(BillableItemId::create($billableItem->id), new CompoundPrice(8.0, 1.68), 1.0, 'Later'),
+                new BillableItem(BillableItemId::create($billableItem->id), new CompoundPrice(8.0, 1.68), 1.0, 'Later', CostCenterId::create($billableItem->cost_center_id)),
             ]),
         );
 

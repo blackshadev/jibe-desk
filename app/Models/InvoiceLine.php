@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Override;
 
-#[Fillable(['description', 'vat', 'price', 'quantity', 'member_id', 'billable_item_id'])]
+#[Fillable(['description', 'vat', 'price', 'quantity', 'member_id', 'billable_item_id', 'cost_center_id'])]
 final class InvoiceLine extends Model
 {
     use HasFactory;
@@ -27,6 +27,12 @@ final class InvoiceLine extends Model
     public function billableItem(): BelongsTo
     {
         return $this->belongsTo(BillableItem::class);
+    }
+
+    /** @return BelongsTo<CostCenter, $this> */
+    public function costCenter(): BelongsTo
+    {
+        return $this->belongsTo(CostCenter::class);
     }
 
     #[Override]

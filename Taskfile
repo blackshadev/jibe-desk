@@ -38,7 +38,7 @@ function task:start { ## Start the project in development mode
 	proxy:start
 	docker:start
 	proxy:connect
-	echo "https://local.leden.almerecentraal.nl"
+	echo "https://local.jibe-desk.almerecentraal.nl"
 }
 
 function task:stop { ## Stop the local project
@@ -196,13 +196,13 @@ function proxy:disconnect {
 
 function proxy:hosts {
     title "Setup hosts file"
-    for localHostName in "local.leden.almerecentraal.nl" "local.mail.almerecentraal.nl"; do
+    for localHostName in "local.jibe-desk.almerecentraal.nl" "local.mail.almerecentraal.nl"; do
         if ! cat /etc/hosts | grep --silent $localHostName; then
             echo "Missing $localHostName in /etc/hosts, please make sure it contains:"
             echo ""
             echo "#==== AlmereCentraal"
-            echo "127.0.0.1    local.leden.almerecentraal.nl local.mail.almerecentraal.nl"
-            echo "::1          local.leden.almerecentraal.nl local.mail.almerecentraal.nl"
+            echo "127.0.0.1    local.jibe-desk.almerecentraal.nl local.mail.almerecentraal.nl"
+            echo "::1          local.jibe-desk.almerecentraal.nl local.mail.almerecentraal.nl"
             echo "#===="
             exit 422
         fi
@@ -217,7 +217,7 @@ function proxy:certificates { ## Generate the SSL certificates
     mkdir -p ~/.development-proxy/config
     (
         cd ~/.development-proxy/certs \
-        && mkcert "local.leden.almerecentraal.nl" \
+        && mkcert "local.jibe-desk.almerecentraal.nl" \
         && mkcert "local.mail.almerecentraal.nl"
     )
     echo "Done."

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\Memberships\Schemas;
 
 use App\Filament\Admin\Labels\BillPeriodLabels;
+use App\Models\CostCenter;
 use App\Models\Membership;
 use App\Rules\UniqueDefaultMembership;
 use Filament\Forms\Components\Select;
@@ -42,6 +43,12 @@ final class MembershipForm
                             ->label(__('labels.bill_period'))
                             ->options(BillPeriodLabels::options())
                             ->required(),
+                        Select::make('cost_center_id')
+                            ->label(__('labels.cost_center'))
+                            ->options(static fn () => CostCenter::query()->orderBy('number')->pluck('title', 'id'))
+                            ->searchable()
+                            ->preload()
+                            ->required(),
                     ])
                     ->mutateRelationshipDataBeforeCreateUsing(static fn (array $data): array => [
                         ...$data,
@@ -60,6 +67,12 @@ final class MembershipForm
                         Select::make('bill_period')
                             ->label(__('labels.bill_period'))
                             ->options(BillPeriodLabels::options())
+                            ->required(),
+                        Select::make('cost_center_id')
+                            ->label(__('labels.cost_center'))
+                            ->options(static fn () => CostCenter::query()->orderBy('number')->pluck('title', 'id'))
+                            ->searchable()
+                            ->preload()
                             ->required(),
                     ])
                     ->mutateRelationshipDataBeforeCreateUsing(static fn (array $data): array => [

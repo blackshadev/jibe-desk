@@ -34,6 +34,9 @@ final class BillableItemInstancesRelationManager extends RelationManager
                 TextColumn::make('billableItem.price')
                     ->label(__('labels.price'))
                     ->formatStateUsing(PriceFormatter::format(...)),
+                TextColumn::make('billableItem.costCenter.title')
+                    ->label(__('labels.cost_center'))
+                    ->toggleable(),
 
                 TextColumn::make('start_date')
                     ->label(__('labels.start_date'))

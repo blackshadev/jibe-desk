@@ -7,6 +7,7 @@ namespace Tests\Feature\Filament\StorageSpaceLocations;
 use App\Filament\Admin\Resources\StorageSpaceLocations\Pages\CreateStorageSpaceLocation;
 use App\Filament\Admin\Resources\StorageSpaceLocations\Pages\EditStorageSpaceLocation;
 use App\Filament\Admin\Resources\StorageSpaceLocations\Pages\ListStorageSpaceLocations;
+use App\Models\CostCenter;
 use App\Models\StorageSpace;
 use App\Models\StorageSpaceLocation;
 use Livewire\Livewire;
@@ -32,12 +33,15 @@ final class StorageSpaceLocationResourceTest extends FeatureTestCase
     {
         $this->withAuthorizedUser();
 
+        $costCenter = CostCenter::factory()->create();
+
         Livewire::test(CreateStorageSpaceLocation::class)
             ->fillForm([
                 'name' => 'Schuur Noord',
                 'billableItem.description' => 'Opslagplek: Schuur Noord',
                 'billableItem.price' => '0',
                 'billableItem.bill_period' => 'annually',
+                'billableItem.cost_center_id' => $costCenter->id,
             ])
             ->call('create')
             ->assertHasNoFormErrors();

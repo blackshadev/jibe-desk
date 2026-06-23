@@ -7,6 +7,7 @@ namespace Tests\Unit\Domain\Invoices;
 use App\Domain\Invoices\Billing\BillableItem;
 use App\Domain\Invoices\Billing\BillableItemId;
 use App\Domain\Invoices\Billing\BillableItemList;
+use App\Domain\Invoices\Billing\CostCenterId;
 use App\Domain\Invoices\CompoundPrice;
 use InvalidArgumentException;
 use stdClass;
@@ -16,7 +17,7 @@ final class BillableItemListTest extends UnitTestCase
 {
     public function test_it_stores_items(): void
     {
-        $items = [new BillableItem(BillableItemId::create(1), new CompoundPrice(10.0, 2.1), 1.0, 'Test')];
+        $items = [new BillableItem(BillableItemId::create(1), new CompoundPrice(10.0, 2.1), 1.0, 'Test', CostCenterId::create(1))];
 
         $subject = new BillableItemList($items);
 

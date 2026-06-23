@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\StorageSpaceLocations\Schemas;
 
 use App\Filament\Admin\Labels\BillPeriodLabels;
+use App\Models\CostCenter;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -33,6 +34,12 @@ final class StorageSpaceLocationForm
                     Select::make('bill_period')
                         ->label(__('labels.bill_period'))
                         ->options(BillPeriodLabels::options()),
+                    Select::make('cost_center_id')
+                        ->label(__('labels.cost_center'))
+                        ->options(static fn () => CostCenter::query()->orderBy('number')->pluck('title', 'id'))
+                        ->searchable()
+                        ->preload()
+                        ->required(),
                 ]),
         ]);
     }

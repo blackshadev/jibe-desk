@@ -130,4 +130,12 @@ enum ResourcePermission: string
     case UpdateBillableItemInstances = 'update_billable_item_instances';
     case DeleteBillableItemInstances = 'delete_billable_item_instances';
     case DeleteAnyBillableItemInstances = 'delete_any_billable_item_instances';
+
+    // Cost Centers
+    case ViewAnyCostCenters = 'view_any_cost_centers';
+    case ViewCostCenters = 'view_cost_centers';
+    case CreateCostCenters = 'create_cost_centers';
+    case UpdateCostCenters = 'update_cost_centers';
+    case DeleteCostCenters = 'delete_cost_centers';
+    case DeleteAnyCostCenters = 'delete_any_cost_centers';
 }

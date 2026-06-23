@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\Activities\Schemas;
 
 use App\Filament\Admin\Labels\BillPeriodLabels;
+use App\Models\CostCenter;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -29,6 +30,12 @@ final class ActivityForm
             Section::make(__('labels.billing'))
                 ->relationship('billableItem')
                 ->schema([
+                    Select::make('cost_center_id')
+                        ->label(__('labels.cost_center'))
+                        ->options(static fn () => CostCenter::query()->orderBy('number')->pluck('title', 'id'))
+                        ->searchable()
+                        ->preload()
+                        ->required(),
                     TextInput::make('price')
                         ->label(__('labels.price'))
                         ->required(),

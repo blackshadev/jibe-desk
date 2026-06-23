@@ -6,6 +6,7 @@ namespace App\Filament\Admin\Resources\Invoices\Schemas;
 
 use App\Filament\Admin\Labels\InvoiceStatusLabels;
 use App\Formatters\PriceFormatter;
+use App\Models\CostCenter;
 use App\Models\Member;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
@@ -94,6 +95,12 @@ final class InvoiceForm
                                 TextInput::make('price')
                                     ->label(__('labels.price'))
                                     ->default(1.99)
+                                    ->required(),
+                                Select::make('cost_center_id')
+                                    ->label(__('labels.cost_center'))
+                                    ->options(static fn () => CostCenter::query()->orderBy('number')->pluck('title', 'id'))
+                                    ->searchable()
+                                    ->preload()
                                     ->required(),
                             ])
                             ->mutateRelationshipDataBeforeSaveUsing(
