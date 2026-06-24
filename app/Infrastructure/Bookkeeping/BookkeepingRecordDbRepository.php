@@ -10,8 +10,8 @@ use App\Domain\Invoices\Billing\CostCenterId;
 use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceStatus;
+use App\Models\BookkeepingRecord;
 use App\Models\Invoice;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Override;
 
@@ -20,44 +20,39 @@ final class BookkeepingRecordDbRepository implements BookkeepingRecordRepository
     #[Override]
     public function createForBatch(InvoiceBatchId $batchId): void
     {
-        $rows = Invoice::query()
-            ->where('invoices.invoice_batch_id', $batchId->value)
-            ->where('invoices.status', InvoiceStatus::Pending)
-            ->joinRelationship('lines')
-            ->joinRelationship('invoiceBatch')
-            ->groupBy(
-                'invoices.id',
-                'invoices.invoice_number',
-                'invoice_lines.cost_center_id',
-                'invoice_batches.invoice_date',
-            )
-            ->select(
-                'invoices.id as invoice_id',
-                'invoices.invoice_number',
-                'invoice_lines.cost_center_id',
-                DB::raw('SUM(invoice_lines.price * invoice_lines.quantity) as total_price'),
-                DB::raw('SUM(invoice_lines.vat * invoice_lines.quantity) as total_vat'),
-                'invoice_batches.invoice_date',
-            )
-            ->get();
-
-        if ($rows->isEmpty()) {
-            return;
-        }
-
         $now = now();
-        DB::table('bookkeeping_records')->insert(
-            $rows->map(static fn (object $row) => [
-                'year' => Carbon::parse($row->invoice_date)->year,
-                'cost_center_id' => $row->cost_center_id,
-                'amount_price' => $row->total_price,
-                'amount_vat' => $row->total_vat,
-                'description' => 'Invoice ' . $row->invoice_number,
-                'reference_type' => Invoice::class,
-                'reference_id' => $row->invoice_id,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ])->all(),
+        BookkeepingRecord::query()->insertUsing(
+            ['year', 'cost_center_id', 'amount_price', 'amount_vat', 'description', 'reference_type', 'reference_id', 'created_at', 'updated_at'],
+            Invoice::query()
+                ->where('invoices.invoice_batch_id', $batchId->value)
+                ->where('invoices.status', InvoiceStatus::Pending)
+                ->whereNotExists(static function ($query): void {
+                    $query
+                        ->from('bookkeeping_records')
+                        ->whereColumn('bookkeeping_records.reference_id', 'invoices.id')
+                        ->where('bookkeeping_records.reference_type', Invoice::class);
+                })
+                ->joinRelationship('lines')
+                ->joinRelationship('invoiceBatch')
+                ->groupBy(
+                    'invoices.id',
+                    'invoices.invoice_number',
+                    'invoice_lines.cost_center_id',
+                    'invoice_batches.invoice_date',
+                )
+                ->select(
+                    DB::connection()->getConfig()['driver'] === 'pgsql' ?
+                        DB::raw('EXTRACT(YEAR FROM invoice_batches.invoice_date) AS year') :
+                        DB::raw('STRFTIME(\'%Y\', invoice_batches.invoice_date)'),
+                    'invoice_lines.cost_center_id',
+                    DB::raw('SUM(invoice_lines.price * invoice_lines.quantity)'),
+                    DB::raw('SUM(invoice_lines.vat * invoice_lines.quantity)'),
+                    DB::raw("CONCAT('Invoice ', invoices.invoice_number)"),
+                    DB::raw("'" . Invoice::class . "'"),
+                    'invoices.id',
+                    $now,
+                    $now,
+                ),
         );
     }
 

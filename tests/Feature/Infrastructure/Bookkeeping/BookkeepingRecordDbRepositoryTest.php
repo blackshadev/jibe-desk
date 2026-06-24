@@ -111,6 +111,35 @@ final class BookkeepingRecordDbRepositoryTest extends FeatureTestCase
         static::assertSame(2026, $records->first()->year);
     }
 
+    public function test_create_for_batch_skips_invoices_already_in_bookkeeping_records(): void
+    {
+        $costCenter = CostCenter::factory()->create();
+        $batch = InvoiceBatch::factory()->create(['invoice_date' => '2026-06-15']);
+
+        $invoice = Invoice::factory()
+            ->has(InvoiceLine::factory()->state(['cost_center_id' => $costCenter->id, 'price' => 100, 'vat' => 21, 'quantity' => 1]), 'lines')
+            ->create([
+                'invoice_batch_id' => $batch->id,
+                'status' => 'pending',
+            ]);
+
+        BookkeepingRecord::factory()->create([
+            'reference_type' => Invoice::class,
+            'reference_id' => $invoice->id,
+            'cost_center_id' => $costCenter->id,
+            'year' => 2026,
+            'amount_price' => 100,
+            'amount_vat' => 21,
+        ]);
+
+        $this->repository->createForBatch(InvoiceBatchId::create($batch->id));
+
+        $records = BookkeepingRecord::query()->where('reference_type', Invoice::class)->get();
+
+        static::assertCount(1, $records);
+        static::assertSame(100.0, (float) $records->first()->amount_price);
+    }
+
     public function test_create_for_batch_no_pending_invoices_creates_nothing(): void
     {
         $batch = InvoiceBatch::factory()->create();
