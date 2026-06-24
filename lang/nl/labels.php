@@ -212,4 +212,5 @@ return [
     'result' => 'Resultaat',
     'cost_center_results' => 'Resultaten',
     'goto_related' => 'Ga naar bron',
+    'recipient' => 'Ontvanger',
 ];

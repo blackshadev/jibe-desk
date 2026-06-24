@@ -48,7 +48,7 @@ final class InvoiceLine extends Model
     /** @return Attribute<CompoundPrice, never> */
     protected function compoundPrice(): Attribute
     {
-        return Attribute::get(static fn ($_value, array $attributes) => new CompoundPrice($attributes['price'], $attributes['vat']));
+        return Attribute::get(static fn ($_value, array $attributes) => new CompoundPrice((float) ($attributes['price'] ?? 0.0), (float) ($attributes['vat'] ?? 0.0)));
     }
 
     /** @return Attribute<CompoundPrice, never> */

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Invoices;
 
+use App\Domain\Mail\Recipient;
 use DateTimeInterface;
 
 final readonly class InvoiceMailData
@@ -14,8 +15,9 @@ final readonly class InvoiceMailData
     public function __construct(
         public int $invoiceId,
         public string $invoiceNumber,
-        public string $memberName,
-        public string $memberEmail,
+        public Recipient $recipient,
+        public string $recipientIban,
+        public string $recipientAddress,
         public DateTimeInterface $invoiceDate,
         public CompoundPrice $total,
         public array $lines,

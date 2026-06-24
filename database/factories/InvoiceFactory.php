@@ -25,6 +25,7 @@ final class InvoiceFactory extends Factory
             'invoice_number' => fake()->unique()->numerify("I-{$year}######"),
             'recipient_name' => fake()->name(),
             'recipient_address' => fake()->address(),
+            'recipient_email' => fake()->safeEmail(),
             'status' => fake()->randomElement(InvoiceStatus::cases()),
         ];
     }
@@ -35,6 +36,8 @@ final class InvoiceFactory extends Factory
         return $this->state(fn (array $_attributes) => [
             'member_id' => $member->id,
             'recipient_name' => $member->name,
+            'recipient_address' => $member->address,
+            'recipient_email' => $member->email,
         ]);
     }
 

@@ -14,6 +14,7 @@ return new class() extends Migration {
             $table->foreignId('member_id')->nullable()->constrained()->nullOnDelete();
             $table->string('invoice_number')->unique();
             $table->date('date');
+            $table->string('recipient_email');
             $table->string('recipient_address');
             $table->string('recipient_name');
             $table->timestamps();

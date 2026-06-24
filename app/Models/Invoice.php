@@ -6,7 +6,8 @@ namespace App\Models;
 
 use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceStatus;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
+use DateTimeInterface;
+use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,8 +17,9 @@ use Override;
 
 /**
  * @property InvoiceStatus $status
+ * @property DateTimeInterface $date
  */
-#[Fillable(['date', 'status', 'member_id', 'invoice_number', 'recipient_address', 'recipient_name', 'invoice_batch_id'])]
+#[Guarded(['id', 'created_at', 'updated_at'])]
 final class Invoice extends Model
 {
     use HasFactory;

@@ -12,7 +12,6 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
@@ -41,37 +40,46 @@ final class InvoiceForm
                             ->label(__('labels.status'))
                             ->options(InvoiceStatusLabels::options())
                             ->disabled(),
+                    ]),
+                Section::make(__('labels.recipient'))
+                    ->columnSpanFull()
+                    ->columns(2)
+                    ->schema([
+                        Select::make('member_id')
+                            ->relationship(
+                                'member',
+                                modifyQueryUsing: static fn (Builder $query) => $query->orderBy('last_name')->orderBy('first_name')->orderBy('infix_name'),
+                            )
+                            ->label(__('labels.member'))
+                            ->live(onBlur: true)
+                            ->getOptionLabelFromRecordUsing(static fn (Member $record) => $record->name)
+                            ->searchable(['first_name', 'infix_name', 'last_name'])
+                            ->afterStateUpdated(static function (?int $state, Set $set) {
+                                if ($state === null) {
+                                    return;
+                                }
+                                $member = Member::findOrFail($state);
 
-                        Grid::make()
-                            ->columnSpanFull()
-                            ->schema([
-                                Select::make('member_id')
-                                    ->relationship(
-                                        'member',
-                                        modifyQueryUsing: static fn (Builder $query) => $query->orderBy('last_name')->orderBy('first_name')->orderBy('infix_name'),
-                                    )
-                                    ->label(__('labels.member'))
-                                    ->live(onBlur: true)
-                                    ->getOptionLabelFromRecordUsing(static fn (Member $record) => $record->name)
-                                    ->searchable(['first_name', 'infix_name', 'last_name'])
-                                    ->afterStateUpdated(static function (?int $state, Set $set) {
-                                        if ($state === null) {
-                                            return;
-                                        }
+                                $set('recipient_address', $member->address);
+                                $set('recipient_name', $member->name);
+                                $set('recipient_email', $member->email);
+                            }),
 
-                                        $set('recipient_address', Member::findOrFail($state)->address);
-                                        $set('recipient_name', Member::findOrFail($state)->name);
-                                    }),
-                            ]),
+                        TextInput::make('recipient_email')
+                            ->label(__('labels.recipient_email'))
+                            ->disabled(static fn (Get $get) => $get('member_id') !== null)
+                            ->required(),
 
                         TextInput::make('recipient_address')
                             ->label(__('labels.recipient_address'))
+                            ->disabled(static fn (Get $get) => $get('member_id') !== null)
                             ->required(),
                         TextInput::make('recipient_name')
                             ->label(__('labels.recipient_name'))
                             ->disabled(static fn (Get $get) => $get('member_id') !== null)
                             ->required(),
                     ]),
+
                 Section::make(__('labels.invoice_lines'))
                     ->columnSpanFull()
                     ->schema([

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Mail\Invoices;
 
 use App\Domain\Invoices\InvoiceMailData;
+use App\Infrastructure\Invoices\SepaConfiguration;
 use App\Models\Invoice;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -21,6 +22,7 @@ final class InvoiceMail extends Mailable implements ShouldQueue
 
     public function __construct(
         public readonly InvoiceMailData $invoice,
+        public readonly SepaConfiguration $sepaConfiguration,
     ) {}
 
     public function headers(): Headers
@@ -47,12 +49,17 @@ final class InvoiceMail extends Mailable implements ShouldQueue
             markdown: 'mail.invoice',
             with: [
                 'invoice' => $this->invoice,
-                'memberName' => $this->invoice->memberName,
+                'memberName' => $this->invoice->recipient->name,
+                'address' => $this->invoice->recipientAddress,
+                'email' => $this->invoice->recipient->email,
+                'recipientIban' => $this->invoice->recipientIban,
                 'invoiceNumber' => $this->invoice->invoiceNumber,
                 'invoiceDate' => $this->invoice->invoiceDate,
-                'total' => (string) $this->invoice->total,
+                'total' => $this->invoice->total,
                 'lines' => $this->invoice->lines,
                 'sepaTransferDate' => $this->invoice->sepaTransferDate,
+                'creditorIban' => $this->sepaConfiguration->creditorIban,
+                'creditorAccountName' => $this->sepaConfiguration->creditorName,
             ],
         );
     }

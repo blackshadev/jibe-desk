@@ -8,6 +8,7 @@ use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceMailData;
 use App\Domain\Invoices\InvoiceMailLine;
 use App\Domain\Invoices\InvoiceMailRepository;
+use App\Domain\Mail\Recipient;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;
 use Override;
@@ -19,7 +20,7 @@ final readonly class InvoiceMailRepositoryDb implements InvoiceMailRepository
     {
         /** @var Invoice $invoice */
         $invoice = Invoice::query()
-            ->with(['member', 'lines', 'invoiceBatch'])
+            ->with(['member.paymentInformation', 'lines', 'invoiceBatch'])
             ->findOrFail($id->value);
 
         $lines = $invoice->lines->map(
@@ -34,12 +35,13 @@ final readonly class InvoiceMailRepositoryDb implements InvoiceMailRepository
         return new InvoiceMailData(
             invoiceId: $invoice->id,
             invoiceNumber: $invoice->invoice_number,
-            memberName: $invoice->recipient_name,
-            memberEmail: $invoice->member->email ?? '',
+            recipient: new Recipient($invoice->recipient_name, $invoice->recipient_email),
+            recipientIban: $invoice->member?->paymentInformation->iban ?? '',
+            recipientAddress: $invoice->recipient_address,
             invoiceDate: $invoice->date,
             total: $invoice->total,
             lines: $lines,
-            sepaTransferDate: $invoice->invoiceBatch?->invoice_date,
+            sepaTransferDate: $invoice->member?->paymentInformation?->mandate_accepted_date !== null ? $invoice->invoiceBatch?->invoice_date : null,
         );
     }
 }
