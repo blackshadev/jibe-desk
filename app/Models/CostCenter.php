@@ -25,4 +25,10 @@ final class CostCenter extends Model
     {
         return $this->hasMany(InvoiceLine::class);
     }
+
+    /** @return HasMany<CostCenterBudget, $this> */
+    public function budgets(): HasMany
+    {
+        return $this->hasMany(CostCenterBudget::class);
+    }
 }

@@ -22,7 +22,12 @@ final class MembershipSeeder extends Seeder
 
     public function run(): void
     {
-        $costCenter = CostCenter::query()->where('number', CostCenterNumber::Contribution)->firstOrFail();
+        $costCenter = CostCenter::query()
+            ->where('number', CostCenterNumber::Contribution)
+            ->firstOrCreate([
+                'title' => 'Contributie leden',
+                'number' => CostCenterNumber::Contribution,
+            ]);
 
         foreach (self::MEMBERSHIPS as $membership) {
             $adultBillableItem = BillableItem::create([

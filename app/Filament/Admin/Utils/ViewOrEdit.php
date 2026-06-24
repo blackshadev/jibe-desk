@@ -19,4 +19,12 @@ final class ViewOrEdit
     {
         return static fn (Model $record) => $resource::getUrl(Gate::allows('update', $record) ? 'edit' : 'view', ['record' => $record]);
     }
+
+    /**
+     * @param class-string<Resource> $resource
+     */
+    public static function routeFor(string $resource, Model $record): string
+    {
+        return $resource::getUrl(Gate::allows('update', $record) ? 'edit' : 'view', ['record' => $record]);
+    }
 }

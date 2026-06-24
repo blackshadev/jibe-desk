@@ -7,5 +7,4 @@ return [
     'creditor_name' => env('SEPA_CREDITOR_NAME', 'WSV Almere Centraal'),
     'creditor_iban' => env('SEPA_CREDITOR_IBAN'),
     'creditor_bic' => env('SEPA_CREDITOR_BIC'),
-    'pain_format' => env('SEPA_PAIN_FORMAT', 'pain.008.001.02'),
 ];

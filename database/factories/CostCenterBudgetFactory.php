@@ -4,27 +4,23 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\BookkeepingRecord;
 use App\Models\CostCenter;
+use App\Models\CostCenterBudget;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Override;
 
 /**
- * @extends Factory<BookkeepingRecord>
+ * @extends Factory<CostCenterBudget>
  */
-final class BookkeepingRecordFactory extends Factory
+final class CostCenterBudgetFactory extends Factory
 {
     #[Override]
     public function definition(): array
     {
-        $price = fake()->randomFloat(2, 1, 500);
-
         return [
             'year' => now()->year,
             'cost_center_id' => CostCenter::factory(),
-            'amount_price' => $price,
-            'amount_vat' => $price * 0.21,
-            'description' => fake()->sentence(),
+            'starting_amount' => fake()->randomFloat(2, 0, 10_000),
         ];
     }
 }

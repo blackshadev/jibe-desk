@@ -25,7 +25,7 @@ class BookkeepingRecordResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::BookOpen;
 
-    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Invoicing;
+    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Bookkeeping;
 
     protected static ?string $recordTitleAttribute = 'description';
 

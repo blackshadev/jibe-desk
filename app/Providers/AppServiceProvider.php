@@ -26,7 +26,6 @@ final class AppServiceProvider extends ServiceProvider
             creditorName: config('sepa.creditor_name') ?? '',
             creditorIban: config('sepa.creditor_iban') ?? '',
             creditorBic: config('sepa.creditor_bic') ?? '',
-            painFormat: config('sepa.pain_format') ?? 'pain.008.001.02',
         ));
     }
 

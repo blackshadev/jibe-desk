@@ -138,4 +138,20 @@ enum ResourcePermission: string
     case UpdateCostCenters = 'update_cost_centers';
     case DeleteCostCenters = 'delete_cost_centers';
     case DeleteAnyCostCenters = 'delete_any_cost_centers';
+
+    // Bookkeeping Records
+    case ViewAnyBookkeepingRecords = 'view_any_bookkeeping_records';
+    case ViewBookkeepingRecords = 'view_bookkeeping_records';
+    case CreateBookkeepingRecords = 'create_bookkeeping_records';
+    case UpdateBookkeepingRecords = 'update_bookkeeping_records';
+    case DeleteBookkeepingRecords = 'delete_bookkeeping_records';
+    case DeleteAnyBookkeepingRecords = 'delete_any_bookkeeping_records';
+
+    // Cost Center Budgets
+    case ViewAnyCostCenterBudgets = 'view_any_cost_center_budgets';
+    case ViewCostCenterBudgets = 'view_cost_center_budgets';
+    case CreateCostCenterBudgets = 'create_cost_center_budgets';
+    case UpdateCostCenterBudgets = 'update_cost_center_budgets';
+    case DeleteCostCenterBudgets = 'delete_cost_center_budgets';
+    case DeleteAnyCostCenterBudgets = 'delete_any_cost_center_budgets';
 }

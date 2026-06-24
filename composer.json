@@ -16,7 +16,8 @@
         "laravel/fortify": "^1.36",
         "laravel/framework": "^13.8",
         "laravel/tinker": "^3.0",
-        "spatie/laravel-permission": "^8.0"
+        "spatie/laravel-permission": "^8.0",
+        "ext-zip": "*"
     },
     "require-dev": {
         "brianium/paratest": "^7.20",

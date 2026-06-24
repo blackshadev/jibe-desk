@@ -6,6 +6,7 @@ namespace App\Infrastructure\Invoices;
 
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceBatchRepository;
+use App\Domain\Invoices\SepaExport;
 use App\Domain\Invoices\SepaExportInvoice;
 use App\Domain\Invoices\SepaExportService;
 use Digitick\Sepa\PaymentInformation;
@@ -20,7 +21,7 @@ final readonly class SepaExportServiceImpl implements SepaExportService
     ) {}
 
     #[Override]
-    public function export(InvoiceBatchId $batchId): string
+    public function export(InvoiceBatchId $batchId): SepaExport
     {
         $dueDate = $this->batchRepository->getBatchDate($batchId);
 
@@ -28,11 +29,25 @@ final readonly class SepaExportServiceImpl implements SepaExportService
         $invoices = $this->batchRepository->getInvoicesForExport($batchId);
 
         $paymentInfoId = 'payment-batch-' . $batchId->value;
+        $uniqueMessageId = 'BATCH-' . $batchId->value;
+
+        $credit = TransferFileFacadeFactory::createCustomerCredit(
+            $uniqueMessageId,
+            $this->configuration->creditorName,
+        );
+
+        $credit->addPaymentInfo($paymentInfoId, [
+            'id' => $paymentInfoId,
+            'debtorName' => $this->configuration->creditorName,
+            'debtorAccountIBAN' => $this->configuration->creditorIban,
+            'debtorAgentBIC' => $this->configuration->creditorBic,
+            'batchBooking' => true,
+            'dueDate' => $dueDate,
+        ]);
 
         $directDebit = TransferFileFacadeFactory::createDirectDebit(
-            'BATCH-' . $batchId->value,
+            $uniqueMessageId,
             $this->configuration->creditorName,
-            $this->configuration->painFormat,
         );
 
         $directDebit->addPaymentInfo($paymentInfoId, [
@@ -46,19 +61,43 @@ final readonly class SepaExportServiceImpl implements SepaExportService
             'dueDate' => $dueDate,
         ]);
 
+        $hasCreditTransfer = false;
+        $hasDirectDebit = false;
         foreach ($invoices as $invoice) {
-            $directDebit->addTransfer($paymentInfoId, [
-                'amount' => $invoice->amountInCents(),
-                'debtorIban' => $invoice->iban,
-                'debtorName' => $invoice->recipientName,
-                'debtorBic' => $invoice->bic,
-                'debtorMandate' => $invoice->mandateId->value,
-                'debtorMandateSignDate' => $invoice->mandateDate,
-                'endToEndId' => $invoice->invoiceNumber,
-                'remittanceInformation' => $invoice->invoiceNumber,
-            ]);
+            if ($invoice->amountInCents() === 0) {
+                continue;
+            }
+
+            if ($invoice->amountInCents() > 0) {
+                $hasDirectDebit = true;
+                $directDebit->addTransfer($paymentInfoId, [
+                    'amount' => $invoice->amountInCents(),
+                    'debtorIban' => $invoice->iban,
+                    'debtorName' => $invoice->recipientName,
+                    'debtorBic' => $invoice->bic,
+                    'debtorMandate' => $invoice->mandateId->value,
+                    'debtorMandateSignDate' => $invoice->mandateDate,
+                    'endToEndId' => $invoice->invoiceNumber,
+                    'remittanceInformation' => $invoice->invoiceNumber,
+                ]);
+            }
+
+            if ($invoice->amountInCents() < 0) {
+                $hasCreditTransfer = true;
+                $credit->addTransfer($paymentInfoId, [
+                    'amount' => abs($invoice->amountInCents()),
+                    'creditorIban' => $invoice->iban,
+                    'creditorName' => $invoice->recipientName,
+                    'creditorBic' => $invoice->bic,
+                    'endToEndId' => $invoice->invoiceNumber,
+                    'remittanceInformation' => $invoice->invoiceNumber,
+                ]);
+            }
         }
 
-        return $directDebit->asXML();
+        return new SepaExport(
+            creditTransfers: $hasCreditTransfer ? $credit->asXML() : '',
+            directDebit: $hasDirectDebit ? $directDebit->asXML() : '',
+        );
     }
 }

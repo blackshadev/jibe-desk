@@ -10,12 +10,14 @@ use App\Domain\Invoices\InvoiceBatchServiceImpl;
 use App\Domain\Invoices\InvoiceBatchStatus;
 use Carbon\CarbonImmutable;
 use Override;
+use Tests\Unit\Domain\Bookkeeping\BookkeepingRecordRepositoryExpectation;
 use Tests\Unit\Laravel\EventDispatcherExpectation;
 use Tests\UnitTestCase;
 
 final class InvoiceBatchServiceTest extends UnitTestCase
 {
     private InvoiceBatchRepositoryExpectation $repo;
+    private BookkeepingRecordRepositoryExpectation $bookkeepingRepo;
     private EventDispatcherExpectation $dispatcher;
     private InvoiceBatchServiceImpl $service;
 
@@ -25,9 +27,14 @@ final class InvoiceBatchServiceTest extends UnitTestCase
         parent::setUp();
 
         $this->repo = InvoiceBatchRepositoryExpectation::create();
+        $this->bookkeepingRepo = BookkeepingRecordRepositoryExpectation::create();
         $this->dispatcher = EventDispatcherExpectation::create();
 
-        $this->service = new InvoiceBatchServiceImpl($this->repo->mock, $this->dispatcher->mock);
+        $this->service = new InvoiceBatchServiceImpl(
+            $this->repo->mock,
+            $this->bookkeepingRepo->mock,
+            $this->dispatcher->mock,
+        );
     }
 
     public function test_create_batch(): void
@@ -56,6 +63,7 @@ final class InvoiceBatchServiceTest extends UnitTestCase
         $batchId = InvoiceBatchId::create(5);
 
         $this->repo->expectsMarkInvoicesAsPending($batchId);
+        $this->bookkeepingRepo->expectsCreateForBatch($batchId);
         $this->repo->expectsCloseBatch($batchId);
 
         $this->dispatcher->expectsDispatch(new InvoiceBatchClosed(batchId: $batchId));

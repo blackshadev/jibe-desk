@@ -34,7 +34,7 @@ class BookkeepingRecordForm
                     ->required()
                     ->prefix('€')
                     ->regex('/^\d+((\.|,)\d{0,3})?$/')
-                    ->formatStateUsing(static fn (BookkeepingRecord $record) => PriceFormatter::formatCompoundSignless($record->amount))
+                    ->formatStateUsing(static fn (?BookkeepingRecord $record) => PriceFormatter::formatCompoundSignless($record?->amount))
                     ->dehydrateStateUsing(static fn (string $state): CompoundPrice => CompoundPrice::create(PriceFormatter::parse($state))),
             ]);
     }

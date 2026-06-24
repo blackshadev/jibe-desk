@@ -79,6 +79,8 @@ final class RolePermissionSeeder extends Seeder
             $this->allPermissionsFor('invoices'),
             $this->allPermissionsFor('billable_item_instances'),
             $this->allPermissionsFor('cost_centers'),
+            $this->allPermissionsFor('bookkeeping_records'),
+            $this->allPermissionsFor('cost_center_budgets'),
             $this->allPermissionsFor('invoice_batches'),
             $this->viewPermissionsFor('activities'),
             $this->viewPermissionsFor('storage_spaces'),

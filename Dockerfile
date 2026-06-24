@@ -32,11 +32,15 @@ FROM base AS dev
 ARG UID=255
 ARG GID=255
 
-RUN apk --no-cache add git shadow php85-cli php85-sqlite3 php85-pdo_sqlite php85-pecl-xdebug watchexec
+RUN apk --no-cache add bash curl git shadow php85-cli php85-sqlite3 php85-pdo_sqlite php85-pecl-xdebug watchexec
 RUN groupmod --gid 1020 dialout || true
 RUN groupmod --gid ${GID} php && \
     usermod --uid ${UID}  php
 RUN ln -s /usr/bin/php85 /usr/bin/php
+RUN export BUN_INSTALL=/usr/local/bun && \
+    curl -fsSL https://bun.com/install | bash && \
+    ln -s /usr/local/bun/bin/bun /usr/bin/bun && \
+    chmod +rx /usr/local/bun/
 
 # === production-builder ===
 FROM dev AS production-builder

@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BookkeepingRecords\Tables;
 
+use App\Filament\Admin\Resources\Invoices\InvoiceResource;
+use App\Filament\Admin\Utils\ViewOrEdit;
 use App\Models\BookkeepingRecord;
+use App\Models\Invoice;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -57,6 +62,14 @@ class BookkeepingRecordsTable
             ])
             ->recordActions([
                 EditAction::make(),
+                Action::make('related')
+                    ->label(__('labels.goto_related'))
+                    ->icon(Heroicon::ArrowTopRightOnSquare)
+                    ->url(static fn (BookkeepingRecord $record): string => match (get_class($record->reference)) {
+                        Invoice::class => ViewOrEdit::routeFor(InvoiceResource::class, $record->reference),
+                        default => '',
+                    })
+                    ->visible(static fn (BookkeepingRecord $record): bool => $record->reference !== null),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

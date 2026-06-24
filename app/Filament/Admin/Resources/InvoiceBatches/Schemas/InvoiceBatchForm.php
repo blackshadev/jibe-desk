@@ -32,7 +32,7 @@ final class InvoiceBatchForm
                             ->label(__('labels.attach_invoices'))
                             ->columnSpanFull()
                             ->visibleOn(Operation::Create)
-                            ->default(false),
+                            ->default(true),
                     ]),
             ])
             ->disabled(static fn (?InvoiceBatch $record) => $record !== null && $record->status !== InvoiceBatchStatus::Open);

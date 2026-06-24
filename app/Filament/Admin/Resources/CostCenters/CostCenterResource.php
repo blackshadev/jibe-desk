@@ -27,7 +27,7 @@ final class CostCenterResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Banknotes;
 
-    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Invoicing;
+    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Bookkeeping;
 
     protected static ?string $recordTitleAttribute = 'title';
 

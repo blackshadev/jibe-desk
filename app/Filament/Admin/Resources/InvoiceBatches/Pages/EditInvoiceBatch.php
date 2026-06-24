@@ -20,8 +20,9 @@ use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\EditRecord;
 use Livewire\Attributes\On;
 use Override;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Throwable;
+use ZipArchive;
 
 final class EditInvoiceBatch extends EditRecord
 {
@@ -110,12 +111,25 @@ final class EditInvoiceBatch extends EditRecord
                 ->label(__('labels.export_sepa'))
                 ->icon('heroicon-m-arrow-down-tray')
                 ->color('info')
-                ->action(static function (InvoiceBatch $record, SepaExportService $exporter): StreamedResponse {
+                ->action(static function (InvoiceBatch $record, SepaExportService $exporter): Response {
                     $xml = $exporter->export(InvoiceBatchId::create($record->id));
 
-                    return response()->streamDownload(
-                        static fn () => print $xml,
-                        'sepa-batch-' . $record->id . '-' . $record->invoice_date->format('Y-m-d') . '.xml',
+                    $filename = 'sepa-batch-' . $record->id . '-' . $record->invoice_date->format('Y-m-d');
+                    $zip = new ZipArchive();
+                    $tmp = tempnam(sys_get_temp_dir(), $filename) . '.zip';
+                    $zip->open($tmp, ZipArchive::CREATE);
+                    if ($xml->directDebit) {
+                        $zip->addFromString('sepa-direct-debits.xml', $xml->directDebit);
+                    }
+                    if ($xml->creditTransfers) {
+                        $zip->addFromString('sepa-credit-transfers.xml', $xml->creditTransfers);
+                    }
+                    $zip->close();
+
+                    return response()->download(
+                        $tmp,
+                        $filename . '.zip',
+                        ['Content-Type' => 'application/zip'],
                     );
                 })
                 ->visible(static fn (InvoiceBatch $record) => $record->status === InvoiceBatchStatus::Pending),
