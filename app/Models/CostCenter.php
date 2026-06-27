@@ -31,4 +31,10 @@ final class CostCenter extends Model
     {
         return $this->hasMany(CostCenterBudget::class);
     }
+
+    /** @return HasMany<PurchaseOrderLine, $this> */
+    public function purchaseOrderLines(): HasMany
+    {
+        return $this->hasMany(PurchaseOrderLine::class);
+    }
 }

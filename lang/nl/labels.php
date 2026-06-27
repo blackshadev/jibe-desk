@@ -213,4 +213,18 @@ return [
     'cost_center_results' => 'Resultaten',
     'goto_related' => 'Ga naar bron',
     'recipient' => 'Ontvanger',
+    'purchase_order' => 'Inkooporder',
+    'purchase_orders' => 'Inkooporders',
+    'purchase_order_information' => 'Inkooporder informatie',
+    'purchase_order_lines' => 'Inkooporderregels',
+    'purchase_order_status' => [
+        'open' => 'Open',
+        'pending' => 'In behandeling',
+        'paid' => 'Betaald',
+    ],
+    'creditor_name' => 'Crediteur',
+    'date' => 'Datum',
+    'price_vat' => 'BTW bedrag',
+    'mark_as_pending' => 'Markeer als in behandeling',
+    'image' => 'Afbeelding',
 ];

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Infrastructure\Bookkeeping;
 
 use App\Domain\Invoices\InvoiceBatchId;
+use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Infrastructure\Bookkeeping\BookkeepingRecordDbRepository;
 use App\Models\BookkeepingRecord;
 use App\Models\CostCenter;
@@ -12,6 +13,8 @@ use App\Models\CostCenterBudget;
 use App\Models\Invoice;
 use App\Models\InvoiceBatch;
 use App\Models\InvoiceLine;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderLine;
 use Override;
 use Tests\FeatureTestCase;
 
@@ -93,7 +96,7 @@ final class BookkeepingRecordDbRepositoryTest extends FeatureTestCase
         $costCenterB = CostCenter::factory()->create();
         $batch = InvoiceBatch::factory()->create(['invoice_date' => '2026-06-15']);
 
-        $invoice = Invoice::factory()
+        Invoice::factory()
             ->has(InvoiceLine::factory()->state(['cost_center_id' => $costCenterA->id, 'price' => 100, 'vat' => 21, 'quantity' => 2]), 'lines')
             ->has(InvoiceLine::factory()->state(['cost_center_id' => $costCenterB->id, 'price' => 50, 'vat' => 10.5, 'quantity' => 1]), 'lines')
             ->create([
@@ -103,12 +106,18 @@ final class BookkeepingRecordDbRepositoryTest extends FeatureTestCase
 
         $this->repository->createForBatch(InvoiceBatchId::create($batch->id));
 
-        $records = BookkeepingRecord::query()->where('reference_type', Invoice::class)->get();
-
-        static::assertCount(2, $records);
-        static::assertTrue($records->contains(static fn ($r) => $r->cost_center_id === $costCenterA->id && (float) $r->amount_price === 200.0));
-        static::assertTrue($records->contains(static fn ($r) => $r->cost_center_id === $costCenterB->id && (float) $r->amount_price === 50.0));
-        static::assertSame(2026, $records->first()->year);
+        $this->assertDatabaseHas('bookkeeping_records', [
+            'reference_type' => Invoice::class,
+            'cost_center_id' => $costCenterA->id,
+            'year' => 2026,
+            'amount_price' => 200.0,
+        ]);
+        $this->assertDatabaseHas('bookkeeping_records', [
+            'reference_type' => Invoice::class,
+            'cost_center_id' => $costCenterB->id,
+            'year' => 2026,
+            'amount_price' => 50.0,
+        ]);
     }
 
     public function test_create_for_batch_skips_invoices_already_in_bookkeeping_records(): void
@@ -134,10 +143,14 @@ final class BookkeepingRecordDbRepositoryTest extends FeatureTestCase
 
         $this->repository->createForBatch(InvoiceBatchId::create($batch->id));
 
-        $records = BookkeepingRecord::query()->where('reference_type', Invoice::class)->get();
-
-        static::assertCount(1, $records);
-        static::assertSame(100.0, (float) $records->first()->amount_price);
+        $this->assertDatabaseHas('bookkeeping_records', [
+            'reference_type' => Invoice::class,
+            'reference_id' => $invoice->id,
+            'cost_center_id' => $costCenter->id,
+            'year' => 2026,
+            'amount_price' => 100,
+            'amount_vat' => 21,
+        ]);
     }
 
     public function test_create_for_batch_no_pending_invoices_creates_nothing(): void
@@ -147,5 +160,88 @@ final class BookkeepingRecordDbRepositoryTest extends FeatureTestCase
         $this->repository->createForBatch(InvoiceBatchId::create($batch->id));
 
         static::assertSame(0, BookkeepingRecord::query()->count());
+    }
+
+    public function test_create_for_purchase_order_creates_records_per_cost_center(): void
+    {
+        $costCenterA = CostCenter::factory()->create();
+        $costCenterB = CostCenter::factory()->create();
+
+        $po = PurchaseOrder::factory()
+            ->has(PurchaseOrderLine::factory()->state(['cost_center_id' => $costCenterA->id, 'price' => 100, 'price_vat' => 21]), 'lines')
+            ->has(PurchaseOrderLine::factory()->state(['cost_center_id' => $costCenterB->id, 'price' => 50, 'price_vat' => 10.5]), 'lines')
+            ->create([
+                'date' => '2026-06-15',
+                'status' => 'pending',
+            ]);
+
+        $this->repository->createForPurchaseOrder(PurchaseOrderId::create($po->id));
+
+        $this->assertDatabaseHas('bookkeeping_records', [
+            'reference_type' => PurchaseOrder::class,
+            'reference_id' => $po->id,
+            'cost_center_id' => $costCenterA->id,
+            'year' => 2026,
+            'amount_price' => -100.0,
+            'amount_vat' => -21.0,
+        ]);
+        $this->assertDatabaseHas('bookkeeping_records', [
+            'reference_type' => PurchaseOrder::class,
+            'reference_id' => $po->id,
+            'cost_center_id' => $costCenterB->id,
+            'year' => 2026,
+            'amount_price' => -50.0,
+            'amount_vat' => -10.5,
+        ]);
+    }
+
+    public function test_create_for_purchase_order_skips_already_existing_records(): void
+    {
+        $costCenter = CostCenter::factory()->create();
+
+        $po = PurchaseOrder::factory()
+            ->has(PurchaseOrderLine::factory()->state(['cost_center_id' => $costCenter->id, 'price' => 100, 'price_vat' => 21]), 'lines')
+            ->create([
+                'date' => '2026-06-15',
+                'status' => 'paid',
+            ]);
+
+        BookkeepingRecord::factory()->create([
+            'reference_type' => PurchaseOrder::class,
+            'reference_id' => $po->id,
+            'cost_center_id' => $costCenter->id,
+            'year' => 2026,
+            'amount_price' => 100,
+            'amount_vat' => 21,
+        ]);
+
+        $this->repository->createForPurchaseOrder(PurchaseOrderId::create($po->id));
+
+        $this->assertDatabaseHas('bookkeeping_records', [
+            'reference_type' => PurchaseOrder::class,
+            'reference_id' => $po->id,
+            'cost_center_id' => $costCenter->id,
+            'year' => 2026,
+            'amount_price' => 100,
+            'amount_vat' => 21,
+        ]);
+    }
+
+    public function test_create_for_purchase_order_open_status_creates_nothing(): void
+    {
+        $costCenter = CostCenter::factory()->create();
+
+        $po = PurchaseOrder::factory()
+            ->has(PurchaseOrderLine::factory()->state(['cost_center_id' => $costCenter->id, 'price' => 100, 'price_vat' => 21]), 'lines')
+            ->create([
+                'status' => 'open',
+            ]);
+
+        $this->repository->createForPurchaseOrder(PurchaseOrderId::create($po->id));
+
+        $this->assertDatabaseMissing('bookkeeping_records', [
+            'reference_type' => PurchaseOrder::class,
+            'reference_id' => $po->id,
+        ]);
     }
 }

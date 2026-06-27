@@ -154,4 +154,12 @@ enum ResourcePermission: string
     case UpdateCostCenterBudgets = 'update_cost_center_budgets';
     case DeleteCostCenterBudgets = 'delete_cost_center_budgets';
     case DeleteAnyCostCenterBudgets = 'delete_any_cost_center_budgets';
+
+    // Purchase Orders
+    case ViewAnyPurchaseOrders = 'view_any_purchase_orders';
+    case ViewPurchaseOrders = 'view_purchase_orders';
+    case CreatePurchaseOrders = 'create_purchase_orders';
+    case UpdatePurchaseOrders = 'update_purchase_orders';
+    case DeletePurchaseOrders = 'delete_purchase_orders';
+    case DeleteAnyPurchaseOrders = 'delete_any_purchase_orders';
 }

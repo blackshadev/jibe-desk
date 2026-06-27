@@ -29,4 +29,6 @@ return [
     'invoice_status_updated' => 'Factuurstatus succesvol bijgewerkt',
     'sepa_exported' => 'SEPA-bestand succesvol geëxporteerd',
     'no_invoices_to_export' => 'Geen facturen om te exporteren',
+    'purchase_order_marked_pending' => 'Inkooporder gemarkeerd als in behandeling',
+    'purchase_order_marked_paid' => 'Inkooporder gemarkeerd als betaald',
 ];

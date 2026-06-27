@@ -14,6 +14,15 @@ final class PriceFormatter
         return '€ ' . number_format($state, 2, ',', '.');
     }
 
+    public static function formatSignless(?float $state): string
+    {
+        if (!$state) {
+            return '';
+        }
+
+        return number_format($state, 2, ',', '.');
+    }
+
     public static function formatCompound(CompoundPrice $state): string
     {
         return '€ ' . number_format($state->price, 2, ',', '.');

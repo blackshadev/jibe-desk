@@ -10,8 +10,11 @@ use App\Domain\Invoices\Billing\CostCenterId;
 use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceStatus;
+use App\Domain\PurchaseOrders\PurchaseOrderId;
+use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Models\BookkeepingRecord;
 use App\Models\Invoice;
+use App\Models\PurchaseOrder;
 use Illuminate\Support\Facades\DB;
 use Override;
 
@@ -41,17 +44,55 @@ final class BookkeepingRecordDbRepository implements BookkeepingRecordRepository
                     'invoice_batches.invoice_date',
                 )
                 ->select(
-                    DB::connection()->getConfig()['driver'] === 'pgsql' ?
-                        DB::raw('EXTRACT(YEAR FROM invoice_batches.invoice_date) AS year') :
-                        DB::raw('STRFTIME(\'%Y\', invoice_batches.invoice_date)'),
+                    DB::connection()->getConfig()['driver'] === 'pgsql'
+                        ? DB::raw('EXTRACT(YEAR FROM invoice_batches.invoice_date) AS year')
+                        : DB::raw('STRFTIME(\'%Y\', invoice_batches.invoice_date)'),
                     'invoice_lines.cost_center_id',
                     DB::raw('SUM(invoice_lines.price * invoice_lines.quantity)'),
                     DB::raw('SUM(invoice_lines.vat * invoice_lines.quantity)'),
                     DB::raw("CONCAT('Invoice ', invoices.invoice_number)"),
-                    DB::raw("'" . Invoice::class . "'"),
+                    DB::raw(DB::escape(Invoice::class)),
                     'invoices.id',
-                    $now,
-                    $now,
+                    DB::raw(DB::escape($now->format('c'))),
+                    DB::raw(DB::escape($now->format('c'))),
+                ),
+        );
+    }
+
+    #[Override]
+    public function createForPurchaseOrder(PurchaseOrderId $id): void
+    {
+        $now = now();
+        BookkeepingRecord::query()->insertUsing(
+            ['year', 'cost_center_id', 'amount_price', 'amount_vat', 'description', 'reference_type', 'reference_id', 'created_at', 'updated_at'],
+            PurchaseOrder::query()
+                ->where('purchase_orders.id', $id->value)
+                ->whereIn('purchase_orders.status', [PurchaseOrderStatus::Pending, PurchaseOrderStatus::Paid])
+                ->whereNotExists(static function ($query): void {
+                    $query
+                        ->from('bookkeeping_records')
+                        ->whereColumn('bookkeeping_records.reference_id', 'purchase_orders.id')
+                        ->where('bookkeeping_records.reference_type', PurchaseOrder::class);
+                })
+                ->joinRelationship('lines')
+                ->groupBy(
+                    'purchase_orders.id',
+                    'purchase_orders.description',
+                    'purchase_orders.date',
+                    'purchase_order_lines.cost_center_id',
+                )
+                ->select(
+                    DB::connection()->getConfig()['driver'] === 'pgsql'
+                        ? DB::raw('EXTRACT(YEAR FROM purchase_orders.date) AS year')
+                        : DB::raw('STRFTIME(\'%Y\', purchase_orders.date)'),
+                    'purchase_order_lines.cost_center_id',
+                    DB::raw('SUM(-purchase_order_lines.price)'),
+                    DB::raw('SUM(-purchase_order_lines.price_vat)'),
+                    DB::raw("CONCAT('Purchase order ', purchase_orders.description)"),
+                    DB::raw(DB::escape(PurchaseOrder::class)),
+                    'purchase_orders.id',
+                    DB::raw(DB::escape($now->format('c'))),
+                    DB::raw(DB::escape($now->format('c'))),
                 ),
         );
     }

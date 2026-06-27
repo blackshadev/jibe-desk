@@ -10,6 +10,7 @@ use App\Filament\Admin\Resources\InvoiceBatches\Pages\ListInvoiceBatches;
 use App\Filament\Admin\Resources\Invoices\Pages\ListInvoices;
 use App\Filament\Admin\Resources\Members\Pages\ListMembers;
 use App\Filament\Admin\Resources\OutgoingEmails\Pages\ListOutgoingEmails;
+use App\Filament\Admin\Resources\PurchaseOrders\Pages\ListPurchaseOrders;
 use App\Filament\Admin\Resources\StorageSpaces\Pages\ListStorageSpaces;
 use App\Models\User;
 use Livewire\Livewire;
@@ -168,5 +169,29 @@ final class AuthorizationTest extends FeatureTestCase
         $user = $this->withUserHavingRole(RoleName::MemberAdministration);
 
         static::assertFalse($user->can('view_member_registration_data'));
+    }
+
+    public function test_financial_administration_can_view_purchase_orders(): void
+    {
+        $this->withUserHavingRole(RoleName::FinancialAdministration);
+
+        Livewire::test(ListPurchaseOrders::class)
+            ->assertSuccessful();
+    }
+
+    public function test_member_administration_cannot_view_purchase_orders(): void
+    {
+        $this->withUserHavingRole(RoleName::MemberAdministration);
+
+        Livewire::test(ListPurchaseOrders::class)
+            ->assertForbidden();
+    }
+
+    public function test_activity_administration_cannot_view_purchase_orders(): void
+    {
+        $this->withUserHavingRole(RoleName::ActivityAdministration);
+
+        Livewire::test(ListPurchaseOrders::class)
+            ->assertForbidden();
     }
 }
