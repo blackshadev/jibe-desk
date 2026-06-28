@@ -19,6 +19,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Override;
 use UnitEnum;
+use Webmozart\Assert\Assert;
 
 final class InvoiceBatchResource extends Resource
 {
@@ -68,6 +69,7 @@ final class InvoiceBatchResource extends Resource
 
     public static function getRecordTitle(?Model $record): string
     {
+        Assert::nullOrIsInstanceOf($record, InvoiceBatch::class);
         return $record === null ? 'N/A' : 'Facturatieronde ' . $record->id;
     }
 }

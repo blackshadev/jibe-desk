@@ -23,7 +23,6 @@ final class MemberIdListTest extends UnitTestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        /** @phpstan-ignore-next-line argument.type */
         new MemberIdList([new stdClass()]);
     }
 }

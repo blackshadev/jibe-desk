@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Invoices;
 
+use App\Domain\Invoices\InvoiceBatchEmailData;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceBatchRepository;
 use App\Domain\Invoices\InvoiceBatchStatus;
@@ -15,6 +16,7 @@ use Mockery\MockInterface;
 
 use function PHPUnit\Framework\equalTo;
 
+// @mago-expect lint:too-many-methods
 final readonly class InvoiceBatchRepositoryExpectation
 {
     private function __construct(
@@ -83,5 +85,13 @@ final readonly class InvoiceBatchRepositoryExpectation
         $this->mock
             ->expects('attachInvoice')
             ->with(equalTo($batchId), equalTo($invoiceId));
+    }
+
+    public function expectsGetBatchEmailData(InvoiceBatchId $batchId, InvoiceBatchEmailData $return): void
+    {
+        $this->mock
+            ->expects('getBatchEmailData')
+            ->with(equalTo($batchId))
+            ->andReturn($return);
     }
 }

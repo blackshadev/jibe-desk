@@ -7,37 +7,43 @@ use App\Domain\Invoices\InvoiceBatchEmailData;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceMailData;
 use App\Domain\Invoices\InvoiceMailLine;
+use App\Domain\Invoices\Mails\InvoiceBatchCreatedMail;
+use App\Domain\Invoices\Mails\InvoiceMail;
+use App\Domain\Invoices\SepaConfiguration;
 use App\Domain\Mail\Recipient;
 use App\Domain\Members\MemberId;
+use App\Domain\Registration\Mails\NewMemberAdminNotification;
+use App\Domain\Registration\Mails\NewMemberWelcome;
 use App\Domain\Registration\MembershipData;
-use App\Infrastructure\Invoices\SepaConfiguration;
-use App\Mail\Invoices\InvoiceBatchCreatedMail;
-use App\Mail\Invoices\InvoiceMail;
-use App\Mail\Registration\NewMemberAdminNotification;
-use App\Mail\Registration\NewMemberWelcome;
+use App\Infrastructure\Mail\MailMailable;
+use Illuminate\Contracts\Mail\Mailable;
 use Xammie\Mailbook\Facades\Mailbook;
 
-Mailbook::add(static fn (): NewMemberAdminNotification =>
-    new NewMemberAdminNotification(
-        MemberId::create(1),
-        "Jan de Vries",
-        new MembershipData(
-            true,
-            false,
-            true,
-            true,
-            "123"
-        )
-    )
-);
-Mailbook::add(static fn (): NewMemberWelcome =>
-    new NewMemberWelcome(
-        "Jan de Vries",
-    )
-);
+Mailbook::add(NewMemberAdminNotification::class)
+    ->variant('New member admin notification', static fn (): Mailable =>
+        new MailMailable(new NewMemberAdminNotification(
+            MemberId::create(1),
+            "Jan de Vries",
+            new MembershipData(
+                true,
+                false,
+                true,
+                true,
+                "123"
+            ),
+            new Recipient("admin", "admin@admin.nl"),
+        ))
+    );
 
-Mailbook::add(InvoiceMailData::class)
-    ->variant('With SEPA transfer', static function (SepaConfiguration $config): InvoiceMail {
+Mailbook::add(NewMemberWelcome::class)
+    ->variant('New member welcome', static fn (): Mailable =>
+        new MailMailable(new NewMemberWelcome(
+            new Recipient("Jan de Vries", "jan@devries.nl"),
+        ))
+    );
+
+Mailbook::add(InvoiceMail::class)
+    ->variant('With SEPA transfer', static function (SepaConfiguration $config): Mailable {
         $data = new InvoiceMailData(
             invoiceId: 2,
             invoiceNumber: '1234',
@@ -64,15 +70,15 @@ Mailbook::add(InvoiceMailData::class)
             sepaTransferDate: new DateTimeImmutable('2024-01-02')
         );
 
-        return new InvoiceMail($data, $config);
+        return new MailMailable(new InvoiceMail($data, $config));
     })
-    ->variant('Without SEPA transfer', static function (SepaConfiguration $config): InvoiceMail {
+    ->variant('Without SEPA transfer', static function (SepaConfiguration $config): Mailable {
         $data = new InvoiceMailData(
             invoiceId: 2,
             invoiceNumber: '1234',
             recipient: new Recipient('Jan de Vries', 'jan@devries.nl'),
-            recipientAddress: "Kerkstraat 12\n1111 AA Amtersdam",
             recipientIban: 'NL12ABCD1234567890',
+            recipientAddress: "Kerkstraat 12\n1111 AA Amtersdam",
             invoiceDate: new DateTimeImmutable('2024-01-01'),
             total: new CompoundPrice(120, 25.2),
             lines: [
@@ -93,15 +99,15 @@ Mailbook::add(InvoiceMailData::class)
             sepaTransferDate: null
         );
 
-        return new InvoiceMail($data, $config);
+        return new MailMailable(new InvoiceMail($data, $config));
     })
-    ->variant('Credit', static function (SepaConfiguration $config): InvoiceMail {
+    ->variant('Credit', static function (SepaConfiguration $config): Mailable {
         $data = new InvoiceMailData(
             invoiceId: 2,
             invoiceNumber: '1234',
             recipient: new Recipient('Jan de Vries', 'jan@devries.nl'),
-            recipientAddress: "Kerkstraat 12\n1111 AA Amtersdam",
             recipientIban: 'NL12ABCD1234567890',
+            recipientAddress: "Kerkstraat 12\n1111 AA Amtersdam",
             invoiceDate: new DateTimeImmutable('2024-01-01'),
             total: new CompoundPrice(-120, -25.2),
             lines: [
@@ -122,16 +128,18 @@ Mailbook::add(InvoiceMailData::class)
             sepaTransferDate: null
         );
 
-        return new InvoiceMail($data, $config);
+        return new MailMailable(new InvoiceMail($data, $config));
     });
 
-Mailbook::add(static function (): InvoiceBatchCreatedMail {
-    return new InvoiceBatchCreatedMail(
-        new InvoiceBatchEmailData(
-            id: InvoiceBatchId::create(1),
-            invoiceDate: new DateTimeImmutable('2026-06-15'),
-            invoiceCount: 12,
-            total: new CompoundPrice(1500.00, 315.00),
-        ),
-    );
-});
+Mailbook::add(InvoiceBatchCreatedMail::class)
+    ->variant('Invoice batch created', static function (): Mailable {
+        return new MailMailable(new InvoiceBatchCreatedMail(
+            new InvoiceBatchEmailData(
+                id: InvoiceBatchId::create(1),
+                invoiceDate: new DateTimeImmutable('2026-06-15'),
+                invoiceCount: 12,
+                total: new CompoundPrice(1500.00, 315.00),
+            ),
+            new Recipient('Financiële administratie', 'financieel@domain.nl')
+        ));
+    });

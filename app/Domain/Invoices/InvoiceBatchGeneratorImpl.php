@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Domain\Invoices;
 
 use App\Domain\Invoices\Billing\BillableItemsViewRepository;
+use App\Domain\Invoices\Jobs\GenerateInvoice;
+use App\Domain\Invoices\Jobs\SendInvoiceBatchCreatedEmail;
 use App\Domain\Jobs\JobBatch;
 use App\Domain\Jobs\JobDispatcher;
 use App\Domain\Members\MemberId;
-use App\Jobs\Invoices\GenerateInvoice;
-use App\Jobs\Invoices\SendInvoiceBatchCreatedEmail;
 use Override;
 use Webmozart\Assert\Assert;
 

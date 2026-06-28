@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\PurchaseOrders\Schemas;
 
+use App\Domain\Invoices\Formatters\PriceFormatter;
 use App\Filament\Admin\Labels\PurchaseOrderStatusLabels;
-use App\Formatters\PriceFormatter;
 use App\Models\CostCenter;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
@@ -16,20 +16,17 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Intervention\Validation\Rules\Iban;
 
 final class PurchaseOrderForm
 {
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns()
             ->components([
                 Section::make(__('labels.purchase_order_information'))
-                    ->columnSpanFull()
-                    ->columns(2)
                     ->schema([
-                        TextInput::make('creditor_name')
-                            ->label(__('labels.creditor_name'))
-                            ->required(),
                         DatePicker::make('date')
                             ->label(__('labels.date'))
                             ->native(false)
@@ -52,6 +49,14 @@ final class PurchaseOrderForm
                             ->visibility('private')
                             ->previewable()
                             ->columnSpanFull(),
+                    ]),
+                Section::make(__('labels.creditor_information'))
+                    ->schema([
+                        TextInput::make('creditor_name')
+                            ->label(__('labels.name')),
+                        TextInput::make('creditor_iban')
+                            ->label(__('labels.iban'))
+                            ->rule(new Iban()),
                     ]),
                 Section::make(__('labels.purchase_order_lines'))
                     ->columnSpanFull()

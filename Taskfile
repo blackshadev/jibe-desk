@@ -89,8 +89,16 @@ function task:lint { ## Run checks ECS and PHPStan.
     task:stan
 }
 
-function task:stan { ## Run PHPStan
-    mago analyze
+
+function task:stan { ## Run PHPStan static analysis checker
+    docker:ensure-running
+    dockercompose exec app sh -c "chown -R php:php /tmp/phpstan"
+    title "Analysing domain code"
+    task:exec "./vendor/bin/phpstan analyse --configuration=phpstan-domain.neon --memory-limit=2G"
+    title "Analysing infrastructure code"
+    task:exec "./vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=2G"
+    title "Analysing tests"
+    task:exec "./vendor/bin/phpstan analyse --configuration=phpstan-tests.neon --memory-limit=2G"
 }
 
 function task:fix { ## Run Codestyle fixer

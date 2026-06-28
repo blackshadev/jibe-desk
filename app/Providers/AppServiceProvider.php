@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Infrastructure\Invoices\SepaConfiguration;
+use App\Domain\Invoices\SepaConfiguration;
+use App\Domain\Mail\FinancialAdministrationRecipient;
+use App\Domain\Mail\MemberAdministrationRecipient;
+use App\Domain\Mail\Recipient;
 use Carbon\FactoryImmutable;
 use Illuminate\Support\ServiceProvider;
 use Override;
@@ -25,6 +28,22 @@ final class AppServiceProvider extends ServiceProvider
             creditorIban: config('sepa.creditor_iban') ?? '',
             creditorBic: config('sepa.creditor_bic') ?? '',
         ));
+
+        $this->app
+            ->bind(MemberAdministrationRecipient::class, static fn () => new MemberAdministrationRecipient(
+                recipient: new Recipient(
+                    name: config('mail.admin.name'),
+                    email: config('mail.admin.address'),
+                ),
+            ));
+
+        $this->app
+            ->bind(FinancialAdministrationRecipient::class, static fn () => new FinancialAdministrationRecipient(
+                recipient: new Recipient(
+                    name: config('mail.invoicing.name'),
+                    email: config('mail.invoicing.address'),
+                ),
+            ));
     }
 
     public function boot(): void

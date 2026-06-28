@@ -230,9 +230,9 @@ final class OutgoingEmailFactory extends Factory
         return [
             'tracking_id' => fake()->uuid(),
             'mailable_class' => fake()->randomElement([
-                'App\\Mail\\Registration\\NewMemberWelcome',
-                'App\\Mail\\Registration\\NewMemberAdminNotification',
-                'App\\Mail\\Invoices\\InvoiceMail',
+                'App\\Domain\\Registration\\Mails\\NewMemberWelcome',
+                'App\\Domain\\Registration\\Mails\\NewMemberAdminNotification',
+                'App\\Domain\\Invoices\\Mails\\InvoiceMail',
             ]),
             'recipient_email' => fake()->safeEmail(),
             'recipient_name' => fake()->name(),
@@ -849,7 +849,7 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
-use App\Domain\Invoices\InvoiceEmailLine;use App\Domain\Invoices\InvoiceId;use App\Mail\Invoices\InvoiceMail;use App\Models\Invoice;use App\Models\InvoiceLine;use Illuminate\Bus\Batchable;use Illuminate\Bus\Queueable;use Illuminate\Contracts\Queue\ShouldQueue;use Illuminate\Foundation\Bus\Dispatchable;use Illuminate\Queue\InteractsWithQueue;use Illuminate\Queue\Middleware\RateLimited;use Illuminate\Queue\SerializesModels;use Illuminate\Support\Facades\Mail;
+use App\Domain\Invoices\InvoiceEmailLine;use App\Domain\Invoices\InvoiceId;use App\Domain\Invoices\Mails\InvoiceMail;use App\Models\Invoice;use App\Models\InvoiceLine;use Illuminate\Bus\Batchable;use Illuminate\Bus\Queueable;use Illuminate\Contracts\Queue\ShouldQueue;use Illuminate\Foundation\Bus\Dispatchable;use Illuminate\Queue\InteractsWithQueue;use Illuminate\Queue\Middleware\RateLimited;use Illuminate\Queue\SerializesModels;use Illuminate\Support\Facades\Mail;
 
 final class SendInvoiceEmail implements ShouldQueue
 {
@@ -1640,7 +1640,7 @@ No changes needed — the `InvoiceBatchService::closeBatch()` now handles event 
 ### File: `routes/mailbook.php` (modify)
 
 ```php
-use App\Mail\Invoices\InvoiceMail;
+use App\Domain\Invoices\Mails\InvoiceMail;
 
 Mailbook::add(InvoiceMail::class);
 ```

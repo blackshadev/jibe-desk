@@ -677,24 +677,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Pages;
 
-use App\Domain\Bookkeeping\BookkeepingRecordRepository;
-use App\Domain\Bookkeeping\CostCenterYearResult;
-use App\Filament\Admin\Navigation\NavigationGroup;
-use App\Formatters\PriceFormatter;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
-use Filament\Pages\Page;
-use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
-use Filament\Tables\Contracts\HasTable;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
-use Override;
-use UnitEnum;
+use App\Filament\Admin\Navigation\NavigationGroup;use Filament\Forms\Components\Select;use Filament\Forms\Concerns\InteractsWithForms;use Filament\Forms\Contracts\HasForms;use Filament\Forms\Form;use Filament\Pages\Page;use Filament\Support\Icons\Heroicon;use Filament\Tables\Columns\TextColumn;use Filament\Tables\Concerns\InteractsWithTable;use Filament\Tables\Contracts\HasTable;use Filament\Tables\Table;use Illuminate\Database\Eloquent\Builder;use Override;use UnitEnum;
 
 final class CostCenterResults extends Page implements HasForms, HasTable
 {

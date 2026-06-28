@@ -14,7 +14,6 @@ final class ViewPurchaseOrder extends ViewRecord
 {
     protected static string $resource = PurchaseOrderResource::class;
 
-    #[Override]
     protected function getHeaderActions(): array
     {
         return [

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\Members\RelationManagers;
 
 use App\Domain\Invoices\Billing\BillPeriod;
-use App\Formatters\PriceFormatter;
+use App\Domain\Invoices\Formatters\PriceFormatter;
 use App\Models\BillableItemInstance;
 use Filament\Actions\Action;
 use Filament\Resources\RelationManagers\RelationManager;

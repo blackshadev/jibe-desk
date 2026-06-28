@@ -222,9 +222,10 @@ return [
         'pending' => 'In behandeling',
         'paid' => 'Betaald',
     ],
-    'creditor_name' => 'Crediteur',
     'date' => 'Datum',
     'price_vat' => 'BTW bedrag',
     'mark_as_pending' => 'Markeer als in behandeling',
     'image' => 'Afbeelding',
+    'iban' => 'IBAN',
+    'creditor_information' => 'Crediteur',
 ];

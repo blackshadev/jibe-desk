@@ -1,0 +1,25 @@
+services:
+    -
+        class: \Stan\Collectors\FeatureTestCollector
+        tags:
+            - phpstan.collector
+    -
+        class: \Stan\Rules\FeatureTestRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: \Stan\Collectors\UnitTestCollector
+        tags:
+            - phpstan.collector
+    -
+        class: \Stan\Rules\UnitTestRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: \Stan\Rules\DomainDependencyRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: \Stan\Rules\FilamentResourceNavigationGroupRule
+        tags:
+            - phpstan.rules.rule

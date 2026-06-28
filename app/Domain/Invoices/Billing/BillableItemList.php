@@ -12,7 +12,7 @@ final readonly class BillableItemList
     public function __construct(
         public array $items,
     ) {
-        /** @mago-expect analysis:redundant-type-comparison */
+        /** @phpstan-ignore-next-line staticMethod.alreadyNarrowedType */
         Assert::allIsInstanceOf($items, BillableItem::class);
     }
 }

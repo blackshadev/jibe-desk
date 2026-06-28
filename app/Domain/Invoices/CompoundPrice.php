@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Invoices;
 
-use App\Formatters\PriceFormatter;
+use App\Domain\Invoices\Formatters\PriceFormatter;
 use Override;
 use Stringable;
 

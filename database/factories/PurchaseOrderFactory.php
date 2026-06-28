@@ -19,6 +19,7 @@ final class PurchaseOrderFactory extends Factory
         return [
             'description' => fake()->sentence(),
             'creditor_name' => fake()->company(),
+            'creditor_iban' => fake()->iban(),
             'date' => fake()->dateTimeBetween('-2 years', 'now'),
             'status' => fake()->randomElement(PurchaseOrderStatus::cases()),
         ];

@@ -272,7 +272,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Members\Listeners;
 
-use App\Domain\Members\Events\NewMemberRegistration;use App\Mail\Registration\NewMemberAdminNotification;use Illuminate\Support\Facades\Mail;
+use App\Domain\Members\Events\NewMemberRegistration;use App\Domain\Registration\Mails\NewMemberAdminNotification;use Illuminate\Support\Facades\Mail;
 
 final readonly class SendAdminNewMemberNotification
 {
@@ -297,7 +297,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Members\Listeners;
 
-use App\Domain\Members\Events\NewMemberRegistration;use App\Mail\Registration\NewMemberWelcome;use Illuminate\Support\Facades\Mail;
+use App\Domain\Members\Events\NewMemberRegistration;use App\Domain\Registration\Mails\NewMemberWelcome;use Illuminate\Support\Facades\Mail;
 
 final readonly class SendNewMemberWelcome
 {

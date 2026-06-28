@@ -13,10 +13,11 @@ return new class() extends Migration {
             $table->id();
             $table->timestamps();
             $table->string('description');
-            $table->string('creditor_name');
             $table->date('date');
             $table->string('status')->index()->default('open');
             $table->string('image_path')->nullable();
+            $table->string('creditor_name')->nullable();
+            $table->string('creditor_iban')->nullable();
         });
     }
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Domain\Invoices;
 
 use App\Domain\Invoices\CompoundPrice;
-use App\Formatters\PriceFormatter;
+use App\Domain\Invoices\Formatters\PriceFormatter;
 use Tests\UnitTestCase;
 
 final class CompoundPriceTest extends UnitTestCase

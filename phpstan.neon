@@ -1,18 +1,21 @@
 includes:
     - ./vendor/larastan/larastan/extension.neon
-    - ./vendor/phpstan/phpstan-mockery/extension.neon
     - ./phpstan-baseline.neon
+    - ./dev/phpstan/custom-rules.neon
 
 parameters:
     resultCachePath: %tmpDir%/resultCache.php
 
     paths:
         - ./app/
-        - ./tests/
+        - ./dev/phpstan
 
     excludePaths:
         - ./app/Domain
-        - ./tests/Unit
 
     level: 5
 
+#    ignoreErrors:
+#        - '#PHPDoc tag @var#'
+#
+#    checkMissingIterableValueType: false

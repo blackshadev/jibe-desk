@@ -48,7 +48,7 @@ final class LogOutgoingMailTest extends UnitTestCase
     {
         $dt = new CarbonImmutable();
         $memberId = MemberId::create(42);
-        $mailableClass = 'App\Mail\Invoices\InvoiceMail';
+        $mailableClass = 'App\Domain\Invoices\Mails\InvoiceMail';
         $trackingId = TrackingId::fromString('550e8400-e29b-41d4-a716-446655440000');
 
         $email = $this->createEmail(
@@ -88,7 +88,7 @@ final class LogOutgoingMailTest extends UnitTestCase
     {
         $email = new Email();
         $email->subject('Test');
-        $email->getHeaders()->addTextHeader('X-Mailable-Class', 'App\Mail\Invoices\InvoiceMail');
+        $email->getHeaders()->addTextHeader('X-Mailable-Class', 'App\Domain\Invoices\Mails\InvoiceMail');
 
         $event = new MessageSending($email);
 

@@ -120,9 +120,11 @@ return [
     'theme' => 'custom',
 
     'admin' => [
+        'name' => env('MAIL_INVOICING_NAME', 'Almerecentraal ledenadministratie'),
         'address' => env('MAIL_ADMIN_ADDRESS', 'ledenadministratie@almerecentraal.nl'),
     ],
     'invoicing' => [
+        'name' => env('MAIL_INVOICING_NAME', 'Almerecentraal penningmeester'),
         'address' => env('MAIL_INVOICING_ADDRESS', 'penningmeester@almerecentraal.nl'),
     ],
 ];

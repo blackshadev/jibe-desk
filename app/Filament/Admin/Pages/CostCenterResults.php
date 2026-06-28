@@ -39,7 +39,7 @@ final class CostCenterResults extends Page implements HasForms, HasTable
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->can('view_any_bookkeeping_records') || auth()->user()?->can('view_any_cost_centers') ?? false;
+        return auth()->user()?->can('view_any_bookkeeping_records') || auth()->user()?->can('view_any_cost_centers');
     }
 
     #[Override]

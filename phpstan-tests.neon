@@ -1,0 +1,12 @@
+includes:
+    - ./vendor/larastan/larastan/extension.neon
+    - ./dev/phpstan/custom-rules.neon
+
+parameters:
+    resultCachePath: %tmpDir%/resultCache-tests.php
+
+    paths:
+        - ./tests/
+        - ./dev/phpstan
+
+    level: 1

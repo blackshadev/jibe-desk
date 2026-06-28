@@ -37,7 +37,7 @@ final readonly class MemberObjectObserver
 
         $invoice = $this->invoiceRepository->applyLines($apply);
 
-        if ($invoice->lineIds[0]?->value === null) {
+        if (count($invoice->lineIds) === 0) {
             throw new RuntimeException('Invoice line was not created for member object');
         }
 

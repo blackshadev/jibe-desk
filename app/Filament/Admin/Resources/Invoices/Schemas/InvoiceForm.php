@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Invoices\Schemas;
 
+use App\Domain\Invoices\Formatters\PriceFormatter;
 use App\Filament\Admin\Labels\InvoiceStatusLabels;
-use App\Formatters\PriceFormatter;
 use App\Models\CostCenter;
 use App\Models\Member;
 use Filament\Forms\Components\DatePicker;

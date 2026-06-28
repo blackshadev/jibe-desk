@@ -28,7 +28,6 @@ final class BillableItemListTest extends UnitTestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        /** @phpstan-ignore-next-line argument.type */
         new BillableItemList([new stdClass()]);
     }
 }

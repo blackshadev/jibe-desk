@@ -1,11 +1,11 @@
 includes:
-    - ./vendor/phpstan/phpstan-mockery/extension.neon
+    - ./dev/phpstan/custom-rules.neon
 
 parameters:
     resultCachePath: %tmpDir%/resultCache-domain.php
 
     paths:
         - ./app/Domain
-        - ./tests/Unit
+        - ./dev/phpstan
 
     level: 9

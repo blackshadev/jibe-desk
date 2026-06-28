@@ -118,7 +118,7 @@ final class HouseholdMemberActions
 
                     $livewire->getOwnerRecord()->update(['household_id' => $selected]);
                 })
-                ->successNotificationTitle(static function (array $data): ?string {
+                ->successNotificationTitle(static function (array $data): string {
                     if ($data['create_new'] === true) {
                         return __('notifications.household_created');
                     }

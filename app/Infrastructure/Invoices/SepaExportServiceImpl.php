@@ -6,6 +6,7 @@ namespace App\Infrastructure\Invoices;
 
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceBatchRepository;
+use App\Domain\Invoices\SepaConfiguration;
 use App\Domain\Invoices\SepaExport;
 use App\Domain\Invoices\SepaExportInvoice;
 use App\Domain\Invoices\SepaExportService;
