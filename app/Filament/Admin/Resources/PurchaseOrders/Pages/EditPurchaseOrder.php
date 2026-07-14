@@ -26,11 +26,4 @@ final class EditPurchaseOrder extends EditRecord
                 ->visible(static fn (PurchaseOrder $record): bool => $record->status === PurchaseOrderStatus::Open),
         ];
     }
-
-    #[On('markedAsPending')]
-    #[On('markedAsPaid')]
-    public function toView(): void
-    {
-        $this->redirect(PurchaseOrderResource::getUrl('view', ['record' => $this->record]));
-    }
 }

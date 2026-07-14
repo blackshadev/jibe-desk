@@ -7,8 +7,10 @@ namespace App\Filament\Admin\Resources\PurchaseOrders\Actions;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Domain\PurchaseOrders\PurchaseOrderService;
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Models\PurchaseOrder;
 use Filament\Actions\Action;
+use Filament\Resources\Pages\EditRecord;
 use Filament\Resources\Pages\Page;
 
 final class PurchaseOrderStateActions
@@ -25,6 +27,7 @@ final class PurchaseOrderStateActions
                 ->action(static function (PurchaseOrder $record, PurchaseOrderService $service): void {
                     $service->markAsPending(PurchaseOrderId::create($record->id));
                 })
+                ->successRedirectUrl(static fn (Page $livewire, PurchaseOrder $record) => $livewire instanceof EditRecord ? PurchaseOrderResource::getUrl('view', ['record' => $record]) : null)
                 ->after(static fn (Page $livewire) => $livewire->dispatch('markedAsPending'))
                 ->successNotificationTitle(__('notifications.purchase_order_marked_pending')),
 

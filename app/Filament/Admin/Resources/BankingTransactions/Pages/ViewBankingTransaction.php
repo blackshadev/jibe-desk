@@ -1,0 +1,46 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Filament\Admin\Resources\BankingTransactions\Pages;
+
+use App\Filament\Admin\Resources\BankingTransactions\BankingTransactionResource;
+use App\Filament\Admin\Resources\BankingTransactions\RelationManagers\BookkeepingRecordsRelationManager;
+use App\Filament\Admin\Resources\BankingTransactions\RelationManagers\InvoicesRelationManager;
+use App\Filament\Admin\Resources\BankingTransactions\RelationManagers\PurchaseOrdersRelationManager;
+use Filament\Actions\DeleteAction;
+use Filament\Resources\Pages\ViewRecord;
+use Override;
+
+final class ViewBankingTransaction extends ViewRecord
+{
+    protected static string $resource = BankingTransactionResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            DeleteAction::make(),
+        ];
+    }
+
+    public function getRelationManagers(): array
+    {
+        return [
+            InvoicesRelationManager::class,
+            PurchaseOrdersRelationManager::class,
+            BookkeepingRecordsRelationManager::class,
+        ];
+    }
+
+    #[Override]
+    public function hasCombinedRelationManagerTabsWithContent(): bool
+    {
+        return true;
+    }
+
+    #[Override]
+    public function getContentTabLabel(): string
+    {
+        return __('labels.banking_transaction');
+    }
+}

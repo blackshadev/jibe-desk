@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Override;
 
 /**
@@ -30,6 +31,13 @@ final class PurchaseOrder extends Model
     public function lines(): HasMany
     {
         return $this->hasMany(PurchaseOrderLine::class);
+    }
+
+    /** @return MorphToMany<BankingTransaction, $this> */
+    public function bankingTransactions(): MorphToMany
+    {
+        return $this->morphToMany(BankingTransaction::class, 'reference', 'banking_transaction_references')
+            ->withTimestamps();
     }
 
     #[Override]

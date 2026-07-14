@@ -24,7 +24,7 @@ final class PurchaseOrdersTable
                     ->label(__('labels.image'))
                     ->disk('local')
                     ->circular()
-                    ->size(40)
+                    ->imageSize(40)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('creditor_name')
                     ->label(__('labels.creditor_name'))

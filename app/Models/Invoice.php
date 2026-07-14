@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Override;
 
 /**
@@ -40,6 +41,13 @@ final class Invoice extends Model
     public function lines(): HasMany
     {
         return $this->hasMany(InvoiceLine::class);
+    }
+
+    /** @return MorphToMany<BankingTransaction, $this> */
+    public function bankingTransactions(): MorphToMany
+    {
+        return $this->morphToMany(BankingTransaction::class, 'reference', 'banking_transaction_references')
+            ->withTimestamps();
     }
 
     #[Override]

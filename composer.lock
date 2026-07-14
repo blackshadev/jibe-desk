@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "18f5e14722e73c18f04a6647766f728c",
+    "content-hash": "bed44c5742e3eb6e062f60f6693f4db4",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -2346,6 +2346,55 @@
                 "source": "https://github.com/Jeroen-G/autowire/tree/3.0.0"
             },
             "time": "2026-03-31T07:42:33+00:00"
+        },
+        {
+            "name": "kingsquare/php-mt940",
+            "version": "2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/fruitl00p/php-mt940.git",
+                "reference": "8384a9c4daaed81d7235f7c47bca19b0bca8df29"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/fruitl00p/php-mt940/zipball/8384a9c4daaed81d7235f7c47bca19b0bca8df29",
+                "reference": "8384a9c4daaed81d7235f7c47bca19b0bca8df29",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": ">=7"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "4.4.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Kingsquare\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Robin Speekenbrink",
+                    "email": "robin@kingsquare.nl"
+                }
+            ],
+            "description": "Simple MT940 parser in PHP",
+            "homepage": "https://github.com/fruitl00p/php-mt940",
+            "keywords": [
+                "mt940",
+                "parsing"
+            ],
+            "support": {
+                "issues": "https://github.com/fruitl00p/php-mt940/issues",
+                "source": "https://github.com/fruitl00p/php-mt940/tree/2.0.0"
+            },
+            "time": "2020-11-05T10:11:19+00:00"
         },
         {
             "name": "kirschbaum-development/eloquent-power-joins",
@@ -13100,7 +13149,8 @@
     "prefer-lowest": false,
     "platform": {
         "php": "^8.5",
-        "ext-intl": "*"
+        "ext-intl": "*",
+        "ext-zip": "*"
     },
     "platform-dev": {
         "ext-dom": "*"
