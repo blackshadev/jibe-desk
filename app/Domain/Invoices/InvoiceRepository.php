@@ -12,4 +12,9 @@ interface InvoiceRepository
     public function create(NewInvoice $invoice): InvoiceId;
 
     public function applyLines(ApplyInvoiceLines $invoice): AppliedInvoiceWithLineIds;
+
+    /**
+     * Mark an individual invoice as paid by updating its status.
+     */
+    public function markAsPaid(InvoiceId $id): void;
 }

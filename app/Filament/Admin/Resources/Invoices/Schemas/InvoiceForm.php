@@ -67,16 +67,16 @@ final class InvoiceForm
 
                         TextInput::make('recipient_email')
                             ->label(__('labels.recipient_email'))
-                            ->disabled(static fn (Get $get) => $get('member_id') !== null)
+                            ->readOnly(static fn (Get $get) => $get('member_id') !== null)
                             ->required(),
 
                         TextInput::make('recipient_address')
                             ->label(__('labels.recipient_address'))
-                            ->disabled(static fn (Get $get) => $get('member_id') !== null)
+                            ->readOnly(static fn (Get $get) => $get('member_id') !== null)
                             ->required(),
                         TextInput::make('recipient_name')
                             ->label(__('labels.recipient_name'))
-                            ->disabled(static fn (Get $get) => $get('member_id') !== null)
+                            ->readOnly(static fn (Get $get) => $get('member_id') !== null)
                             ->required(),
                     ]),
 

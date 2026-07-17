@@ -9,6 +9,7 @@ use App\Domain\Bookkeeping\CostCenterYearResult;
 use App\Domain\Invoices\Billing\CostCenterId;
 use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceBatchId;
+use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceStatus;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
@@ -91,6 +92,43 @@ final class BookkeepingRecordDbRepository implements BookkeepingRecordRepository
                     DB::raw("CONCAT('Purchase order ', purchase_orders.description)"),
                     DB::raw(DB::escape(PurchaseOrder::class)),
                     'purchase_orders.id',
+                    DB::raw(DB::escape($now->format('c'))),
+                    DB::raw(DB::escape($now->format('c'))),
+                ),
+        );
+    }
+
+    #[Override]
+    public function createForInvoice(InvoiceId $id): void
+    {
+        $now = now();
+        BookkeepingRecord::query()->insertUsing(
+            ['year', 'cost_center_id', 'amount_price', 'amount_vat', 'description', 'reference_type', 'reference_id', 'created_at', 'updated_at'],
+            Invoice::query()
+                ->where('invoices.id', $id->value)
+                ->whereNotExists(static function ($query): void {
+                    $query
+                        ->from('bookkeeping_records')
+                        ->whereColumn('bookkeeping_records.reference_id', 'invoices.id')
+                        ->where('bookkeeping_records.reference_type', Invoice::class);
+                })
+                ->joinRelationship('lines')
+                ->groupBy(
+                    'invoices.id',
+                    'invoices.invoice_number',
+                    'invoice_lines.cost_center_id',
+                    'invoices.date',
+                )
+                ->select(
+                    DB::connection()->getConfig()['driver'] === 'pgsql'
+                        ? DB::raw('EXTRACT(YEAR FROM invoices.date) AS year')
+                        : DB::raw("STRFTIME('%Y', invoices.date)"),
+                    'invoice_lines.cost_center_id',
+                    DB::raw('SUM(invoice_lines.price * invoice_lines.quantity)'),
+                    DB::raw('SUM(invoice_lines.vat * invoice_lines.quantity)'),
+                    DB::raw("CONCAT('Invoice ', invoices.invoice_number)"),
+                    DB::raw(DB::escape(Invoice::class)),
+                    'invoices.id',
                     DB::raw(DB::escape($now->format('c'))),
                     DB::raw(DB::escape($now->format('c'))),
                 ),

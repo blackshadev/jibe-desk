@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\BankingTransactions\Actions;
 
 use App\Domain\BankTransactions\BankTransactionId;
-use App\Domain\BankTransactions\BankTransactionRepository;
+use App\Domain\BankTransactions\BankTransactionService;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Models\BankingTransaction;
 use App\Models\PurchaseOrder;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
-use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
+use Illuminate\Support\Collection;
 
 final class AttachPurchaseOrderAction
 {
@@ -24,20 +24,26 @@ final class AttachPurchaseOrderAction
             ->schema([
                 Select::make('purchase_order_id')
                     ->label(__('labels.purchase_order'))
-                    ->options(static fn () => PurchaseOrder::query()
-                        ->orderBy('description')
-                        ->get()
-                        ->mapWithKeys(static fn (PurchaseOrder $po): array => [
-                            $po->id => $po->description,
-                        ]))
+                    ->options(static function (RelationManager $livewire): Collection {
+                        /** @var BankingTransaction $model */
+                        $model = $livewire->getOwnerRecord();
+
+                        return PurchaseOrder::query()
+                            ->openOrPending()
+                            ->orderByRelevancy(-$model->amount, $model->banking_account_number)
+                            ->get()
+                            ->mapWithKeys(static fn (PurchaseOrder $po): array => [
+                                $po->id => $po->displayName,
+                            ]);
+                    })
                     ->searchable()
                     ->preload()
                     ->required(),
             ])
-            ->action(static function (array $data, RelationManager $livewire, BankTransactionRepository $repository): void {
+            ->action(static function (array $data, RelationManager $livewire, BankTransactionService $service): void {
                 /** @var BankingTransaction $model */
                 $model = $livewire->getOwnerRecord();
-                $repository->attachPurchaseOrder(
+                $service->attachPurchaseOrder(
                     BankTransactionId::create((int) $model->id),
                     PurchaseOrderId::create((int) $data['purchase_order_id']),
                 );

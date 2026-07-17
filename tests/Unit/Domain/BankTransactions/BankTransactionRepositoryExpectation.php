@@ -7,6 +7,8 @@ namespace Tests\Unit\Domain\BankTransactions;
 use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\BankTransactions\BankTransactionRepository;
 use App\Domain\BankTransactions\CreateBankTransaction;
+use App\Domain\Invoices\InvoiceId;
+use App\Domain\PurchaseOrders\PurchaseOrderId;
 use Mockery;
 use Mockery\MockInterface;
 
@@ -58,5 +60,19 @@ final readonly class BankTransactionRepositoryExpectation
         $this->mock
             ->shouldReceive('create')
             ->never();
+    }
+
+    public function expectsAttachInvoice(BankTransactionId $bankTransactionId, InvoiceId $invoiceId): void
+    {
+        $this->mock
+            ->expects('attachInvoice')
+            ->with(equalTo($bankTransactionId), equalTo($invoiceId));
+    }
+
+    public function expectsAttachPurchaseOrder(BankTransactionId $bankTransactionId, PurchaseOrderId $purchaseOrderId): void
+    {
+        $this->mock
+            ->expects('attachPurchaseOrder')
+            ->with(equalTo($bankTransactionId), equalTo($purchaseOrderId));
     }
 }

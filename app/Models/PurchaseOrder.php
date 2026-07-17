@@ -10,6 +10,8 @@ use App\Observers\PurchaseOrderObserver;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -46,7 +48,31 @@ final class PurchaseOrder extends Model
         return [
             'date' => 'datetime',
             'status' => PurchaseOrderStatus::class,
+            'amount' => 'decimal:3',
         ];
+    }
+
+    #[Scope]
+    public function openOrPending(Builder $query): Builder
+    {
+        return $query->whereIn('status', [PurchaseOrderStatus::Open, PurchaseOrderStatus::Pending]);
+    }
+
+    #[Scope]
+    public function orderByRelevancy(Builder $query, float $targetAmount, string $accountNumber): Builder
+    {
+        return $query->orderByRaw(
+            'CASE WHEN creditor_iban = ? THEN 0 ELSE 1 END ASC, ABS(COALESCE((SELECT SUM(price) FROM purchase_order_lines WHERE purchase_order_lines.purchase_order_id = purchase_orders.id), 0) - ?) ASC',
+            [$accountNumber, $targetAmount],
+        )->orderBy('id', 'asc');
+    }
+
+    /** @return Attribute<non-falsy-string, never> */
+    protected function displayName(): Attribute
+    {
+        return Attribute::get(
+            fn () => sprintf('[%s] %s - %s', $this->date->format('Y-m-d'), $this->description, $this->total),
+        );
     }
 
     /** @return Attribute<CompoundPrice, never> */

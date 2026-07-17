@@ -8,6 +8,8 @@ use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceStatus;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -57,6 +59,30 @@ final class Invoice extends Model
             'date' => 'datetime',
             'status' => InvoiceStatus::class,
         ];
+    }
+
+    #[Scope]
+    protected function openOrPending(Builder $query): Builder
+    {
+        return $query->whereIn('status', [InvoiceStatus::Open, InvoiceStatus::Pending]);
+    }
+
+    #[Scope]
+    protected function orderByAmountProximity(Builder $query, float $targetAmount): Builder
+    {
+        return $query->orderByRaw(
+            'ABS(COALESCE((SELECT SUM(price * quantity) FROM invoice_lines WHERE invoice_lines.invoice_id = invoices.id), 0) - ?) ASC',
+            [$targetAmount],
+        )->orderBy('id', 'asc');
+    }
+
+
+    /** @return Attribute<non-falsy-string, never> */
+    protected function displayName(): Attribute
+    {
+        return Attribute::get(
+            fn () => sprintf('[%s] %s -  %s - %s', $this->date->format('Y-m-d'), $this->invoice_number, $this->member->name, $this->total),
+        );
     }
 
     /** @return Attribute<CompoundPrice, never> */

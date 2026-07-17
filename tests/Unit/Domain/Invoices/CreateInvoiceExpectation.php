@@ -40,4 +40,11 @@ final readonly class CreateInvoiceExpectation
             ->with(equalTo($invoiceLines))
             ->andReturn($return);
     }
+
+    public function expectsMarkAsPaid(InvoiceId $id): void
+    {
+        $this->mock
+            ->expects('markAsPaid')
+            ->with(equalTo($id));
+    }
 }

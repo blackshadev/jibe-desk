@@ -14,6 +14,7 @@ use Override;
 /**
  * @property int $id
  * @property string $description
+ * @property float $amount
  */
 #[Guarded(['id', 'created_at', 'updated_at'])]
 final class BankingTransaction extends Model

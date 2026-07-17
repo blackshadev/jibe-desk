@@ -124,4 +124,12 @@ final class InvoiceRepositoryDb implements InvoiceRepository
             lineIds: array_map(static fn (InvoiceLine $item) => InvoiceLineId::create($item->id), $lines->all()),
         );
     }
+
+    #[Override]
+    public function markAsPaid(InvoiceId $id): void
+    {
+        Invoice::query()
+            ->where('id', $id->value)
+            ->update(['status' => InvoiceStatus::Paid]);
+    }
 }

@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\BankingTransactions\Actions;
 
 use App\Domain\BankTransactions\BankTransactionId;
-use App\Domain\BankTransactions\BankTransactionRepository;
+use App\Domain\BankTransactions\BankTransactionService;
 use App\Domain\Invoices\InvoiceId;
+use App\Models\BankingTransaction;
 use App\Models\Invoice;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
-use Filament\Notifications\Notification;
+use Filament\Resources\RelationManagers\RelationManager;
 
 final class AttachInvoiceAction
 {
@@ -22,19 +23,29 @@ final class AttachInvoiceAction
             ->schema([
                 Select::make('invoice_id')
                     ->label(__('labels.invoice'))
-                    ->options(static fn () => Invoice::query()
-                        ->orderBy('invoice_number')
-                        ->get()
-                        ->mapWithKeys(static fn (Invoice $invoice): array => [
-                            $invoice->id => sprintf('#%s - %s', $invoice->invoice_number, $invoice->member->fullName ?? ''),
-                        ]))
+                    ->options(static function (RelationManager $livewire) {
+                        /** @var BankingTransaction $model */
+                        $model = $livewire->getOwnerRecord();
+
+                        return Invoice::query()
+                            ->openOrPending()
+                            ->orderByAmountProximity((float)$model->amount)
+                            ->with(['member'])
+                            ->get()
+                            ->mapWithKeys(static fn(Invoice $invoice): array => [
+                                $invoice->id => $invoice->displayName,
+                            ]);
+                    })
                     ->searchable()
                     ->preload()
                     ->required(),
             ])
-            ->action(static function (array $data, mixed $record, BankTransactionRepository $repository): void {
-                $repository->attachInvoice(
-                    BankTransactionId::create((int) $record->id),
+            ->action(static function (array $data, RelationManager $livewire,  BankTransactionService $service): void {
+                /** @var BankingTransaction $record */
+                $record = $livewire->getOwnerRecord();
+
+                $service->attachInvoice(
+                    BankTransactionId::create($record->id),
                     InvoiceId::create((int) $data['invoice_id']),
                 );
             })

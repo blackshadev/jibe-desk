@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Infrastructure\Bookkeeping;
 
 use App\Domain\Invoices\InvoiceBatchId;
+use App\Domain\Invoices\InvoiceId;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Infrastructure\Bookkeeping\BookkeepingRecordDbRepository;
 use App\Models\BookkeepingRecord;
@@ -242,6 +243,92 @@ final class BookkeepingRecordDbRepositoryTest extends FeatureTestCase
         $this->assertDatabaseMissing('bookkeeping_records', [
             'reference_type' => PurchaseOrder::class,
             'reference_id' => $po->id,
+        ]);
+    }
+
+    public function test_create_for_invoice_creates_records_per_cost_center(): void
+    {
+        $costCenterA = CostCenter::factory()->create();
+        $costCenterB = CostCenter::factory()->create();
+
+        $invoice = Invoice::factory()
+            ->has(InvoiceLine::factory()->state(['cost_center_id' => $costCenterA->id, 'price' => 100, 'vat' => 21, 'quantity' => 2]), 'lines')
+            ->has(InvoiceLine::factory()->state(['cost_center_id' => $costCenterB->id, 'price' => 50, 'vat' => 10.5, 'quantity' => 1]), 'lines')
+            ->create([
+                'date' => '2026-06-15',
+                'status' => 'open',
+            ]);
+
+        $this->repository->createForInvoice(InvoiceId::create($invoice->id));
+
+        $this->assertDatabaseHas('bookkeeping_records', [
+            'reference_type' => Invoice::class,
+            'reference_id' => $invoice->id,
+            'cost_center_id' => $costCenterA->id,
+            'year' => 2026,
+            'amount_price' => 200.0,
+        ]);
+        $this->assertDatabaseHas('bookkeeping_records', [
+            'reference_type' => Invoice::class,
+            'reference_id' => $invoice->id,
+            'cost_center_id' => $costCenterB->id,
+            'year' => 2026,
+            'amount_price' => 50.0,
+        ]);
+    }
+
+    public function test_create_for_invoice_skips_already_existing_records(): void
+    {
+        $costCenter = CostCenter::factory()->create();
+
+        $invoice = Invoice::factory()
+            ->has(InvoiceLine::factory()->state(['cost_center_id' => $costCenter->id, 'price' => 100, 'vat' => 21, 'quantity' => 1]), 'lines')
+            ->create([
+                'date' => '2026-06-15',
+                'status' => 'open',
+            ]);
+
+        BookkeepingRecord::factory()->create([
+            'reference_type' => Invoice::class,
+            'reference_id' => $invoice->id,
+            'cost_center_id' => $costCenter->id,
+            'year' => 2026,
+            'amount_price' => 100,
+            'amount_vat' => 21,
+        ]);
+
+        $this->repository->createForInvoice(InvoiceId::create($invoice->id));
+
+        $this->assertDatabaseHas('bookkeeping_records', [
+            'reference_type' => Invoice::class,
+            'reference_id' => $invoice->id,
+            'cost_center_id' => $costCenter->id,
+            'year' => 2026,
+            'amount_price' => 100,
+            'amount_vat' => 21,
+        ]);
+    }
+
+    public function test_create_for_invoice_works_for_open_status(): void
+    {
+        $costCenter = CostCenter::factory()->create();
+
+        $invoice = Invoice::factory()
+            ->has(InvoiceLine::factory()->state(['cost_center_id' => $costCenter->id, 'price' => 100, 'vat' => 21, 'quantity' => 1]), 'lines')
+            ->create([
+                'date' => '2026-06-15',
+                'status' => 'open',
+            ]);
+
+        $this->repository->createForInvoice(InvoiceId::create($invoice->id));
+
+        $this->assertDatabaseHas('bookkeeping_records', [
+            'reference_type' => Invoice::class,
+            'reference_id' => $invoice->id,
+            'cost_center_id' => $costCenter->id,
+            'year' => 2026,
+            'amount_price' => 100.0,
+            'amount_vat' => 21.0,
         ]);
     }
 }
