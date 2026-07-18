@@ -53,13 +53,13 @@ final class PurchaseOrder extends Model
     }
 
     #[Scope]
-    public function openOrPending(Builder $query): Builder
+    protected function openOrPending(Builder $query): Builder
     {
         return $query->whereIn('status', [PurchaseOrderStatus::Open, PurchaseOrderStatus::Pending]);
     }
 
     #[Scope]
-    public function orderByRelevancy(Builder $query, float $targetAmount, string $accountNumber): Builder
+    protected function orderByRelevancy(Builder $query, float $targetAmount, string $accountNumber): Builder
     {
         return $query->orderByRaw(
             'CASE WHEN creditor_iban = ? THEN 0 ELSE 1 END ASC, ABS(COALESCE((SELECT SUM(price) FROM purchase_order_lines WHERE purchase_order_lines.purchase_order_id = purchase_orders.id), 0) - ?) ASC',

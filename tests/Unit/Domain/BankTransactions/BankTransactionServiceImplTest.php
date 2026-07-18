@@ -9,9 +9,9 @@ use App\Domain\BankTransactions\BankTransactionServiceImpl;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use Override;
+use Tests\FeatureTestCase;
 use Tests\Unit\Domain\Invoices\InvoiceServiceExpectation;
 use Tests\Unit\Domain\PurchaseOrders\PurchaseOrderServiceExpectation;
-use Tests\FeatureTestCase;
 
 final class BankTransactionServiceImplTest extends FeatureTestCase
 {

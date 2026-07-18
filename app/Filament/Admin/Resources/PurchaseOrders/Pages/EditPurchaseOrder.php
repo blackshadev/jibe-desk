@@ -10,7 +10,6 @@ use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Models\PurchaseOrder;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
-use Livewire\Attributes\On;
 use Override;
 
 final class EditPurchaseOrder extends EditRecord

@@ -41,7 +41,7 @@ final class InvoicesRelationManager extends RelationManager
             ])
             ->recordUrl(ViewOrEdit::route(InvoiceResource::class))
             ->headerActions([
-                AttachInvoiceAction::make()
+                AttachInvoiceAction::make(),
             ])
             ->recordActions([
                 Action::make('detach')

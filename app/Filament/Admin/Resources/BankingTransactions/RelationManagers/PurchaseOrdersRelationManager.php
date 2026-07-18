@@ -39,7 +39,7 @@ final class PurchaseOrdersRelationManager extends RelationManager
             ])
             ->recordUrl(ViewOrEdit::route(PurchaseOrderResource::class))
             ->headerActions([
-                AttachPurchaseOrderAction::make()
+                AttachPurchaseOrderAction::make(),
             ])
             ->recordActions([
                 Action::make('detach')

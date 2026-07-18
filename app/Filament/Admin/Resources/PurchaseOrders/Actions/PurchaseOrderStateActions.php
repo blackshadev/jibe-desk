@@ -27,7 +27,9 @@ final class PurchaseOrderStateActions
                 ->action(static function (PurchaseOrder $record, PurchaseOrderService $service): void {
                     $service->markAsPending(PurchaseOrderId::create($record->id));
                 })
-                ->successRedirectUrl(static fn (Page $livewire, PurchaseOrder $record) => $livewire instanceof EditRecord ? PurchaseOrderResource::getUrl('view', ['record' => $record]) : null)
+                ->successRedirectUrl(static fn (Page $livewire, PurchaseOrder $record) => (
+                    $livewire instanceof EditRecord ? PurchaseOrderResource::getUrl('view', ['record' => $record]) : null
+                ))
                 ->after(static fn (Page $livewire) => $livewire->dispatch('markedAsPending'))
                 ->successNotificationTitle(__('notifications.purchase_order_marked_pending')),
 

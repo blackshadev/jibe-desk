@@ -33,22 +33,20 @@ final class InvoiceTest extends FeatureTestCase
     {
         $member = Member::factory()->createQuietly();
 
-        $invoice1 = Invoice::factory()->forMember($member)
-            ->has(InvoiceLine::factory()->state([ 'price' => 90.00, 'quantity' => 1]), 'lines')
+        $invoice1 = Invoice::factory()
+            ->forMember($member)
+            ->has(InvoiceLine::factory()->state(['price' => 90.00, 'quantity' => 1]), 'lines')
             ->createQuietly(['status' => InvoiceStatus::Open]);
-
 
         $invoice2 = Invoice::factory()
             ->forMember($member)
             ->has(InvoiceLine::factory()->state(['price' => 110.00, 'quantity' => 1]), 'lines')
             ->createQuietly(['status' => InvoiceStatus::Open]);
 
-
         $invoice3 = Invoice::factory()
             ->forMember($member)
             ->has(InvoiceLine::factory()->state(['price' => 500.00, 'quantity' => 1]), 'lines')
             ->createQuietly(['status' => InvoiceStatus::Open]);
-
 
         $results = Invoice::query()
             ->openOrPending()

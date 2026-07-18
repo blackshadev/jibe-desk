@@ -29,10 +29,10 @@ final class AttachInvoiceAction
 
                         return Invoice::query()
                             ->openOrPending()
-                            ->orderByAmountProximity((float)$model->amount)
+                            ->orderByAmountProximity((float) $model->amount)
                             ->with(['member'])
                             ->get()
-                            ->mapWithKeys(static fn(Invoice $invoice): array => [
+                            ->mapWithKeys(static fn (Invoice $invoice): array => [
                                 $invoice->id => $invoice->displayName,
                             ]);
                     })
@@ -40,7 +40,7 @@ final class AttachInvoiceAction
                     ->preload()
                     ->required(),
             ])
-            ->action(static function (array $data, RelationManager $livewire,  BankTransactionService $service): void {
+            ->action(static function (array $data, RelationManager $livewire, BankTransactionService $service): void {
                 /** @var BankingTransaction $record */
                 $record = $livewire->getOwnerRecord();
 
