@@ -35,7 +35,7 @@ final class BookkeepingRecordsRelationManager extends RelationManager
                     ->money('EUR'),
             ])
             ->headerActions([
-                AttachBookkeepingRecordAction::make()
+                AttachBookkeepingRecordAction::make(),
             ])
             ->recordActions([
                 Action::make('detach')

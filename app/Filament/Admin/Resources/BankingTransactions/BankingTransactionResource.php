@@ -6,7 +6,6 @@ namespace App\Filament\Admin\Resources\BankingTransactions;
 
 use App\Filament\Admin\Navigation\NavigationGroup;
 use App\Filament\Admin\Resources\BankingTransactions\Pages\CreateBankingTransaction;
-use App\Filament\Admin\Resources\BankingTransactions\Pages\EditBankingTransaction;
 use App\Filament\Admin\Resources\BankingTransactions\Pages\ListBankingTransactions;
 use App\Filament\Admin\Resources\BankingTransactions\Pages\ViewBankingTransaction;
 use App\Filament\Admin\Resources\BankingTransactions\Schemas\BankingTransactionForm;
@@ -63,6 +62,4 @@ final class BankingTransactionResource extends Resource
             'view' => ViewBankingTransaction::route('/{record}'),
         ];
     }
-
-
 }

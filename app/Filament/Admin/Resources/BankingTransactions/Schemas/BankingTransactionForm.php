@@ -32,6 +32,13 @@ final class BankingTransactionForm
                             ->prefix('€')
                             ->numeric()
                             ->required(),
+                        TextInput::make('unmatched_amount')
+                            ->label(__('labels.unmatched_amount'))
+                            ->prefix('€')
+                            ->numeric()
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->hiddenOn('create'),
                         TextInput::make('banking_account_number')
                             ->label(__('labels.banking_account_number'))
                             ->required(),

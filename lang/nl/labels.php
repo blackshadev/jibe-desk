@@ -242,6 +242,6 @@ return [
     'detach' => 'Ontkoppelen',
     'detached' => 'Ontkoppeld',
     'matched_references' => 'Gekoppelde verwijzingen',
-    'unmatched' => 'Niet gekoppeld',
+    'unmatched' => 'Openstaand',
     'creditor_name' => 'Crediteur',
 ];

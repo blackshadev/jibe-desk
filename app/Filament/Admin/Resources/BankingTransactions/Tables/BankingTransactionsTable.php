@@ -4,20 +4,14 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BankingTransactions\Tables;
 
-use App\Filament\Admin\Resources\BankingTransactions\BankingTransactionResource;
-use App\Filament\Admin\Utils\ViewOrEdit;
 use App\Models\BankingTransaction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
 final class BankingTransactionsTable
 {
-
     public static function configure(Table $table): Table
     {
         return $table
@@ -36,18 +30,15 @@ final class BankingTransactionsTable
                     ->sortable()
                     ->alignEnd()
                     ->color(static fn (BankingTransaction $record): string => $record->amount < 0 ? 'danger' : 'success'),
+                TextColumn::make('unmatched_amount')
+                    ->label(__('labels.unmatched_amount'))
+                    ->money('EUR')
+                    ->sortable()
+                    ->alignEnd()
+                    ->color(static fn (BankingTransaction $record): string => abs($record->unmatched_amount) >= 0.01 ? 'warning' : 'success'),
                 TextColumn::make('banking_account_number')
                     ->label(__('labels.banking_account_number'))
                     ->searchable(),
-                TextColumn::make('matched_count')
-                    ->label(__('labels.matched_references'))
-                    ->state(
-                        static fn (BankingTransaction $record): int => (
-                            $record->loadCount(['invoices', 'purchaseOrders', 'bookkeepingRecords'])->invoices_count
-                            + $record->purchase_orders_count
-                            + $record->bookkeeping_records_count
-                        ),
-                    ),
                 TextColumn::make('created_at')
                     ->label(__('labels.created_at'))
                     ->dateTime()

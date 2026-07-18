@@ -12,8 +12,6 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Schemas\Components\Tabs\Tab;
-use Illuminate\Database\Eloquent\Builder;
 use Override;
 
 final class ListBankingTransactions extends ListRecords
@@ -51,20 +49,6 @@ final class ListBankingTransactions extends ListRecords
                     $livewire->dispatch('refreshTable');
                 }),
             CreateAction::make(),
-        ];
-    }
-
-    public function getTabs(): array
-    {
-        return [
-            'all' => Tab::make(__('labels.all')),
-            'unmatched' => Tab::make(__('labels.unmatched'))
-                ->modifyQueryUsing(
-                    static fn (Builder $query): Builder => $query
-                        ->whereDoesntHave('invoices')
-                        ->whereDoesntHave('purchaseOrders')
-                        ->whereDoesntHave('bookkeepingRecords'),
-                ),
         ];
     }
 }

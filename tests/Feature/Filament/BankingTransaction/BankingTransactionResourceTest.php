@@ -12,6 +12,7 @@ use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Resources\BankingTransactions\Pages\CreateBankingTransaction;
 use App\Filament\Admin\Resources\BankingTransactions\Pages\ListBankingTransactions;
+use App\Filament\Admin\Resources\BankingTransactions\Pages\ViewBankingTransaction;
 use App\Models\BankingTransaction;
 use App\Models\BookkeepingRecord;
 use App\Models\Invoice;
@@ -173,5 +174,42 @@ final class BankingTransactionResourceTest extends FeatureTestCase
             'reference_type' => PurchaseOrder::class,
             'reference_id' => $po->id,
         ]);
+    }
+
+    public function test_list_page_shows_unmatched_amount_column(): void
+    {
+        $this->withAuthorizedUser();
+
+        $transaction = BankingTransaction::factory()->create(['amount' => 200.000]);
+        BookkeepingRecord::factory()->create([
+            'banking_transaction_id' => $transaction->id,
+            'amount_price' => 80.000,
+            'amount_vat' => 16.800,
+        ]);
+
+        Livewire::test(ListBankingTransactions::class)
+            ->assertSuccessful()
+            ->assertSee(__('labels.unmatched_amount'));
+    }
+
+    public function test_view_page_shows_unmatched_amount(): void
+    {
+        $this->withAuthorizedUser();
+
+        $transaction = BankingTransaction::factory()->create(['amount' => 300.000]);
+        BookkeepingRecord::factory()->create([
+            'banking_transaction_id' => $transaction->id,
+            'amount_price' => 100.000,
+            'amount_vat' => 21.000,
+        ]);
+        BookkeepingRecord::factory()->create([
+            'banking_transaction_id' => $transaction->id,
+            'amount_price' => 50.000,
+            'amount_vat' => 10.500,
+        ]);
+
+        Livewire::test(ViewBankingTransaction::class, ['record' => $transaction->id])
+            ->assertSuccessful()
+            ->assertSee(__('labels.unmatched_amount'));
     }
 }

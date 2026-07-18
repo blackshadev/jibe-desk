@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Guarded;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -48,5 +49,17 @@ final class BankingTransaction extends Model
             'date' => 'date',
             'amount' => 'decimal:3',
         ];
+    }
+
+    /**
+     * @return Attribute<float, never>
+     */
+    protected function unmatchedAmount(): Attribute
+    {
+        return Attribute::get(function (): float {
+            $recordsSum = $this->bookkeepingRecords->sum('amount_price');
+
+            return (float) $this->amount - $recordsSum;
+        });
     }
 }

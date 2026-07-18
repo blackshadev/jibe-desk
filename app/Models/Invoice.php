@@ -76,7 +76,6 @@ final class Invoice extends Model
         )->orderBy('id', 'asc');
     }
 
-
     /** @return Attribute<non-falsy-string, never> */
     protected function displayName(): Attribute
     {
