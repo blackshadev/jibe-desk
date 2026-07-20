@@ -27,6 +27,9 @@ final class PurchaseOrdersRelationManager extends RelationManager
     #[Override]
     public function table(Table $table): Table
     {
+        /** @var BankingTransaction $owner */
+        $owner = $this->getOwnerRecord();
+
         return $table
             ->columns([
                 TextColumn::make('description')
@@ -38,25 +41,29 @@ final class PurchaseOrdersRelationManager extends RelationManager
                     ->sortable(),
             ])
             ->recordUrl(ViewOrEdit::route(PurchaseOrderResource::class))
-            ->headerActions([
-                AttachPurchaseOrderAction::make(),
-            ])
-            ->recordActions([
-                Action::make('detach')
-                    ->label(__('labels.detach'))
-                    ->color('danger')
-                    ->icon('heroicon-o-x-mark')
-                    ->requiresConfirmation()
-                    ->action(function (PurchaseOrder $record, BankTransactionRepository $repository): void {
-                        /** @var BankingTransaction $model */
-                        $model = $this->getOwnerRecord();
-                        $repository->detachPurchaseOrder(
-                            BankTransactionId::create($model->id),
-                            PurchaseOrderId::create($record->id),
-                        );
-                    })
-                    ->successNotificationTitle(__('labels.detached')),
-            ]);
+            ->headerActions(
+                $owner->isCompleted() ? [] : [AttachPurchaseOrderAction::make()],
+            )
+            ->recordActions(
+                $owner->isCompleted()
+                    ? []
+                    : [
+                        Action::make('detach')
+                            ->label(__('labels.detach'))
+                            ->color('danger')
+                            ->icon('heroicon-o-x-mark')
+                            ->requiresConfirmation()
+                            ->action(function (PurchaseOrder $record, BankTransactionRepository $repository): void {
+                                /** @var BankingTransaction $model */
+                                $model = $this->getOwnerRecord();
+                                $repository->detachPurchaseOrder(
+                                    BankTransactionId::create($model->id),
+                                    PurchaseOrderId::create($record->id),
+                                );
+                            })
+                            ->successNotificationTitle(__('labels.detached')),
+                    ],
+            );
     }
 
     #[Override]

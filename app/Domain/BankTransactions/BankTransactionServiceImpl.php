@@ -21,14 +21,24 @@ final readonly class BankTransactionServiceImpl implements BankTransactionServic
     #[Override]
     public function attachInvoice(BankTransactionId $bankTransactionId, InvoiceId $invoiceId): void
     {
-        $this->invoiceService->markAsPaid($invoiceId);
         $this->repository->attachInvoice($bankTransactionId, $invoiceId);
     }
 
     #[Override]
     public function attachPurchaseOrder(BankTransactionId $bankTransactionId, PurchaseOrderId $purchaseOrderId): void
     {
-        $this->purchaseOrderService->markAsPaid($purchaseOrderId);
         $this->repository->attachPurchaseOrder($bankTransactionId, $purchaseOrderId);
+    }
+
+    #[Override]
+    public function complete(BankTransactionId $bankTransactionId): void
+    {
+        $invoiceIdList = $this->repository->getAttachedInvoiceIds($bankTransactionId);
+        $purchaseOrderIdList = $this->repository->getAttachedPurchaseOrderIds($bankTransactionId);
+
+        $this->invoiceService->markAsPaid($invoiceIdList);
+        $this->purchaseOrderService->markAsPaid($purchaseOrderIdList);
+
+        $this->repository->complete($bankTransactionId);
     }
 }

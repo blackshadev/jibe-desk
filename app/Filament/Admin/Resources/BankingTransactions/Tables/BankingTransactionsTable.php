@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BankingTransactions\Tables;
 
+use App\Domain\BankTransactions\BankTransactionStatus;
 use App\Models\BankingTransaction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -36,6 +37,20 @@ final class BankingTransactionsTable
                     ->sortable()
                     ->alignEnd()
                     ->color(static fn (BankingTransaction $record): string => abs($record->unmatched_amount) >= 0.01 ? 'warning' : 'success'),
+                TextColumn::make('status')
+                    ->label(__('labels.status'))
+                    ->badge()
+                    ->formatStateUsing(static fn ($state): string => match ($state) {
+                        'open' => __('labels.open'),
+                        'completed' => __('labels.completed'),
+                        default => $state instanceof BankTransactionStatus ? $state->value : (string) $state,
+                    })
+                    ->color(static fn ($state): string => match ($state) {
+                        'open' => 'warning',
+                        'completed' => 'success',
+                        default => 'gray',
+                    })
+                    ->sortable(),
                 TextColumn::make('banking_account_number')
                     ->label(__('labels.banking_account_number'))
                     ->searchable(),

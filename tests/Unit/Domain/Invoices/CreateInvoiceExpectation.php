@@ -7,6 +7,7 @@ namespace Tests\Unit\Domain\Invoices;
 use App\Domain\Invoices\AppliedInvoiceWithLineIds;
 use App\Domain\Invoices\ApplyInvoiceLines;
 use App\Domain\Invoices\InvoiceId;
+use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\Invoices\InvoiceRepository;
 use App\Domain\Invoices\NewInvoice;
 use Mockery;
@@ -41,10 +42,10 @@ final readonly class CreateInvoiceExpectation
             ->andReturn($return);
     }
 
-    public function expectsMarkAsPaid(InvoiceId $id): void
+    public function expectsMarkAsPaid(InvoiceIdList $ids): void
     {
         $this->mock
             ->expects('markAsPaid')
-            ->with(equalTo($id));
+            ->with(equalTo($ids));
     }
 }

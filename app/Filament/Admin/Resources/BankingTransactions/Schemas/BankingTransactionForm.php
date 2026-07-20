@@ -39,6 +39,11 @@ final class BankingTransactionForm
                             ->disabled()
                             ->dehydrated(false)
                             ->hiddenOn('create'),
+                        TextInput::make('status')
+                            ->label(__('labels.status'))
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->hiddenOn('create'),
                         TextInput::make('banking_account_number')
                             ->label(__('labels.banking_account_number'))
                             ->required(),

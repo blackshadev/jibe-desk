@@ -15,9 +15,9 @@ final readonly class InvoiceServiceImpl implements InvoiceService
     ) {}
 
     #[Override]
-    public function markAsPaid(InvoiceId $id): void
+    public function markAsPaid(InvoiceIdList $ids): void
     {
-        $this->invoiceRepository->markAsPaid($id);
-        $this->bookkeepingRepository->createForInvoice($id);
+        $this->invoiceRepository->markAsPaid($ids);
+        $this->bookkeepingRepository->createForInvoice($ids);
     }
 }

@@ -20,6 +20,12 @@ final class AttachInvoiceAction
         return Action::make('attachInvoice')
             ->label(__('labels.attach_invoice'))
             ->modalHeading(__('labels.attach_invoice'))
+            ->visible(static function (RelationManager $livewire): bool {
+                /** @var BankingTransaction $record */
+                $record = $livewire->getOwnerRecord();
+
+                return !$record->isCompleted();
+            })
             ->schema([
                 Select::make('invoice_id')
                     ->label(__('labels.invoice'))

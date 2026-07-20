@@ -6,7 +6,9 @@ namespace Tests\Feature\Infrastructure\Bookkeeping;
 
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceId;
+use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
+use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use App\Infrastructure\Bookkeeping\BookkeepingRecordDbRepository;
 use App\Models\BookkeepingRecord;
 use App\Models\CostCenter;
@@ -176,7 +178,7 @@ final class BookkeepingRecordDbRepositoryTest extends FeatureTestCase
                 'status' => 'pending',
             ]);
 
-        $this->repository->createForPurchaseOrder(PurchaseOrderId::create($po->id));
+        $this->repository->createForPurchaseOrder(new PurchaseOrderIdList([PurchaseOrderId::create($po->id)]));
 
         $this->assertDatabaseHas('bookkeeping_records', [
             'reference_type' => PurchaseOrder::class,
@@ -216,7 +218,7 @@ final class BookkeepingRecordDbRepositoryTest extends FeatureTestCase
             'amount_vat' => 21,
         ]);
 
-        $this->repository->createForPurchaseOrder(PurchaseOrderId::create($po->id));
+        $this->repository->createForPurchaseOrder(new PurchaseOrderIdList([PurchaseOrderId::create($po->id)]));
 
         $this->assertDatabaseHas('bookkeeping_records', [
             'reference_type' => PurchaseOrder::class,
@@ -238,7 +240,7 @@ final class BookkeepingRecordDbRepositoryTest extends FeatureTestCase
                 'status' => 'open',
             ]);
 
-        $this->repository->createForPurchaseOrder(PurchaseOrderId::create($po->id));
+        $this->repository->createForPurchaseOrder(new PurchaseOrderIdList([PurchaseOrderId::create($po->id)]));
 
         $this->assertDatabaseMissing('bookkeeping_records', [
             'reference_type' => PurchaseOrder::class,
@@ -259,7 +261,7 @@ final class BookkeepingRecordDbRepositoryTest extends FeatureTestCase
                 'status' => 'open',
             ]);
 
-        $this->repository->createForInvoice(InvoiceId::create($invoice->id));
+        $this->repository->createForInvoice(new InvoiceIdList([InvoiceId::create($invoice->id)]));
 
         $this->assertDatabaseHas('bookkeeping_records', [
             'reference_type' => Invoice::class,
@@ -297,7 +299,7 @@ final class BookkeepingRecordDbRepositoryTest extends FeatureTestCase
             'amount_vat' => 21,
         ]);
 
-        $this->repository->createForInvoice(InvoiceId::create($invoice->id));
+        $this->repository->createForInvoice(new InvoiceIdList([InvoiceId::create($invoice->id)]));
 
         $this->assertDatabaseHas('bookkeeping_records', [
             'reference_type' => Invoice::class,
@@ -320,7 +322,7 @@ final class BookkeepingRecordDbRepositoryTest extends FeatureTestCase
                 'status' => 'open',
             ]);
 
-        $this->repository->createForInvoice(InvoiceId::create($invoice->id));
+        $this->repository->createForInvoice(new InvoiceIdList([InvoiceId::create($invoice->id)]));
 
         $this->assertDatabaseHas('bookkeeping_records', [
             'reference_type' => Invoice::class,

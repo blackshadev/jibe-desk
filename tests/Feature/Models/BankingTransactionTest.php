@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Models;
 
+use App\Domain\BankTransactions\BankTransactionStatus;
 use App\Models\BankingTransaction;
-use App\Models\BookkeepingRecord;
+use App\Models\Invoice;
+use App\Models\InvoiceLine;
+use App\Models\Member;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderLine;
 use Tests\FeatureTestCase;
 
 final class BankingTransactionTest extends FeatureTestCase
 {
-    public function test_unmatched_amount_returns_full_amount_when_no_bookkeeping_records(): void
+    public function test_unmatched_amount_returns_full_amount_when_no_references(): void
     {
         $transaction = BankingTransaction::factory()
             ->createQuietly(['amount' => 150.500]);
@@ -20,22 +25,17 @@ final class BankingTransactionTest extends FeatureTestCase
         static::assertSame(150.5, $result);
     }
 
-    public function test_unmatched_amount_subtracts_sum_of_bookkeeping_record_totals(): void
+    public function test_unmatched_amount_subtracts_invoice_totals_from_pivot(): void
     {
         $transaction = BankingTransaction::factory()
             ->createQuietly(['amount' => 200.000]);
 
-        BookkeepingRecord::factory()->createQuietly([
-            'banking_transaction_id' => $transaction->id,
-            'amount_price' => 50.000,
-            'amount_vat' => 10.500,
-        ]);
+        $member = Member::factory()->createQuietly();
+        $invoice = Invoice::factory()->forMember($member)->createQuietly();
+        InvoiceLine::factory()->createQuietly(['invoice_id' => $invoice->id, 'price' => 50.000, 'quantity' => 1]);
+        InvoiceLine::factory()->createQuietly(['invoice_id' => $invoice->id, 'price' => 25.000, 'quantity' => 1]);
 
-        BookkeepingRecord::factory()->createQuietly([
-            'banking_transaction_id' => $transaction->id,
-            'amount_price' => 25.000,
-            'amount_vat' => 5.250,
-        ]);
+        $transaction->invoices()->attach($invoice->id);
 
         $result = $transaction->unmatched_amount;
 
@@ -43,42 +43,58 @@ final class BankingTransactionTest extends FeatureTestCase
         static::assertSame(125.0, $result);
     }
 
+    public function test_unmatched_amount_adds_purchase_order_totals_from_pivot(): void
+    {
+        $transaction = BankingTransaction::factory()
+            ->createQuietly(['amount' => -100.000]);
+
+        $po = PurchaseOrder::factory()->createQuietly();
+        PurchaseOrderLine::factory()->createQuietly(['purchase_order_id' => $po->id, 'price' => 30.000]);
+        PurchaseOrderLine::factory()->createQuietly(['purchase_order_id' => $po->id, 'price' => 20.000]);
+
+        $transaction->purchaseOrders()->attach($po->id);
+
+        $result = $transaction->unmatched_amount;
+
+        // -100.0 - 0 + (30.0 + 20.0) = -100.0 + 50.0 = -50.0
+        static::assertSame(-50.0, $result);
+    }
+
     public function test_unmatched_amount_returns_zero_when_fully_matched(): void
     {
         $transaction = BankingTransaction::factory()
             ->createQuietly(['amount' => 100.000]);
 
-        BookkeepingRecord::factory()->createQuietly([
-            'banking_transaction_id' => $transaction->id,
-            'amount_price' => 60.000,
-            'amount_vat' => 0.000,
-        ]);
+        $member = Member::factory()->createQuietly();
+        $invoice = Invoice::factory()->forMember($member)->createQuietly();
+        InvoiceLine::factory()->createQuietly(['invoice_id' => $invoice->id, 'price' => 60.000, 'quantity' => 1]);
+        InvoiceLine::factory()->createQuietly(['invoice_id' => $invoice->id, 'price' => 40.000, 'quantity' => 1]);
 
-        BookkeepingRecord::factory()->createQuietly([
-            'banking_transaction_id' => $transaction->id,
-            'amount_price' => 40.000,
-            'amount_vat' => 0.000,
-        ]);
+        $transaction->invoices()->attach($invoice->id);
 
         $result = $transaction->unmatched_amount;
 
         static::assertSame(0.0, $result);
     }
 
-    public function test_unmatched_amount_handles_negative_transaction_amount(): void
+    public function test_status_defaults_to_open(): void
     {
-        $transaction = BankingTransaction::factory()
-            ->createQuietly(['amount' => -50.000]);
+        $transaction = BankingTransaction::factory()->createQuietly();
 
-        BookkeepingRecord::factory()->createQuietly([
-            'banking_transaction_id' => $transaction->id,
-            'amount_price' => 20.000,
-            'amount_vat' => 4.200,
-        ]);
+        static::assertSame(BankTransactionStatus::Open, $transaction->status);
+    }
 
-        $result = $transaction->unmatched_amount;
+    public function test_is_completed_returns_true_when_status_is_completed(): void
+    {
+        $transaction = BankingTransaction::factory()->completed()->createQuietly();
 
-        // -50.0 - 20.0 = -50.0 - 24.2 = -70.0
-        static::assertSame(-70.0, $result);
+        static::assertTrue($transaction->isCompleted());
+    }
+
+    public function test_is_completed_returns_false_when_status_is_open(): void
+    {
+        $transaction = BankingTransaction::factory()->createQuietly();
+
+        static::assertFalse($transaction->isCompleted());
     }
 }

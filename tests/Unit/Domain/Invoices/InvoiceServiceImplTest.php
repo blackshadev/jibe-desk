@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Domain\Invoices;
 
 use App\Domain\Invoices\InvoiceId;
+use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\Invoices\InvoiceServiceImpl;
 use Override;
 use Tests\Unit\Domain\Bookkeeping\BookkeepingRecordRepositoryExpectation;
@@ -33,10 +34,11 @@ final class InvoiceServiceImplTest extends UnitTestCase
     public function test_mark_as_paid_updates_status_and_creates_bookkeeping_records(): void
     {
         $id = InvoiceId::create(1);
+        $ids = new InvoiceIdList([$id]);
 
-        $this->repo->expectsMarkAsPaid($id);
-        $this->bookkeepingRepo->expectsCreateForInvoice($id);
+        $this->repo->expectsMarkAsPaid($ids);
+        $this->bookkeepingRepo->expectsCreateForInvoice($ids);
 
-        $this->service->markAsPaid($id);
+        $this->service->markAsPaid($ids);
     }
 }

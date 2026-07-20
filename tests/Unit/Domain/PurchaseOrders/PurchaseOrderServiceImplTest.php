@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Domain\PurchaseOrders;
 
 use App\Domain\PurchaseOrders\PurchaseOrderId;
+use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderServiceImpl;
 use Override;
 use Tests\Unit\Domain\Bookkeeping\BookkeepingRecordRepositoryExpectation;
@@ -33,9 +34,10 @@ final class PurchaseOrderServiceImplTest extends UnitTestCase
     public function test_mark_as_pending_updates_status_and_creates_bookkeeping_records(): void
     {
         $id = PurchaseOrderId::create(1);
+        $ids = new PurchaseOrderIdList([$id]);
 
         $this->repo->expectsMarkAsPending($id);
-        $this->bookkeepingRepo->expectsCreateForPurchaseOrder($id);
+        $this->bookkeepingRepo->expectsCreateForPurchaseOrder($ids);
 
         $this->service->markAsPending($id);
     }
@@ -43,10 +45,11 @@ final class PurchaseOrderServiceImplTest extends UnitTestCase
     public function test_mark_as_paid_updates_status_and_creates_bookkeeping_records(): void
     {
         $id = PurchaseOrderId::create(2);
+        $ids = new PurchaseOrderIdList([$id]);
 
-        $this->repo->expectsMarkAsPaid($id);
-        $this->bookkeepingRepo->expectsCreateForPurchaseOrder($id);
+        $this->repo->expectsMarkAsPaid($ids);
+        $this->bookkeepingRepo->expectsCreateForPurchaseOrder($ids);
 
-        $this->service->markAsPaid($id);
+        $this->service->markAsPaid($ids);
     }
 }

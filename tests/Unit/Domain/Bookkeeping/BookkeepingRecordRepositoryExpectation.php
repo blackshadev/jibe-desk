@@ -6,8 +6,8 @@ namespace Tests\Unit\Domain\Bookkeeping;
 
 use App\Domain\Bookkeeping\BookkeepingRecordRepository;
 use App\Domain\Invoices\InvoiceBatchId;
-use App\Domain\Invoices\InvoiceId;
-use App\Domain\PurchaseOrders\PurchaseOrderId;
+use App\Domain\Invoices\InvoiceIdList;
+use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use Mockery;
 use Mockery\MockInterface;
 
@@ -31,17 +31,17 @@ final readonly class BookkeepingRecordRepositoryExpectation
             ->with(equalTo($batchId));
     }
 
-    public function expectsCreateForPurchaseOrder(PurchaseOrderId $id): void
+    public function expectsCreateForPurchaseOrder(PurchaseOrderIdList $ids): void
     {
         $this->mock
             ->expects('createForPurchaseOrder')
-            ->with(equalTo($id));
+            ->with(equalTo($ids));
     }
 
-    public function expectsCreateForInvoice(InvoiceId $id): void
+    public function expectsCreateForInvoice(InvoiceIdList $ids): void
     {
         $this->mock
             ->expects('createForInvoice')
-            ->with(equalTo($id));
+            ->with(equalTo($ids));
     }
 }

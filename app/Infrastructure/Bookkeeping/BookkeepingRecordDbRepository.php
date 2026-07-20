@@ -10,8 +10,10 @@ use App\Domain\Invoices\Billing\CostCenterId;
 use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceId;
+use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\Invoices\InvoiceStatus;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
+use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Models\BookkeepingRecord;
 use App\Models\Invoice;
@@ -61,13 +63,15 @@ final class BookkeepingRecordDbRepository implements BookkeepingRecordRepository
     }
 
     #[Override]
-    public function createForPurchaseOrder(PurchaseOrderId $id): void
+    public function createForPurchaseOrder(PurchaseOrderIdList $ids): void
     {
+        $idValues = array_map(static fn (PurchaseOrderId $id) => $id->value, $ids->ids);
+
         $now = now();
         BookkeepingRecord::query()->insertUsing(
             ['year', 'cost_center_id', 'amount_price', 'amount_vat', 'description', 'reference_type', 'reference_id', 'created_at', 'updated_at'],
             PurchaseOrder::query()
-                ->where('purchase_orders.id', $id->value)
+                ->whereIn('purchase_orders.id', $idValues)
                 ->whereIn('purchase_orders.status', [PurchaseOrderStatus::Pending, PurchaseOrderStatus::Paid])
                 ->whereNotExists(static function ($query): void {
                     $query
@@ -99,13 +103,15 @@ final class BookkeepingRecordDbRepository implements BookkeepingRecordRepository
     }
 
     #[Override]
-    public function createForInvoice(InvoiceId $id): void
+    public function createForInvoice(InvoiceIdList $ids): void
     {
+        $idValues = array_map(static fn (InvoiceId $id) => $id->value, $ids->ids);
+
         $now = now();
         BookkeepingRecord::query()->insertUsing(
             ['year', 'cost_center_id', 'amount_price', 'amount_vat', 'description', 'reference_type', 'reference_id', 'created_at', 'updated_at'],
             Invoice::query()
-                ->where('invoices.id', $id->value)
+                ->whereIn('invoices.id', $idValues)
                 ->whereNotExists(static function ($query): void {
                     $query
                         ->from('bookkeeping_records')

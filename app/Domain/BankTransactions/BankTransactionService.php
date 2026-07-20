@@ -14,4 +14,6 @@ interface BankTransactionService
     public function attachInvoice(BankTransactionId $bankTransactionId, InvoiceId $invoiceId): void;
 
     public function attachPurchaseOrder(BankTransactionId $bankTransactionId, PurchaseOrderId $purchaseOrderId): void;
+
+    public function complete(BankTransactionId $bankTransactionId): void;
 }

@@ -11,5 +11,5 @@ interface PurchaseOrderService
 {
     public function markAsPending(PurchaseOrderId $id): void;
 
-    public function markAsPaid(PurchaseOrderId $id): void;
+    public function markAsPaid(PurchaseOrderIdList $ids): void;
 }

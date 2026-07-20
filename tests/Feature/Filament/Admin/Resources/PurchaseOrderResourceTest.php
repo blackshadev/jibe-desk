@@ -6,6 +6,7 @@ namespace Tests\Feature\Filament\Admin\Resources;
 
 use App\Domain\Authorization\RoleName;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
+use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderService;
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Resources\PurchaseOrders\Pages\CreatePurchaseOrder;
@@ -87,7 +88,7 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
             ->has(PurchaseOrderLine::factory()->state(['cost_center_id' => $costCenter->id, 'price' => 100, 'price_vat' => 21]), 'lines')
             ->create(['status' => PurchaseOrderStatus::Pending, 'date' => '2026-06-15']);
 
-        app(PurchaseOrderService::class)->markAsPaid(PurchaseOrderId::create($po->id));
+        app(PurchaseOrderService::class)->markAsPaid(new PurchaseOrderIdList([PurchaseOrderId::create($po->id)]));
 
         $po->refresh();
         static::assertSame(PurchaseOrderStatus::Paid, $po->status);

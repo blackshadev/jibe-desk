@@ -8,6 +8,7 @@ use App\Domain\Invoices\AppliedInvoiceWithLineIds;
 use App\Domain\Invoices\ApplyInvoiceLines;
 use App\Domain\Invoices\Billing\BillableItem;
 use App\Domain\Invoices\InvoiceId;
+use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\Invoices\InvoiceLineId;
 use App\Domain\Invoices\InvoiceNumberGenerator;
 use App\Domain\Invoices\InvoiceRepository;
@@ -126,10 +127,10 @@ final class InvoiceRepositoryDb implements InvoiceRepository
     }
 
     #[Override]
-    public function markAsPaid(InvoiceId $id): void
+    public function markAsPaid(InvoiceIdList $ids): void
     {
         Invoice::query()
-            ->where('id', $id->value)
+            ->whereIn('id', array_map(static fn (InvoiceId $id) => $id->value, $ids->ids))
             ->update(['status' => InvoiceStatus::Paid]);
     }
 }

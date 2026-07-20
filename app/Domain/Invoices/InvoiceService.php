@@ -9,5 +9,5 @@ use JeroenG\Autowire\Attribute\Autowire;
 #[Autowire]
 interface InvoiceService
 {
-    public function markAsPaid(InvoiceId $id): void;
+    public function markAsPaid(InvoiceIdList $ids): void;
 }

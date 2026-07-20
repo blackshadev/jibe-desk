@@ -14,7 +14,7 @@ interface InvoiceRepository
     public function applyLines(ApplyInvoiceLines $invoice): AppliedInvoiceWithLineIds;
 
     /**
-     * Mark an individual invoice as paid by updating its status.
+     * Mark invoices as paid by updating their status.
      */
-    public function markAsPaid(InvoiceId $id): void;
+    public function markAsPaid(InvoiceIdList $ids): void;
 }

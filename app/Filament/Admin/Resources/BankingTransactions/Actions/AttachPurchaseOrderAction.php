@@ -21,6 +21,12 @@ final class AttachPurchaseOrderAction
         return Action::make('attachPurchaseOrder')
             ->label(__('labels.attach_purchase_order'))
             ->modalHeading(__('labels.attach_purchase_order'))
+            ->visible(static function (RelationManager $livewire): bool {
+                /** @var BankingTransaction $record */
+                $record = $livewire->getOwnerRecord();
+
+                return !$record->isCompleted();
+            })
             ->schema([
                 Select::make('purchase_order_id')
                     ->label(__('labels.purchase_order'))

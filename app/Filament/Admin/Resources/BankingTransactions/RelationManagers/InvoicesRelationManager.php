@@ -27,6 +27,9 @@ final class InvoicesRelationManager extends RelationManager
     #[Override]
     public function table(Table $table): Table
     {
+        /** @var BankingTransaction $owner */
+        $owner = $this->getOwnerRecord();
+
         return $table
             ->columns([
                 TextColumn::make('invoice_number')
@@ -40,25 +43,29 @@ final class InvoicesRelationManager extends RelationManager
                     ->alignEnd(),
             ])
             ->recordUrl(ViewOrEdit::route(InvoiceResource::class))
-            ->headerActions([
-                AttachInvoiceAction::make(),
-            ])
-            ->recordActions([
-                Action::make('detach')
-                    ->label(__('labels.detach'))
-                    ->color('danger')
-                    ->icon('heroicon-o-x-mark')
-                    ->requiresConfirmation()
-                    ->action(function (Invoice $record, BankTransactionRepository $repository): void {
-                        /** @var BankingTransaction $model */
-                        $model = $this->getOwnerRecord();
-                        $repository->detachInvoice(
-                            BankTransactionId::create($model->id),
-                            InvoiceId::create($record->id),
-                        );
-                    })
-                    ->successNotificationTitle(__('labels.detached')),
-            ]);
+            ->headerActions(
+                $owner->isCompleted() ? [] : [AttachInvoiceAction::make()],
+            )
+            ->recordActions(
+                $owner->isCompleted()
+                    ? []
+                    : [
+                        Action::make('detach')
+                            ->label(__('labels.detach'))
+                            ->color('danger')
+                            ->icon('heroicon-o-x-mark')
+                            ->requiresConfirmation()
+                            ->action(function (Invoice $record, BankTransactionRepository $repository): void {
+                                /** @var BankingTransaction $model */
+                                $model = $this->getOwnerRecord();
+                                $repository->detachInvoice(
+                                    BankTransactionId::create($model->id),
+                                    InvoiceId::create($record->id),
+                                );
+                            })
+                            ->successNotificationTitle(__('labels.detached')),
+                    ],
+            );
     }
 
     #[Override]

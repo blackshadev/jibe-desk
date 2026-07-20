@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Domain\PurchaseOrders;
 
 use App\Domain\PurchaseOrders\PurchaseOrderId;
+use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderService;
 use Mockery;
 use Mockery\MockInterface;
@@ -22,11 +23,11 @@ final readonly class PurchaseOrderServiceExpectation
         return new self(Mockery::mock(PurchaseOrderService::class));
     }
 
-    public function expectsMarkAsPaid(PurchaseOrderId $id): void
+    public function expectsMarkAsPaid(PurchaseOrderIdList $ids): void
     {
         $this->mock
             ->expects('markAsPaid')
-            ->with(equalTo($id));
+            ->with(equalTo($ids));
     }
 
     public function expectsMarkAsPending(PurchaseOrderId $id): void

@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BankingTransactions\Pages;
 
+use App\Filament\Admin\Resources\BankingTransactions\Actions\CompleteBankingTransactionAction;
 use App\Filament\Admin\Resources\BankingTransactions\BankingTransactionResource;
 use App\Filament\Admin\Resources\BankingTransactions\RelationManagers\BookkeepingRecordsRelationManager;
 use App\Filament\Admin\Resources\BankingTransactions\RelationManagers\InvoicesRelationManager;
 use App\Filament\Admin\Resources\BankingTransactions\RelationManagers\PurchaseOrdersRelationManager;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
+use Livewire\Attributes\On;
 use Override;
 
 final class ViewBankingTransaction extends ViewRecord
@@ -19,6 +22,8 @@ final class ViewBankingTransaction extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            CompleteBankingTransactionAction::make(),
+            EditAction::make(),
             DeleteAction::make(),
         ];
     }
@@ -42,5 +47,10 @@ final class ViewBankingTransaction extends ViewRecord
     public function getContentTabLabel(): string
     {
         return __('labels.banking_transaction');
+    }
+
+    #[On('refresh')]
+    public function refresh(): void
+    {
     }
 }

@@ -243,5 +243,10 @@ return [
     'detached' => 'Ontkoppeld',
     'matched_references' => 'Gekoppelde verwijzingen',
     'unmatched' => 'Openstaand',
+    'complete_transaction' => 'Markeer als afgerond',
+    'complete' => 'Afgerond',
+    'open' => 'Open',
+    'completed' => 'Afgerond',
+    'cannot_complete_unmatched' => 'Kan transactie niet afronden: het bedrag is niet volledig gekoppeld.',
     'creditor_name' => 'Crediteur',
 ];

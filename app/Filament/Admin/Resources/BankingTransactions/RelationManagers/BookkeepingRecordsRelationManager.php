@@ -22,6 +22,9 @@ final class BookkeepingRecordsRelationManager extends RelationManager
 
     public function table(Table $table): Table
     {
+        /** @var BankingTransaction $owner */
+        $owner = $this->getOwnerRecord();
+
         return $table
             ->columns([
                 TextColumn::make('year')
@@ -34,24 +37,32 @@ final class BookkeepingRecordsRelationManager extends RelationManager
                     ->label(__('labels.price'))
                     ->money('EUR'),
             ])
-            ->headerActions([
-                AttachBookkeepingRecordAction::make(),
-            ])
-            ->recordActions([
-                Action::make('detach')
-                    ->label(__('labels.detach'))
-                    ->color('danger')
-                    ->icon('heroicon-o-x-mark')
-                    ->requiresConfirmation()
-                    ->action(function (BookkeepingRecord $record, BankTransactionRepository $repository): void {
-                        /** @var BankingTransaction $model */
-                        $model = $this->getOwnerRecord();
-                        $repository->detachBookkeepingRecord(
-                            BankTransactionId::create((int) $model->id),
-                            $record->id,
-                        );
-                    })
-                    ->successNotificationTitle(__('labels.detached')),
-            ]);
+            ->headerActions(
+                [AttachBookkeepingRecordAction::make()],
+            )
+            ->recordActions(
+                [
+                    Action::make('detach')
+                        ->label(__('labels.detach'))
+                        ->color('danger')
+                        ->icon('heroicon-o-x-mark')
+                        ->requiresConfirmation()
+                        ->visible(static function (RelationManager $livewire): bool {
+                            /** @var BankingTransaction $ownerRecord */
+                            $ownerRecord = $livewire->getOwnerRecord();
+
+                            return !$ownerRecord->isCompleted();
+                        })
+                        ->action(function (BookkeepingRecord $record, BankTransactionRepository $repository): void {
+                            /** @var BankingTransaction $model */
+                            $model = $this->getOwnerRecord();
+                            $repository->detachBookkeepingRecord(
+                                BankTransactionId::create($model->id),
+                                $record->id,
+                            );
+                        })
+                        ->successNotificationTitle(__('labels.detached')),
+                ],
+            );
     }
 }

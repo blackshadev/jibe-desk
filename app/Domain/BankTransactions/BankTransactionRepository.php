@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Domain\BankTransactions;
 
 use App\Domain\Invoices\InvoiceId;
+use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
+use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use JeroenG\Autowire\Attribute\Autowire;
 
 #[Autowire]
@@ -26,4 +28,10 @@ interface BankTransactionRepository
     public function attachBookkeepingRecord(BankTransactionId $bankTransactionId, int $bookkeepingRecordId): void;
 
     public function detachBookkeepingRecord(BankTransactionId $bankTransactionId, int $bookkeepingRecordId): void;
+
+    public function getAttachedInvoiceIds(BankTransactionId $bankTransactionId): InvoiceIdList;
+
+    public function getAttachedPurchaseOrderIds(BankTransactionId $bankTransactionId): PurchaseOrderIdList;
+
+    public function complete(BankTransactionId $bankTransactionId): void;
 }

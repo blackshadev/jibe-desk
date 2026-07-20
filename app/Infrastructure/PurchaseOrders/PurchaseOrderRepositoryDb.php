@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\PurchaseOrders;
 
 use App\Domain\PurchaseOrders\PurchaseOrderId;
+use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderRepository;
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Models\PurchaseOrder;
@@ -21,10 +22,10 @@ final class PurchaseOrderRepositoryDb implements PurchaseOrderRepository
     }
 
     #[Override]
-    public function markAsPaid(PurchaseOrderId $id): void
+    public function markAsPaid(PurchaseOrderIdList $ids): void
     {
         PurchaseOrder::query()
-            ->where('id', $id->value)
+            ->whereIn('id', array_map(static fn (PurchaseOrderId $id) => $id->value, $ids->ids))
             ->update(['status' => PurchaseOrderStatus::Paid]);
     }
 }

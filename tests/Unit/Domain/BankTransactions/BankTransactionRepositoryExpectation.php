@@ -8,7 +8,9 @@ use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\BankTransactions\BankTransactionRepository;
 use App\Domain\BankTransactions\CreateBankTransaction;
 use App\Domain\Invoices\InvoiceId;
+use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
+use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use Mockery;
 use Mockery\MockInterface;
 
@@ -74,5 +76,28 @@ final readonly class BankTransactionRepositoryExpectation
         $this->mock
             ->expects('attachPurchaseOrder')
             ->with(equalTo($bankTransactionId), equalTo($purchaseOrderId));
+    }
+
+    public function expectsGetAttachedInvoiceIds(BankTransactionId $id, InvoiceIdList $return): void
+    {
+        $this->mock
+            ->expects('getAttachedInvoiceIds')
+            ->with(equalTo($id))
+            ->andReturn($return);
+    }
+
+    public function expectsGetAttachedPurchaseOrderIds(BankTransactionId $id, PurchaseOrderIdList $return): void
+    {
+        $this->mock
+            ->expects('getAttachedPurchaseOrderIds')
+            ->with(equalTo($id))
+            ->andReturn($return);
+    }
+
+    public function expectsComplete(BankTransactionId $id): void
+    {
+        $this->mock
+            ->expects('complete')
+            ->with(equalTo($id));
     }
 }
