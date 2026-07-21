@@ -29,14 +29,10 @@ final class PurchaseOrdersRelationManager extends RelationManager
     #[Override]
     public function table(Table $table): Table
     {
-        /** @var BankingTransaction $owner */
-        $owner = $this->getOwnerRecord();
-
         return $table
             ->columns([
                 TextColumn::make('description')
-                    ->label(__('labels.description'))
-                    ->searchable(),
+                    ->label(__('labels.description')),
                 TextColumn::make('date')
                     ->label(__('labels.date'))
                     ->date()

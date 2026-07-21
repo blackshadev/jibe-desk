@@ -60,10 +60,12 @@ final class BankingTransaction extends Model
         ];
     }
 
+
+
     /**
      * @return Attribute<float, never>
      */
-    protected function unmatchedAmount(): Attribute
+    protected function matchedAmount(): Attribute
     {
         return Attribute::get(function (): float {
             $invoiceTotal = (float) InvoiceLine::query()
@@ -79,7 +81,17 @@ final class BankingTransaction extends Model
                 ->unattached()
                 ->sum(DB::raw('amount_price'));
 
-            return (float) $this->amount - $invoiceTotal + $poTotal - $unattachedBookkeepingRecords;
+            return $invoiceTotal + $unattachedBookkeepingRecords - $poTotal;
+        });
+    }
+
+    /**
+     * @return Attribute<float, never>
+     */
+    protected function unmatchedAmount(): Attribute
+    {
+        return Attribute::get(function (): float {
+            return $this->amount - $this->matched_amount;
         });
     }
 }

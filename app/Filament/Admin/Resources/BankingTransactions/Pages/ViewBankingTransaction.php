@@ -9,9 +9,11 @@ use App\Filament\Admin\Resources\BankingTransactions\BankingTransactionResource;
 use App\Filament\Admin\Resources\BankingTransactions\RelationManagers\BookkeepingRecordsRelationManager;
 use App\Filament\Admin\Resources\BankingTransactions\RelationManagers\InvoicesRelationManager;
 use App\Filament\Admin\Resources\BankingTransactions\RelationManagers\PurchaseOrdersRelationManager;
+use App\Filament\Admin\Resources\BankingTransactions\Widgets\BankingTransactionStats;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use Livewire\Attributes\On;
 use Override;
 
@@ -52,5 +54,12 @@ final class ViewBankingTransaction extends ViewRecord
     #[On('refresh')]
     public function refresh(): void
     {
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            BankingTransactionStats::class,
+        ];
     }
 }

@@ -242,6 +242,7 @@ return [
     'detach' => 'Ontkoppelen',
     'detached' => 'Ontkoppeld',
     'matched_references' => 'Gekoppelde verwijzingen',
+    'matched_transactions' => 'Gekoppelde transacties',
     'unmatched' => 'Openstaand',
     'complete_transaction' => 'Markeer als afgerond',
     'complete' => 'Afgerond',

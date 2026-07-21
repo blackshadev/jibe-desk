@@ -29,9 +29,6 @@ final class InvoicesRelationManager extends RelationManager
     #[Override]
     public function table(Table $table): Table
     {
-        /** @var BankingTransaction $owner */
-        $owner = $this->getOwnerRecord();
-
         return $table
             ->columns([
                 TextColumn::make('invoice_number')
