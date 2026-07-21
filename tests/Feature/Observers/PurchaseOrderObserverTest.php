@@ -25,7 +25,7 @@ final class PurchaseOrderObserverTest extends FeatureTestCase
         $this->subject = new PurchaseOrderObserver();
     }
 
-    public function testItDeletesTheImageFileWhenPurchaseOrderIsDeleted(): void
+    public function test_it_deletes_the_image_file_when_purchase_order_is_deleted(): void
     {
         $path = UploadedFile::fake()->image('invoice.jpg')->store('', 'local');
 
@@ -40,7 +40,7 @@ final class PurchaseOrderObserverTest extends FeatureTestCase
         static::assertFalse(Storage::disk('local')->exists($path));
     }
 
-    public function testItDoesNothingWhenPurchaseOrderWithoutImageIsDeleted(): void
+    public function test_it_does_nothing_when_purchase_order_without_image_is_deleted(): void
     {
         $purchaseOrder = PurchaseOrder::factory()->create([
             'image_path' => null,

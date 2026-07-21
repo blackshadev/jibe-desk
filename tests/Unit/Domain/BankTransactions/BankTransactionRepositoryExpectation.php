@@ -26,7 +26,6 @@ final readonly class BankTransactionRepositoryExpectation
         return new self(Mockery::mock(BankTransactionRepository::class));
     }
 
-    // @mago-expect lint:no-boolean-flag-parameter
     public function expectsExistsByHashAlways(bool $return): void
     {
         $this->mock
