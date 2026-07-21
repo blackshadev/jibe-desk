@@ -10,8 +10,6 @@ final class CouldNotCompleteTransaction extends RuntimeException
 {
     public function __construct()
     {
-        parent::__construct(
-            'Cannot complete banking transaction: unmatched amount must be 0.',
-        );
+        parent::__construct('Cannot complete banking transaction: unmatched amount must be 0.');
     }
 }

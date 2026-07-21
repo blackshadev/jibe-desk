@@ -16,7 +16,6 @@ use Mockery\MockInterface;
 
 use function PHPUnit\Framework\equalTo;
 
-// @mago-expect lint:too-many-methods
 final readonly class InvoiceBatchRepositoryExpectation
 {
     private function __construct(

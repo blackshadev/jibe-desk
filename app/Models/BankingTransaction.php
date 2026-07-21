@@ -66,29 +66,20 @@ final class BankingTransaction extends Model
     protected function unmatchedAmount(): Attribute
     {
         return Attribute::get(function (): float {
-            $btId = $this->id;
-
             $invoiceTotal = (float) InvoiceLine::query()
-                ->whereIn('invoice_id', static function ($query) use ($btId): void {
-                    $query
-                        ->select('reference_id')
-                        ->from('banking_transaction_references')
-                        ->where('banking_transaction_id', $btId)
-                        ->where('reference_type', Invoice::class);
-                })
+                ->whereIn('invoice_id', $this->invoices()->select('invoices.id'))
                 ->sum(DB::raw('price * quantity'));
 
-            $poTotal = (float) PurchaseOrderLine::query()
-                ->whereIn('purchase_order_id', static function ($query) use ($btId): void {
-                    $query
-                        ->select('reference_id')
-                        ->from('banking_transaction_references')
-                        ->where('banking_transaction_id', $btId)
-                        ->where('reference_type', PurchaseOrder::class);
-                })
+            $poTotal = PurchaseOrderLine::query()
+                ->whereIn('purchase_order_id', $this->purchaseOrders()->select('purchase_orders.id'))
                 ->sum(DB::raw('price'));
 
-            return (float) $this->amount - $invoiceTotal + $poTotal;
+            $unattachedBookkeepingRecords = $this
+                ->bookkeepingRecords()
+                ->unattached()
+                ->sum(DB::raw('amount_price'));
+
+            return (float) $this->amount - $invoiceTotal + $poTotal - $unattachedBookkeepingRecords;
         });
     }
 }

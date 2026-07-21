@@ -6,7 +6,6 @@ namespace Tests\Unit\Domain\BankTransactions;
 
 use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\BankTransactions\BankTransactionRepository;
-use App\Domain\BankTransactions\CreateBankTransaction;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
@@ -27,26 +26,11 @@ final readonly class BankTransactionRepositoryExpectation
         return new self(Mockery::mock(BankTransactionRepository::class));
     }
 
-    public function expectsExistsByHash(string $hash, bool $return): void
-    {
-        $this->mock
-            ->expects('existsByHash')
-            ->with(equalTo($hash))
-            ->andReturn($return);
-    }
-
+    // @mago-expect lint:no-boolean-flag-parameter
     public function expectsExistsByHashAlways(bool $return): void
     {
         $this->mock
             ->shouldReceive('existsByHash')
-            ->andReturn($return);
-    }
-
-    public function expectsCreate(CreateBankTransaction $dto, BankTransactionId $return): void
-    {
-        $this->mock
-            ->expects('create')
-            ->with(equalTo($dto))
             ->andReturn($return);
     }
 

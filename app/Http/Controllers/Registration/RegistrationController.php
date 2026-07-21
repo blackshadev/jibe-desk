@@ -16,7 +16,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 
 // TODO(vhagen): split this up
-// @mago-expect lint:too-many-methods
 final class RegistrationController extends Controller
 {
     public function __construct(

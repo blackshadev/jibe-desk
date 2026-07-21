@@ -249,4 +249,7 @@ return [
     'completed' => 'Afgerond',
     'cannot_complete_unmatched' => 'Kan transactie niet afronden: het bedrag is niet volledig gekoppeld.',
     'creditor_name' => 'Crediteur',
+    'create_invoice_from_transaction' => 'Factuur aanmaken',
+    'create_purchase_order_from_transaction' => 'Inkooporder aanmaken',
+    'create_bookkeeping_record_from_transaction' => 'Boekhouding mutatie aanmaken',
 ];

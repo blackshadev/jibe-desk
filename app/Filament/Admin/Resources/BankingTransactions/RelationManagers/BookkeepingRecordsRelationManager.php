@@ -7,6 +7,8 @@ namespace App\Filament\Admin\Resources\BankingTransactions\RelationManagers;
 use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\BankTransactions\BankTransactionRepository;
 use App\Filament\Admin\Resources\BankingTransactions\Actions\AttachBookkeepingRecordAction;
+use App\Filament\Admin\Resources\BankingTransactions\Actions\CreateBookkeepingRecordFromTransactionAction;
+use App\Filament\Admin\Resources\BankingTransactions\Helpers\IsOpen;
 use App\Models\BankingTransaction;
 use App\Models\BookkeepingRecord;
 use Filament\Actions\Action;
@@ -38,7 +40,10 @@ final class BookkeepingRecordsRelationManager extends RelationManager
                     ->money('EUR'),
             ])
             ->headerActions(
-                [AttachBookkeepingRecordAction::make()],
+                [
+                    AttachBookkeepingRecordAction::make(),
+                    CreateBookkeepingRecordFromTransactionAction::make(),
+                ],
             )
             ->recordActions(
                 [
@@ -47,12 +52,7 @@ final class BookkeepingRecordsRelationManager extends RelationManager
                         ->color('danger')
                         ->icon('heroicon-o-x-mark')
                         ->requiresConfirmation()
-                        ->visible(static function (RelationManager $livewire): bool {
-                            /** @var BankingTransaction $ownerRecord */
-                            $ownerRecord = $livewire->getOwnerRecord();
-
-                            return !$ownerRecord->isCompleted();
-                        })
+                        ->visible(IsOpen::checkOwner(...))
                         ->action(function (BookkeepingRecord $record, BankTransactionRepository $repository): void {
                             /** @var BankingTransaction $model */
                             $model = $this->getOwnerRecord();

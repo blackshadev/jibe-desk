@@ -7,6 +7,7 @@ namespace App\Filament\Admin\Resources\BankingTransactions\Actions;
 use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\BankTransactions\BankTransactionService;
 use App\Domain\Invoices\InvoiceId;
+use App\Filament\Admin\Resources\BankingTransactions\Helpers\IsOpen;
 use App\Models\BankingTransaction;
 use App\Models\Invoice;
 use Filament\Actions\Action;
@@ -20,12 +21,7 @@ final class AttachInvoiceAction
         return Action::make('attachInvoice')
             ->label(__('labels.attach_invoice'))
             ->modalHeading(__('labels.attach_invoice'))
-            ->visible(static function (RelationManager $livewire): bool {
-                /** @var BankingTransaction $record */
-                $record = $livewire->getOwnerRecord();
-
-                return !$record->isCompleted();
-            })
+            ->visible(IsOpen::checkOwner(...))
             ->schema([
                 Select::make('invoice_id')
                     ->label(__('labels.invoice'))

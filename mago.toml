@@ -25,7 +25,7 @@ ambiguous-function-call = { enabled = false }
 literal-named-argument = { enabled = false }
 halstead = { effort-threshold = 7000 }
 excessive-parameter-list = { enabled = false }
-too-many-methods = { exclude = ["tests/**/*Test.php", "app/Models/*.php"] }
+too-many-methods = { exclude = ["tests/**/*Test.php", "app/Models/*.php"], threshold = 20 }
 no-fully-qualified-global-class-like = { enabled = true }
 no-fully-qualified-global-constant = { enabled = true }
 no-fully-qualified-global-function = { enabled = true }

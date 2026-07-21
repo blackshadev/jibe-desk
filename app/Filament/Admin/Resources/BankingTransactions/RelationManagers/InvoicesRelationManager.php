@@ -8,6 +8,8 @@ use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\BankTransactions\BankTransactionRepository;
 use App\Domain\Invoices\InvoiceId;
 use App\Filament\Admin\Resources\BankingTransactions\Actions\AttachInvoiceAction;
+use App\Filament\Admin\Resources\BankingTransactions\Actions\CreateInvoiceFromTransactionAction;
+use App\Filament\Admin\Resources\BankingTransactions\Helpers\IsOpen;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Filament\Admin\Utils\ViewOrEdit;
 use App\Models\BankingTransaction;
@@ -43,28 +45,28 @@ final class InvoicesRelationManager extends RelationManager
                     ->alignEnd(),
             ])
             ->recordUrl(ViewOrEdit::route(InvoiceResource::class))
-            ->headerActions(
-                $owner->isCompleted() ? [] : [AttachInvoiceAction::make()],
-            )
+            ->headerActions([
+                AttachInvoiceAction::make(),
+                CreateInvoiceFromTransactionAction::make(),
+            ])
             ->recordActions(
-                $owner->isCompleted()
-                    ? []
-                    : [
-                        Action::make('detach')
-                            ->label(__('labels.detach'))
-                            ->color('danger')
-                            ->icon('heroicon-o-x-mark')
-                            ->requiresConfirmation()
-                            ->action(function (Invoice $record, BankTransactionRepository $repository): void {
-                                /** @var BankingTransaction $model */
-                                $model = $this->getOwnerRecord();
-                                $repository->detachInvoice(
-                                    BankTransactionId::create($model->id),
-                                    InvoiceId::create($record->id),
-                                );
-                            })
-                            ->successNotificationTitle(__('labels.detached')),
-                    ],
+                [
+                    Action::make('detach')
+                        ->label(__('labels.detach'))
+                        ->color('danger')
+                        ->icon('heroicon-o-x-mark')
+                        ->requiresConfirmation()
+                        ->visible(IsOpen::checkOwner(...))
+                        ->action(function (Invoice $record, BankTransactionRepository $repository): void {
+                            /** @var BankingTransaction $model */
+                            $model = $this->getOwnerRecord();
+                            $repository->detachInvoice(
+                                BankTransactionId::create($model->id),
+                                InvoiceId::create($record->id),
+                            );
+                        })
+                        ->successNotificationTitle(__('labels.detached')),
+                ],
             );
     }
 

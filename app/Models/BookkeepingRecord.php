@@ -6,6 +6,8 @@ namespace App\Models;
 
 use App\Domain\Invoices\CompoundPrice;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -30,6 +32,12 @@ final class BookkeepingRecord extends Model
     public function bankingTransaction(): BelongsTo
     {
         return $this->belongsTo(BankingTransaction::class);
+    }
+
+    #[Scope]
+    protected function unattached(Builder $query): Builder
+    {
+        return $query->whereNull('reference_id');
     }
 
     /** @return Attribute<CompoundPrice, CompoundPrice> */

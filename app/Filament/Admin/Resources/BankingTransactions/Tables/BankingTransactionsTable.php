@@ -32,7 +32,7 @@ final class BankingTransactionsTable
                     ->alignEnd()
                     ->color(static fn (BankingTransaction $record): string => $record->amount < 0 ? 'danger' : 'success'),
                 TextColumn::make('unmatched_amount')
-                    ->label(__('labels.unmatched_amount'))
+                    ->label(__('labels.unmatched'))
                     ->money('EUR')
                     ->sortable()
                     ->alignEnd()
@@ -62,7 +62,8 @@ final class BankingTransactionsTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->authorizeIndividualRecords(),
                 ]),
             ]);
     }

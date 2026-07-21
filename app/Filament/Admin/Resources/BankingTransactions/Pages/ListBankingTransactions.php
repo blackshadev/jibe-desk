@@ -25,7 +25,7 @@ final class ListBankingTransactions extends ListRecords
             Action::make('importMt940')
                 ->label(__('labels.import_mt940'))
                 ->modalHeading(__('labels.import_mt940'))
-                ->form([
+                ->schema([
                     FileUpload::make('mt940_file')
                         ->label(__('labels.mt940_file'))
                         ->directory('mt940-imports')

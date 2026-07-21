@@ -8,6 +8,8 @@ use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\BankTransactions\BankTransactionRepository;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Filament\Admin\Resources\BankingTransactions\Actions\AttachPurchaseOrderAction;
+use App\Filament\Admin\Resources\BankingTransactions\Actions\CreatePurchaseOrderFromTransactionAction;
+use App\Filament\Admin\Resources\BankingTransactions\Helpers\IsOpen;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Filament\Admin\Utils\ViewOrEdit;
 use App\Models\BankingTransaction;
@@ -42,27 +44,29 @@ final class PurchaseOrdersRelationManager extends RelationManager
             ])
             ->recordUrl(ViewOrEdit::route(PurchaseOrderResource::class))
             ->headerActions(
-                $owner->isCompleted() ? [] : [AttachPurchaseOrderAction::make()],
+                [
+                    AttachPurchaseOrderAction::make(),
+                    CreatePurchaseOrderFromTransactionAction::make(),
+                ],
             )
             ->recordActions(
-                $owner->isCompleted()
-                    ? []
-                    : [
-                        Action::make('detach')
-                            ->label(__('labels.detach'))
-                            ->color('danger')
-                            ->icon('heroicon-o-x-mark')
-                            ->requiresConfirmation()
-                            ->action(function (PurchaseOrder $record, BankTransactionRepository $repository): void {
-                                /** @var BankingTransaction $model */
-                                $model = $this->getOwnerRecord();
-                                $repository->detachPurchaseOrder(
-                                    BankTransactionId::create($model->id),
-                                    PurchaseOrderId::create($record->id),
-                                );
-                            })
-                            ->successNotificationTitle(__('labels.detached')),
-                    ],
+                [
+                    Action::make('detach')
+                        ->label(__('labels.detach'))
+                        ->color('danger')
+                        ->icon('heroicon-o-x-mark')
+                        ->requiresConfirmation()
+                        ->visible(IsOpen::checkOwner(...))
+                        ->action(function (PurchaseOrder $record, BankTransactionRepository $repository): void {
+                            /** @var BankingTransaction $model */
+                            $model = $this->getOwnerRecord();
+                            $repository->detachPurchaseOrder(
+                                BankTransactionId::create($model->id),
+                                PurchaseOrderId::create($record->id),
+                            );
+                        })
+                        ->successNotificationTitle(__('labels.detached')),
+                ],
             );
     }
 

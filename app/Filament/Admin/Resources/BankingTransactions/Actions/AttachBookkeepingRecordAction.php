@@ -6,11 +6,10 @@ namespace App\Filament\Admin\Resources\BankingTransactions\Actions;
 
 use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\BankTransactions\BankTransactionRepository;
-use App\Models\BankingTransaction;
+use App\Filament\Admin\Resources\BankingTransactions\Helpers\IsOpen;
 use App\Models\BookkeepingRecord;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
-use Filament\Resources\RelationManagers\RelationManager;
 
 final class AttachBookkeepingRecordAction
 {
@@ -19,12 +18,7 @@ final class AttachBookkeepingRecordAction
         return Action::make('attachBookkeepingRecord')
             ->label(__('labels.attach_bookkeeping_record'))
             ->modalHeading(__('labels.attach_bookkeeping_record'))
-            ->visible(static function (RelationManager $livewire): bool {
-                /** @var BankingTransaction $ownerRecord */
-                $ownerRecord = $livewire->getOwnerRecord();
-
-                return !$ownerRecord->isCompleted();
-            })
+            ->visible(IsOpen::checkOwner(...))
             ->schema([
                 Select::make('bookkeeping_record_id')
                     ->label(__('labels.bookkeeping_record'))

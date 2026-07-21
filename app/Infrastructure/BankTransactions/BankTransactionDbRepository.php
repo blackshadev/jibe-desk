@@ -125,11 +125,7 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
                 ->with(['invoices.lines', 'purchaseOrders.lines'])
                 ->findOrFail($bankTransactionId->value);
 
-            $invoiceTotal = $bt->invoices->sum(static fn (Invoice $i) => (float) $i->total->price);
-            $poTotal = $bt->purchaseOrders->sum(static fn (PurchaseOrder $po) => (float) $po->total->price);
-            $unmatched = (float) $bt->amount - $invoiceTotal + $poTotal;
-
-            if (abs($unmatched) >= 0.01) {
+            if (abs($bt->unmatched_amount) >= 0.01) {
                 throw new CouldNotCompleteTransaction();
             }
 

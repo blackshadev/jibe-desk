@@ -76,7 +76,7 @@ final readonly class BankTransactionImportServiceImpl implements BankTransaction
 
     private function formatDate(string $date): ?string
     {
-        if (empty($date) || $date === '1970-01-01') {
+        if ($date === '' || $date === '1970-01-01') {
             return null;
         }
 
