@@ -39,6 +39,7 @@ final class BookkeepingRecordsRelationManager extends RelationManager
                     ->label(__('labels.price'))
                     ->money('EUR'),
             ])
+            ->filters([])
             ->headerActions(
                 [
                     AttachBookkeepingRecordAction::make(),

@@ -9,7 +9,12 @@ use App\Models\BankingTransaction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\BaseFilter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 final class BankingTransactionsTable
 {
@@ -65,6 +70,28 @@ final class BankingTransactionsTable
                     DeleteBulkAction::make()
                         ->authorizeIndividualRecords(),
                 ]),
-            ]);
+            ])
+            ->filters([
+                SelectFilter::make(__('labels.book_year'))
+                    ->options(
+                        BankingTransaction::query()
+                            ->select(DB::connection()->getConfig()['driver'] === 'pgsql'
+                                ? DB::raw('EXTRACT(YEAR FROM date) AS year')
+                                : DB::raw('STRFTIME(\'%Y\', date) AS year')
+                            )->pluck('year', 'year')
+                            ->all()
+                            ,
+                    )
+                    ->default(now()->year)
+                    ->query(static function (Builder $query, array $state) {
+                        $value = $state['value'] ?? '';
+                        if ($value === '') {
+                            return $query;
+                        }
+
+                        return $query->whereYear('date', $value);
+                    }),
+            ])
+            ->filtersLayout(FiltersLayout::BeforeContent);
     }
 }

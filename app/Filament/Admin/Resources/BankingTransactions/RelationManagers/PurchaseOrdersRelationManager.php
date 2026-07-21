@@ -38,6 +38,7 @@ final class PurchaseOrdersRelationManager extends RelationManager
                     ->date()
                     ->sortable(),
             ])
+            ->filters([])
             ->recordUrl(ViewOrEdit::route(PurchaseOrderResource::class))
             ->headerActions(
                 [

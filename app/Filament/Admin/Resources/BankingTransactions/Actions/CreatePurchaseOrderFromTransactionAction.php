@@ -14,6 +14,7 @@ use App\Models\CostCenter;
 use App\Models\PurchaseOrder;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -69,6 +70,15 @@ final class CreatePurchaseOrderFromTransactionAction
                         ->prefix('€')
                         ->default(round(-$record->amount * 0.21, 2))
                         ->required(),
+                    FileUpload::make('image_path')
+                        ->label(__('labels.image'))
+                        ->image()
+                        ->imagePreviewHeight('250')
+                        ->directory('purchase-orders')
+                        ->disk('local')
+                        ->visibility('private')
+                        ->previewable()
+                        ->columnSpanFull(),
                     Select::make('cost_center_id')
                         ->label(__('labels.cost_center'))
                         ->options(static fn () => CostCenter::query()->orderBy('number')->pluck('title', 'id'))

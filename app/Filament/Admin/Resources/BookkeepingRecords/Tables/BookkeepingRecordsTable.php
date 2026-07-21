@@ -16,6 +16,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
@@ -62,6 +63,7 @@ final class BookkeepingRecordsTable
                     ->label(__('labels.cost_center'))
                     ->relationship('costCenter', 'title'),
             ])
+            ->filtersLayout(FiltersLayout::BeforeContent)
             ->recordActions([
                 EditAction::make(),
                 Action::make('related')

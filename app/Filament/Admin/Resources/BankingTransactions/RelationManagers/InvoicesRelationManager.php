@@ -46,6 +46,7 @@ final class InvoicesRelationManager extends RelationManager
                 AttachInvoiceAction::make(),
                 CreateInvoiceFromTransactionAction::make(),
             ])
+            ->filters([])
             ->recordActions(
                 [
                     Action::make('detach')

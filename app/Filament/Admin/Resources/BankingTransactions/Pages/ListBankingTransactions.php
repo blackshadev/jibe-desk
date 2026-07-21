@@ -13,6 +13,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Resources\Pages\ListRecords;
 use Override;
+use Filament\Schemas\Components\Tabs;
 
 final class ListBankingTransactions extends ListRecords
 {
@@ -49,6 +50,20 @@ final class ListBankingTransactions extends ListRecords
                     $livewire->dispatch('refreshTable');
                 }),
             CreateAction::make(),
+        ];
+    }
+
+    #[Override]
+    public function getTabs(): array
+    {
+        return [
+            'all' => Tabs\Tab::make(__('labels.all')),
+            'open' => Tabs\Tab::make(__('labels.open'))->modifyQueryUsing(static function ($query) {
+                return $query->where('status', 'open');
+            }),
+            'completed' => Tabs\Tab::make(__('labels.completed'))->modifyQueryUsing(static function ($query) {
+                return $query->where('status', 'completed');
+            }),
         ];
     }
 }
