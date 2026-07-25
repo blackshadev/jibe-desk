@@ -18,6 +18,7 @@ use Filament\Actions\Action;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Livewire\Attributes\On;
 use Override;
 
 final class InvoicesRelationManager extends RelationManager
@@ -78,5 +79,10 @@ final class InvoicesRelationManager extends RelationManager
     public static function getPluralModelLabel(): string
     {
         return mb_strtolower(__('labels.invoices'));
+    }
+
+    #[On('refresh')]
+    public function refresh(): void
+    {
     }
 }

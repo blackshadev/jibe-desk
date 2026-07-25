@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\BankingTransactions\Tables;
 
 use App\Domain\BankTransactions\BankTransactionStatus;
+use App\Domain\BankTransactions\ResolveStatus;
 use App\Models\BankingTransaction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
-use Filament\Tables\Filters\BaseFilter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -56,6 +56,20 @@ final class BankingTransactionsTable
                         default => 'gray',
                     })
                     ->sortable(),
+                TextColumn::make('resolve_status')
+                    ->label(__('labels.resolve_status'))
+                    ->badge()
+                    ->formatStateUsing(static fn (ResolveStatus $state): string => match ($state) {
+                        ResolveStatus::Unresolved => __('labels.resolve_status_unresolved'),
+                        ResolveStatus::Resolved => __('labels.resolve_status_resolved'),
+                        ResolveStatus::Unresolvable => __('labels.resolve_status_unresolvable'),
+                    })
+                    ->color(static fn (ResolveStatus $state): string => match ($state) {
+                        ResolveStatus::Resolved => 'success',
+                        ResolveStatus::Unresolvable => 'danger',
+                        ResolveStatus::Unresolved => 'warning',
+                    })
+                    ->sortable(),
                 TextColumn::make('banking_account_number')
                     ->label(__('labels.banking_account_number'))
                     ->searchable(),
@@ -75,12 +89,13 @@ final class BankingTransactionsTable
                 SelectFilter::make(__('labels.book_year'))
                     ->options(
                         BankingTransaction::query()
-                            ->select(DB::connection()->getConfig()['driver'] === 'pgsql'
-                                ? DB::raw('EXTRACT(YEAR FROM date) AS year')
-                                : DB::raw('STRFTIME(\'%Y\', date) AS year')
-                            )->pluck('year', 'year')
-                            ->all()
-                            ,
+                            ->select(
+                                DB::connection()->getConfig()['driver'] === 'pgsql'
+                                    ? DB::raw('EXTRACT(YEAR FROM date) AS year')
+                                    : DB::raw('STRFTIME(\'%Y\', date) AS year'),
+                            )
+                            ->pluck('year', 'year')
+                            ->all(),
                     )
                     ->default(now()->year)
                     ->query(static function (Builder $query, array $state) {

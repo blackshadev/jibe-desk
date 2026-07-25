@@ -7,6 +7,7 @@ namespace Tests\Unit\Domain\PurchaseOrders;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderRepository;
+use DateTimeInterface;
 use Mockery;
 use Mockery\MockInterface;
 
@@ -35,5 +36,13 @@ final readonly class PurchaseOrderRepositoryExpectation
         $this->mock
             ->expects('markAsPaid')
             ->with(equalTo($ids));
+    }
+
+    public function expectsFindMatchingDebit(string $creditorIban, float $amount, DateTimeInterface $date, ?PurchaseOrderId $return): void
+    {
+        $this->mock
+            ->expects('findMatchingDebit')
+            ->with(equalTo($creditorIban), equalTo($amount), equalTo($date))
+            ->andReturn($return);
     }
 }

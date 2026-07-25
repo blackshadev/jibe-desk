@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Tests\Feature\Infrastructure\BankTransactions;
 
 use App\Domain\BankTransactions\BankTransactionId;
+use App\Domain\BankTransactions\BankTransactionIdList;
 use App\Domain\BankTransactions\BankTransactionStatus;
 use App\Domain\BankTransactions\CouldNotCompleteTransaction;
 use App\Domain\BankTransactions\CreateBankTransaction;
+use App\Domain\BankTransactions\ResolveStatus;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Infrastructure\BankTransactions\BankTransactionDbRepository;
@@ -342,5 +344,89 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
 
         $bankingTransaction->refresh();
         static::assertSame(BankTransactionStatus::Completed, $bankingTransaction->status);
+    }
+
+    public function test_get_unresolved_ids_returns_only_unresolved(): void
+    {
+        $unresolved1 = BankingTransaction::factory()->create(['resolve_status' => ResolveStatus::Unresolved->value]);
+        $unresolved2 = BankingTransaction::factory()->create(['resolve_status' => ResolveStatus::Unresolved->value]);
+        BankingTransaction::factory()->create(['resolve_status' => ResolveStatus::Resolved->value]);
+        BankingTransaction::factory()->create(['resolve_status' => ResolveStatus::Unresolvable->value]);
+
+        $result = $this->repository->getUnresolvedIds(50);
+
+        static::assertCount(2, $result->ids);
+
+        $resultIds = array_map(static fn ($id) => $id->value, $result->ids);
+        static::assertContains($unresolved1->id, $resultIds);
+        static::assertContains($unresolved2->id, $resultIds);
+    }
+
+    #[Test]
+    public function test_get_unresolved_unresolved_ids_respects_limit(): void
+    {
+        BankingTransaction::factory()->count(10)->create(['resolve_status' => ResolveStatus::Unresolved->value]);
+
+        $result = $this->repository->getUnresolvedIds(5);
+
+        static::assertCount(5, $result->ids);
+    }
+
+    public function test_mark_as_resolved(): void
+    {
+        $bankingTransaction = BankingTransaction::factory()->create(['resolve_status' => ResolveStatus::Unresolved->value]);
+
+        $this->repository->markAsResolved(BankTransactionId::create($bankingTransaction->id));
+
+        $bankingTransaction->refresh();
+        static::assertSame(ResolveStatus::Resolved, $bankingTransaction->resolve_status);
+    }
+
+    #[Test]
+    public function test_mark_as_unresolvable(): void
+    {
+        $bankingTransaction = BankingTransaction::factory()->create(['resolve_status' => ResolveStatus::Unresolved->value]);
+
+        $this->repository->markAsUnresolvable(BankTransactionId::create($bankingTransaction->id));
+
+        $bankingTransaction->refresh();
+        static::assertSame(ResolveStatus::Unresolvable, $bankingTransaction->resolve_status);
+    }
+
+    public function test_get_match_criteria_for_ids(): void
+    {
+        $bt1 = BankingTransaction::factory()->create([
+            'date' => '2026-01-15',
+            'amount' => 100.50,
+            'banking_account_number' => 'NL91ABNA0417164300',
+        ]);
+        $bt2 = BankingTransaction::factory()->create([
+            'date' => '2026-01-16',
+            'amount' => -50.25,
+            'banking_account_number' => 'NL91ABNA0417164301',
+        ]);
+
+        $ids = new BankTransactionIdList([
+            BankTransactionId::create($bt1->id),
+            BankTransactionId::create($bt2->id),
+        ]);
+
+        $result = $this->repository->getMatchCriteriaForIds($ids);
+
+        static::assertCount(2, $result);
+        static::assertArrayHasKey($bt1->id, $result);
+        static::assertArrayHasKey($bt2->id, $result);
+        static::assertSame(100.50, $result[$bt1->id]->amount);
+        static::assertSame('NL91ABNA0417164300', $result[$bt1->id]->bankingAccountNumber);
+        static::assertEquals(-50.25, $result[$bt2->id]->amount);
+    }
+
+    public function test_get_match_criteria_returns_empty_for_nonexistent_ids(): void
+    {
+        $ids = new BankTransactionIdList([BankTransactionId::create(99_999)]);
+
+        $result = $this->repository->getMatchCriteriaForIds($ids);
+
+        static::assertEmpty($result);
     }
 }

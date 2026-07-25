@@ -34,4 +34,13 @@ interface BankTransactionRepository
     public function getAttachedPurchaseOrderIds(BankTransactionId $bankTransactionId): PurchaseOrderIdList;
 
     public function complete(BankTransactionId $bankTransactionId): void;
+
+    public function getUnresolvedIds(int $limit): BankTransactionIdList;
+
+    /** @return array<int, MatchCriteria> */
+    public function getMatchCriteriaForIds(BankTransactionIdList $ids): array;
+
+    public function markAsResolved(BankTransactionId $bankTransactionId): void;
+
+    public function markAsUnresolvable(BankTransactionId $bankTransactionId): void;
 }

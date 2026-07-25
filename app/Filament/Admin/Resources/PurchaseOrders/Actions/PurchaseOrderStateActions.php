@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\PurchaseOrders\Actions;
 
 use App\Domain\PurchaseOrders\PurchaseOrderId;
+use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderService;
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
@@ -40,7 +41,7 @@ final class PurchaseOrderStateActions
                 ->requiresConfirmation()
                 ->visible(static fn (PurchaseOrder $record): bool => $record->status === PurchaseOrderStatus::Pending)
                 ->action(static function (PurchaseOrder $record, PurchaseOrderService $service): void {
-                    $service->markAsPaid(PurchaseOrderId::create($record->id));
+                    $service->markAsPaid(PurchaseOrderIdList::fromArray([$record->id]));
                 })
                 ->after(static fn (Page $livewire) => $livewire->dispatch('markedAsPaid'))
                 ->successNotificationTitle(__('notifications.purchase_order_marked_paid')),

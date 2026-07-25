@@ -18,6 +18,7 @@ use Filament\Actions\Action;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Livewire\Attributes\On;
 use Override;
 
 final class PurchaseOrdersRelationManager extends RelationManager
@@ -77,5 +78,10 @@ final class PurchaseOrdersRelationManager extends RelationManager
     public static function getPluralModelLabel(): string
     {
         return mb_strtolower(__('labels.purchase_orders'));
+    }
+
+    #[On('refresh')]
+    public function refresh(): void
+    {
     }
 }

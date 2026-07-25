@@ -18,12 +18,15 @@ use App\Models\Invoice;
 use App\Models\InvoiceLine;
 use App\Models\Member;
 use Carbon\CarbonImmutable;
+use DateTimeInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Override;
 
 final class InvoiceRepositoryDb implements InvoiceRepository
 {
+    private const float AMOUNT_TOLERANCE = 0.01;
+
     public function __construct(
         private InvoiceNumberGenerator $invoiceNumberGenerator,
     ) {}
@@ -132,5 +135,32 @@ final class InvoiceRepositoryDb implements InvoiceRepository
         Invoice::query()
             ->whereIn('id', array_map(static fn (InvoiceId $id) => $id->value, $ids->ids))
             ->update(['status' => InvoiceStatus::Paid]);
+    }
+
+    #[Override]
+    public function findMatchingCredit(string $bankingAccountNumber, float $amount, DateTimeInterface $date): ?InvoiceId
+    {
+        $startDate = CarbonImmutable::instance($date)->subDays(30);
+        $endDate = CarbonImmutable::instance($date)->addDays(30);
+
+        $invoice = Invoice::query()
+            ->whereIn('status', [InvoiceStatus::Open, InvoiceStatus::Pending])
+            ->whereBetween('date', [$startDate, $endDate])
+            ->whereHas('member.paymentInformation', static function ($query) use ($bankingAccountNumber): void {
+                $query->where('banking_account_number', $bankingAccountNumber);
+            })
+            ->orderByAmountProximity($amount)
+            ->with('lines')
+            ->first();
+
+        if ($invoice === null) {
+            return null;
+        }
+
+        if (abs($invoice->total->price - $amount) > self::AMOUNT_TOLERANCE) {
+            return null;
+        }
+
+        return InvoiceId::create($invoice->id);
     }
 }

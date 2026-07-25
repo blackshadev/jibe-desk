@@ -8,7 +8,6 @@ use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceStatus;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Filament\Admin\Utils\ViewOrEdit;
-use App\Models\BankingTransaction;
 use App\Models\Invoice;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -61,12 +60,13 @@ final class InvoicesTable
                     ->options(
                         Invoice::query()
                             ->distinct()
-                            ->select(DB::connection()->getConfig()['driver'] === 'pgsql'
-                                ? DB::raw('EXTRACT(YEAR FROM date) AS year')
-                                : DB::raw('STRFTIME(\'%Y\', date) AS year')
-                            )->pluck('year', 'year')
-                            ->all()
-                        ,
+                            ->select(
+                                DB::connection()->getConfig()['driver'] === 'pgsql'
+                                    ? DB::raw('EXTRACT(YEAR FROM date) AS year')
+                                    : DB::raw('STRFTIME(\'%Y\', date) AS year'),
+                            )
+                            ->pluck('year', 'year')
+                            ->all(),
                     )
                     ->default(now()->year)
                     ->query(static function (Builder $query, array $state) {

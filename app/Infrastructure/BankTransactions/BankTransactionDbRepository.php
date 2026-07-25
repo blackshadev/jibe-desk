@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Infrastructure\BankTransactions;
 
 use App\Domain\BankTransactions\BankTransactionId;
+use App\Domain\BankTransactions\BankTransactionIdList;
 use App\Domain\BankTransactions\BankTransactionRepository;
 use App\Domain\BankTransactions\BankTransactionStatus;
 use App\Domain\BankTransactions\CouldNotCompleteTransaction;
 use App\Domain\BankTransactions\CreateBankTransaction;
+use App\Domain\BankTransactions\MatchCriteria;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
@@ -147,5 +149,55 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
                     ->update(['banking_transaction_id' => $bankTransactionId->value]);
             }
         });
+    }
+
+    #[Override]
+    public function getUnresolvedIds(int $limit): BankTransactionIdList
+    {
+        $ids = BankingTransaction::query()
+            ->where('resolve_status', 'unresolved')
+            ->orderBy('date', 'desc')
+            ->limit($limit)
+            ->pluck('id')
+            ->map(BankTransactionId::create(...))
+            ->all();
+
+        return new BankTransactionIdList($ids);
+    }
+
+    #[Override]
+    public function getMatchCriteriaForIds(BankTransactionIdList $ids): array
+    {
+        if ($ids->ids === []) {
+            return [];
+        }
+
+        return BankingTransaction::query()
+            ->whereIn('id', $ids->asInts())
+            ->get()
+            ->mapWithKeys(static fn (BankingTransaction $bt): array => [
+                $bt->id => new MatchCriteria(
+                    date: $bt->date,
+                    amount: (float) $bt->unmatched_amount,
+                    bankingAccountNumber: $bt->banking_account_number,
+                ),
+            ])
+            ->all();
+    }
+
+    #[Override]
+    public function markAsResolved(BankTransactionId $bankTransactionId): void
+    {
+        BankingTransaction::query()
+            ->where('id', $bankTransactionId->value)
+            ->update(['resolve_status' => 'resolved']);
+    }
+
+    #[Override]
+    public function markAsUnresolvable(BankTransactionId $bankTransactionId): void
+    {
+        BankingTransaction::query()
+            ->where('id', $bankTransactionId->value)
+            ->update(['resolve_status' => 'unresolvable']);
     }
 }

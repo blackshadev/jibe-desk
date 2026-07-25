@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Invoices;
 
+use DateTimeInterface;
 use JeroenG\Autowire\Attribute\Autowire;
 
 #[Autowire]
@@ -13,8 +14,7 @@ interface InvoiceRepository
 
     public function applyLines(ApplyInvoiceLines $invoice): AppliedInvoiceWithLineIds;
 
-    /**
-     * Mark invoices as paid by updating their status.
-     */
     public function markAsPaid(InvoiceIdList $ids): void;
+
+    public function findMatchingCredit(string $bankingAccountNumber, float $amount, DateTimeInterface $date): ?InvoiceId;
 }

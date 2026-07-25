@@ -16,4 +16,6 @@ interface BankTransactionService
     public function attachPurchaseOrder(BankTransactionId $bankTransactionId, PurchaseOrderId $purchaseOrderId): void;
 
     public function complete(BankTransactionId $bankTransactionId): void;
+
+    public function resolveMatching(BankTransactionIdList $ids): void;
 }

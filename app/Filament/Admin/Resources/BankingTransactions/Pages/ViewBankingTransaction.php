@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\BankingTransactions\Pages;
 
 use App\Filament\Admin\Resources\BankingTransactions\Actions\CompleteBankingTransactionAction;
+use App\Filament\Admin\Resources\BankingTransactions\Actions\RetryMatchingAction;
 use App\Filament\Admin\Resources\BankingTransactions\BankingTransactionResource;
 use App\Filament\Admin\Resources\BankingTransactions\RelationManagers\BookkeepingRecordsRelationManager;
 use App\Filament\Admin\Resources\BankingTransactions\RelationManagers\InvoicesRelationManager;
@@ -13,7 +14,6 @@ use App\Filament\Admin\Resources\BankingTransactions\Widgets\BankingTransactionS
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Widgets\StatsOverviewWidget\Stat;
 use Livewire\Attributes\On;
 use Override;
 
@@ -24,6 +24,7 @@ final class ViewBankingTransaction extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            RetryMatchingAction::make(),
             CompleteBankingTransactionAction::make(),
             EditAction::make(),
             DeleteAction::make(),
@@ -54,6 +55,7 @@ final class ViewBankingTransaction extends ViewRecord
     #[On('refresh')]
     public function refresh(): void
     {
+        $this->record->refresh();
     }
 
     protected function getHeaderWidgets(): array

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\BankingTransactions\Pages;
 
 use App\Domain\BankTransactions\BankTransactionImportService;
+use App\Domain\Jobs\MatchBankingTransactionsJob;
 use App\Filament\Admin\Resources\BankingTransactions\BankingTransactionResource;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
@@ -12,8 +13,8 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Resources\Pages\ListRecords;
-use Override;
 use Filament\Schemas\Components\Tabs;
+use Override;
 
 final class ListBankingTransactions extends ListRecords
 {
@@ -47,6 +48,10 @@ final class ListBankingTransactions extends ListRecords
                         ->success()
                         ->send();
 
+                    if ($result['imported'] > 0) {
+                        MatchBankingTransactionsJob::dispatch();
+                    }
+
                     $livewire->dispatch('refreshTable');
                 }),
             CreateAction::make(),
@@ -58,12 +63,9 @@ final class ListBankingTransactions extends ListRecords
     {
         return [
             'all' => Tabs\Tab::make(__('labels.all')),
-            'open' => Tabs\Tab::make(__('labels.open'))->modifyQueryUsing(static function ($query) {
-                return $query->where('status', 'open');
-            }),
-            'completed' => Tabs\Tab::make(__('labels.completed'))->modifyQueryUsing(static function ($query) {
-                return $query->where('status', 'completed');
-            }),
+            'open' => Tabs\Tab::make(__('labels.open'))->modifyQueryUsing(static fn ($query) => $query->where('status', 'open')),
+            'completed' => Tabs\Tab::make(__('labels.completed'))->modifyQueryUsing(static fn ($query) => $query->where('status', 'completed')),
+            'unresolvable' => Tabs\Tab::make(__('labels.resolve_status_unresolvable'))->modifyQueryUsing(static fn ($query) => $query->where('resolve_status', 'unresolvable')),
         ];
     }
 }

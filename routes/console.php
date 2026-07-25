@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Console\Commands\GenerateInvoiceBatchCommand;
+use App\Console\Commands\MatchBankingTransactionsCommand;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 
@@ -11,3 +12,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command(GenerateInvoiceBatchCommand::class)->monthlyOn(1, '04:00');
+Schedule::command(MatchBankingTransactionsCommand::class)->hourly();

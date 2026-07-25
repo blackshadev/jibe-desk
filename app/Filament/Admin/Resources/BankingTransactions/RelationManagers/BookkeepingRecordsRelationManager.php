@@ -15,12 +15,17 @@ use Filament\Actions\Action;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use Livewire\Attributes\On;
 
 final class BookkeepingRecordsRelationManager extends RelationManager
 {
     protected static string $relationship = 'bookkeepingRecords';
 
-    protected static ?string $title = 'Boekhouding mutaties';
+    public static function getTitle(Model $ownerRecord, string $pageClass): string
+    {
+        return __('labels.bookkeeping_records');
+    }
 
     public function table(Table $table): Table
     {
@@ -65,5 +70,10 @@ final class BookkeepingRecordsRelationManager extends RelationManager
                         ->successNotificationTitle(__('labels.detached')),
                 ],
             );
+    }
+
+    #[On('refresh')]
+    public function refresh(): void
+    {
     }
 }

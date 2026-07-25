@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Domain\BankTransactions\BankTransactionStatus;
+use App\Domain\BankTransactions\ResolveStatus;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,6 +21,8 @@ use Override;
  * @property string $description
  * @property float $amount
  * @property BankTransactionStatus $status
+ * @property ResolveStatus $resolve_status
+ * @property DateTimeInterface $date
  */
 #[Guarded(['id', 'created_at', 'updated_at'])]
 final class BankingTransaction extends Model
@@ -57,10 +61,9 @@ final class BankingTransaction extends Model
             'date' => 'date',
             'amount' => 'decimal:3',
             'status' => BankTransactionStatus::class,
+            'resolve_status' => ResolveStatus::class,
         ];
     }
-
-
 
     /**
      * @return Attribute<float, never>
@@ -90,8 +93,6 @@ final class BankingTransaction extends Model
      */
     protected function unmatchedAmount(): Attribute
     {
-        return Attribute::get(function (): float {
-            return $this->amount - $this->matched_amount;
-        });
+        return Attribute::get(fn (): float => $this->amount - $this->matched_amount);
     }
 }

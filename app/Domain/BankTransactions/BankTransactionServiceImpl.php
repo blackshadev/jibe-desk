@@ -16,6 +16,7 @@ final readonly class BankTransactionServiceImpl implements BankTransactionServic
         private BankTransactionRepository $repository,
         private InvoiceService $invoiceService,
         private PurchaseOrderService $purchaseOrderService,
+        private TransactionMatchingService $matchingService,
     ) {}
 
     #[Override]
@@ -40,5 +41,29 @@ final readonly class BankTransactionServiceImpl implements BankTransactionServic
         $this->purchaseOrderService->markAsPaid($purchaseOrderIdList);
 
         $this->repository->complete($bankTransactionId);
+    }
+
+    #[Override]
+    public function resolveMatching(BankTransactionIdList $ids): void
+    {
+        $criteriaList = $this->repository->getMatchCriteriaForIds($ids);
+
+        foreach ($criteriaList as $bankTransactionId => $criteria) {
+            $result = $this->matchingService->findMatch($criteria);
+
+            if (!$result->isMatch) {
+                $this->repository->markAsUnresolvable(BankTransactionId::create($bankTransactionId));
+                continue;
+            }
+
+            if ($result->invoiceId !== null) {
+                $this->repository->attachInvoice(BankTransactionId::create($bankTransactionId), $result->invoiceId);
+            }
+            if ($result->purchaseOrderId !== null) {
+                $this->repository->attachPurchaseOrder(BankTransactionId::create($bankTransactionId), $result->purchaseOrderId);
+            }
+
+            $this->repository->markAsResolved(BankTransactionId::create($bankTransactionId));
+        }
     }
 }

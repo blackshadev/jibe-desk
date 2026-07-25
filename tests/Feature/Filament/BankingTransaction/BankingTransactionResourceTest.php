@@ -39,8 +39,8 @@ final class BankingTransactionResourceTest extends FeatureTestCase
     {
         $this->withAuthorizedUser();
 
-        BankingTransaction::factory()->create(['description' => 'Payment from John']);
-        BankingTransaction::factory()->create(['description' => 'Invoice payment']);
+        BankingTransaction::factory()->create(['description' => 'Payment from John', 'date' => now()]);
+        BankingTransaction::factory()->create(['description' => 'Invoice payment', 'date' => now()]);
 
         Livewire::test(ListBankingTransactions::class)
             ->assertCanSeeTableRecords(BankingTransaction::all());

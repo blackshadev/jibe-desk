@@ -7,6 +7,7 @@ namespace App\Filament\Admin\Resources\BankingTransactions\Widgets;
 use App\Domain\Invoices\Formatters\PriceFormatter;
 use App\Models\BankingTransaction;
 use Filament\Widgets\StatsOverviewWidget;
+use Livewire\Attributes\On;
 
 final class BankingTransactionStats extends StatsOverviewWidget
 {
@@ -24,8 +25,13 @@ final class BankingTransactionStats extends StatsOverviewWidget
         return [
             StatsOverviewWidget\Stat::make('total', PriceFormatter::format($matched))
                 ->label(__('labels.matched_transactions'))
-                ->description('nog '. PriceFormatter::format($unmatched) . ' ' . strtolower(__('labels.unmatched')))
+                ->description('nog ' . PriceFormatter::format($unmatched) . ' ' . strtolower(__('labels.unmatched')))
                 ->color($unmatched > 0 ? 'danger' : 'success'),
         ];
+    }
+
+    #[On('refresh')]
+    public function refresh(): void
+    {
     }
 }

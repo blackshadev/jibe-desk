@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Tests\Unit\Domain\BankTransactions;
 
 use App\Domain\BankTransactions\BankTransactionId;
+use App\Domain\BankTransactions\BankTransactionIdList;
 use App\Domain\BankTransactions\BankTransactionRepository;
+use App\Domain\BankTransactions\MatchCriteria;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
@@ -81,6 +83,37 @@ final readonly class BankTransactionRepositoryExpectation
     {
         $this->mock
             ->expects('complete')
+            ->with(equalTo($id));
+    }
+
+    public function expectsGetUnresolvedIds(int $limit, BankTransactionIdList $return): void
+    {
+        $this->mock
+            ->expects('getUnresolvedIds')
+            ->with(equalTo($limit))
+            ->andReturn($return);
+    }
+
+    /** @param array<int, MatchCriteria> $return */
+    public function expectsGetMatchCriteriaForIds(BankTransactionIdList $ids, array $return): void
+    {
+        $this->mock
+            ->expects('getMatchCriteriaForIds')
+            ->with(equalTo($ids))
+            ->andReturn($return);
+    }
+
+    public function expectsMarkAsResolved(BankTransactionId $id): void
+    {
+        $this->mock
+            ->expects('markAsResolved')
+            ->with(equalTo($id));
+    }
+
+    public function expectsMarkAsUnresolvable(BankTransactionId $id): void
+    {
+        $this->mock
+            ->expects('markAsUnresolvable')
             ->with(equalTo($id));
     }
 }
