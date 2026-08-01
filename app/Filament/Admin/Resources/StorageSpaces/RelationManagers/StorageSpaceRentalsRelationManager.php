@@ -18,6 +18,7 @@ use Override;
 
 final class StorageSpaceRentalsRelationManager extends RelationManager
 {
+    #[Override]
     protected static string $relationship = 'rentals';
 
     #[Override]

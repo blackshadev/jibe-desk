@@ -19,8 +19,10 @@ use Override;
 
 final class ViewBankingTransaction extends ViewRecord
 {
+    #[Override]
     protected static string $resource = BankingTransactionResource::class;
 
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [
@@ -31,6 +33,7 @@ final class ViewBankingTransaction extends ViewRecord
         ];
     }
 
+    #[Override]
     public function getRelationManagers(): array
     {
         return [
@@ -52,12 +55,14 @@ final class ViewBankingTransaction extends ViewRecord
         return __('labels.banking_transaction');
     }
 
+    #[Override]
     #[On('refresh')]
     public function refresh(): void
     {
         $this->record->refresh();
     }
 
+    #[Override]
     protected function getHeaderWidgets(): array
     {
         return [

@@ -10,6 +10,7 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
+use Override;
 
 /**
  * @implements Rule<Use_>
@@ -39,6 +40,7 @@ final readonly class DomainDependencyRule implements Rule
     ) {
     }
 
+    #[Override]
     public function getNodeType(): string
     {
         return Use_::class;
@@ -47,6 +49,7 @@ final readonly class DomainDependencyRule implements Rule
     /**
      * @param Use_ $node
      */
+    #[Override]
     public function processNode(Node $node, Scope $scope): array
     {
         $errors = [];

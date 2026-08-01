@@ -23,14 +23,19 @@ use Webmozart\Assert\Assert;
 
 final class InvoiceBatchResource extends Resource
 {
+    #[Override]
     protected static ?string $model = InvoiceBatch::class;
 
+    #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Invoicing;
 
+    #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::DocumentDuplicate;
 
+    #[Override]
     protected static ?string $recordTitleAttribute = 'id';
 
+    #[Override]
     protected static bool $isGloballySearchable = false;
 
     #[Override]
@@ -67,6 +72,7 @@ final class InvoiceBatchResource extends Resource
         ];
     }
 
+    #[Override]
     public static function getRecordTitle(?Model $record): string
     {
         Assert::nullOrIsInstanceOf($record, InvoiceBatch::class);

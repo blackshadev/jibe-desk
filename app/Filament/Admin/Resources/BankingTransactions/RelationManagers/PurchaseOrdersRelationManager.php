@@ -23,8 +23,10 @@ use Override;
 
 final class PurchaseOrdersRelationManager extends RelationManager
 {
+    #[Override]
     protected static string $relationship = 'purchaseOrders';
 
+    #[Override]
     protected static ?string $relatedResource = PurchaseOrderResource::class;
 
     #[Override]

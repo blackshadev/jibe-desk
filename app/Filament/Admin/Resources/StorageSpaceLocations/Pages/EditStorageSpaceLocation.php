@@ -12,6 +12,7 @@ use Override;
 
 final class EditStorageSpaceLocation extends EditRecord
 {
+    #[Override]
     protected static string $resource = StorageSpaceLocationResource::class;
 
     #[Override]

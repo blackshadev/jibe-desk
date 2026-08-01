@@ -11,6 +11,7 @@ use Override;
 
 final class BankingTransactionPolicy extends ResourcePolicy
 {
+    #[Override]
     protected static function permissionPrefix(): string
     {
         return 'banking_transactions';

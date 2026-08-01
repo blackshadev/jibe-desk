@@ -29,12 +29,16 @@ use UnitEnum;
 
 final class MemberResource extends Resource
 {
+    #[Override]
     protected static ?string $model = Member::class;
 
+    #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::MemberAdministration;
 
+    #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::UserGroup;
 
+    #[Override]
     protected static ?string $recordTitleAttribute = 'name';
 
     #[Override]

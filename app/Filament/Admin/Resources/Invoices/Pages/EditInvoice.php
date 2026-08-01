@@ -17,6 +17,7 @@ use Override;
 
 final class EditInvoice extends EditRecord
 {
+    #[Override]
     protected static string $resource = InvoiceResource::class;
 
     #[Override]

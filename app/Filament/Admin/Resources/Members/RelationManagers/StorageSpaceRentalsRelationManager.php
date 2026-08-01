@@ -18,8 +18,10 @@ use Override;
 
 final class StorageSpaceRentalsRelationManager extends RelationManager
 {
+    #[Override]
     protected static string $relationship = 'storageSpaceRentals';
 
+    #[Override]
     public function isReadOnly(): bool
     {
         return false;

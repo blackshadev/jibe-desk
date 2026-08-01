@@ -22,12 +22,16 @@ use UnitEnum;
 
 final class BankingTransactionResource extends Resource
 {
+    #[Override]
     protected static ?string $model = BankingTransaction::class;
 
+    #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Banknotes;
 
+    #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Bookkeeping;
 
+    #[Override]
     protected static ?string $recordTitleAttribute = 'description';
 
     #[Override]

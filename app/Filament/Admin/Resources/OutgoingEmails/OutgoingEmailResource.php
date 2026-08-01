@@ -17,14 +17,19 @@ use UnitEnum;
 
 final class OutgoingEmailResource extends Resource
 {
+    #[Override]
     protected static ?string $model = OutgoingEmail::class;
 
+    #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Technical;
 
+    #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Envelope;
 
+    #[Override]
     protected static ?string $recordTitleAttribute = 'subject';
 
+    #[Override]
     protected static bool $isGloballySearchable = false;
 
     #[Override]

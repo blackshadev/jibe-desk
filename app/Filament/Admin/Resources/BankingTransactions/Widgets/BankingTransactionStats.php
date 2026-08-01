@@ -8,11 +8,13 @@ use App\Domain\Invoices\Formatters\PriceFormatter;
 use App\Models\BankingTransaction;
 use Filament\Widgets\StatsOverviewWidget;
 use Livewire\Attributes\On;
+use Override;
 
 final class BankingTransactionStats extends StatsOverviewWidget
 {
     public ?BankingTransaction $record = null;
 
+    #[Override]
     protected function getStats(): array
     {
         if (!$this->record) {

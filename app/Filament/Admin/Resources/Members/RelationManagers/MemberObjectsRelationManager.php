@@ -18,6 +18,7 @@ use Override;
 
 final class MemberObjectsRelationManager extends RelationManager
 {
+    #[Override]
     protected static string $relationship = 'memberObjects';
 
     #[Override]
@@ -44,6 +45,7 @@ final class MemberObjectsRelationManager extends RelationManager
             ]);
     }
 
+    #[Override]
     public function isReadOnly(): bool
     {
         return false;

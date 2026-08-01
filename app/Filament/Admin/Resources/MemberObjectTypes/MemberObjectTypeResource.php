@@ -21,12 +21,16 @@ use UnitEnum;
 
 final class MemberObjectTypeResource extends Resource
 {
+    #[Override]
     protected static bool $isGloballySearchable = false;
 
+    #[Override]
     protected static ?string $model = MemberObjectType::class;
 
+    #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Tag;
 
+    #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Technical;
 
     #[Override]

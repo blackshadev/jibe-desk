@@ -22,12 +22,16 @@ use UnitEnum;
 
 final class StorageSpaceResource extends Resource
 {
+    #[Override]
     protected static bool $isGloballySearchable = false;
 
+    #[Override]
     protected static ?string $model = StorageSpace::class;
 
+    #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Rental;
 
+    #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Squares2x2;
 
     #[Override]

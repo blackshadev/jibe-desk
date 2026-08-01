@@ -10,12 +10,14 @@ use App\Infrastructure\PurchaseOrders\PurchaseOrderRepositoryDb;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use DateTimeImmutable;
+use Override;
 use Tests\FeatureTestCase;
 
 final class PurchaseOrderRepositoryDbMatchingTest extends FeatureTestCase
 {
     private PurchaseOrderRepositoryDb $repository;
 
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();

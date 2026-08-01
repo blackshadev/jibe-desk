@@ -16,6 +16,7 @@ use Override;
 
 final class ViewInvoice extends ViewRecord
 {
+    #[Override]
     protected static string $resource = InvoiceResource::class;
 
     #[Override]

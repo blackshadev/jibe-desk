@@ -11,6 +11,7 @@ use Override;
 
 final class ListHouseholds extends ListRecords
 {
+    #[Override]
     protected static string $resource = HouseholdResource::class;
 
     #[Override]

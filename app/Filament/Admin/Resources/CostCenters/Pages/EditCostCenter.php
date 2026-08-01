@@ -11,6 +11,7 @@ use Override;
 
 final class EditCostCenter extends EditRecord
 {
+    #[Override]
     protected static string $resource = CostCenterResource::class;
 
     #[Override]

@@ -11,6 +11,7 @@ use Override;
 
 final class ListMemberships extends ListRecords
 {
+    #[Override]
     protected static string $resource = MembershipResource::class;
 
     #[Override]

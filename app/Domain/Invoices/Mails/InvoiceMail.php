@@ -12,6 +12,7 @@ use App\Domain\Mail\Related;
 /** @phpstan-ignore domain.dependency */
 use App\Models\Invoice;
 use Illuminate\Mail\Mailables\Content;
+use Override;
 
 final readonly class InvoiceMail extends BaseMail
 {
@@ -20,11 +21,13 @@ final readonly class InvoiceMail extends BaseMail
         public SepaConfiguration $sepaConfiguration,
     ) {}
 
+    #[Override]
     public function related(): Related
     {
         return new Related(Invoice::class, $this->invoice->invoiceId);
     }
 
+    #[Override]
     public function content(): Content
     {
         return new Content(
@@ -46,11 +49,13 @@ final readonly class InvoiceMail extends BaseMail
         );
     }
 
+    #[Override]
     public function subject(): string
     {
         return 'Factuur ' . $this->invoice->invoiceNumber;
     }
 
+    #[Override]
     public function to(): Recipient
     {
         return $this->invoice->recipient;

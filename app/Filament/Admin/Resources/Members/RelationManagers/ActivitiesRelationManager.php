@@ -19,10 +19,13 @@ use Override;
 
 final class ActivitiesRelationManager extends RelationManager
 {
+    #[Override]
     protected static string $relationship = 'activities';
 
+    #[Override]
     protected static ?string $recordTitleAttribute = 'name';
 
+    #[Override]
     protected static ?string $relatedResource = ActivityResource::class;
 
     #[Override]

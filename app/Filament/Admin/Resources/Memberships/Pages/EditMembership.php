@@ -11,6 +11,7 @@ use Override;
 
 final class EditMembership extends EditRecord
 {
+    #[Override]
     protected static string $resource = MembershipResource::class;
 
     #[Override]

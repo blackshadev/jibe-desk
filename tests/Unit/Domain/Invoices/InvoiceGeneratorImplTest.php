@@ -18,6 +18,7 @@ use App\Domain\Invoices\InvoiceLineId;
 use App\Domain\Invoices\InvoiceTarget;
 use App\Domain\Members\MemberId;
 use DateTimeImmutable;
+use Override;
 use Tests\UnitTestCase;
 
 final class InvoiceGeneratorImplTest extends UnitTestCase
@@ -27,6 +28,7 @@ final class InvoiceGeneratorImplTest extends UnitTestCase
     private InvoiceBatchRepositoryExpectation $invoiceBatchRepository;
     private InvoiceGeneratorImpl $subject;
 
+    #[Override]
     protected function setup(): void
     {
         parent::setup();

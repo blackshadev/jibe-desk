@@ -6,12 +6,14 @@ namespace Tests\Feature\Infrastructure\Mail;
 
 use App\Domain\Mail\TrackingId;
 use App\Infrastructure\Mail\TrackingIdGeneratorImpl;
+use Override;
 use Tests\FeatureTestCase;
 
 final class TrackingIdGeneratorImplTest extends FeatureTestCase
 {
     private TrackingIdGeneratorImpl $generator;
 
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();

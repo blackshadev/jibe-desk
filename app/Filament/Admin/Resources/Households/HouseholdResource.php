@@ -20,12 +20,16 @@ use UnitEnum;
 
 final class HouseholdResource extends Resource
 {
+    #[Override]
     protected static bool $isGloballySearchable = false;
 
+    #[Override]
     protected static ?string $model = Household::class;
 
+    #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::MemberAdministration;
 
+    #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Home;
 
     #[Override]

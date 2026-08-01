@@ -14,6 +14,7 @@ use Override;
 
 final class ListPurchaseOrders extends ListRecords
 {
+    #[Override]
     protected static string $resource = PurchaseOrderResource::class;
 
     #[Override]

@@ -22,12 +22,16 @@ use UnitEnum;
 
 final class ActivityResource extends Resource
 {
+    #[Override]
     protected static ?string $model = Activity::class;
 
+    #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Activities;
 
+    #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::CalendarDays;
 
+    #[Override]
     protected static ?string $recordTitleAttribute = 'name';
 
     #[Override]

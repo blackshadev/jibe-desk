@@ -21,12 +21,16 @@ use UnitEnum;
 
 final class UserResource extends Resource
 {
+    #[Override]
     protected static ?string $model = User::class;
 
+    #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Technical;
 
+    #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Users;
 
+    #[Override]
     protected static ?string $recordTitleAttribute = 'name';
 
     #[Override]

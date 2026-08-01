@@ -3,6 +3,7 @@ includes:
 
 parameters:
     resultCachePath: %tmpDir%/resultCache-domain.php
+    checkMissingOverrideMethodAttribute: true
 
     paths:
         - ./app/Domain

@@ -13,6 +13,7 @@ use Override;
 
 final class CreateInvoice extends CreateRecord
 {
+    #[Override]
     protected static string $resource = InvoiceResource::class;
 
     private readonly InvoiceNumberGenerator $invoiceNumberGenerator;

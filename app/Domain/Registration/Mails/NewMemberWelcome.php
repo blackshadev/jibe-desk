@@ -7,6 +7,7 @@ namespace App\Domain\Registration\Mails;
 use App\Domain\Mail\BaseMail;
 use App\Domain\Mail\Recipient;
 use Illuminate\Mail\Mailables\Content;
+use Override;
 
 final readonly class NewMemberWelcome extends BaseMail
 {
@@ -14,6 +15,7 @@ final readonly class NewMemberWelcome extends BaseMail
         public Recipient $recipient,
     ) {}
 
+    #[Override]
     public function content(): Content
     {
         return new Content(
@@ -24,11 +26,13 @@ final readonly class NewMemberWelcome extends BaseMail
         );
     }
 
+    #[Override]
     public function subject(): string
     {
         return 'Welkom bij Almere Centraal!';
     }
 
+    #[Override]
     public function to(): Recipient
     {
         return $this->recipient;

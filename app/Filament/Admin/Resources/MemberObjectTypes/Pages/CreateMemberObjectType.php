@@ -13,6 +13,7 @@ use Override;
 
 final class CreateMemberObjectType extends CreateRecord
 {
+    #[Override]
     protected static string $resource = MemberObjectTypeResource::class;
 
     #[Override]

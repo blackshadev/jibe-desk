@@ -9,12 +9,14 @@ use App\Domain\Jobs\JobChain;
 use App\Infrastructure\Jobs\LaravelJobDispatcher;
 use Illuminate\Bus\PendingBatch;
 use Illuminate\Support\Facades\Bus;
+use Override;
 use Tests\FeatureTestCase;
 
 final class LaravelJobDispatcherTest extends FeatureTestCase
 {
     private LaravelJobDispatcher $dispatcher;
 
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();

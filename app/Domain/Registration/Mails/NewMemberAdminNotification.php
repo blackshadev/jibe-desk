@@ -9,6 +9,7 @@ use App\Domain\Mail\Recipient;
 use App\Domain\Members\MemberId;
 use App\Domain\Registration\MembershipData;
 use Illuminate\Mail\Mailables\Content;
+use Override;
 
 final readonly class NewMemberAdminNotification extends BaseMail
 {
@@ -19,6 +20,7 @@ final readonly class NewMemberAdminNotification extends BaseMail
         public Recipient $recipient,
     ) {}
 
+    #[Override]
     public function content(): Content
     {
         return new Content(
@@ -31,11 +33,13 @@ final readonly class NewMemberAdminNotification extends BaseMail
         );
     }
 
+    #[Override]
     public function subject(): string
     {
         return 'Nieuwe aanmelding: ' . $this->memberName;
     }
 
+    #[Override]
     public function to(): Recipient
     {
         return $this->recipient;

@@ -19,6 +19,7 @@ use Override;
 
 final class BillableItemInstancesRelationManager extends RelationManager
 {
+    #[Override]
     protected static string $relationship = 'billableItemInstances';
 
     #[Override]

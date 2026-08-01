@@ -16,6 +16,7 @@ use App\Infrastructure\Invoices\SepaExportServiceImpl;
 use Carbon\CarbonImmutable;
 use DOMDocument;
 use DOMXPath;
+use Override;
 use Tests\FeatureTestCase;
 
 final class SepaExportServiceImplTest extends FeatureTestCase
@@ -23,6 +24,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
     private SepaConfiguration $config;
     private InvoiceBatchRepositoryExpectation $repo;
 
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();

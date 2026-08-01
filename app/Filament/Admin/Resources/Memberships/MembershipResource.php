@@ -21,14 +21,19 @@ use UnitEnum;
 
 final class MembershipResource extends Resource
 {
+    #[Override]
     protected static ?string $model = Membership::class;
 
+    #[Override]
     protected static bool $isGloballySearchable = false;
 
+    #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::MemberAdministration;
 
+    #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    #[Override]
     protected static ?string $recordTitleAttribute = 'Membership';
 
     #[Override]

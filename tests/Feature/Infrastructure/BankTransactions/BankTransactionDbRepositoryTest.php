@@ -19,6 +19,7 @@ use App\Models\Invoice;
 use App\Models\InvoiceLine;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
+use Override;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\FeatureTestCase;
 
@@ -26,6 +27,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
 {
     private BankTransactionDbRepository $repository;
 
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();

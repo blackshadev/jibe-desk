@@ -14,6 +14,7 @@ use Override;
 
 final class ListStorageSpaces extends ListRecords
 {
+    #[Override]
     protected static string $resource = StorageSpaceResource::class;
 
     #[Override]

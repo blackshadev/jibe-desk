@@ -14,6 +14,7 @@ use Override;
 
 final class EditPurchaseOrder extends EditRecord
 {
+    #[Override]
     protected static string $resource = PurchaseOrderResource::class;
 
     #[Override]

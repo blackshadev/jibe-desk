@@ -14,6 +14,7 @@ use Override;
 
 final class CreateInvoiceBatch extends CreateRecord
 {
+    #[Override]
     protected static string $resource = InvoiceBatchResource::class;
 
     #[Override]

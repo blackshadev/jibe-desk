@@ -18,8 +18,10 @@ use Override;
 
 final class ActivityMembersRelationManager extends RelationManager
 {
+    #[Override]
     protected static string $relationship = 'members';
 
+    #[Override]
     protected static ?string $recordTitleAttribute = 'name';
 
     #[Override]

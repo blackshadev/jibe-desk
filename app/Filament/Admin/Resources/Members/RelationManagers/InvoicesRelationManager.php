@@ -23,8 +23,10 @@ use Override;
 
 final class InvoicesRelationManager extends RelationManager
 {
+    #[Override]
     protected static string $relationship = 'invoices';
 
+    #[Override]
     protected static ?string $relatedResource = InvoiceResource::class;
 
     #[Override]

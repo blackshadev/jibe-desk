@@ -17,12 +17,14 @@ use App\Models\PaymentInformation;
 use Carbon\CarbonImmutable;
 use DomainException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Override;
 use Tests\FeatureTestCase;
 
 final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
 {
     private InvoiceBatchRepositoryDb $repository;
 
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();

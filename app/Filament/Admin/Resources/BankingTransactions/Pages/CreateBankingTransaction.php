@@ -15,6 +15,7 @@ use Override;
 
 final class CreateBankingTransaction extends CreateRecord
 {
+    #[Override]
     protected static string $resource = BankingTransactionResource::class;
 
     #[Override]

@@ -40,6 +40,7 @@ final class User extends Authenticatable implements FilamentUser
         ];
     }
 
+    #[Override]
     public function sendPasswordResetNotification(#[SensitiveParameter] $token): void
     {
         $this->notify(new QueuedResetPassword($token));

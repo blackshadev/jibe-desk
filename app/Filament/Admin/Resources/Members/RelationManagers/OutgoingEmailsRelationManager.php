@@ -13,6 +13,7 @@ use Override;
 
 final class OutgoingEmailsRelationManager extends RelationManager
 {
+    #[Override]
     protected static string $relationship = 'outgoingEmails';
 
     #[Override]
@@ -61,6 +62,7 @@ final class OutgoingEmailsRelationManager extends RelationManager
             ->defaultSort('sent_at', 'desc');
     }
 
+    #[Override]
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('labels.outgoing_emails');

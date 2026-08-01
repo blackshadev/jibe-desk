@@ -29,14 +29,18 @@ final class CostCenterResults extends Page implements HasForms, HasTable
     use InteractsWithForms;
     use InteractsWithTable;
 
+    #[Override]
     protected string $view = 'filament.admin.pages.cost-center-results';
 
+    #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ChartBarSquare;
 
+    #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Bookkeeping;
 
     public ?int $selectedYear = null;
 
+    #[Override]
     public static function canAccess(): bool
     {
         return auth()->user()?->can('view_any_bookkeeping_records') || auth()->user()?->can('view_any_cost_centers');
@@ -142,6 +146,7 @@ final class CostCenterResults extends Page implements HasForms, HasTable
             ->orderBy('cost_centers.number');
     }
 
+    #[Override]
     public function getBreadcrumbs(): array
     {
         return [

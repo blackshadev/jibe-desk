@@ -12,6 +12,7 @@ use App\Domain\Invoices\Mails\InvoiceMail;
 use App\Domain\Invoices\SepaConfiguration;
 use App\Domain\Mail\Recipient;
 use Carbon\CarbonImmutable;
+use Override;
 use Tests\Unit\Domain\Invoices\InvoiceMailRepositoryExpectation;
 use Tests\Unit\Domain\Mail\MailSenderExpectation;
 use Tests\UnitTestCase;
@@ -22,6 +23,7 @@ final class SendInvoiceEmailTest extends UnitTestCase
     private MailSenderExpectation $mailSender;
     private SepaConfiguration $configuration;
 
+    #[Override]
     protected function setup(): void
     {
         parent::setup();

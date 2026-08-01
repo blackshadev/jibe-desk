@@ -17,38 +17,48 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Override;
 use UnitEnum;
 
 class BookkeepingRecordResource extends Resource
 {
+    #[Override]
     protected static ?string $model = BookkeepingRecord::class;
 
+    #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::BookOpen;
 
+    #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Bookkeeping;
 
+    #[Override]
     protected static ?string $recordTitleAttribute = 'description';
 
+    #[Override]
     public static function form(Schema $schema): Schema
     {
         return BookkeepingRecordForm::configure($schema);
     }
 
+    #[Override]
     public static function table(Table $table): Table
     {
         return BookkeepingRecordsTable::configure($table);
     }
 
+    #[Override]
     public static function getLabel(): string
     {
         return __('labels.bookkeeping_record');
     }
 
+    #[Override]
     public static function getPluralLabel(): string
     {
         return __('labels.bookkeeping_records');
     }
 
+    #[Override]
     public static function getPages(): array
     {
         return [

@@ -21,6 +21,7 @@ final class PaymentInformation extends Model
     use HasFactory;
     use SoftDeletes;
 
+    #[Override]
     protected $table = 'payment_information';
 
     /** @return BelongsTo<Member, $this> */

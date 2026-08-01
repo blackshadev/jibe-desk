@@ -8,12 +8,14 @@ use PhpParser\Node;
 use PhpParser\Node\Stmt\Class_;
 use PHPStan\Analyser\Scope;
 use PHPStan\Collectors\Collector;
+use Override;
 
 /**
  * @implements Collector<Class_, string>
  */
 final readonly class FeatureTestCollector implements Collector
 {
+    #[Override]
     public function getNodeType(): string
     {
         return Class_::class;
@@ -22,6 +24,7 @@ final readonly class FeatureTestCollector implements Collector
     /**
      * @return array<string>|null
      */
+    #[Override]
     public function processNode(Node $node, Scope $scope): ?array
     {
         if ($node->name === null) {

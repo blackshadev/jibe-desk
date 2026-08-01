@@ -13,12 +13,14 @@ use App\Infrastructure\Mail\OutgoingEmailRepositoryDb;
 use App\Models\Member;
 use App\Models\OutgoingEmail as OutgoingEmailModel;
 use Carbon\CarbonImmutable;
+use Override;
 use Tests\FeatureTestCase;
 
 final class OutgoingEmailRepositoryDbTest extends FeatureTestCase
 {
     private OutgoingEmailRepositoryDb $repo;
 
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();

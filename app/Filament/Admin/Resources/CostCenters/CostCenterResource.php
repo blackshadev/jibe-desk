@@ -21,14 +21,19 @@ use UnitEnum;
 
 final class CostCenterResource extends Resource
 {
+    #[Override]
     protected static bool $isGloballySearchable = false;
 
+    #[Override]
     protected static ?string $model = CostCenter::class;
 
+    #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Banknotes;
 
+    #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Bookkeeping;
 
+    #[Override]
     protected static ?string $recordTitleAttribute = 'title';
 
     #[Override]

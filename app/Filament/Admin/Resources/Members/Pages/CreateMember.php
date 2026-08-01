@@ -10,6 +10,7 @@ use Override;
 
 final class CreateMember extends CreateRecord
 {
+    #[Override]
     protected static string $resource = MemberResource::class;
 
     protected function mutateFormDataBeforeSave(array $data): array

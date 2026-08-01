@@ -12,12 +12,14 @@ use App\Models\InvoiceLine;
 use App\Models\Member;
 use App\Models\PaymentInformation;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Override;
 use Tests\FeatureTestCase;
 
 final class InvoiceMailRepositoryDbTest extends FeatureTestCase
 {
     private InvoiceMailRepositoryDb $repository;
 
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();

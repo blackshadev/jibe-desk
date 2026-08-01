@@ -14,6 +14,7 @@ use App\Domain\Jobs\JobBatch;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MemberIdList;
 use DateTimeImmutable;
+use Override;
 use Tests\Unit\Domain\Jobs\JobDispatcherExpectation;
 use Tests\UnitTestCase;
 
@@ -24,6 +25,7 @@ final class InvoiceBatchGeneratorImplTest extends UnitTestCase
     private InvoiceBatchServiceExpectation $batchService;
     private InvoiceBatchGeneratorImpl $subject;
 
+    #[Override]
     protected function setup(): void
     {
         parent::setup();

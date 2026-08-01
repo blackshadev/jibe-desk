@@ -7,11 +7,14 @@ namespace App\Filament\Admin\Resources\BookkeepingRecords\Pages;
 use App\Filament\Admin\Resources\BookkeepingRecords\BookkeepingRecordResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Override;
 
 class ListBookkeepingRecords extends ListRecords
 {
+    #[Override]
     protected static string $resource = BookkeepingRecordResource::class;
 
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [

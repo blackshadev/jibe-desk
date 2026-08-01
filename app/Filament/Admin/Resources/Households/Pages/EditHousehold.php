@@ -11,6 +11,7 @@ use Override;
 
 final class EditHousehold extends EditRecord
 {
+    #[Override]
     protected static string $resource = HouseholdResource::class;
 
     #[Override]

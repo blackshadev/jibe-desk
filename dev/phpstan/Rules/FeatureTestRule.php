@@ -10,17 +10,20 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Node\CollectedDataNode;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
+use Override;
 
 /**
  * @implements Rule<CollectedDataNode>
  */
 final readonly class FeatureTestRule implements Rule
 {
+    #[Override]
     public function getNodeType(): string
     {
         return CollectedDataNode::class;
     }
 
+    #[Override]
     public function processNode(Node $node, Scope $scope): array
     {
         /** @var array<string, array<?array<string>>> $data */

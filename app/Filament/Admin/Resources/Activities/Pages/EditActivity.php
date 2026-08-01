@@ -11,6 +11,7 @@ use Override;
 
 final class EditActivity extends EditRecord
 {
+    #[Override]
     protected static string $resource = ActivityResource::class;
 
     #[Override]

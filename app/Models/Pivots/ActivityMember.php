@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasTimestamps;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use Override;
 
 #[Fillable(['activity_id', 'member_id', 'billable_item_instance_id'])]
 #[ObservedBy([ActivityMemberObserver::class])]
@@ -20,6 +21,7 @@ final class ActivityMember extends Pivot
 {
     use HasTimestamps;
 
+    #[Override]
     public $incrementing = true;
 
     /** @return BelongsTo<Member, $this> */

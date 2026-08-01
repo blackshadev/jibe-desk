@@ -22,12 +22,16 @@ use UnitEnum;
 
 final class PurchaseOrderResource extends Resource
 {
+    #[Override]
     protected static ?string $model = PurchaseOrder::class;
 
+    #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ShoppingCart;
 
+    #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Bookkeeping;
 
+    #[Override]
     protected static ?string $recordTitleAttribute = 'description';
 
     #[Override]

@@ -26,6 +26,7 @@ use ZipArchive;
 
 final class EditInvoiceBatch extends EditRecord
 {
+    #[Override]
     protected static string $resource = InvoiceBatchResource::class;
 
     #[Override]
@@ -145,6 +146,7 @@ final class EditInvoiceBatch extends EditRecord
         ];
     }
 
+    #[Override]
     #[On('refreshInvoicesTable')]
     public function refresh(): void
     {

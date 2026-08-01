@@ -12,6 +12,7 @@ use App\Domain\Invoices\Mails\InvoiceBatchCreatedMail;
 use App\Domain\Mail\FinancialAdministrationRecipient;
 use App\Domain\Mail\Recipient;
 use Carbon\CarbonImmutable;
+use Override;
 use Tests\Unit\Domain\Invoices\InvoiceBatchRepositoryExpectation;
 use Tests\Unit\Domain\Mail\MailSenderExpectation;
 use Tests\UnitTestCase;
@@ -21,6 +22,7 @@ final class SendInvoiceBatchCreatedEmailTest extends UnitTestCase
     private InvoiceBatchRepositoryExpectation $batchRepository;
     private MailSenderExpectation $mailSender;
 
+    #[Override]
     protected function setup(): void
     {
         parent::setup();

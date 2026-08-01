@@ -11,6 +11,7 @@ use PHPStan\Reflection\ClassReflection;
 use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
+use Override;
 
 /**
  * @implements Rule<Class_>
@@ -22,6 +23,7 @@ final readonly class FilamentResourceNavigationGroupRule implements Rule
     ) {
     }
 
+    #[Override]
     public function getNodeType(): string
     {
         return Class_::class;
@@ -30,6 +32,7 @@ final readonly class FilamentResourceNavigationGroupRule implements Rule
     /**
      * @param Class_ $node
      */
+    #[Override]
     public function processNode(Node $node, Scope $scope): array
     {
         $errors = [];

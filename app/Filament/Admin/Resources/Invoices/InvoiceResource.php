@@ -22,12 +22,16 @@ use UnitEnum;
 
 final class InvoiceResource extends Resource
 {
+    #[Override]
     protected static ?string $model = Invoice::class;
 
+    #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Invoicing;
 
+    #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::DocumentCurrencyEuro;
 
+    #[Override]
     protected static ?string $recordTitleAttribute = 'invoice_number';
 
     #[Override]

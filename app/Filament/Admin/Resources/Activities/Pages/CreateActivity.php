@@ -12,6 +12,7 @@ use Override;
 
 final class CreateActivity extends CreateRecord
 {
+    #[Override]
     protected static string $resource = ActivityResource::class;
 
     #[Override]

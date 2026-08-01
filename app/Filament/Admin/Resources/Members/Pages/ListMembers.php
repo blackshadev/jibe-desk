@@ -13,6 +13,7 @@ use Override;
 
 final class ListMembers extends ListRecords
 {
+    #[Override]
     protected static string $resource = MemberResource::class;
 
     #[Override]

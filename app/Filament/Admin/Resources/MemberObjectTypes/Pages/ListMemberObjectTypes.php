@@ -11,6 +11,7 @@ use Override;
 
 final class ListMemberObjectTypes extends ListRecords
 {
+    #[Override]
     protected static string $resource = MemberObjectTypeResource::class;
 
     #[Override]

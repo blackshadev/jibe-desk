@@ -12,6 +12,7 @@ use Override;
 
 final class CreatePurchaseOrder extends CreateRecord
 {
+    #[Override]
     protected static string $resource = PurchaseOrderResource::class;
 
     #[Override]

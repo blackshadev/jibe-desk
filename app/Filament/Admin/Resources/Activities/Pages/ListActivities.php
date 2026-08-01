@@ -13,6 +13,7 @@ use Override;
 
 final class ListActivities extends ListRecords
 {
+    #[Override]
     protected static string $resource = ActivityResource::class;
 
     #[Override]

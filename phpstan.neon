@@ -14,6 +14,7 @@ parameters:
         - ./app/Domain
 
     level: 5
+    checkMissingOverrideMethodAttribute: true
 
 #    ignoreErrors:
 #        - '#PHPDoc tag @var#'

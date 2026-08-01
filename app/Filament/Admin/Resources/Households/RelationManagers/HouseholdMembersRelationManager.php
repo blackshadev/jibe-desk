@@ -15,8 +15,10 @@ use Override;
 
 final class HouseholdMembersRelationManager extends RelationManager
 {
+    #[Override]
     protected static string $relationship = 'members';
 
+    #[Override]
     protected static ?string $recordTitleAttribute = 'name';
 
     #[Override]

@@ -14,6 +14,7 @@ use Override;
 
 final class ListInvoices extends ListRecords
 {
+    #[Override]
     protected static string $resource = InvoiceResource::class;
 
     #[Override]

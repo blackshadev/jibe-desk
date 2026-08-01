@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Models\User;
+use Override;
 
 final class MemberPolicy extends ResourcePolicy
 {
+    #[Override]
     protected static function permissionPrefix(): string
     {
         return 'members';

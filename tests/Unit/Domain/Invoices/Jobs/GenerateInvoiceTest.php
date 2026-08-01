@@ -9,6 +9,7 @@ use App\Domain\Invoices\InvoiceTarget;
 use App\Domain\Invoices\Jobs\GenerateInvoice;
 use App\Domain\Members\MemberId;
 use Carbon\CarbonImmutable;
+use Override;
 use Tests\Unit\Domain\Invoices\InvoiceGeneratorExpectation;
 use Tests\UnitTestCase;
 
@@ -16,6 +17,7 @@ final class GenerateInvoiceTest extends UnitTestCase
 {
     private InvoiceGeneratorExpectation $generator;
 
+    #[Override]
     protected function setup(): void
     {
         parent::setup();

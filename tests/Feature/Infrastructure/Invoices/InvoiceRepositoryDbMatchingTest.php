@@ -12,12 +12,14 @@ use App\Models\InvoiceLine;
 use App\Models\Member;
 use App\Models\PaymentInformation;
 use DateTimeImmutable;
+use Override;
 use Tests\FeatureTestCase;
 
 final class InvoiceRepositoryDbMatchingTest extends FeatureTestCase
 {
     private InvoiceRepositoryDb $repository;
 
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();

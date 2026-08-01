@@ -10,9 +10,11 @@ use App\Domain\Jobs\JobChain;
 use App\Domain\Jobs\JobDispatcher;
 use Illuminate\Bus\PendingBatch;
 use Illuminate\Support\Facades\Bus;
+use Override;
 
 final class LaravelJobDispatcher implements JobDispatcher
 {
+    #[Override]
     public function dispatch(Job|JobBatch|JobChain $job): void
     {
         if ($job instanceof JobBatch) {

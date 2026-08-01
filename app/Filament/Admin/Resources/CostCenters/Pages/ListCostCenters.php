@@ -11,6 +11,7 @@ use Override;
 
 final class ListCostCenters extends ListRecords
 {
+    #[Override]
     protected static string $resource = CostCenterResource::class;
 
     #[Override]

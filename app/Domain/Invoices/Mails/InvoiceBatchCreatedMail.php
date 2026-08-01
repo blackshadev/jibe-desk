@@ -12,6 +12,7 @@ use App\Domain\Mail\Related;
 use App\Models\InvoiceBatch;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Override;
 
 final readonly class InvoiceBatchCreatedMail extends BaseMail
 {
@@ -20,6 +21,7 @@ final readonly class InvoiceBatchCreatedMail extends BaseMail
         public Recipient $recipient,
     ) {}
 
+    #[Override]
     public function related(): Related
     {
         return new Related(InvoiceBatch::class, $this->batch->id->value);
@@ -32,6 +34,7 @@ final readonly class InvoiceBatchCreatedMail extends BaseMail
         );
     }
 
+    #[Override]
     public function content(): Content
     {
         return new Content(
@@ -46,11 +49,13 @@ final readonly class InvoiceBatchCreatedMail extends BaseMail
         );
     }
 
+    #[Override]
     public function subject(): string
     {
         return 'Nieuwe facturatieronde aangemaakt';
     }
 
+    #[Override]
     public function to(): Recipient
     {
         return $this->recipient;
