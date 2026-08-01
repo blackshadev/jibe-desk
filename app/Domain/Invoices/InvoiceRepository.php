@@ -16,5 +16,7 @@ interface InvoiceRepository
 
     public function markAsPaid(InvoiceIdList $ids): void;
 
+    public function markAsDeclined(InvoiceIdList $ids): void;
+
     public function findMatchingCredit(string $bankingAccountNumber, float $amount, DateTimeInterface $date): ?InvoiceId;
 }

@@ -41,4 +41,25 @@ final class InvoiceServiceImplTest extends UnitTestCase
 
         $this->service->markAsPaid($ids);
     }
+
+    public function test_mark_as_declined_updates_status(): void
+    {
+        $id = InvoiceId::create(1);
+        $ids = new InvoiceIdList([$id]);
+
+        $this->repo->expectsMarkAsDeclined($ids);
+
+        $this->service->markAsDeclined($ids);
+    }
+
+    public function test_mark_as_declined_does_not_create_bookkeeping_records(): void
+    {
+        $id = InvoiceId::create(1);
+        $ids = new InvoiceIdList([$id]);
+
+        $this->repo->expectsMarkAsDeclined($ids);
+        $this->bookkeepingRepo->mock->shouldNotHaveReceived('createForInvoice');
+
+        $this->service->markAsDeclined($ids);
+    }
 }

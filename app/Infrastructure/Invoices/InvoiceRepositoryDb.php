@@ -138,6 +138,15 @@ final class InvoiceRepositoryDb implements InvoiceRepository
     }
 
     #[Override]
+    public function markAsDeclined(InvoiceIdList $ids): void
+    {
+        Invoice::query()
+            ->whereIn('id', array_map(static fn (InvoiceId $id) => $id->value, $ids->ids))
+            ->where('status', InvoiceStatus::Pending)
+            ->update(['status' => InvoiceStatus::Declined]);
+    }
+
+    #[Override]
     public function findMatchingCredit(string $bankingAccountNumber, float $amount, DateTimeInterface $date): ?InvoiceId
     {
         $startDate = CarbonImmutable::instance($date)->subDays(30);

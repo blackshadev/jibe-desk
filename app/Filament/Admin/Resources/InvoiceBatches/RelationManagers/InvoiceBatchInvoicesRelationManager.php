@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\InvoiceBatches\RelationManagers;
 
 use App\Domain\Invoices\InvoiceBatchStatus;
+use App\Domain\Invoices\InvoiceId;
+use App\Domain\Invoices\InvoiceIdList;
+use App\Domain\Invoices\InvoiceService;
 use App\Domain\Invoices\InvoiceStatus;
 use App\Filament\Admin\Labels\InvoiceStatusLabels;
 use App\Filament\Admin\Resources\InvoiceBatches\Helpers\OnPendingInvoice;
@@ -49,9 +52,12 @@ final class InvoiceBatchInvoicesRelationManager extends RelationManager
                     ->label(__('labels.mark_as_paid'))
                     ->icon('heroicon-m-banknotes')
                     ->requiresConfirmation()
+                    ->modalDescription(__('labels.manual_mark_paid_warning'))
+                    ->modalIcon('heroicon-m-exclamation-triangle')
+                    ->modalIconColor('danger')
                     ->visible(OnPendingInvoice::make(...))
-                    ->action(static function (Invoice $record): void {
-                        $record->update(['status' => InvoiceStatus::Paid]);
+                    ->action(static function (Invoice $record, InvoiceService $invoiceService): void {
+                        $invoiceService->markAsPaid(new InvoiceIdList([InvoiceId::create($record->id)]));
                     })
                     ->after(static fn (RelationManager $livewire) => $livewire->dispatch('refreshInvoicesTable')),
 
@@ -60,9 +66,12 @@ final class InvoiceBatchInvoicesRelationManager extends RelationManager
                     ->icon('heroicon-m-x-circle')
                     ->color('danger')
                     ->requiresConfirmation()
+                    ->modalDescription(__('labels.manual_mark_declined_warning'))
+                    ->modalIcon('heroicon-m-exclamation-triangle')
+                    ->modalIconColor('danger')
                     ->visible(OnPendingInvoice::make(...))
-                    ->action(static function (Invoice $record): void {
-                        $record->update(['status' => InvoiceStatus::Declined]);
+                    ->action(static function (Invoice $record, InvoiceService $invoiceService): void {
+                        $invoiceService->markAsDeclined(new InvoiceIdList([InvoiceId::create($record->id)]));
                     })
                     ->after(static fn (RelationManager $livewire) => $livewire->dispatch('refreshInvoicesTable')),
 

@@ -20,4 +20,10 @@ final readonly class InvoiceServiceImpl implements InvoiceService
         $this->invoiceRepository->markAsPaid($ids);
         $this->bookkeepingRepository->createForInvoice($ids);
     }
+
+    #[Override]
+    public function markAsDeclined(InvoiceIdList $ids): void
+    {
+        $this->invoiceRepository->markAsDeclined($ids);
+    }
 }

@@ -259,4 +259,8 @@ return [
     'create_invoice_from_transaction' => 'Factuur aanmaken',
     'create_purchase_order_from_transaction' => 'Inkooporder aanmaken',
     'create_bookkeeping_record_from_transaction' => 'Boekhouding mutatie aanmaken',
+    'manual_mark_paid_warning' => 'Let op: normaal gesproken worden facturen automatisch als betaald gemarkeerd via het importeren van bankafschriften en het koppelen/afronden van banktransacties. Weet je zeker dat je deze factuur handmatig als betaald wilt markeren?',
+    'manual_mark_declined_warning' => 'Weet je zeker dat je deze factuur handmatig als geweigerd wilt markeren?',
+    'manual_mark_paid_bulk_warning' => 'Let op: normaal gesproken worden facturen automatisch als betaald gemarkeerd via het importeren van bankafschriften. Weet je zeker dat je de geselecteerde facturen handmatig als betaald wilt markeren?',
+    'manual_mark_declined_bulk_warning' => 'Weet je zeker dat je de geselecteerde facturen handmatig als geweigerd wilt markeren?',
 ];

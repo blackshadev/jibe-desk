@@ -10,4 +10,6 @@ use JeroenG\Autowire\Attribute\Autowire;
 interface InvoiceService
 {
     public function markAsPaid(InvoiceIdList $ids): void;
+
+    public function markAsDeclined(InvoiceIdList $ids): void;
 }
