@@ -31,6 +31,18 @@ final class InvoiceServiceImplTest extends UnitTestCase
         );
     }
 
+    public function test_create_credit_delegates_to_repository(): void
+    {
+        $originalId = InvoiceId::create(1);
+        $creditId = InvoiceId::create(2);
+
+        $this->repo->expectsCreateCredit($originalId, $creditId);
+
+        $result = $this->service->createCredit($originalId);
+
+        static::assertSame($creditId, $result);
+    }
+
     public function test_mark_as_paid_updates_status_and_creates_bookkeeping_records(): void
     {
         $id = InvoiceId::create(1);
@@ -61,5 +73,26 @@ final class InvoiceServiceImplTest extends UnitTestCase
         $this->bookkeepingRepo->mock->shouldNotHaveReceived('createForInvoice');
 
         $this->service->markAsDeclined($ids);
+    }
+
+    public function test_mark_as_pending_delegates_to_repository(): void
+    {
+        $id = InvoiceId::create(1);
+        $ids = new InvoiceIdList([$id]);
+
+        $this->repo->expectsMarkAsPending($ids);
+
+        $this->service->markAsPending($ids);
+    }
+
+    public function test_mark_as_pending_does_not_create_bookkeeping_records(): void
+    {
+        $id = InvoiceId::create(1);
+        $ids = new InvoiceIdList([$id]);
+
+        $this->repo->expectsMarkAsPending($ids);
+        $this->bookkeepingRepo->mock->shouldNotHaveReceived('createForInvoice');
+
+        $this->service->markAsPending($ids);
     }
 }

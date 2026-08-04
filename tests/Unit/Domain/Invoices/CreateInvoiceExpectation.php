@@ -42,6 +42,14 @@ final readonly class CreateInvoiceExpectation
             ->andReturn($return);
     }
 
+    public function expectsCreateCredit(InvoiceId $originalInvoiceId, InvoiceId $return): void
+    {
+        $this->mock
+            ->expects('createCredit')
+            ->with(equalTo($originalInvoiceId))
+            ->andReturn($return);
+    }
+
     public function expectsMarkAsPaid(InvoiceIdList $ids): void
     {
         $this->mock
@@ -53,6 +61,13 @@ final readonly class CreateInvoiceExpectation
     {
         $this->mock
             ->expects('markAsDeclined')
+            ->with(equalTo($ids));
+    }
+
+    public function expectsMarkAsPending(InvoiceIdList $ids): void
+    {
+        $this->mock
+            ->expects('markAsPending')
             ->with(equalTo($ids));
     }
 }

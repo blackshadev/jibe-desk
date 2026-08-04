@@ -15,6 +15,12 @@ final readonly class InvoiceServiceImpl implements InvoiceService
     ) {}
 
     #[Override]
+    public function createCredit(InvoiceId $originalInvoiceId): InvoiceId
+    {
+        return $this->invoiceRepository->createCredit($originalInvoiceId);
+    }
+
+    #[Override]
     public function markAsPaid(InvoiceIdList $ids): void
     {
         $this->invoiceRepository->markAsPaid($ids);
@@ -25,5 +31,11 @@ final readonly class InvoiceServiceImpl implements InvoiceService
     public function markAsDeclined(InvoiceIdList $ids): void
     {
         $this->invoiceRepository->markAsDeclined($ids);
+    }
+
+    #[Override]
+    public function markAsPending(InvoiceIdList $ids): void
+    {
+        $this->invoiceRepository->markAsPending($ids);
     }
 }

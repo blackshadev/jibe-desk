@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Override;
 
@@ -37,6 +38,18 @@ final class Invoice extends Model
     public function invoiceBatch(): BelongsTo
     {
         return $this->belongsTo(InvoiceBatch::class);
+    }
+
+    /** @return BelongsTo<Invoice, $this> */
+    public function creditedInvoice(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'credit_invoice_id');
+    }
+
+    /** @return HasOne<Invoice, $this> */
+    public function creditInvoice(): HasOne
+    {
+        return $this->hasOne(self::class, 'credit_invoice_id');
     }
 
     /** @return HasMany<InvoiceLine, $this> */

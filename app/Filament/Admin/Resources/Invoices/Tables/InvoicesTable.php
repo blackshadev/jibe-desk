@@ -13,14 +13,12 @@ use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Filament\Admin\Utils\ViewOrEdit;
 use App\Models\Invoice;
 use Filament\Actions\Action;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ActionGroup;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 final class InvoicesTable
@@ -86,68 +84,54 @@ final class InvoicesTable
             ->filtersLayout(FiltersLayout::BeforeContent)
             ->recordUrl(ViewOrEdit::route(InvoiceResource::class))
             ->recordActions([
-                Action::make('markAsPaid')
-                    ->label(__('labels.mark_as_paid'))
-                    ->icon('heroicon-m-banknotes')
-                    ->requiresConfirmation()
-                    ->modalDescription(__('labels.manual_mark_paid_warning'))
-                    ->visible(static fn (Invoice $record) => $record->status === InvoiceStatus::Pending)
-                    ->action(static function (Invoice $record, InvoiceService $invoiceService) {
-                        $invoiceService->markAsPaid(new InvoiceIdList([InvoiceId::create($record->id)]));
-                    })
-                    ->successNotificationTitle(__('notifications.invoice_status_updated')),
+                ActionGroup::make([
+                    Action::make('markAsPending')
+                        ->label(__('labels.mark_as_pending'))
+                        ->icon('heroicon-m-clock')
+                        ->color('gray')
+                        ->requiresConfirmation()
+                        ->modalDescription(__('labels.manual_mark_pending_warning'))
+                        ->visible(static fn (Invoice $record) => auth()->user()?->can('mark-pending', $record) ?? false)
+                        ->action(static function (Invoice $record, InvoiceService $invoiceService): void {
+                            $invoiceService->markAsPending(new InvoiceIdList([InvoiceId::create($record->id)]));
+                        })
+                        ->successNotificationTitle(__('notifications.invoice_status_updated')),
 
-                Action::make('markAsDeclined')
-                    ->label(__('labels.mark_as_declined'))
-                    ->icon('heroicon-m-x-circle')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->modalDescription(__('labels.manual_mark_declined_warning'))
-                    ->visible(static fn (Invoice $record) => $record->status === InvoiceStatus::Pending)
-                    ->action(static function (Invoice $record, InvoiceService $invoiceService) {
-                        $invoiceService->markAsDeclined(new InvoiceIdList([InvoiceId::create($record->id)]));
-                    })
-                    ->successNotificationTitle(__('notifications.invoice_status_updated')),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    Action::make('bulkMarkAsPaid')
+                    Action::make('markAsPaid')
                         ->label(__('labels.mark_as_paid'))
                         ->icon('heroicon-m-banknotes')
                         ->color('success')
                         ->requiresConfirmation()
-                        ->modalDescription(__('labels.manual_mark_paid_bulk_warning'))
-                        ->action(static function (Collection $records, InvoiceService $invoiceService) {
-                            $ids = $records
-                                ->filter(static fn (Invoice $r) => $r->status === InvoiceStatus::Pending)
-                                ->map(static fn (Invoice $r) => InvoiceId::create($r->id))
-                                ->all();
-                            if ($ids !== []) {
-                                $invoiceService->markAsPaid(new InvoiceIdList($ids));
-                            }
+                        ->modalDescription(__('labels.manual_mark_paid_warning'))
+                        ->visible(static fn (Invoice $record) => auth()->user()?->can('mark-paid', $record) ?? false)
+                        ->action(static function (Invoice $record, InvoiceService $invoiceService) {
+                            $invoiceService->markAsPaid(new InvoiceIdList([InvoiceId::create($record->id)]));
                         })
-                        ->successNotificationTitle(__('notifications.invoice_status_updated'))
-                        ->deselectRecordsAfterCompletion(),
+                        ->successNotificationTitle(__('notifications.invoice_status_updated')),
 
-                    Action::make('bulkMarkAsDeclined')
+                    Action::make('markAsDeclined')
                         ->label(__('labels.mark_as_declined'))
                         ->icon('heroicon-m-x-circle')
                         ->color('danger')
                         ->requiresConfirmation()
-                        ->modalDescription(__('labels.manual_mark_declined_bulk_warning'))
-                        ->action(static function (Collection $records, InvoiceService $invoiceService) {
-                            $ids = $records
-                                ->filter(static fn (Invoice $r) => $r->status === InvoiceStatus::Pending)
-                                ->map(static fn (Invoice $r) => InvoiceId::create($r->id))
-                                ->all();
-                            if ($ids !== []) {
-                                $invoiceService->markAsDeclined(new InvoiceIdList($ids));
-                            }
+                        ->modalDescription(__('labels.manual_mark_declined_warning'))
+                        ->visible(static fn (Invoice $record) => auth()->user()?->can('mark-declined', $record) ?? false)
+                        ->action(static function (Invoice $record, InvoiceService $invoiceService) {
+                            $invoiceService->markAsDeclined(new InvoiceIdList([InvoiceId::create($record->id)]));
                         })
-                        ->successNotificationTitle(__('notifications.invoice_status_updated'))
-                        ->deselectRecordsAfterCompletion(),
+                        ->successNotificationTitle(__('notifications.invoice_status_updated')),
 
-                    DeleteBulkAction::make(),
+                    Action::make('createCredit')
+                        ->label(__('labels.create_credit_invoice'))
+                        ->icon('heroicon-m-arrow-uturn-left')
+                        ->color('warning')
+                        ->requiresConfirmation()
+                        ->modalDescription(__('labels.create_credit_invoice_warning'))
+                        ->visible(static fn (Invoice $record) => auth()->user()?->can('create-credit', $record) ?? false)
+                        ->action(static function (Invoice $record, InvoiceService $invoiceService): void {
+                            $invoiceService->createCredit(InvoiceId::create($record->id));
+                        })
+                        ->successNotificationTitle(__('notifications.credit_invoice_created')),
                 ]),
             ]);
     }

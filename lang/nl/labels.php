@@ -263,4 +263,9 @@ return [
     'manual_mark_declined_warning' => 'Weet je zeker dat je deze factuur handmatig als geweigerd wilt markeren?',
     'manual_mark_paid_bulk_warning' => 'Let op: normaal gesproken worden facturen automatisch als betaald gemarkeerd via het importeren van bankafschriften. Weet je zeker dat je de geselecteerde facturen handmatig als betaald wilt markeren?',
     'manual_mark_declined_bulk_warning' => 'Weet je zeker dat je de geselecteerde facturen handmatig als geweigerd wilt markeren?',
+    'create_credit_invoice' => 'Maak creditfactuur',
+    'create_credit_invoice_warning' => 'Weet je zeker dat je een creditfactuur wilt aanmaken? Dit maakt een nieuwe factuur aan met negatieve bedragen die de originele factuur compenseert. De originele factuur blijft bestaan.',
+    'credit_invoice' => 'Creditfactuur',
+    'original_invoice' => 'Originele factuur',
+    'manual_mark_pending_warning' => 'Let op: normaal gesproken worden facturen als in behandeling gemarkeerd wanneer ze aan een batch worden toegevoegd en dus ook gefactureerd via SEPA. Weet je zeker dat je deze factuur handmatig als in behandeling wilt markeren?',
 ];

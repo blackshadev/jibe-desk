@@ -130,6 +130,47 @@ final class InvoiceRepositoryDb implements InvoiceRepository
     }
 
     #[Override]
+    public function createCredit(InvoiceId $originalInvoiceId): InvoiceId
+    {
+        $original = Invoice::query()->with('lines')->findOrFail($originalInvoiceId->value);
+
+        $invoiceNumber = $this->invoiceNumberGenerator->generate();
+
+        $credit = DB::transaction(static function () use ($original, $invoiceNumber): Invoice {
+            $creditInvoice = Invoice::query()->create([
+                'member_id' => $original->member_id,
+                'credit_invoice_id' => $original->id,
+                'recipient_email' => $original->recipient_email,
+                'recipient_name' => $original->recipient_name,
+                'recipient_address' => $original->recipient_address,
+                'invoice_number' => (string) $invoiceNumber,
+                'date' => CarbonImmutable::now(),
+                'status' => InvoiceStatus::Open,
+            ]);
+
+            $creditInvoice
+                ->lines()
+                ->createMany(
+                    array_map(
+                        static fn (InvoiceLine $line) => [
+                            'description' => $line->description,
+                            'price' => -$line->price,
+                            'vat' => -$line->vat,
+                            'quantity' => $line->quantity,
+                            'billable_item_id' => $line->billable_item_id,
+                            'cost_center_id' => $line->cost_center_id,
+                        ],
+                        $original->lines->all(),
+                    ),
+                );
+
+            return $creditInvoice;
+        });
+
+        return InvoiceId::create($credit->id);
+    }
+
+    #[Override]
     public function markAsPaid(InvoiceIdList $ids): void
     {
         Invoice::query()
@@ -144,6 +185,15 @@ final class InvoiceRepositoryDb implements InvoiceRepository
             ->whereIn('id', array_map(static fn (InvoiceId $id) => $id->value, $ids->ids))
             ->where('status', InvoiceStatus::Pending)
             ->update(['status' => InvoiceStatus::Declined]);
+    }
+
+    #[Override]
+    public function markAsPending(InvoiceIdList $ids): void
+    {
+        Invoice::query()
+            ->whereIn('id', array_map(static fn (InvoiceId $id) => $id->value, $ids->ids))
+            ->where('status', InvoiceStatus::Open)
+            ->update(['status' => InvoiceStatus::Pending]);
     }
 
     #[Override]

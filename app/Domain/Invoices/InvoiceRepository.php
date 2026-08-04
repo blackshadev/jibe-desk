@@ -14,9 +14,13 @@ interface InvoiceRepository
 
     public function applyLines(ApplyInvoiceLines $invoice): AppliedInvoiceWithLineIds;
 
+    public function createCredit(InvoiceId $originalInvoiceId): InvoiceId;
+
     public function markAsPaid(InvoiceIdList $ids): void;
 
     public function markAsDeclined(InvoiceIdList $ids): void;
+
+    public function markAsPending(InvoiceIdList $ids): void;
 
     public function findMatchingCredit(string $bankingAccountNumber, float $amount, DateTimeInterface $date): ?InvoiceId;
 }

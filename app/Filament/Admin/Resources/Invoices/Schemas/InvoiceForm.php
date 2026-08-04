@@ -6,12 +6,15 @@ namespace App\Filament\Admin\Resources\Invoices\Schemas;
 
 use App\Domain\Invoices\Formatters\PriceFormatter;
 use App\Filament\Admin\Labels\InvoiceStatusLabels;
+use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Models\CostCenter;
+use App\Models\Invoice;
 use App\Models\Member;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
@@ -40,6 +43,42 @@ final class InvoiceForm
                             ->label(__('labels.status'))
                             ->options(InvoiceStatusLabels::options())
                             ->disabled(),
+
+                        TextEntry::make('original_invoice')
+                            ->label(__('labels.original_invoice'))
+                            ->state(static function (?Invoice $record) {
+                                $original = $record?->creditedInvoice;
+
+                                return (
+                                    $original !== null
+                                        ? sprintf(
+                                            '<a href="%s" class="fi-link text-primary-500">%s</a>',
+                                            InvoiceResource::getUrl('view', ['record' => $original]),
+                                            $original->invoice_number,
+                                        )
+                                        : null
+                                );
+                            })
+                            ->html()
+                            ->visible(static fn (?Invoice $record) => $record?->credit_invoice_id !== null),
+
+                        TextEntry::make('credit_invoice')
+                            ->label(__('labels.credit_invoice'))
+                            ->state(static function (?Invoice $record) {
+                                $credit = $record?->creditInvoice;
+
+                                if ($credit === null) {
+                                    return null;
+                                }
+
+                                return sprintf(
+                                    '<a href="%s" class="fi-link text-primary-500">%s</a>',
+                                    InvoiceResource::getUrl('view', ['record' => $credit]),
+                                    $credit->invoice_number,
+                                );
+                            })
+                            ->html()
+                            ->visible(static fn (?Invoice $record) => $record?->creditInvoice()->exists()),
                     ]),
                 Section::make(__('labels.recipient'))
                     ->columnSpanFull()
