@@ -8,6 +8,8 @@ use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\Invoices\InvoiceService;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
+use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceBankingTransactionsRelationManager;
+use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceBookkeepingRecordsRelationManager;
 use App\Models\Invoice;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ViewRecord;
@@ -85,5 +87,26 @@ final class ViewInvoice extends ViewRecord
     {
         $this->record->refresh();
         $this->fillForm();
+    }
+
+    #[Override]
+    public function getRelationManagers(): array
+    {
+        return [
+            InvoiceBankingTransactionsRelationManager::class,
+            InvoiceBookkeepingRecordsRelationManager::class,
+        ];
+    }
+
+    #[Override]
+    public function hasCombinedRelationManagerTabsWithContent(): bool
+    {
+        return true;
+    }
+
+    #[Override]
+    public function getContentTabLabel(): string
+    {
+        return __('labels.invoice');
     }
 }

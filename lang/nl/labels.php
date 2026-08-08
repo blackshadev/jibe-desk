@@ -232,6 +232,7 @@ return [
     'banking_transaction' => 'Banktransactie',
     'banking_transactions' => 'Banktransacties',
     'banking_transaction_information' => 'Banktransactie informatie',
+    'related_records' => 'Gerelateerde objecten',
     'import_mt940' => 'Importeer MT940',
     'mt940_file' => 'MT940 bestand',
     'import_complete' => 'Import voltooid',

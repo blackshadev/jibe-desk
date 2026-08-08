@@ -6,6 +6,8 @@ namespace App\Filament\Admin\Resources\PurchaseOrders\Pages;
 
 use App\Filament\Admin\Resources\PurchaseOrders\Actions\PurchaseOrderStateActions;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
+use App\Filament\Admin\Resources\PurchaseOrders\RelationManagers\PurchaseOrderBankingTransactionsRelationManager;
+use App\Filament\Admin\Resources\PurchaseOrders\RelationManagers\PurchaseOrderBookkeepingRecordsRelationManager;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Livewire\Attributes\On;
@@ -30,5 +32,26 @@ final class ViewPurchaseOrder extends ViewRecord
     #[On('markedAsPending')]
     public function refresh(): void
     {
+    }
+
+    #[Override]
+    public function getRelationManagers(): array
+    {
+        return [
+            PurchaseOrderBankingTransactionsRelationManager::class,
+            PurchaseOrderBookkeepingRecordsRelationManager::class,
+        ];
+    }
+
+    #[Override]
+    public function hasCombinedRelationManagerTabsWithContent(): bool
+    {
+        return true;
+    }
+
+    #[Override]
+    public function getContentTabLabel(): string
+    {
+        return __('labels.purchase_order');
     }
 }

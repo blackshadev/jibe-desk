@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BookkeepingRecords\Tables;
 
+use App\Filament\Admin\Resources\BookkeepingRecords\BookkeepingRecordResource;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Filament\Admin\Utils\ViewOrEdit;
@@ -13,7 +14,6 @@ use App\Models\PurchaseOrder;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
@@ -64,8 +64,8 @@ final class BookkeepingRecordsTable
                     ->relationship('costCenter', 'title'),
             ])
             ->filtersLayout(FiltersLayout::BeforeContent)
+            ->recordUrl(static fn (BookkeepingRecord $record): string => BookkeepingRecordResource::getUrl('view', ['record' => $record]))
             ->recordActions([
-                EditAction::make(),
                 Action::make('related')
                     ->label(__('labels.goto_related'))
                     ->icon(Heroicon::ArrowTopRightOnSquare)

@@ -76,25 +76,25 @@ final class BankingTransactionsTable
                     ->searchable(),
                 TextColumn::make('reversedByTransaction')
                     ->label(__('labels.reversal'))
-                    ->formatStateUsing(static fn (BankingTransaction $record): ?string =>
+                    ->formatStateUsing(static fn (BankingTransaction $record): ?string => (
                         $record->isReversal()
                             ? __('labels.reversed_by', ['id' => $record->reversed_by_transaction_id])
-                            : ($record->isReversed()
-                                ? __('labels.has_reversal', ['id' => $record->reversedTransaction->id])
-                                : null
+                            : (
+                                $record->isReversed()
+                                    ? __('labels.has_reversal', ['id' => $record->reversedTransaction->id])
+                                    : null
                             )
-                    )
-                    ->color(static fn (BankingTransaction $record): string =>
-                        $record->isReversal() || $record->isReversed() ? 'danger' : 'gray'
-                    )
-                    ->url(static fn (BankingTransaction $record): ?string =>
+                    ))
+                    ->color(static fn (BankingTransaction $record): string => $record->isReversal() || $record->isReversed() ? 'danger' : 'gray')
+                    ->url(static fn (BankingTransaction $record): ?string => (
                         $record->isReversal()
                             ? BankingTransactionResource::getUrl('view', ['record' => $record->reversed_by_transaction_id])
-                            : ($record->isReversed()
-                                ? BankingTransactionResource::getUrl('view', ['record' => $record->reversedTransaction->id])
-                                : null
+                            : (
+                                $record->isReversed()
+                                    ? BankingTransactionResource::getUrl('view', ['record' => $record->reversedTransaction->id])
+                                    : null
                             )
-                    )
+                    ))
                     ->toggleable(),
                 TextColumn::make('created_at')
                     ->label(__('labels.created_at'))

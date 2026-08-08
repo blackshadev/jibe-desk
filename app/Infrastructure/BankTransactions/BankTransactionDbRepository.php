@@ -228,7 +228,7 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
     #[Override]
     public function linkReversal(BankTransactionId $reversalId, BankTransactionId $originalId): void
     {
-        DB::transaction(function () use ($reversalId, $originalId): void {
+        DB::transaction(static function () use ($reversalId, $originalId): void {
             BankingTransaction::query()
                 ->where('id', $reversalId->value)
                 ->update([
@@ -251,7 +251,7 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
     #[Override]
     public function unlinkReversal(BankTransactionId $reversalId): void
     {
-        DB::transaction(function () use ($reversalId): void {
+        DB::transaction(static function () use ($reversalId): void {
             DB::table('banking_transaction_references')
                 ->where('banking_transaction_id', $reversalId->value)
                 ->delete();

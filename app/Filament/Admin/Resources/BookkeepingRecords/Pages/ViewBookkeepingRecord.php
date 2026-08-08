@@ -6,10 +6,10 @@ namespace App\Filament\Admin\Resources\BookkeepingRecords\Pages;
 
 use App\Filament\Admin\Resources\BookkeepingRecords\BookkeepingRecordResource;
 use Filament\Actions\EditAction;
-use Filament\Resources\Pages\EditRecord;
+use Filament\Resources\Pages\ViewRecord;
 use Override;
 
-class ViewBookkeepingRecord extends EditRecord
+final class ViewBookkeepingRecord extends ViewRecord
 {
     #[Override]
     protected static string $resource = BookkeepingRecordResource::class;
@@ -20,5 +20,17 @@ class ViewBookkeepingRecord extends EditRecord
         return [
             EditAction::make(),
         ];
+    }
+
+    #[Override]
+    public function hasCombinedRelationManagerTabsWithContent(): bool
+    {
+        return true;
+    }
+
+    #[Override]
+    public function getContentTabLabel(): string
+    {
+        return __('labels.bookkeeping_record');
     }
 }

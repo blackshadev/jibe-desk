@@ -19,9 +19,7 @@ final class UnlinkReversalAction
             ->label(__('labels.unlink_reversal'))
             ->icon('heroicon-o-link-slash')
             ->color('danger')
-            ->visible(static fn (BankingTransaction $record): bool =>
-                $record->isReversal() && $record->status === BankTransactionStatus::Open
-            )
+            ->visible(static fn (BankingTransaction $record): bool => $record->isReversal() && $record->status === BankTransactionStatus::Open)
             ->requiresConfirmation()
             ->action(static function (
                 BankingTransaction $record,

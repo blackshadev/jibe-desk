@@ -10,6 +10,7 @@ use App\Filament\Admin\Resources\BookkeepingRecords\Pages\EditBookkeepingRecord;
 use App\Filament\Admin\Resources\BookkeepingRecords\Pages\ListBookkeepingRecords;
 use App\Filament\Admin\Resources\BookkeepingRecords\Pages\ViewBookkeepingRecord;
 use App\Filament\Admin\Resources\BookkeepingRecords\Schemas\BookkeepingRecordForm;
+use App\Filament\Admin\Resources\BookkeepingRecords\Schemas\BookkeepingRecordInfolist;
 use App\Filament\Admin\Resources\BookkeepingRecords\Tables\BookkeepingRecordsTable;
 use App\Models\BookkeepingRecord;
 use BackedEnum;
@@ -38,6 +39,12 @@ class BookkeepingRecordResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return BookkeepingRecordForm::configure($schema);
+    }
+
+    #[Override]
+    public static function infolist(Schema $schema): Schema
+    {
+        return BookkeepingRecordInfolist::configure($schema);
     }
 
     #[Override]

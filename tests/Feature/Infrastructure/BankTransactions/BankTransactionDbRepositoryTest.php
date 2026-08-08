@@ -20,7 +20,6 @@ use App\Models\InvoiceLine;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use Override;
-use PHPUnit\Framework\Attributes\Test;
 use Tests\FeatureTestCase;
 
 final class BankTransactionDbRepositoryTest extends FeatureTestCase
@@ -47,7 +46,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
 
         $id = $this->repository->create($dto);
 
-        $this->assertInstanceOf(BankTransactionId::class, $id);
+        static::assertInstanceOf(BankTransactionId::class, $id);
         $this->assertDatabaseHas('banking_transactions', [
             'description' => 'Test payment',
             'banking_account_number' => 'NL91ABNA0417164300',
@@ -59,8 +58,8 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
     {
         BankingTransaction::factory()->create(['import_hash' => 'existing_hash']);
 
-        $this->assertTrue($this->repository->existsByHash('existing_hash'));
-        $this->assertFalse($this->repository->existsByHash('nonexistent_hash'));
+        static::assertTrue($this->repository->existsByHash('existing_hash'));
+        static::assertFalse($this->repository->existsByHash('nonexistent_hash'));
     }
 
     public function test_it_attaches_an_invoice(): void
@@ -152,7 +151,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         );
 
         $bookkeepingRecord->refresh();
-        $this->assertEquals($bankingTransaction->id, $bookkeepingRecord->banking_transaction_id);
+        static::assertEquals($bankingTransaction->id, $bookkeepingRecord->banking_transaction_id);
     }
 
     public function test_it_detaches_a_bookkeeping_record(): void
@@ -168,7 +167,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         );
 
         $bookkeepingRecord->refresh();
-        $this->assertNull($bookkeepingRecord->banking_transaction_id);
+        static::assertNull($bookkeepingRecord->banking_transaction_id);
     }
 
     public function test_it_gets_attached_invoice_ids(): void

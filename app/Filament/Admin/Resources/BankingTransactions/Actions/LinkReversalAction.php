@@ -7,7 +7,6 @@ namespace App\Filament\Admin\Resources\BankingTransactions\Actions;
 use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\BankTransactions\BankTransactionService;
 use App\Domain\BankTransactions\BankTransactionStatus;
-use App\Filament\Admin\Resources\BankingTransactions\BankingTransactionResource;
 use App\Filament\Admin\Resources\BankingTransactions\Pages\ViewBankingTransaction;
 use App\Models\BankingTransaction;
 use Filament\Actions\Action;
@@ -21,23 +20,19 @@ final class LinkReversalAction
             ->label(__('labels.link_reversal'))
             ->icon('heroicon-o-link')
             ->color('warning')
-            ->visible(static fn (BankingTransaction $record): bool =>
-                $record->status === BankTransactionStatus::Open
-                && !$record->isReversal()
-                && !$record->isReversed()
-            )
+            ->visible(static fn (BankingTransaction $record): bool => $record->status === BankTransactionStatus::Open && !$record->isReversal() && !$record->isReversed())
             ->schema([
                 Select::make('reversal_transaction_id')
                     ->label(__('labels.reversal_transaction'))
-                    ->options(static function (BankingTransaction $record): array {
-                        return BankingTransaction::query()
+                    ->options(
+                        static fn (BankingTransaction $record): array => BankingTransaction::query()
                             ->where('id', '!=', $record->id)
                             ->whereNull('reversed_by_transaction_id')
                             ->where('banking_account_number', $record->banking_account_number)
                             ->whereRaw('ABS(amount + ?) <= 0.01', [$record->amount])
                             ->orderBy('date')
                             ->get()
-                            ->mapWithKeys(fn (BankingTransaction $bt): array => [
+                            ->mapWithKeys(static fn (BankingTransaction $bt): array => [
                                 $bt->id => sprintf(
                                     '#%d — %s — €%s',
                                     $bt->id,
@@ -45,8 +40,8 @@ final class LinkReversalAction
                                     number_format($bt->amount, 2),
                                 ),
                             ])
-                            ->all();
-                    })
+                            ->all(),
+                    )
                     ->searchable()
                     ->required(),
             ])

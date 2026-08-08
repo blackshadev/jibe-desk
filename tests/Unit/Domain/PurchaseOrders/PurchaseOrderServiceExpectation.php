@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\PurchaseOrders;
 
-use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderService;
 use Mockery;
