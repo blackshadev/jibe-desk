@@ -12,5 +12,6 @@ final readonly class MatchCriteria
         public DateTimeInterface $date,
         public float $amount,
         public string $bankingAccountNumber,
+        public string $description,
     ) {}
 }

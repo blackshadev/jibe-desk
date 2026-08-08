@@ -43,4 +43,10 @@ interface BankTransactionRepository
     public function markAsResolved(BankTransactionId $bankTransactionId): void;
 
     public function markAsUnresolvable(BankTransactionId $bankTransactionId): void;
+
+    public function findReversalMatch(MatchCriteria $criteria): ?BankTransactionId;
+
+    public function linkReversal(BankTransactionId $reversalId, BankTransactionId $originalId): void;
+
+    public function unlinkReversal(BankTransactionId $reversalId): void;
 }

@@ -92,6 +92,7 @@ final class BankTransactionServiceImplTest extends FeatureTestCase
             date: new DateTimeImmutable('2026-01-15'),
             amount: 100.00,
             bankingAccountNumber: 'NL91ABNA0417164300',
+            description: 'Monthly fee',
         );
 
         $invoiceId = InvoiceId::create(42);
@@ -114,6 +115,7 @@ final class BankTransactionServiceImplTest extends FeatureTestCase
             date: new DateTimeImmutable('2026-01-15'),
             amount: 100.00,
             bankingAccountNumber: 'NL91ABNA0417164300',
+            description: 'Monthly fee',
         );
 
         $result = MatchResult::none();
@@ -134,6 +136,7 @@ final class BankTransactionServiceImplTest extends FeatureTestCase
             date: new DateTimeImmutable('2026-01-15'),
             amount: -50.00,
             bankingAccountNumber: 'NL91ABNA0417164300',
+            description: 'Monthly fee',
         );
 
         $purchaseOrderId = PurchaseOrderId::create(7);
@@ -157,12 +160,14 @@ final class BankTransactionServiceImplTest extends FeatureTestCase
             date: new DateTimeImmutable('2026-01-15'),
             amount: 100.00,
             bankingAccountNumber: 'NL91ABNA0417164300',
+            description: 'Monthly fee',
         );
 
         $criteria2 = new MatchCriteria(
             date: new DateTimeImmutable('2026-01-16'),
             amount: -50.00,
             bankingAccountNumber: 'NL91ABNA0417164301',
+            description: 'Monthly fee',
         );
 
         $invoiceId = InvoiceId::create(42);
@@ -182,5 +187,105 @@ final class BankTransactionServiceImplTest extends FeatureTestCase
         $this->repo->expectsMarkAsUnresolvable($id2);
 
         $this->service->resolveMatching($ids);
+    }
+
+    public function test_resolve_matching_with_reversal_calls_link_reversal_and_mark_resolved(): void
+    {
+        $bankTransactionId = BankTransactionId::create(1);
+        $originalId = BankTransactionId::create(2);
+        $ids = new BankTransactionIdList([$bankTransactionId]);
+
+        $criteria = new MatchCriteria(
+            date: new DateTimeImmutable('2026-01-15'),
+            amount: 100.00,
+            bankingAccountNumber: 'NL91ABNA0417164300',
+            description: 'Monthly fee',
+        );
+
+        $result = MatchResult::foundReversal($originalId);
+        $emptyInvoiceIds = InvoiceIdList::fromArray([]);
+        $emptyPurchaseOrderIds = PurchaseOrderIdList::fromArray([]);
+
+        $this->repo->expectsGetMatchCriteriaForIds($ids, [1 => $criteria]);
+        $this->matchingService->expectsFindMatch($criteria, $result);
+        $this->repo->expectsLinkReversal($originalId, $bankTransactionId);
+        $this->repo->expectsGetAttachedInvoiceIds($bankTransactionId, $emptyInvoiceIds);
+        $this->invoiceService->expectsMarkAsDeclined($emptyInvoiceIds);
+        $this->repo->expectsGetAttachedPurchaseOrderIds($bankTransactionId, $emptyPurchaseOrderIds);
+        $this->purchaseOrderService->expectsMarkAsDeclined($emptyPurchaseOrderIds);
+        $this->repo->expectsMarkAsResolved($originalId);
+        $this->repo->expectsMarkAsResolved($bankTransactionId);
+        $this->repo->expectsMarkAsResolved($bankTransactionId);
+
+        $this->service->resolveMatching($ids);
+    }
+
+    public function test_link_reversal_marks_attached_invoices_as_declined(): void
+    {
+        $reversalId = BankTransactionId::create(1);
+        $originalId = BankTransactionId::create(2);
+        $invoiceIds = InvoiceIdList::fromArray([10, 20]);
+        $emptyPurchaseOrderIds = PurchaseOrderIdList::fromArray([]);
+
+        $this->repo->expectsLinkReversal($reversalId, $originalId);
+        $this->repo->expectsGetAttachedInvoiceIds($originalId, $invoiceIds);
+        $this->invoiceService->expectsMarkAsDeclined($invoiceIds);
+        $this->repo->expectsGetAttachedPurchaseOrderIds($originalId, $emptyPurchaseOrderIds);
+        $this->purchaseOrderService->expectsMarkAsDeclined($emptyPurchaseOrderIds);
+        $this->repo->expectsMarkAsResolved($reversalId);
+        $this->repo->expectsMarkAsResolved($originalId);
+
+        $this->service->linkReversal($reversalId, $originalId);
+    }
+
+    public function test_link_reversal_marks_attached_purchase_orders_as_declined(): void
+    {
+        $reversalId = BankTransactionId::create(1);
+        $originalId = BankTransactionId::create(2);
+        $emptyInvoiceIds = InvoiceIdList::fromArray([]);
+        $purchaseOrderIds = PurchaseOrderIdList::fromArray([30, 40]);
+
+        $this->repo->expectsLinkReversal($reversalId, $originalId);
+        $this->repo->expectsGetAttachedInvoiceIds($originalId, $emptyInvoiceIds);
+        $this->invoiceService->expectsMarkAsDeclined($emptyInvoiceIds);
+        $this->repo->expectsGetAttachedPurchaseOrderIds($originalId, $purchaseOrderIds);
+        $this->purchaseOrderService->expectsMarkAsDeclined($purchaseOrderIds);
+        $this->repo->expectsMarkAsResolved($reversalId);
+        $this->repo->expectsMarkAsResolved($originalId);
+
+        $this->service->linkReversal($reversalId, $originalId);
+    }
+
+    public function test_link_reversal_does_not_call_decline_when_no_attached_references(): void
+    {
+        $reversalId = BankTransactionId::create(1);
+        $originalId = BankTransactionId::create(2);
+        $emptyInvoiceIds = InvoiceIdList::fromArray([]);
+        $emptyPurchaseOrderIds = PurchaseOrderIdList::fromArray([]);
+
+        $this->repo->expectsLinkReversal($reversalId, $originalId);
+        $this->repo->expectsGetAttachedInvoiceIds($originalId, $emptyInvoiceIds);
+        $this->invoiceService->expectsMarkAsDeclined($emptyInvoiceIds);
+        $this->repo->expectsGetAttachedPurchaseOrderIds($originalId, $emptyPurchaseOrderIds);
+        $this->purchaseOrderService->expectsMarkAsDeclined($emptyPurchaseOrderIds);
+        $this->repo->expectsMarkAsResolved($reversalId);
+        $this->repo->expectsMarkAsResolved($originalId);
+
+        $this->service->linkReversal($reversalId, $originalId);
+    }
+
+    public function test_unlink_reversal_marks_attached_references_as_pending(): void
+    {
+        $reversalId = BankTransactionId::create(1);
+        $invoiceIds = InvoiceIdList::fromArray([10, 20]);
+        $purchaseOrderIds = PurchaseOrderIdList::fromArray([30, 40]);
+
+        $this->repo->expectsGetAttachedInvoiceIds($reversalId, $invoiceIds);
+        $this->invoiceService->expectsMarkAsPending($invoiceIds);
+        $this->repo->expectsGetAttachedPurchaseOrderIds($reversalId, $purchaseOrderIds);
+        $this->purchaseOrderService->expectsMarkAsPending($purchaseOrderIds);
+        $this->repo->expectsUnlinkReversal($reversalId);
+
+        $this->service->unlinkReversal($reversalId);
     }
 }

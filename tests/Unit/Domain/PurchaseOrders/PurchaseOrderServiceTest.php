@@ -36,10 +36,10 @@ final class PurchaseOrderServiceTest extends UnitTestCase
         $id = PurchaseOrderId::create(1);
         $ids = new PurchaseOrderIdList([$id]);
 
-        $this->repo->expectsMarkAsPending($id);
+        $this->repo->expectsMarkAsPending($ids);
         $this->bookkeepingRepo->expectsCreateForPurchaseOrder($ids);
 
-        $this->service->markAsPending($id);
+        $this->service->markAsPending($ids);
     }
 
     public function test_mark_as_paid_updates_status_and_creates_bookkeeping_records(): void

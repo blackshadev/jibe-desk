@@ -24,11 +24,11 @@ final readonly class PurchaseOrderRepositoryExpectation
         return new self(Mockery::mock(PurchaseOrderRepository::class));
     }
 
-    public function expectsMarkAsPending(PurchaseOrderId $id): void
+    public function expectsMarkAsPending(PurchaseOrderIdList $ids): void
     {
         $this->mock
             ->expects('markAsPending')
-            ->with(equalTo($id));
+            ->with(equalTo($ids));
     }
 
     public function expectsMarkAsPaid(PurchaseOrderIdList $ids): void

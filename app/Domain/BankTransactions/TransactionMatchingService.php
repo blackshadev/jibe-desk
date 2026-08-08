@@ -10,4 +10,6 @@ use JeroenG\Autowire\Attribute\Autowire;
 interface TransactionMatchingService
 {
     public function findMatch(MatchCriteria $criteria): MatchResult;
+
+    public function findReversalMatch(MatchCriteria $criteria): ?BankTransactionId;
 }

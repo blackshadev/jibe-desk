@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\BankTransactions;
 
+use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\BankTransactions\MatchCriteria;
 use App\Domain\BankTransactions\TransactionMatchingServiceImpl;
 use App\Domain\Invoices\InvoiceId;
@@ -18,6 +19,7 @@ final class TransactionMatchingServiceImplTest extends UnitTestCase
 {
     private InvoiceMatchingRepositoryExpectation $invoiceRepository;
     private PurchaseOrderRepositoryExpectation $purchaseOrderRepository;
+    private BankTransactionRepositoryExpectation $bankTransactionRepository;
     private TransactionMatchingServiceImpl $service;
 
     #[Override]
@@ -27,10 +29,12 @@ final class TransactionMatchingServiceImplTest extends UnitTestCase
 
         $this->invoiceRepository = InvoiceMatchingRepositoryExpectation::create();
         $this->purchaseOrderRepository = PurchaseOrderRepositoryExpectation::create();
+        $this->bankTransactionRepository = BankTransactionRepositoryExpectation::create();
 
         $this->service = new TransactionMatchingServiceImpl(
             $this->invoiceRepository->mock,
             $this->purchaseOrderRepository->mock,
+            $this->bankTransactionRepository->mock,
         );
     }
 
@@ -40,6 +44,7 @@ final class TransactionMatchingServiceImplTest extends UnitTestCase
             date: new DateTimeImmutable('2026-01-15'),
             amount: 100.00,
             bankingAccountNumber: 'NL91ABNA0417164300',
+            description: 'Monthly fee',
         );
 
         $invoiceId = InvoiceId::create(42);
@@ -60,9 +65,11 @@ final class TransactionMatchingServiceImplTest extends UnitTestCase
             date: new DateTimeImmutable('2026-01-15'),
             amount: 100.00,
             bankingAccountNumber: 'NL91ABNA0417164300',
+            description: 'Monthly fee',
         );
 
         $this->invoiceRepository->expectsFindMatchingCredit('NL91ABNA0417164300', 100.00, $criteria->date, null);
+        $this->bankTransactionRepository->expectsFindReversalMatch($criteria, null);
 
         $result = $this->service->findMatch($criteria);
 
@@ -77,6 +84,7 @@ final class TransactionMatchingServiceImplTest extends UnitTestCase
             date: new DateTimeImmutable('2026-01-15'),
             amount: -50.00,
             bankingAccountNumber: 'NL91ABNA0417164300',
+            description: 'Monthly fee',
         );
 
         $purchaseOrderId = PurchaseOrderId::create(7);
@@ -97,9 +105,11 @@ final class TransactionMatchingServiceImplTest extends UnitTestCase
             date: new DateTimeImmutable('2026-01-15'),
             amount: -50.00,
             bankingAccountNumber: 'NL91ABNA0417164300',
+            description: 'Monthly fee',
         );
 
         $this->purchaseOrderRepository->expectsFindMatchingDebit('NL91ABNA0417164300', 50.00, $criteria->date, null);
+        $this->bankTransactionRepository->expectsFindReversalMatch($criteria, null);
 
         $result = $this->service->findMatch($criteria);
 
@@ -114,12 +124,76 @@ final class TransactionMatchingServiceImplTest extends UnitTestCase
             date: new DateTimeImmutable('2026-01-15'),
             amount: 0.0,
             bankingAccountNumber: 'NL91ABNA0417164300',
+            description: 'Monthly fee',
         );
 
         $this->purchaseOrderRepository->expectsFindMatchingDebit('NL91ABNA0417164300', 0.0, $criteria->date, null);
+        $this->bankTransactionRepository->expectsFindReversalMatch($criteria, null);
 
         $result = $this->service->findMatch($criteria);
 
         static::assertFalse($result->isMatch);
+    }
+
+    public function test_find_match_falls_back_to_reversal_when_no_invoice_match(): void
+    {
+        $criteria = new MatchCriteria(
+            date: new DateTimeImmutable('2026-01-15'),
+            amount: 100.00,
+            bankingAccountNumber: 'NL91ABNA0417164300',
+            description: 'Monthly fee',
+        );
+
+        $reversalId = BankTransactionId::create(42);
+
+        $this->invoiceRepository->expectsFindMatchingCredit('NL91ABNA0417164300', 100.00, $criteria->date, null);
+        $this->bankTransactionRepository->expectsFindReversalMatch($criteria, $reversalId);
+
+        $result = $this->service->findMatch($criteria);
+
+        static::assertTrue($result->isMatch);
+        static::assertNotNull($result->reversedByTransactionId);
+        static::assertSame(42, $result->reversedByTransactionId->value);
+    }
+
+    public function test_find_match_falls_back_to_reversal_when_no_purchase_order_match(): void
+    {
+        $criteria = new MatchCriteria(
+            date: new DateTimeImmutable('2026-01-15'),
+            amount: -50.00,
+            bankingAccountNumber: 'NL91ABNA0417164300',
+            description: 'Monthly fee',
+        );
+
+        $reversalId = BankTransactionId::create(7);
+
+        $this->purchaseOrderRepository->expectsFindMatchingDebit('NL91ABNA0417164300', 50.00, $criteria->date, null);
+        $this->bankTransactionRepository->expectsFindReversalMatch($criteria, $reversalId);
+
+        $result = $this->service->findMatch($criteria);
+
+        static::assertTrue($result->isMatch);
+        static::assertNotNull($result->reversedByTransactionId);
+        static::assertSame(7, $result->reversedByTransactionId->value);
+    }
+
+    public function test_find_match_returns_none_when_no_invoice_and_no_reversal(): void
+    {
+        $criteria = new MatchCriteria(
+            date: new DateTimeImmutable('2026-01-15'),
+            amount: 100.00,
+            bankingAccountNumber: 'NL91ABNA0417164300',
+            description: 'Monthly fee',
+        );
+
+        $this->invoiceRepository->expectsFindMatchingCredit('NL91ABNA0417164300', 100.00, $criteria->date, null);
+        $this->bankTransactionRepository->expectsFindReversalMatch($criteria, null);
+
+        $result = $this->service->findMatch($criteria);
+
+        static::assertFalse($result->isMatch);
+        static::assertNull($result->invoiceId);
+        static::assertNull($result->purchaseOrderId);
+        static::assertNull($result->reversedByTransactionId);
     }
 }

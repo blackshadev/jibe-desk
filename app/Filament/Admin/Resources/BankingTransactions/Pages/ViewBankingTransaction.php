@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\BankingTransactions\Pages;
 
 use App\Filament\Admin\Resources\BankingTransactions\Actions\CompleteBankingTransactionAction;
+use App\Filament\Admin\Resources\BankingTransactions\Actions\LinkReversalAction;
 use App\Filament\Admin\Resources\BankingTransactions\Actions\RetryMatchingAction;
+use App\Filament\Admin\Resources\BankingTransactions\Actions\UnlinkReversalAction;
 use App\Filament\Admin\Resources\BankingTransactions\BankingTransactionResource;
 use App\Filament\Admin\Resources\BankingTransactions\RelationManagers\BookkeepingRecordsRelationManager;
 use App\Filament\Admin\Resources\BankingTransactions\RelationManagers\InvoicesRelationManager;
@@ -27,6 +29,8 @@ final class ViewBankingTransaction extends ViewRecord
     {
         return [
             RetryMatchingAction::make(),
+            LinkReversalAction::make(),
+            UnlinkReversalAction::make(),
             CompleteBankingTransactionAction::make(),
             EditAction::make(),
             DeleteAction::make(),

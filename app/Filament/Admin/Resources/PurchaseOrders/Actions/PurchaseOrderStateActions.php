@@ -26,7 +26,7 @@ final class PurchaseOrderStateActions
                 ->requiresConfirmation()
                 ->visible(static fn (PurchaseOrder $record): bool => $record->status === PurchaseOrderStatus::Open)
                 ->action(static function (PurchaseOrder $record, PurchaseOrderService $service): void {
-                    $service->markAsPending(PurchaseOrderId::create($record->id));
+                    $service->markAsPending(PurchaseOrderIdList::fromArray([$record->id]));
                 })
                 ->successRedirectUrl(static fn (Page $livewire, PurchaseOrder $record) => (
                     $livewire instanceof EditRecord ? PurchaseOrderResource::getUrl('view', ['record' => $record]) : null

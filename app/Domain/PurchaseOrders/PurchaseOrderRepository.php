@@ -10,9 +10,11 @@ use JeroenG\Autowire\Attribute\Autowire;
 #[Autowire]
 interface PurchaseOrderRepository
 {
-    public function markAsPending(PurchaseOrderId $id): void;
+    public function markAsPending(PurchaseOrderIdList $ids): void;
 
     public function markAsPaid(PurchaseOrderIdList $ids): void;
+
+    public function markAsDeclined(PurchaseOrderIdList $ids): void;
 
     /**
      * Find an open or pending PurchaseOrder that matches the given debit criteria.

@@ -13,16 +13,36 @@ final readonly class TransactionMatchingServiceImpl implements TransactionMatchi
     public function __construct(
         private InvoiceRepository $invoiceRepository,
         private PurchaseOrderRepository $purchaseOrderRepository,
+        private BankTransactionRepository $bankTransactionRepository,
     ) {}
 
     #[Override]
     public function findMatch(MatchCriteria $criteria): MatchResult
     {
         if ($criteria->amount > 0) {
-            return $this->findMatchingInvoice($criteria);
+            $result = $this->findMatchingInvoice($criteria);
+            if ($result->isMatch) {
+                return $result;
+            }
+        } else {
+            $result = $this->findMatchingPurchaseOrder($criteria);
+            if ($result->isMatch) {
+                return $result;
+            }
         }
 
-        return $this->findMatchingPurchaseOrder($criteria);
+        $reversedById = $this->findReversalMatch($criteria);
+        if ($reversedById !== null) {
+            return MatchResult::foundReversal($reversedById);
+        }
+
+        return MatchResult::none();
+    }
+
+    #[Override]
+    public function findReversalMatch(MatchCriteria $criteria): ?BankTransactionId
+    {
+        return $this->bankTransactionRepository->findReversalMatch($criteria);
     }
 
     private function findMatchingInvoice(MatchCriteria $criteria): MatchResult

@@ -35,8 +35,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         $this->repository = new BankTransactionDbRepository();
     }
 
-    #[Test]
-    public function itCreatesABankingTransactionAndReturnsId(): void
+    public function test_it_creates_a_banking_transaction_and_returns_id(): void
     {
         $dto = new CreateBankTransaction(
             date: '2024-01-15',
@@ -56,8 +55,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         ]);
     }
 
-    #[Test]
-    public function itChecksIfHashExists(): void
+    public function test_it_checks_if_hash_exists(): void
     {
         BankingTransaction::factory()->create(['import_hash' => 'existing_hash']);
 
@@ -65,8 +63,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         $this->assertFalse($this->repository->existsByHash('nonexistent_hash'));
     }
 
-    #[Test]
-    public function itAttachesAnInvoice(): void
+    public function test_it_attaches_an_invoice(): void
     {
         $bankingTransaction = BankingTransaction::factory()->create();
         $invoice = Invoice::factory()->create();
@@ -83,8 +80,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         ]);
     }
 
-    #[Test]
-    public function itDetachesAnInvoice(): void
+    public function test_it_detaches_an_invoice(): void
     {
         $bankingTransaction = BankingTransaction::factory()->create();
         $invoice = Invoice::factory()->create();
@@ -106,8 +102,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         ]);
     }
 
-    #[Test]
-    public function itAttachesAPurchaseOrder(): void
+    public function test_it_attaches_a_purchase_order(): void
     {
         $bankingTransaction = BankingTransaction::factory()->create();
         $purchaseOrder = PurchaseOrder::factory()->create();
@@ -124,8 +119,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         ]);
     }
 
-    #[Test]
-    public function itDetachesAPurchaseOrder(): void
+    public function test_it_detaches_a_purchase_order(): void
     {
         $bankingTransaction = BankingTransaction::factory()->create();
         $purchaseOrder = PurchaseOrder::factory()->create();
@@ -147,8 +141,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         ]);
     }
 
-    #[Test]
-    public function itAttachesABookkeepingRecordDirectly(): void
+    public function test_it_attaches_a_bookkeeping_record_directly(): void
     {
         $bankingTransaction = BankingTransaction::factory()->create();
         $bookkeepingRecord = BookkeepingRecord::factory()->create();
@@ -162,8 +155,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         $this->assertEquals($bankingTransaction->id, $bookkeepingRecord->banking_transaction_id);
     }
 
-    #[Test]
-    public function itDetachesABookkeepingRecord(): void
+    public function test_it_detaches_a_bookkeeping_record(): void
     {
         $bankingTransaction = BankingTransaction::factory()->create();
         $bookkeepingRecord = BookkeepingRecord::factory()->create([
@@ -179,8 +171,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         $this->assertNull($bookkeepingRecord->banking_transaction_id);
     }
 
-    #[Test]
-    public function itGetsAttachedInvoiceIds(): void
+    public function test_it_gets_attached_invoice_ids(): void
     {
         $bankingTransaction = BankingTransaction::factory()->create();
         $invoice1 = Invoice::factory()->create();
@@ -202,8 +193,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         static::assertCount(2, $result->ids);
     }
 
-    #[Test]
-    public function itGetsAttachedPurchaseOrderIds(): void
+    public function test_it_gets_attached_purchase_order_ids(): void
     {
         $bankingTransaction = BankingTransaction::factory()->create();
         $po1 = PurchaseOrder::factory()->create();
@@ -225,8 +215,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         static::assertCount(2, $result->ids);
     }
 
-    #[Test]
-    public function itCompletesABankingTransaction(): void
+    public function test_it_completes_a_banking_transaction(): void
     {
         $bankingTransaction = BankingTransaction::factory()->create(['amount' => 100.00]);
         $invoice = Invoice::factory()->create();
@@ -250,8 +239,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         static::assertEquals($bankingTransaction->id, $bookkeepingRecord->banking_transaction_id);
     }
 
-    #[Test]
-    public function itThrowsWhenCompletingWithUnmatchedAmount(): void
+    public function test_it_throws_when_completing_with_unmatched_amount(): void
     {
         $bankingTransaction = BankingTransaction::factory()->create(['amount' => 200.00]);
         $invoice = Invoice::factory()->create();
@@ -266,8 +254,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         $this->repository->complete(BankTransactionId::create($bankingTransaction->id));
     }
 
-    #[Test]
-    public function itCompletesWhenPoTotalOffsetsDifference(): void
+    public function test_it_completes_when_po_total_offsets_difference(): void
     {
         $bankingTransaction = BankingTransaction::factory()->create(['amount' => 150.00]);
         $invoice = Invoice::factory()->create();
@@ -290,8 +277,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         static::assertSame(BankTransactionStatus::Completed, $bankingTransaction->status);
     }
 
-    #[Test]
-    public function itThrowsWhenPoTotalCausesUnmatchedAmount(): void
+    public function test_it_throws_when_po_total_causes_unmatched_amount(): void
     {
         $bankingTransaction = BankingTransaction::factory()->create(['amount' => 100.00]);
         $invoice = Invoice::factory()->create();
@@ -312,8 +298,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         $this->repository->complete(BankTransactionId::create($bankingTransaction->id));
     }
 
-    #[Test]
-    public function itCompletesWithMultipleInvoicesAndPurchaseOrders(): void
+    public function test_it_completes_with_multiple_invoices_and_purchase_orders(): void
     {
         $bankingTransaction = BankingTransaction::factory()->create(['amount' => 50.00]);
         $invoice1 = Invoice::factory()->create();
@@ -364,7 +349,6 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         static::assertContains($unresolved2->id, $resultIds);
     }
 
-    #[Test]
     public function test_get_unresolved_unresolved_ids_respects_limit(): void
     {
         BankingTransaction::factory()->count(10)->create(['resolve_status' => ResolveStatus::Unresolved->value]);
@@ -384,7 +368,6 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         static::assertSame(ResolveStatus::Resolved, $bankingTransaction->resolve_status);
     }
 
-    #[Test]
     public function test_mark_as_unresolvable(): void
     {
         $bankingTransaction = BankingTransaction::factory()->create(['resolve_status' => ResolveStatus::Unresolved->value]);

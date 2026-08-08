@@ -15,10 +15,10 @@ final readonly class PurchaseOrderServiceImpl implements PurchaseOrderService
     ) {}
 
     #[Override]
-    public function markAsPending(PurchaseOrderId $id): void
+    public function markAsPending(PurchaseOrderIdList $ids): void
     {
-        $this->repository->markAsPending($id);
-        $this->bookkeepingRepository->createForPurchaseOrder(new PurchaseOrderIdList([$id]));
+        $this->repository->markAsPending($ids);
+        $this->bookkeepingRepository->createForPurchaseOrder($ids);
     }
 
     #[Override]
@@ -26,5 +26,11 @@ final readonly class PurchaseOrderServiceImpl implements PurchaseOrderService
     {
         $this->repository->markAsPaid($ids);
         $this->bookkeepingRepository->createForPurchaseOrder($ids);
+    }
+
+    #[Override]
+    public function markAsDeclined(PurchaseOrderIdList $ids): void
+    {
+        $this->repository->markAsDeclined($ids);
     }
 }

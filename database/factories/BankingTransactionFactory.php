@@ -36,4 +36,13 @@ final class BankingTransactionFactory extends Factory
     {
         return $this->state(['status' => BankTransactionStatus::Completed->value]);
     }
+
+    public function reversedBy(BankingTransaction $original): self
+    {
+        return $this->state([
+            'reversed_by_transaction_id' => $original->id,
+            'amount' => -$original->amount,
+            'banking_account_number' => $original->banking_account_number,
+        ]);
+    }
 }

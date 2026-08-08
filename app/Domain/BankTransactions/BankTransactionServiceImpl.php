@@ -50,20 +50,51 @@ final readonly class BankTransactionServiceImpl implements BankTransactionServic
 
         foreach ($criteriaList as $bankTransactionId => $criteria) {
             $result = $this->matchingService->findMatch($criteria);
+            $id = BankTransactionId::create($bankTransactionId);
 
             if (!$result->isMatch) {
-                $this->repository->markAsUnresolvable(BankTransactionId::create($bankTransactionId));
+                $this->repository->markAsUnresolvable($id);
                 continue;
             }
 
             if ($result->invoiceId !== null) {
-                $this->repository->attachInvoice(BankTransactionId::create($bankTransactionId), $result->invoiceId);
+                $this->repository->attachInvoice($id, $result->invoiceId);
             }
             if ($result->purchaseOrderId !== null) {
-                $this->repository->attachPurchaseOrder(BankTransactionId::create($bankTransactionId), $result->purchaseOrderId);
+                $this->repository->attachPurchaseOrder($id, $result->purchaseOrderId);
+            }
+            if ($result->reversedByTransactionId !== null) {
+                $this->linkReversal($result->reversedByTransactionId, $id);
             }
 
-            $this->repository->markAsResolved(BankTransactionId::create($bankTransactionId));
+            $this->repository->markAsResolved($id);
         }
+    }
+
+    #[Override]
+    public function linkReversal(BankTransactionId $reversalId, BankTransactionId $originalId): void
+    {
+        $this->repository->linkReversal($reversalId, $originalId);
+
+        $invoiceIds = $this->repository->getAttachedInvoiceIds($originalId);
+        $this->invoiceService->markAsDeclined($invoiceIds);
+
+        $purchaseOrderIds = $this->repository->getAttachedPurchaseOrderIds($originalId);
+        $this->purchaseOrderService->markAsDeclined($purchaseOrderIds);
+
+        $this->repository->markAsResolved($reversalId);
+        $this->repository->markAsResolved($originalId);
+    }
+
+    #[Override]
+    public function unlinkReversal(BankTransactionId $reversalId): void
+    {
+        $invoiceIds = $this->repository->getAttachedInvoiceIds($reversalId);
+        $this->invoiceService->markAsPending($invoiceIds);
+
+        $purchaseOrderIds = $this->repository->getAttachedPurchaseOrderIds($reversalId);
+        $this->purchaseOrderService->markAsPending($purchaseOrderIds);
+
+        $this->repository->unlinkReversal($reversalId);
     }
 }

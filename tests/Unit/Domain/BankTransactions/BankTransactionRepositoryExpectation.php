@@ -116,4 +116,26 @@ final readonly class BankTransactionRepositoryExpectation
             ->expects('markAsUnresolvable')
             ->with(equalTo($id));
     }
+
+    public function expectsFindReversalMatch(MatchCriteria $criteria, ?BankTransactionId $return): void
+    {
+        $this->mock
+            ->expects('findReversalMatch')
+            ->with(equalTo($criteria))
+            ->andReturn($return);
+    }
+
+    public function expectsLinkReversal(BankTransactionId $reversalId, BankTransactionId $originalId): void
+    {
+        $this->mock
+            ->expects('linkReversal')
+            ->with(equalTo($reversalId), equalTo($originalId));
+    }
+
+    public function expectsUnlinkReversal(BankTransactionId $reversalId): void
+    {
+        $this->mock
+            ->expects('unlinkReversal')
+            ->with(equalTo($reversalId));
+    }
 }

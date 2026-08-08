@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\BankTransactions;
 
+use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\BankTransactions\MatchCriteria;
 use App\Domain\BankTransactions\MatchResult;
 use App\Domain\BankTransactions\TransactionMatchingService;
@@ -27,6 +28,14 @@ final readonly class TransactionMatchingServiceExpectation
     {
         $this->mock
             ->expects('findMatch')
+            ->with(equalTo($criteria))
+            ->andReturn($return);
+    }
+
+    public function expectsFindReversalMatch(MatchCriteria $criteria, ?BankTransactionId $return): void
+    {
+        $this->mock
+            ->expects('findReversalMatch')
             ->with(equalTo($criteria))
             ->andReturn($return);
     }

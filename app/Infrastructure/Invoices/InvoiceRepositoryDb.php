@@ -192,7 +192,6 @@ final class InvoiceRepositoryDb implements InvoiceRepository
     {
         Invoice::query()
             ->whereIn('id', array_map(static fn (InvoiceId $id) => $id->value, $ids->ids))
-            ->where('status', InvoiceStatus::Open)
             ->update(['status' => InvoiceStatus::Pending]);
     }
 

@@ -28,4 +28,18 @@ final readonly class InvoiceServiceExpectation
             ->expects('markAsPaid')
             ->with(equalTo($ids));
     }
+
+    public function expectsMarkAsDeclined(InvoiceIdList $ids): void
+    {
+        $this->mock
+            ->expects('markAsDeclined')
+            ->with(equalTo($ids));
+    }
+
+    public function expectsMarkAsPending(InvoiceIdList $ids): void
+    {
+        $this->mock
+            ->expects('markAsPending')
+            ->with(equalTo($ids));
+    }
 }

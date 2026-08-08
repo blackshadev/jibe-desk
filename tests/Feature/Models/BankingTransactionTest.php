@@ -97,4 +97,55 @@ final class BankingTransactionTest extends FeatureTestCase
 
         static::assertFalse($transaction->isCompleted());
     }
+
+    public function test_is_reversal_returns_true_when_reversed_by_transaction_id_is_set(): void
+    {
+        $original = BankingTransaction::factory()->createQuietly(['amount' => 100.000]);
+        $reversal = BankingTransaction::factory()->reversedBy($original)->createQuietly();
+
+        static::assertTrue($reversal->isReversal());
+        static::assertFalse($original->isReversal());
+    }
+
+    public function test_is_reversed_returns_true_when_another_transaction_points_to_it(): void
+    {
+        $original = BankingTransaction::factory()->createQuietly(['amount' => 100.000]);
+        BankingTransaction::factory()->reversedBy($original)->createQuietly();
+
+        static::assertTrue($original->isReversed());
+    }
+
+    public function test_reversed_by_relationship_loads_original_transaction(): void
+    {
+        $original = BankingTransaction::factory()->createQuietly(['amount' => 100.000]);
+        $reversal = BankingTransaction::factory()->reversedBy($original)->createQuietly();
+
+        static::assertNotNull($reversal->reversedBy);
+        static::assertSame($original->id, $reversal->reversedBy->id);
+    }
+
+    public function test_unmatched_amount_returns_zero_for_reversal(): void
+    {
+        $original = BankingTransaction::factory()->createQuietly(['amount' => 100.000]);
+        $reversal = BankingTransaction::factory()->reversedBy($original)->createQuietly(['amount' => -100.000]);
+
+        static::assertSame(0.0, $reversal->unmatched_amount);
+    }
+
+    public function test_matched_amount_equals_amount_for_reversal(): void
+    {
+        $original = BankingTransaction::factory()->createQuietly(['amount' => 100.000]);
+        $reversal = BankingTransaction::factory()->reversedBy($original)->createQuietly(['amount' => -100.000]);
+
+        static::assertSame(-100.0, $reversal->matched_amount);
+    }
+
+    public function test_unmatched_amount_still_works_normally_for_non_reversal(): void
+    {
+        $transaction = BankingTransaction::factory()->createQuietly(['amount' => 150.500]);
+
+        $result = $transaction->unmatched_amount;
+
+        static::assertSame(150.5, $result);
+    }
 }

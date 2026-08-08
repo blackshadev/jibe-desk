@@ -18,11 +18,13 @@ final class MatchCriteriaTest extends UnitTestCase
             date: $date,
             amount: 100.50,
             bankingAccountNumber: 'NL91ABNA0417164300',
+            description: 'Monthly fee',
         );
 
         static::assertSame($date, $criteria->date);
         static::assertSame(100.50, $criteria->amount);
         static::assertSame('NL91ABNA0417164300', $criteria->bankingAccountNumber);
+        static::assertSame('Monthly fee', $criteria->description);
     }
 
     public function test_it_supports_negative_amount(): void
@@ -31,6 +33,7 @@ final class MatchCriteriaTest extends UnitTestCase
             date: new DateTimeImmutable('2026-01-15'),
             amount: -50.00,
             bankingAccountNumber: 'NL91ABNA0417164300',
+            description: 'Monthly fee',
         );
 
         static::assertSame(-50.00, $criteria->amount);

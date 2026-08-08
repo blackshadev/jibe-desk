@@ -6,6 +6,7 @@ namespace App\Filament\Admin\Resources\BankingTransactions\Tables;
 
 use App\Domain\BankTransactions\BankTransactionStatus;
 use App\Domain\BankTransactions\ResolveStatus;
+use App\Filament\Admin\Resources\BankingTransactions\BankingTransactionResource;
 use App\Models\BankingTransaction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -73,6 +74,28 @@ final class BankingTransactionsTable
                 TextColumn::make('banking_account_number')
                     ->label(__('labels.banking_account_number'))
                     ->searchable(),
+                TextColumn::make('reversedByTransaction')
+                    ->label(__('labels.reversal'))
+                    ->formatStateUsing(static fn (BankingTransaction $record): ?string =>
+                        $record->isReversal()
+                            ? __('labels.reversed_by', ['id' => $record->reversed_by_transaction_id])
+                            : ($record->isReversed()
+                                ? __('labels.has_reversal', ['id' => $record->reversedTransaction->id])
+                                : null
+                            )
+                    )
+                    ->color(static fn (BankingTransaction $record): string =>
+                        $record->isReversal() || $record->isReversed() ? 'danger' : 'gray'
+                    )
+                    ->url(static fn (BankingTransaction $record): ?string =>
+                        $record->isReversal()
+                            ? BankingTransactionResource::getUrl('view', ['record' => $record->reversed_by_transaction_id])
+                            : ($record->isReversed()
+                                ? BankingTransactionResource::getUrl('view', ['record' => $record->reversedTransaction->id])
+                                : null
+                            )
+                    )
+                    ->toggleable(),
                 TextColumn::make('created_at')
                     ->label(__('labels.created_at'))
                     ->dateTime()
@@ -105,6 +128,22 @@ final class BankingTransactionsTable
                         }
 
                         return $query->whereYear('date', $value);
+                    }),
+                SelectFilter::make('is_reversal')
+                    ->label(__('labels.is_reversal'))
+                    ->options([
+                        '1' => __('labels.yes'),
+                        '0' => __('labels.no'),
+                    ])
+                    ->query(static function (Builder $query, array $state) {
+                        $value = $state['value'] ?? '';
+                        if ($value === '') {
+                            return $query;
+                        }
+
+                        return $value === '1'
+                            ? $query->whereNotNull('reversed_by_transaction_id')
+                            : $query->whereNull('reversed_by_transaction_id');
                     }),
             ])
             ->filtersLayout(FiltersLayout::BeforeContent);

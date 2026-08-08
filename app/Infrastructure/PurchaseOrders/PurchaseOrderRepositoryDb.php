@@ -18,10 +18,10 @@ final class PurchaseOrderRepositoryDb implements PurchaseOrderRepository
     private const float AMOUNT_TOLERANCE = 0.01;
 
     #[Override]
-    public function markAsPending(PurchaseOrderId $id): void
+    public function markAsPending(PurchaseOrderIdList $ids): void
     {
         PurchaseOrder::query()
-            ->where('id', $id->value)
+            ->whereIn('id', array_map(static fn (PurchaseOrderId $id) => $id->value, $ids->ids))
             ->update(['status' => PurchaseOrderStatus::Pending]);
     }
 
@@ -31,6 +31,14 @@ final class PurchaseOrderRepositoryDb implements PurchaseOrderRepository
         PurchaseOrder::query()
             ->whereIn('id', array_map(static fn (PurchaseOrderId $id) => $id->value, $ids->ids))
             ->update(['status' => PurchaseOrderStatus::Paid]);
+    }
+
+    #[Override]
+    public function markAsDeclined(PurchaseOrderIdList $ids): void
+    {
+        PurchaseOrder::query()
+            ->whereIn('id', array_map(static fn (PurchaseOrderId $id) => $id->value, $ids->ids))
+            ->update(['status' => PurchaseOrderStatus::Declined]);
     }
 
     #[Override]

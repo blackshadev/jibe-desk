@@ -30,10 +30,17 @@ final readonly class PurchaseOrderServiceExpectation
             ->with(equalTo($ids));
     }
 
-    public function expectsMarkAsPending(PurchaseOrderId $id): void
+    public function expectsMarkAsPending(PurchaseOrderIdList $ids): void
     {
         $this->mock
             ->expects('markAsPending')
-            ->with(equalTo($id));
+            ->with(equalTo($ids));
+    }
+
+    public function expectsMarkAsDeclined(PurchaseOrderIdList $ids): void
+    {
+        $this->mock
+            ->expects('markAsDeclined')
+            ->with(equalTo($ids));
     }
 }

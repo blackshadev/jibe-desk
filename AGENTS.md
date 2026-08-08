@@ -166,6 +166,10 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 </laravel-boost-guidelines>
 
+## Domain Design
+
+Before working in a domain, read the context map and relevant context docs in `/.agents/docs/` — start with [CONTEXT-MAP.md](./.agents/docs/CONTEXT-MAP.md).
+
 ## Running commands
 
 All commands should be run through the `./Taskfile` script. For instance to run an Artisan command, use `./Taskfile artisan [command]`. To run a PHPUnit test, use `./Taskfile artisan test --filter=[testName]`. To run composer commands, use `./Taskfile composer [command]`.

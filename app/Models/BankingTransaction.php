@@ -11,7 +11,9 @@ use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Facades\DB;
 use Override;
@@ -49,6 +51,28 @@ final class BankingTransaction extends Model
         return $this->hasMany(BookkeepingRecord::class);
     }
 
+    /** @return BelongsTo<BankingTransaction, $this> */
+    public function reversedBy(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'reversed_by_transaction_id');
+    }
+
+    /** @return HasOne<BankingTransaction, $this> */
+    public function reversedTransaction(): HasOne
+    {
+        return $this->hasOne(self::class, 'reversed_by_transaction_id');
+    }
+
+    public function isReversal(): bool
+    {
+        return $this->reversed_by_transaction_id !== null;
+    }
+
+    public function isReversed(): bool
+    {
+        return $this->reversedTransaction()->exists();
+    }
+
     public function isCompleted(): bool
     {
         return $this->status === BankTransactionStatus::Completed;
@@ -59,9 +83,10 @@ final class BankingTransaction extends Model
     {
         return [
             'date' => 'date',
-            'amount' => 'decimal:3',
+            'amount' => 'float',
             'status' => BankTransactionStatus::class,
             'resolve_status' => ResolveStatus::class,
+            'reversed_by_transaction_id' => 'integer',
         ];
     }
 
@@ -71,6 +96,10 @@ final class BankingTransaction extends Model
     protected function matchedAmount(): Attribute
     {
         return Attribute::get(function (): float {
+            if ($this->isReversal()) {
+                return (float) $this->amount;
+            }
+
             $invoiceTotal = (float) InvoiceLine::query()
                 ->whereIn('invoice_id', $this->invoices()->select('invoices.id'))
                 ->sum(DB::raw('price * quantity'));
@@ -93,6 +122,8 @@ final class BankingTransaction extends Model
      */
     protected function unmatchedAmount(): Attribute
     {
-        return Attribute::get(fn (): float => $this->amount - $this->matched_amount);
+        return Attribute::get(fn (): float => $this->isReversal()
+            ? 0.0
+            : $this->amount - $this->matched_amount);
     }
 }

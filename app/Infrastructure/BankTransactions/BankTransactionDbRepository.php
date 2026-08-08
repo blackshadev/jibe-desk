@@ -19,6 +19,7 @@ use App\Models\BankingTransaction;
 use App\Models\BookkeepingRecord;
 use App\Models\Invoice;
 use App\Models\PurchaseOrder;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Override;
 
@@ -180,6 +181,7 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
                     date: $bt->date,
                     amount: (float) $bt->unmatched_amount,
                     bankingAccountNumber: $bt->banking_account_number,
+                    description: $bt->description,
                 ),
             ])
             ->all();
@@ -199,5 +201,66 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
         BankingTransaction::query()
             ->where('id', $bankTransactionId->value)
             ->update(['resolve_status' => 'unresolvable']);
+    }
+
+    #[Override]
+    public function findReversalMatch(MatchCriteria $criteria): ?BankTransactionId
+    {
+        $date = CarbonImmutable::instance($criteria->date);
+
+        $opposite = BankingTransaction::query()
+            ->whereNull('reversed_by_transaction_id')
+            ->where('banking_account_number', $criteria->bankingAccountNumber)
+            ->where('description', $criteria->description)
+            ->whereRaw('ABS(amount + ?) <= 0.01', [$criteria->amount])
+            ->whereDate('date', '>=', $date->subDays(56))
+            ->whereDate('date', '<=', $date)
+            ->orderByRaw('ABS(amount + ?) ASC', [$criteria->amount])
+            ->first();
+
+        if ($opposite === null) {
+            return null;
+        }
+
+        return BankTransactionId::create($opposite->id);
+    }
+
+    #[Override]
+    public function linkReversal(BankTransactionId $reversalId, BankTransactionId $originalId): void
+    {
+        DB::transaction(function () use ($reversalId, $originalId): void {
+            BankingTransaction::query()
+                ->where('id', $reversalId->value)
+                ->update([
+                    'reversed_by_transaction_id' => $originalId->value,
+                ]);
+
+            DB::table('banking_transaction_references')->insertUsing(
+                ['banking_transaction_id', 'reference_type', 'reference_id', 'created_at', 'updated_at'],
+                DB::table('banking_transaction_references')
+                    ->selectRaw('?, reference_type, reference_id, ?, ?', [$reversalId->value, now(), now()])
+                    ->where('banking_transaction_id', $originalId->value),
+            );
+
+            DB::table('bookkeeping_records')
+                ->where('banking_transaction_id', $originalId->value)
+                ->update(['banking_transaction_id' => null]);
+        });
+    }
+
+    #[Override]
+    public function unlinkReversal(BankTransactionId $reversalId): void
+    {
+        DB::transaction(function () use ($reversalId): void {
+            DB::table('banking_transaction_references')
+                ->where('banking_transaction_id', $reversalId->value)
+                ->delete();
+
+            BankingTransaction::query()
+                ->where('id', $reversalId->value)
+                ->update([
+                    'reversed_by_transaction_id' => null,
+                ]);
+        });
     }
 }

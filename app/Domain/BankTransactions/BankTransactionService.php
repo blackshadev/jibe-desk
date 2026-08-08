@@ -18,4 +18,8 @@ interface BankTransactionService
     public function complete(BankTransactionId $bankTransactionId): void;
 
     public function resolveMatching(BankTransactionIdList $ids): void;
+
+    public function linkReversal(BankTransactionId $reversalId, BankTransactionId $originalId): void;
+
+    public function unlinkReversal(BankTransactionId $reversalId): void;
 }

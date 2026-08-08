@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\BankTransactions;
 
+use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\BankTransactions\BankTransactionIdList;
 use App\Domain\BankTransactions\BankTransactionService;
 use Mockery;
@@ -34,5 +35,19 @@ final readonly class BankTransactionServiceExpectation
         $this->mock
             ->expects('resolveMatching')
             ->never();
+    }
+
+    public function expectsLinkReversal(BankTransactionId $reversalId, BankTransactionId $originalId): void
+    {
+        $this->mock
+            ->expects('linkReversal')
+            ->with(equalTo($reversalId), equalTo($originalId));
+    }
+
+    public function expectsUnlinkReversal(BankTransactionId $reversalId): void
+    {
+        $this->mock
+            ->expects('unlinkReversal')
+            ->with(equalTo($reversalId));
     }
 }
