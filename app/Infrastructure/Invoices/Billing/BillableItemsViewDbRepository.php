@@ -40,7 +40,7 @@ final class BillableItemsViewDbRepository implements BillableItemsViewRepository
             ->with('billableItem')
             ->where('member_id', $memberId->value)
             ->get()
-            ->map(static fn (BillableItemInstance $instance) => $instance->billableItem->toInvoiceBillableItem())
+            ->map(static fn (BillableItemInstance $instance) => $instance->billableItem->toInvoiceBillableItem($instance->quantityFor($when)))
             ->all();
 
         return new BillableItemList($billingItems);
@@ -52,6 +52,7 @@ final class BillableItemsViewDbRepository implements BillableItemsViewRepository
         $date = new Carbon($when)
             ->firstOfMonth()
             ->format('Y-m-d');
+        $month = (int) Carbon::create($when)->format('n');
 
         return BillableItemInstance::query()
             ->select('billable_item_instances.*')
@@ -78,15 +79,15 @@ final class BillableItemsViewDbRepository implements BillableItemsViewRepository
                     ->whereColumn('invoice_lines.billable_item_id', 'billable_items.id')
                     ->when(
                         DB::connection()->getDriverName() === 'sqlite',
-                        static function (Builder $query) use ($date): void {
+                        static function (Builder $query) use ($date, $month): void {
                             $query->whereRaw(
-                                "strftime('%Y-%m-01', invoices.date) > date(?, '-' || billable_item_instances.bill_cycle_in_months || ' months')",
-                                [$date],
+                                "strftime('%Y-%m-01', invoices.date) >= date(?, '-' || (((? - billable_item_instances.bill_month + 12) % 12) % billable_item_instances.bill_cycle_in_months) || ' months')",
+                                [$date, $month],
                             );
                         },
-                        static function (Builder $query) use ($date): void {
+                        static function (Builder $query) use ($date, $month): void {
                             $query->whereRaw(
-                                "DATE_TRUNC('month', invoices.date) > '{$date}'::date - MAKE_INTERVAL(0, billable_item_instances.bill_cycle_in_months)",
+                                "DATE_TRUNC('month', invoices.date) >= '{$date}'::date - MAKE_INTERVAL(0, ((({$month} - billable_item_instances.bill_month + 12) % 12) % billable_item_instances.bill_cycle_in_months))",
                             );
                         },
                     ),

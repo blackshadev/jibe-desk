@@ -22,6 +22,7 @@ final class BillableItemInstanceFactory extends Factory
             'member_id' => null,
             'billable_item_id' => BillableItem::factory(),
             'bill_cycle_in_months' => 12,
+            'bill_month' => 1,
             'start_date' => fake()->date(),
             'end_date' => null,
         ];

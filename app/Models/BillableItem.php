@@ -21,7 +21,7 @@ use Override;
  * @property BillPeriod $bill_period
  * @property int $id
  */
-#[Fillable(['description', 'price', 'vat', 'bill_period', 'cost_center_id'])]
+#[Fillable(['description', 'price', 'vat', 'bill_period', 'bill_month', 'cost_center_id'])]
 final class BillableItem extends Model
 {
     use HasFactory;
@@ -45,17 +45,18 @@ final class BillableItem extends Model
             'price' => 0,
             'vat' => 0,
             'bill_period' => BillPeriod::Annually,
+            'bill_month' => 1,
             'cost_center_id' => CostCenter::factory()->create()->id,
             ...$data,
         ]);
     }
 
-    public function toInvoiceBillableItem(): InvoiceBillableItem
+    public function toInvoiceBillableItem(float $quantity = 1.0): InvoiceBillableItem
     {
         return new InvoiceBillableItem(
             new BillableItemId($this->id),
             $this->compound_price,
-            1.0,
+            $quantity,
             $this->description,
             CostCenterId::create($this->cost_center_id),
         );
@@ -75,6 +76,7 @@ final class BillableItem extends Model
     {
         return [
             'bill_period' => BillPeriod::class,
+            'bill_month' => 'integer',
             'price' => 'decimal:2',
             'vat' => 'decimal:2',
         ];

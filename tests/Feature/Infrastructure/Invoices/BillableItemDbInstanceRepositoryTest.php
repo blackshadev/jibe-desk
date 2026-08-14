@@ -67,7 +67,7 @@ final class BillableItemDbInstanceRepositoryTest extends FeatureTestCase
     public function test_add_instance_creates_record_with_correct_bill_period(): void
     {
         $member = Member::factory()->createQuietly();
-        $billable = BillableItem::factory()->create(['bill_period' => 'monthly']);
+        $billable = BillableItem::factory()->create(['bill_period' => 'monthly', 'bill_month' => 6]);
 
         $repo = new BillableItemDbInstanceRepository();
 
@@ -78,13 +78,15 @@ final class BillableItemDbInstanceRepositoryTest extends FeatureTestCase
             'billable_item_id' => $billable->id,
             'start_date' => self::NOW,
             'end_date' => null,
+            'bill_cycle_in_months' => 1,
+            'bill_month' => 6,
         ]);
     }
 
     public function test_ensure_creates_record_when_missing(): void
     {
         $member = Member::factory()->createQuietly();
-        $billable = BillableItem::factory()->create(['bill_period' => 'monthly']);
+        $billable = BillableItem::factory()->create(['bill_period' => 'monthly', 'bill_month' => 6]);
 
         $repo = new BillableItemDbInstanceRepository();
 
@@ -94,6 +96,7 @@ final class BillableItemDbInstanceRepositoryTest extends FeatureTestCase
             'member_id' => $member->id,
             'billable_item_id' => $billable->id,
             'bill_cycle_in_months' => 1,
+            'bill_month' => 6,
             'end_date' => null,
         ]);
     }

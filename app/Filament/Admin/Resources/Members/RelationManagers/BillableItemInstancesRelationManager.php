@@ -30,6 +30,9 @@ final class BillableItemInstancesRelationManager extends RelationManager
                 TextColumn::make('billableItem.bill_period')
                     ->label(__('labels.bill_period'))
                     ->formatStateUsing(static fn (BillPeriod $state) => __('labels.bill_periods.' . $state->value)),
+                TextColumn::make('bill_month')
+                    ->label(__('labels.bill_month'))
+                    ->formatStateUsing(static fn (int $state): string => __('labels.months.' . $state)),
                 TextColumn::make('billableItem.description')
                     ->label(__('labels.description')),
                 TextColumn::make('billableItem.price')

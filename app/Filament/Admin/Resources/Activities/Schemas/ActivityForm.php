@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Activities\Schemas;
 
+use App\Filament\Admin\Labels\BillMonthLabels;
 use App\Filament\Admin\Labels\BillPeriodLabels;
 use App\Models\CostCenter;
 use Filament\Forms\Components\DatePicker;
@@ -42,6 +43,11 @@ final class ActivityForm
                     Select::make('bill_period')
                         ->label(__('labels.billing_period'))
                         ->options(BillPeriodLabels::options())
+                        ->required(),
+                    Select::make('bill_month')
+                        ->label(__('labels.bill_month'))
+                        ->options(BillMonthLabels::options())
+                        ->default(1)
                         ->required(),
                 ])
                 ->mutateRelationshipDataBeforeSaveUsing(static fn (array $state) => [

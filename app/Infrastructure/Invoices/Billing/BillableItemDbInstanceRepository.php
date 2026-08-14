@@ -41,6 +41,7 @@ final class BillableItemDbInstanceRepository implements BillableItemInstanceRepo
             'start_date' => $startDate ?? CarbonImmutable::now(),
             'end_date' => $endDate,
             'bill_cycle_in_months' => $billableItem->bill_period->toBillPeriodInMonths(),
+            'bill_month' => $billableItem->bill_month,
         ]);
 
         return BillableItemInstanceId::create($instance->id);
@@ -56,6 +57,7 @@ final class BillableItemDbInstanceRepository implements BillableItemInstanceRepo
             'billable_item_id' => $billableItemId->value,
             'end_date' => null,
             'bill_cycle_in_months' => $billableItem->bill_period->toBillPeriodInMonths(),
+            'bill_month' => $billableItem->bill_month,
         ], [
             'start_date' => CarbonImmutable::now(),
         ]);

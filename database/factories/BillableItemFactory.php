@@ -26,6 +26,7 @@ final class BillableItemFactory extends Factory
             'price' => $price,
             'vat' => $price * 0.21,
             'bill_period' => fake()->randomElement(BillPeriod::cases())->value,
+            'bill_month' => 1,
             'cost_center_id' => CostCenter::factory(),
         ];
     }

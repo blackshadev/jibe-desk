@@ -235,4 +235,115 @@ final class BillableItemsViewDbRepositoryTest extends FeatureTestCase
 
         static::assertCount(1, $items);
     }
+
+    public function test_list_billable_items_for_member_returns_pro_rated_quantity(): void
+    {
+        $when = new DateTimeImmutable('2026-08-15');
+        $membership = Membership::factory()->create();
+        $member = Member::factory()->createQuietly(['membership_id' => $membership->id]);
+        $billable = BillableItem::factory()->create(['bill_period' => 'annually', 'bill_month' => 1]);
+
+        BillableItemInstance::factory()->create([
+            'member_id' => $member->id,
+            'billable_item_id' => $billable->id,
+            'bill_cycle_in_months' => 12,
+            'bill_month' => 1,
+            'start_date' => '2026-08-01',
+            'end_date' => null,
+        ]);
+
+        $repo = new BillableItemsViewDbRepository();
+
+        $items = $repo->listBillableItemsForMember($when, MemberId::create($member->id))->items;
+
+        static::assertCount(1, $items);
+        static::assertEqualsWithDelta(5.0 / 12.0, $items[0]->quantity, 0.0001);
+    }
+
+    public function test_list_billable_items_for_member_returns_quarterly_anchor_quantity(): void
+    {
+        $when = new DateTimeImmutable('2026-02-15');
+        $membership = Membership::factory()->create();
+        $member = Member::factory()->createQuietly(['membership_id' => $membership->id]);
+        $billable = BillableItem::factory()->create(['bill_period' => 'quarterly', 'bill_month' => 1]);
+
+        BillableItemInstance::factory()->create([
+            'member_id' => $member->id,
+            'billable_item_id' => $billable->id,
+            'bill_cycle_in_months' => 3,
+            'bill_month' => 1,
+            'start_date' => '2026-02-01',
+            'end_date' => null,
+        ]);
+
+        $repo = new BillableItemsViewDbRepository();
+
+        $items = $repo->listBillableItemsForMember($when, MemberId::create($member->id))->items;
+
+        static::assertCount(1, $items);
+        static::assertEqualsWithDelta(2.0 / 3.0, $items[0]->quantity, 0.0001);
+    }
+
+    public function test_list_billable_items_for_member_respects_anchored_re_billing_window(): void
+    {
+        $membership = Membership::factory()->create();
+        $member = Member::factory()->createQuietly(['membership_id' => $membership->id]);
+        $billable = BillableItem::factory()->create(['bill_period' => 'annually', 'bill_month' => 1]);
+
+        BillableItemInstance::factory()->create([
+            'member_id' => $member->id,
+            'billable_item_id' => $billable->id,
+            'bill_cycle_in_months' => 12,
+            'bill_month' => 1,
+            'start_date' => '2026-08-01',
+            'end_date' => null,
+        ]);
+
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->create([
+                'date' => '2026-08-05',
+            ]);
+        InvoiceLine::factory()->create([
+            'invoice_id' => $invoice->id,
+            'billable_item_id' => $billable->id,
+            'description' => 'Member fee',
+            'price' => 10.0,
+            'vat' => 2.1,
+            'quantity' => 1.0,
+        ]);
+
+        $repo = new BillableItemsViewDbRepository();
+
+        $sameWindowItems = $repo->listBillableItemsForMember(new DateTimeImmutable('2026-09-15'), MemberId::create($member->id))->items;
+        static::assertCount(0, $sameWindowItems);
+
+        $nextWindowItems = $repo->listBillableItemsForMember(new DateTimeImmutable('2027-01-15'), MemberId::create($member->id))->items;
+        static::assertCount(1, $nextWindowItems);
+        static::assertSame(1.0, $nextWindowItems[0]->quantity);
+    }
+
+    public function test_list_billable_items_for_member_returns_non_january_bill_month_quantity(): void
+    {
+        $when = new DateTimeImmutable('2026-08-15');
+        $membership = Membership::factory()->create();
+        $member = Member::factory()->createQuietly(['membership_id' => $membership->id]);
+        $billable = BillableItem::factory()->create(['bill_period' => 'annually', 'bill_month' => 7]);
+
+        BillableItemInstance::factory()->create([
+            'member_id' => $member->id,
+            'billable_item_id' => $billable->id,
+            'bill_cycle_in_months' => 12,
+            'bill_month' => 7,
+            'start_date' => '2026-08-01',
+            'end_date' => null,
+        ]);
+
+        $repo = new BillableItemsViewDbRepository();
+
+        $items = $repo->listBillableItemsForMember($when, MemberId::create($member->id))->items;
+
+        static::assertCount(1, $items);
+        static::assertEqualsWithDelta(11.0 / 12.0, $items[0]->quantity, 0.0001);
+    }
 }
