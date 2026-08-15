@@ -170,4 +170,20 @@ enum ResourcePermission: string
     case UpdateBankingTransactions = 'update_banking_transactions';
     case DeleteBankingTransactions = 'delete_banking_transactions';
     case DeleteAnyBankingTransactions = 'delete_any_banking_transactions';
+
+    // Inventory Items
+    case ViewAnyInventoryItems = 'view_any_inventory_items';
+    case ViewInventoryItems = 'view_inventory_items';
+    case CreateInventoryItems = 'create_inventory_items';
+    case UpdateInventoryItems = 'update_inventory_items';
+    case DeleteInventoryItems = 'delete_inventory_items';
+    case DeleteAnyInventoryItems = 'delete_any_inventory_items';
+
+    // Inventory Categories
+    case ViewAnyInventoryCategories = 'view_any_inventory_categories';
+    case ViewInventoryCategories = 'view_inventory_categories';
+    case CreateInventoryCategories = 'create_inventory_categories';
+    case UpdateInventoryCategories = 'update_inventory_categories';
+    case DeleteInventoryCategories = 'delete_inventory_categories';
+    case DeleteAnyInventoryCategories = 'delete_any_inventory_categories';
 }
