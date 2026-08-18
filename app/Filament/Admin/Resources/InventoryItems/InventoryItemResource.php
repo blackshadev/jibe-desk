@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\InventoryItems;
 
+use App\Filament\Admin\Clusters\Bookkeeping\BookkeepingCluster;
 use App\Filament\Admin\Navigation\NavigationGroup;
 use App\Filament\Admin\Resources\InventoryItems\Pages\CreateInventoryItem;
 use App\Filament\Admin\Resources\InventoryItems\Pages\EditInventoryItem;
@@ -12,7 +13,6 @@ use App\Filament\Admin\Resources\InventoryItems\Schemas\InventoryItemForm;
 use App\Filament\Admin\Resources\InventoryItems\Tables\InventoryItemsTable;
 use App\Models\InventoryItem;
 use BackedEnum;
-use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -33,6 +33,12 @@ final class InventoryItemResource extends Resource
 
     #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Bookkeeping;
+
+    #[Override]
+    protected static ?string $cluster = BookkeepingCluster::class;
+
+    #[Override]
+    protected static ?int $navigationSort = 5;
 
     #[Override]
     public static function form(Schema $schema): Schema

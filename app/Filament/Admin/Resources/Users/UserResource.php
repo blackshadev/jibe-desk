@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Users;
 
+use App\Filament\Admin\Clusters\AdministrationSettings\AdministrationSettingsCluster;
 use App\Filament\Admin\Navigation\NavigationGroup;
 use App\Filament\Admin\Resources\Users\Pages\CreateUser;
 use App\Filament\Admin\Resources\Users\Pages\EditUser;
@@ -26,6 +27,12 @@ final class UserResource extends Resource
 
     #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Technical;
+
+    #[Override]
+    protected static ?string $cluster = AdministrationSettingsCluster::class;
+
+    #[Override]
+    protected static ?int $navigationSort = 2;
 
     #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Users;

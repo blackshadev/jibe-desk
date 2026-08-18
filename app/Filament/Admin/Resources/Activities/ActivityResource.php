@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Activities;
 
+use App\Filament\Admin\Clusters\Activities\ActivitiesCluster;
 use App\Filament\Admin\Navigation\NavigationGroup;
 use App\Filament\Admin\Resources\Activities\Pages\CreateActivity;
 use App\Filament\Admin\Resources\Activities\Pages\EditActivity;
@@ -27,6 +28,12 @@ final class ActivityResource extends Resource
 
     #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Activities;
+
+    #[Override]
+    protected static ?string $cluster = ActivitiesCluster::class;
+
+    #[Override]
+    protected static ?int $navigationSort = 1;
 
     #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::CalendarDays;

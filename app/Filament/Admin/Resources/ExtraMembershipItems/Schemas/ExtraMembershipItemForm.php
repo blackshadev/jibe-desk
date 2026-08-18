@@ -37,15 +37,15 @@ final class ExtraMembershipItemForm
                         TextInput::make('price')
                             ->label(__('labels.price'))
                             ->required(),
-                    Select::make('bill_period')
-                        ->label(__('labels.bill_period'))
-                        ->options(BillPeriodLabels::options())
-                        ->required(),
-                    Select::make('bill_month')
-                        ->label(__('labels.bill_month'))
-                        ->options(BillMonthLabels::options())
-                        ->default(1)
-                        ->required(),
+                        Select::make('bill_period')
+                            ->label(__('labels.bill_period'))
+                            ->options(BillPeriodLabels::options())
+                            ->required(),
+                        Select::make('bill_month')
+                            ->label(__('labels.bill_month'))
+                            ->options(BillMonthLabels::options())
+                            ->default(1)
+                            ->required(),
                         Select::make('cost_center_id')
                             ->label(__('labels.cost_center'))
                             ->options(static fn () => CostCenter::query()->orderBy('number')->pluck('title', 'id'))

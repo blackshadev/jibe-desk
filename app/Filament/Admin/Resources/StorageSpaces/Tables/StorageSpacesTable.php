@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\StorageSpaces\Tables;
 
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
@@ -41,10 +39,6 @@ final class StorageSpacesTable
                     ->relationship('location', 'name'),
             ], FiltersLayout::BeforeContent)
             ->defaultSort('location.name')
-            ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
-            ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

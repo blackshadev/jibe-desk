@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
-use App\Filament\Admin\Navigation\NavigationGroup;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -34,10 +33,10 @@ final class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
+            ->maxContentWidth('full')
             ->colors([
                 'primary' => '#2EA3F2',
             ])
-            ->navigationGroups(NavigationGroup::class)
             ->favicon(asset('favicon.ico'))
             ->brandName('WSV Almere Centraal')
             ->brandLogo(asset('images/logo.png'))

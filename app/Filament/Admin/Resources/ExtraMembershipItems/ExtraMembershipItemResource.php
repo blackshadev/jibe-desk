@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\ExtraMembershipItems;
 
+use App\Filament\Admin\Clusters\AdministrationSettings\AdministrationSettingsCluster;
 use App\Filament\Admin\Navigation\NavigationGroup;
 use App\Filament\Admin\Resources\ExtraMembershipItems\Pages\EditExtraMembershipItem;
 use App\Filament\Admin\Resources\ExtraMembershipItems\Pages\ListExtraMembershipItems;
@@ -31,7 +32,13 @@ final class ExtraMembershipItemResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::PlusCircle;
 
     #[Override]
-    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Technical;
+    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::MemberAdministration;
+
+    #[Override]
+    protected static ?string $cluster = AdministrationSettingsCluster::class;
+
+    #[Override]
+    protected static ?int $navigationSort = 10;
 
     #[Override]
     protected static ?string $recordTitleAttribute = 'code';

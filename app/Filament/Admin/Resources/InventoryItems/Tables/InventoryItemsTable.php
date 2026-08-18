@@ -5,10 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\InventoryItems\Tables;
 
 use App\Domain\Invoices\Formatters\PriceFormatter;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;

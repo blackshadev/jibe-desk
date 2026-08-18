@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\PurchaseOrders;
 
+use App\Filament\Admin\Clusters\Invoicing\InvoicingCluster;
 use App\Filament\Admin\Navigation\NavigationGroup;
 use App\Filament\Admin\Resources\PurchaseOrders\Pages\CreatePurchaseOrder;
 use App\Filament\Admin\Resources\PurchaseOrders\Pages\EditPurchaseOrder;
@@ -29,7 +30,13 @@ final class PurchaseOrderResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ShoppingCart;
 
     #[Override]
-    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Bookkeeping;
+    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Invoicing;
+
+    #[Override]
+    protected static ?string $cluster = InvoicingCluster::class;
+
+    #[Override]
+    protected static ?int $navigationSort = 2;
 
     #[Override]
     protected static ?string $recordTitleAttribute = 'description';

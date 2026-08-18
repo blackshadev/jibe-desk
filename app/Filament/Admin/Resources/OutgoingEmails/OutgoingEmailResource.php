@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\OutgoingEmails;
 
+use App\Filament\Admin\Clusters\Tech\TechCluster;
 use App\Filament\Admin\Navigation\NavigationGroup;
 use App\Filament\Admin\Resources\OutgoingEmails\Pages\ListOutgoingEmails;
 use App\Filament\Admin\Resources\OutgoingEmails\Tables\OutgoingEmailsTable;
@@ -22,6 +23,12 @@ final class OutgoingEmailResource extends Resource
 
     #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Technical;
+
+    #[Override]
+    protected static ?string $cluster = TechCluster::class;
+
+    #[Override]
+    protected static ?int $navigationSort = 1;
 
     #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Envelope;

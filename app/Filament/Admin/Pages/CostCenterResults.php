@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Pages;
 
-use App\Filament\Admin\Navigation\NavigationGroup;
+use App\Filament\Admin\Clusters\Bookkeeping\BookkeepingCluster;
 use App\Models\BookkeepingRecord;
 use App\Models\CostCenter;
 use App\Models\CostCenterBudget;
@@ -22,7 +22,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Override;
-use UnitEnum;
 
 final class CostCenterResults extends Page implements HasForms, HasTable
 {
@@ -36,7 +35,10 @@ final class CostCenterResults extends Page implements HasForms, HasTable
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ChartBarSquare;
 
     #[Override]
-    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Bookkeeping;
+    protected static ?string $cluster = BookkeepingCluster::class;
+
+    #[Override]
+    protected static ?int $navigationSort = 1;
 
     public ?int $selectedYear = null;
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Invoices;
 
+use App\Filament\Admin\Clusters\Invoicing\InvoicingCluster;
 use App\Filament\Admin\Navigation\NavigationGroup;
 use App\Filament\Admin\Resources\Invoices\Pages\CreateInvoice;
 use App\Filament\Admin\Resources\Invoices\Pages\EditInvoice;
@@ -27,6 +28,12 @@ final class InvoiceResource extends Resource
 
     #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Invoicing;
+
+    #[Override]
+    protected static ?string $cluster = InvoicingCluster::class;
+
+    #[Override]
+    protected static ?int $navigationSort = 1;
 
     #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::DocumentCurrencyEuro;

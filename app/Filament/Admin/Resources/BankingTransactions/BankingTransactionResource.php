@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BankingTransactions;
 
+use App\Filament\Admin\Clusters\Bookkeeping\BookkeepingCluster;
 use App\Filament\Admin\Navigation\NavigationGroup;
 use App\Filament\Admin\Resources\BankingTransactions\Pages\CreateBankingTransaction;
 use App\Filament\Admin\Resources\BankingTransactions\Pages\EditBankingTransaction;
@@ -30,6 +31,12 @@ final class BankingTransactionResource extends Resource
 
     #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Bookkeeping;
+
+    #[Override]
+    protected static ?string $cluster = BookkeepingCluster::class;
+
+    #[Override]
+    protected static ?int $navigationSort = 2;
 
     #[Override]
     protected static ?string $recordTitleAttribute = 'description';

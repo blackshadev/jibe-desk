@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\MemberObjectTypes;
 
+use App\Filament\Admin\Clusters\AdministrationSettings\AdministrationSettingsCluster;
 use App\Filament\Admin\Navigation\NavigationGroup;
 use App\Filament\Admin\Resources\MemberObjectTypes\Pages\CreateMemberObjectType;
 use App\Filament\Admin\Resources\MemberObjectTypes\Pages\EditMemberObjectType;
@@ -32,6 +33,12 @@ final class MemberObjectTypeResource extends Resource
 
     #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Technical;
+
+    #[Override]
+    protected static ?string $cluster = AdministrationSettingsCluster::class;
+
+    #[Override]
+    protected static ?int $navigationSort = 1;
 
     #[Override]
     public static function form(Schema $schema): Schema

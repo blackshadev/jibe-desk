@@ -48,16 +48,15 @@ final class InventoryItem extends Model
     protected function residualValue(): Attribute
     {
         return Attribute::get(static function (mixed $_value, array $attributes): float {
-           $years = abs(ceil(CarbonImmutable::make($attributes['date'])->diffInYears(now())));
-           $writeOffPeriodYears = $attributes['write_off_period_years'];
-           if ($years >= $writeOffPeriodYears) {
-               return 0;
-           }
+            $years = abs(ceil(CarbonImmutable::make($attributes['date'])->diffInYears(now())));
+            $writeOffPeriodYears = $attributes['write_off_period_years'];
+            if ($years >= $writeOffPeriodYears) {
+                return 0;
+            }
 
-           $fractionalValue = ($writeOffPeriodYears - $years) / $writeOffPeriodYears;
+            $fractionalValue = ($writeOffPeriodYears - $years) / $writeOffPeriodYears;
 
             return $attributes['amount'] * $fractionalValue;
         });
     }
-
 }

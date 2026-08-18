@@ -62,6 +62,7 @@ return [
         'technical' => 'Technisch',
         'bookkeeping' => 'Boekhouding',
         'inventory' => 'Inventaris',
+        'administration_settings' => 'Beheerinstellingen',
     ],
     'user' => 'Gebruiker',
     'users' => 'Gebruikers',

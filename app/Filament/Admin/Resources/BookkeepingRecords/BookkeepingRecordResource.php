@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BookkeepingRecords;
 
+use App\Filament\Admin\Clusters\Bookkeeping\BookkeepingCluster;
 use App\Filament\Admin\Navigation\NavigationGroup;
 use App\Filament\Admin\Resources\BookkeepingRecords\Pages\CreateBookkeepingRecord;
 use App\Filament\Admin\Resources\BookkeepingRecords\Pages\EditBookkeepingRecord;
@@ -31,6 +32,12 @@ class BookkeepingRecordResource extends Resource
 
     #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Bookkeeping;
+
+    #[Override]
+    protected static ?string $cluster = BookkeepingCluster::class;
+
+    #[Override]
+    protected static ?int $navigationSort = 3;
 
     #[Override]
     protected static ?string $recordTitleAttribute = 'description';

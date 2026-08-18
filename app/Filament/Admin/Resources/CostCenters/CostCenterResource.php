@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\CostCenters;
 
+use App\Filament\Admin\Clusters\Bookkeeping\BookkeepingCluster;
 use App\Filament\Admin\Navigation\NavigationGroup;
 use App\Filament\Admin\Resources\CostCenters\Pages\CreateCostCenter;
 use App\Filament\Admin\Resources\CostCenters\Pages\EditCostCenter;
@@ -32,6 +33,12 @@ final class CostCenterResource extends Resource
 
     #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Bookkeeping;
+
+    #[Override]
+    protected static ?string $cluster = BookkeepingCluster::class;
+
+    #[Override]
+    protected static ?int $navigationSort = 4;
 
     #[Override]
     protected static ?string $recordTitleAttribute = 'title';

@@ -9,6 +9,8 @@ use App\Domain\Mail\BaseMail;
 use App\Domain\Mail\Recipient;
 use App\Domain\Mail\Related;
 /** @phpstan-ignore domain.dependency */
+/** @phpstan-ignore domain.dependency */
+use App\Filament\Admin\Resources\InvoiceBatches\InvoiceBatchResource;
 use App\Models\InvoiceBatch;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -44,7 +46,7 @@ final readonly class InvoiceBatchCreatedMail extends BaseMail
                 'batchDate' => $this->batch->invoiceDate,
                 'invoiceCount' => $this->batch->invoiceCount,
                 'invoiceTotal' => (string) $this->batch->total,
-                'batchUrl' => route('filament.admin.resources.invoice-batches.edit', ['record' => $this->batch->id->value]),
+                'batchUrl' => InvoiceBatchResource::getUrl('edit', ['record' => $this->batch->id->value]),
             ],
         );
     }

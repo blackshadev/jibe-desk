@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\InventoryCategories;
 
+use App\Filament\Admin\Clusters\Bookkeeping\BookkeepingCluster;
 use App\Filament\Admin\Navigation\NavigationGroup;
 use App\Filament\Admin\Resources\InventoryCategories\Pages\CreateInventoryCategory;
 use App\Filament\Admin\Resources\InventoryCategories\Pages\EditInventoryCategory;
@@ -34,7 +35,10 @@ final class InventoryCategoryResource extends Resource
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Bookkeeping;
 
     #[Override]
-    protected static bool $shouldRegisterNavigation = false;
+    protected static ?int $navigationSort = 6;
+
+    #[Override]
+    protected static ?string $cluster = BookkeepingCluster::class;
 
     #[Override]
     protected static ?string $recordTitleAttribute = 'name';

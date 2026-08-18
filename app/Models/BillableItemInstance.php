@@ -68,7 +68,7 @@ final class BillableItemInstance extends Model
         $month = (int) $invoiceMonth->format('n');
         $billMonth = (int) $this->bill_month;
 
-        $offset = (($month - $billMonth + 12) % 12) % $cycle;
+        $offset = ($month - $billMonth + 12) % 12 % $cycle;
         $anchor = $invoiceMonth->subMonths($offset);
         $nextBill = $anchor->addMonths($cycle);
 

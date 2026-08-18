@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\InvoiceBatches;
 
+use App\Filament\Admin\Clusters\Invoicing\InvoicingCluster;
 use App\Filament\Admin\Navigation\NavigationGroup;
 use App\Filament\Admin\Resources\InvoiceBatches\Pages\CreateInvoiceBatch;
 use App\Filament\Admin\Resources\InvoiceBatches\Pages\EditInvoiceBatch;
@@ -28,6 +29,12 @@ final class InvoiceBatchResource extends Resource
 
     #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Invoicing;
+
+    #[Override]
+    protected static ?string $cluster = InvoicingCluster::class;
+
+    #[Override]
+    protected static ?int $navigationSort = 3;
 
     #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::DocumentDuplicate;

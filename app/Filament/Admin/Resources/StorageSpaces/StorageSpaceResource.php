@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\StorageSpaces;
 
+use App\Filament\Admin\Clusters\Rental\RentalCluster;
 use App\Filament\Admin\Navigation\NavigationGroup;
 use App\Filament\Admin\Resources\StorageSpaces\Pages\CreateStorageSpace;
 use App\Filament\Admin\Resources\StorageSpaces\Pages\EditStorageSpace;
@@ -30,6 +31,12 @@ final class StorageSpaceResource extends Resource
 
     #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Rental;
+
+    #[Override]
+    protected static ?string $cluster = RentalCluster::class;
+
+    #[Override]
+    protected static ?int $navigationSort = 1;
 
     #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Squares2x2;

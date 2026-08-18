@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Members;
 
+use App\Filament\Admin\Clusters\Members\MembersCluster;
 use App\Filament\Admin\Navigation\NavigationGroup;
 use App\Filament\Admin\Resources\Members\Pages\CreateMember;
 use App\Filament\Admin\Resources\Members\Pages\EditMember;
@@ -34,6 +35,12 @@ final class MemberResource extends Resource
 
     #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::MemberAdministration;
+
+    #[Override]
+    protected static ?string $cluster = MembersCluster::class;
+
+    #[Override]
+    protected static ?int $navigationSort = 1;
 
     #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::UserGroup;

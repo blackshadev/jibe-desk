@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Households;
 
+use App\Filament\Admin\Clusters\Members\MembersCluster;
 use App\Filament\Admin\Navigation\NavigationGroup;
 use App\Filament\Admin\Resources\Households\Pages\CreateHousehold;
 use App\Filament\Admin\Resources\Households\Pages\EditHousehold;
 use App\Filament\Admin\Resources\Households\Pages\ListHouseholds;
 use App\Filament\Admin\Resources\Households\RelationManagers\HouseholdMembersRelationManager;
-use App\Filament\Admin\Resources\Households\Table\HouseholdTable;
+use App\Filament\Admin\Resources\Households\Tables\HouseholdTable;
 use App\Models\Household;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -28,6 +29,12 @@ final class HouseholdResource extends Resource
 
     #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::MemberAdministration;
+
+    #[Override]
+    protected static ?string $cluster = MembersCluster::class;
+
+    #[Override]
+    protected static ?int $navigationSort = 2;
 
     #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Home;

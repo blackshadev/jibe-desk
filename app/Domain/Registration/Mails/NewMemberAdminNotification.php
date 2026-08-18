@@ -8,6 +8,8 @@ use App\Domain\Mail\BaseMail;
 use App\Domain\Mail\Recipient;
 use App\Domain\Members\MemberId;
 use App\Domain\Registration\MembershipData;
+/** @phpstan-ignore domain.dependency */
+use App\Filament\Admin\Resources\Members\MemberResource;
 use Illuminate\Mail\Mailables\Content;
 use Override;
 
@@ -28,7 +30,7 @@ final readonly class NewMemberAdminNotification extends BaseMail
             with: [
                 'memberName' => $this->memberName,
                 'membershipData' => $this->membershipData,
-                'editUrl' => route('filament.admin.resources.members.edit', ['record' => $this->memberId->value]),
+                'editUrl' => MemberResource::getUrl('edit', ['record' => $this->memberId->value]),
             ],
         );
     }
