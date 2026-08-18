@@ -34,6 +34,7 @@ final class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->maxContentWidth('full')
+            ->sidebarWidth('15rem')
             ->colors([
                 'primary' => '#2EA3F2',
             ])
