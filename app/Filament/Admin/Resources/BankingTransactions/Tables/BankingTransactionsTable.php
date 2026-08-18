@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BankingTransactions\Tables;
 
+use App\Domain\BankTransactions\BankingTransactionReversalState;
 use App\Domain\BankTransactions\BankTransactionStatus;
 use App\Domain\BankTransactions\ResolveStatus;
 use App\Filament\Admin\Resources\BankingTransactions\BankingTransactionResource;
@@ -13,19 +14,12 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Query\Builder as QueryBuilder;
-use Illuminate\Support\Facades\DB;
 
 final class BankingTransactionsTable
 {
     public static function configure(Table $table): Table
     {
-        $monthExpression = self::monthExpression();
-
         return $table
             ->columns([
                 TextColumn::make('date')
@@ -58,15 +52,13 @@ final class BankingTransactionsTable
                 TextColumn::make('status')
                     ->label(__('labels.status'))
                     ->badge()
-                    ->formatStateUsing(static fn ($state): string => match ($state) {
-                        'open' => __('labels.open'),
-                        'completed' => __('labels.completed'),
-                        default => $state instanceof BankTransactionStatus ? $state->value : (string) $state,
+                    ->formatStateUsing(static fn (BankTransactionStatus $state): string => match ($state) {
+                        BankTransactionStatus::Open => __('labels.open'),
+                        BankTransactionStatus::Completed => __('labels.completed'),
                     })
-                    ->color(static fn ($state): string => match ($state) {
-                        'open' => 'warning',
-                        'completed' => 'success',
-                        default => 'gray',
+                    ->color(static fn (BankTransactionStatus $state): string => match ($state) {
+                        BankTransactionStatus::Open => 'warning',
+                        BankTransactionStatus::Completed => 'success',
                     })
                     ->sortable(),
                 TextColumn::make('resolve_status')
@@ -88,25 +80,17 @@ final class BankingTransactionsTable
                     ->searchable(),
                 TextColumn::make('reversedByTransaction')
                     ->label(__('labels.reversal'))
-                    ->formatStateUsing(static fn (BankingTransaction $record): ?string => (
-                        $record->isReversal()
-                            ? __('labels.reversed_by', ['id' => $record->reversed_by_transaction_id])
-                            : (
-                                $record->isReversed()
-                                    ? __('labels.has_reversal', ['id' => $record->reversedTransaction->id])
-                                    : null
-                            )
-                    ))
+                    ->formatStateUsing(static fn (BankingTransaction $record): ?string => match ($record->reversalState()) {
+                        BankingTransactionReversalState::Reversal => __('labels.reversed_by', ['id' => $record->reversed_by_transaction_id]),
+                        BankingTransactionReversalState::Reversed => __('labels.has_reversal', ['id' => $record->reversedTransaction->id]),
+                        default => null,
+                    })
                     ->color(static fn (BankingTransaction $record): string => $record->isReversal() || $record->isReversed() ? 'danger' : 'gray')
-                    ->url(static fn (BankingTransaction $record): ?string => (
-                        $record->isReversal()
-                            ? BankingTransactionResource::getUrl('view', ['record' => $record->reversed_by_transaction_id])
-                            : (
-                                $record->isReversed()
-                                    ? BankingTransactionResource::getUrl('view', ['record' => $record->reversedTransaction->id])
-                                    : null
-                            )
-                    ))
+                    ->url(static fn (BankingTransaction $record): ?string => match ($record->reversalState()) {
+                        BankingTransactionReversalState::Reversal => BankingTransactionResource::getUrl('view', ['record' => $record->reversed_by_transaction_id]),
+                        BankingTransactionReversalState::Reversed => BankingTransactionResource::getUrl('view', ['record' => $record->reversedTransaction->id]),
+                        default => null,
+                    })
                     ->toggleable(),
                 TextColumn::make('created_at')
                     ->label(__('labels.created_at'))
@@ -121,68 +105,17 @@ final class BankingTransactionsTable
                 ]),
             ])
             ->groups([
-                Group::make('month')
-                    ->label(__('labels.month'))
-                    ->getKeyFromRecordUsing(static fn (BankingTransaction $record): string => $record->date->format('Y-m'))
-                    ->getTitleFromRecordUsing(static fn (BankingTransaction $record): string => $record->date->format('Y-m'))
-                    ->groupQueryUsing(static fn (QueryBuilder $query): QueryBuilder => $query->groupByRaw($monthExpression))
-                    ->orderQueryUsing(static fn (Builder $query, string $direction): Builder => $query->orderBy('date', $direction))
-                    ->scopeQueryByKeyUsing(static fn (Builder $query, ?string $key): Builder => (
-                        $key === null
-                            ? $query
-                            : $query->whereRaw($monthExpression . ' = ?', [$key])
-                    )),
+                MonthGroup::make('month')
+                    ->label(__('labels.month')),
             ])
             ->defaultGroup('month')
             ->groupingSettingsHidden()
             ->filters([
-                SelectFilter::make(__('labels.book_year'))
-                    ->options(
-                        BankingTransaction::query()
-                            ->select(
-                                DB::connection()->getConfig()['driver'] === 'pgsql'
-                                    ? DB::raw('EXTRACT(YEAR FROM date) AS year')
-                                    : DB::raw('STRFTIME(\'%Y\', date) AS year'),
-                            )
-                            ->pluck('year', 'year')
-                            ->all(),
-                    )
-                    ->query(static function (Builder $query, array $state) {
-                        $value = $state['value'] ?? '';
-                        if ($value === '') {
-                            return $query;
-                        }
-
-                        return $query->whereYear('date', $value);
-                    }),
-                SelectFilter::make('is_reversal')
-                    ->label(__('labels.is_reversal'))
-                    ->options([
-                        '1' => __('labels.yes'),
-                        '0' => __('labels.no'),
-                    ])
-                    ->query(static function (Builder $query, array $state) {
-                        $value = $state['value'] ?? '';
-                        if ($value === '') {
-                            return $query;
-                        }
-
-                        return $value === '1'
-                            ? $query->whereNotNull('reversed_by_transaction_id')
-                            : $query->whereNull('reversed_by_transaction_id');
-                    }),
+                BookYearFilter::make('book_year')
+                    ->label(__('labels.book_year')),
+                IsReversalFilter::make('is_reversal')
+                    ->label(__('labels.is_reversal')),
             ])
             ->filtersLayout(FiltersLayout::BeforeContent);
-    }
-
-    /**
-     * Raw SQL expression that returns the month (`YYYY-MM`) of the transaction date,
-     * matching the `Y-m` format produced by `getKeyFromRecordUsing`.
-     */
-    private static function monthExpression(): string
-    {
-        return DB::connection()->getConfig()['driver'] === 'pgsql'
-            ? "to_char(date, 'YYYY-MM')"
-            : "strftime('%Y-%m', date)";
     }
 }

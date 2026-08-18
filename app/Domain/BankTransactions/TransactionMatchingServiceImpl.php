@@ -19,16 +19,9 @@ final readonly class TransactionMatchingServiceImpl implements TransactionMatchi
     #[Override]
     public function findMatch(MatchCriteria $criteria): MatchResult
     {
-        if ($criteria->amount > 0) {
-            $result = $this->findMatchingInvoice($criteria);
-            if ($result->isMatch) {
-                return $result;
-            }
-        } else {
-            $result = $this->findMatchingPurchaseOrder($criteria);
-            if ($result->isMatch) {
-                return $result;
-            }
+        $result = $criteria->amount > 0 ? $this->findMatchingInvoice($criteria) : $this->findMatchingPurchaseOrder($criteria);
+        if ($result->isMatch) {
+            return $result;
         }
 
         $reversedById = $this->findReversalMatch($criteria);

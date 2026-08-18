@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Domain\BankTransactions\BankingTransactionReversalState;
 use App\Domain\BankTransactions\BankTransactionStatus;
 use App\Domain\BankTransactions\ResolveStatus;
 use DateTimeInterface;
@@ -61,6 +62,19 @@ final class BankingTransaction extends Model
     public function reversedTransaction(): HasOne
     {
         return $this->hasOne(self::class, 'reversed_by_transaction_id');
+    }
+
+    public function reversalState(): BankingTransactionReversalState
+    {
+        if ($this->isReversal()) {
+            return BankingTransactionReversalState::Reversal;
+        }
+
+        if ($this->isReversed()) {
+            return BankingTransactionReversalState::Reversed;
+        }
+
+        return BankingTransactionReversalState::None;
     }
 
     public function isReversal(): bool

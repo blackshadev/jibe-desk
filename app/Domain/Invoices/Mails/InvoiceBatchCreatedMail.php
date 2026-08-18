@@ -9,8 +9,8 @@ use App\Domain\Mail\BaseMail;
 use App\Domain\Mail\Recipient;
 use App\Domain\Mail\Related;
 /** @phpstan-ignore domain.dependency */
-/** @phpstan-ignore domain.dependency */
 use App\Filament\Admin\Resources\InvoiceBatches\InvoiceBatchResource;
+/** @phpstan-ignore domain.dependency */
 use App\Models\InvoiceBatch;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
