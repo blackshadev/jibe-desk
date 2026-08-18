@@ -197,4 +197,20 @@ final class BankingTransactionResourceTest extends FeatureTestCase
         static::assertNotNull($record);
         static::assertEqualsWithDelta(-100.0, (float) $record->amount_price, 0.001);
     }
+
+    public function test_banking_transactions_are_grouped_by_month_with_amount_summary(): void
+    {
+        $this->withAuthorizedUser();
+
+        BankingTransaction::factory()->create(['date' => '2026-01-10', 'amount' => 100.00]);
+        BankingTransaction::factory()->create(['date' => '2026-01-20', 'amount' => -30.00]);
+        BankingTransaction::factory()->create(['date' => '2026-02-05', 'amount' => 50.00]);
+
+        Livewire::test(ListBankingTransactions::class)
+            ->assertSuccessful()
+            ->assertSee('2026-01')
+            ->assertSee('2026-02')
+            ->assertTableColumnSummarySet('amount', 'total_amount', 120.00)
+            ->assertTableColumnSummarySet('amount', 'running_total', '');
+    }
 }

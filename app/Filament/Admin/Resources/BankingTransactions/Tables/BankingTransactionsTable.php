@@ -10,17 +10,22 @@ use App\Filament\Admin\Resources\BankingTransactions\BankingTransactionResource;
 use App\Models\BankingTransaction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\DB;
 
 final class BankingTransactionsTable
 {
     public static function configure(Table $table): Table
     {
+        $monthExpression = self::monthExpression();
+
         return $table
             ->columns([
                 TextColumn::make('date')
@@ -36,7 +41,14 @@ final class BankingTransactionsTable
                     ->money('EUR')
                     ->sortable()
                     ->alignEnd()
-                    ->color(static fn (BankingTransaction $record): string => $record->amount < 0 ? 'danger' : 'success'),
+                    ->color(static fn (BankingTransaction $record): string => $record->amount < 0 ? 'danger' : 'success')
+                    ->summarize([
+                        Sum::make('total_amount')
+                            ->label(__('labels.total_amount_this_month'))
+                            ->money('EUR'),
+                        RunningTotalSummery::make('running_total')
+                            ->label(__('labels.running_total')),
+                    ]),
                 TextColumn::make('unmatched_amount')
                     ->label(__('labels.unmatched'))
                     ->money('EUR')
@@ -108,6 +120,21 @@ final class BankingTransactionsTable
                         ->authorizeIndividualRecords(),
                 ]),
             ])
+            ->groups([
+                Group::make('month')
+                    ->label(__('labels.month'))
+                    ->getKeyFromRecordUsing(static fn (BankingTransaction $record): string => $record->date->format('Y-m'))
+                    ->getTitleFromRecordUsing(static fn (BankingTransaction $record): string => $record->date->format('Y-m'))
+                    ->groupQueryUsing(static fn (QueryBuilder $query): QueryBuilder => $query->groupByRaw($monthExpression))
+                    ->orderQueryUsing(static fn (Builder $query, string $direction): Builder => $query->orderBy('date', $direction))
+                    ->scopeQueryByKeyUsing(static fn (Builder $query, ?string $key): Builder => (
+                        $key === null
+                            ? $query
+                            : $query->whereRaw($monthExpression . ' = ?', [$key])
+                    )),
+            ])
+            ->defaultGroup('month')
+            ->groupingSettingsHidden()
             ->filters([
                 SelectFilter::make(__('labels.book_year'))
                     ->options(
@@ -120,7 +147,6 @@ final class BankingTransactionsTable
                             ->pluck('year', 'year')
                             ->all(),
                     )
-                    ->default(now()->year)
                     ->query(static function (Builder $query, array $state) {
                         $value = $state['value'] ?? '';
                         if ($value === '') {
@@ -147,5 +173,16 @@ final class BankingTransactionsTable
                     }),
             ])
             ->filtersLayout(FiltersLayout::BeforeContent);
+    }
+
+    /**
+     * Raw SQL expression that returns the month (`YYYY-MM`) of the transaction date,
+     * matching the `Y-m` format produced by `getKeyFromRecordUsing`.
+     */
+    private static function monthExpression(): string
+    {
+        return DB::connection()->getConfig()['driver'] === 'pgsql'
+            ? "to_char(date, 'YYYY-MM')"
+            : "strftime('%Y-%m', date)";
     }
 }
