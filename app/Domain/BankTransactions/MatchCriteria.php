@@ -13,5 +13,6 @@ final readonly class MatchCriteria
         public float $amount,
         public string $bankingAccountNumber,
         public string $description,
+        public ?int $bankAccountId = null,
     ) {}
 }

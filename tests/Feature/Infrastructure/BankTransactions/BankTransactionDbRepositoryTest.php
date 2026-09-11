@@ -13,6 +13,7 @@ use App\Domain\BankTransactions\ResolveStatus;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Infrastructure\BankTransactions\BankTransactionDbRepository;
+use App\Models\BankAccount;
 use App\Models\BankingTransaction;
 use App\Models\BookkeepingRecord;
 use App\Models\Invoice;
@@ -36,11 +37,15 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
 
     public function test_it_creates_a_banking_transaction_and_returns_id(): void
     {
+        $bankAccount = BankAccount::factory()->create();
+
         $dto = new CreateBankTransaction(
             date: '2024-01-15',
             amount: 100.50,
             description: 'Test payment',
             bankingAccountNumber: 'NL91ABNA0417164300',
+            bankAccountId: $bankAccount->id,
+            bankStatementId: null,
             importHash: 'abc123',
         );
 

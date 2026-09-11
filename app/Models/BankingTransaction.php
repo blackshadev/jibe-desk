@@ -64,6 +64,18 @@ final class BankingTransaction extends Model
         return $this->hasOne(self::class, 'reversed_by_transaction_id');
     }
 
+    /** @return BelongsTo<BankAccount, $this> */
+    public function bankAccount(): BelongsTo
+    {
+        return $this->belongsTo(BankAccount::class);
+    }
+
+    /** @return BelongsTo<BankStatement, $this> */
+    public function bankStatement(): BelongsTo
+    {
+        return $this->belongsTo(BankStatement::class);
+    }
+
     public function reversalState(): BankingTransactionReversalState
     {
         if ($this->isReversal()) {
@@ -92,6 +104,36 @@ final class BankingTransaction extends Model
         return $this->status === BankTransactionStatus::Completed;
     }
 
+    public function isInternalTransfer(): bool
+    {
+        return DB::table('banking_transaction_links')
+            ->where('link_type', 'internal_transfer')
+            ->where(fn ($query) => $query
+                ->where('banking_transaction_id', $this->id)
+                ->orWhere('linked_transaction_id', $this->id))
+            ->exists();
+    }
+
+    public function linkedInternalTransfer(): ?self
+    {
+        $link = DB::table('banking_transaction_links')
+            ->where('link_type', 'internal_transfer')
+            ->where(fn ($query) => $query
+                ->where('banking_transaction_id', $this->id)
+                ->orWhere('linked_transaction_id', $this->id))
+            ->first();
+
+        if ($link === null) {
+            return null;
+        }
+
+        $otherId = (int) $link->banking_transaction_id === $this->id
+            ? (int) $link->linked_transaction_id
+            : (int) $link->banking_transaction_id;
+
+        return self::query()->find($otherId);
+    }
+
     #[Override]
     protected function casts(): array
     {
@@ -101,6 +143,8 @@ final class BankingTransaction extends Model
             'status' => BankTransactionStatus::class,
             'resolve_status' => ResolveStatus::class,
             'reversed_by_transaction_id' => 'integer',
+            'bank_account_id' => 'integer',
+            'bank_statement_id' => 'integer',
         ];
     }
 

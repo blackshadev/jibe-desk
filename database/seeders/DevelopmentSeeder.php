@@ -6,6 +6,7 @@ namespace Database\Seeders;
 
 use App\Domain\Authorization\RoleName;
 use App\Models\Activity;
+use App\Models\BankAccount;
 use App\Models\Member;
 use App\Models\Membership;
 use App\Models\StorageSpace;
@@ -73,6 +74,12 @@ final class DevelopmentSeeder extends Seeder
                     ->createMany(),
             );
         }
+
+        BankAccount::factory()->create();
+        BankAccount::factory()->create([
+            'iban' => 'NL35RABO3010166281',
+            'name' => 'Betaalrekening',
+        ]);
 
         Member::factory()
             ->deleted()

@@ -11,6 +11,8 @@ final readonly class CreateBankTransaction
         public float $amount,
         public string $description,
         public string $bankingAccountNumber,
+        public int $bankAccountId,
+        public ?int $bankStatementId,
         public string $importHash,
     ) {}
 }

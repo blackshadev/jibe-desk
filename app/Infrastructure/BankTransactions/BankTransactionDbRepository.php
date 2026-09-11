@@ -11,10 +11,12 @@ use App\Domain\BankTransactions\BankTransactionStatus;
 use App\Domain\BankTransactions\CouldNotCompleteTransaction;
 use App\Domain\BankTransactions\CreateBankTransaction;
 use App\Domain\BankTransactions\MatchCriteria;
+use App\Domain\BankTransactions\ResolveStatus;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Domain\PurchaseOrders\PurchaseOrderIdList;
+use App\Models\BankAccount;
 use App\Models\BankingTransaction;
 use App\Models\BookkeepingRecord;
 use App\Models\Invoice;
@@ -33,6 +35,8 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
             'amount' => $dto->amount,
             'description' => $dto->description,
             'banking_account_number' => $dto->bankingAccountNumber,
+            'bank_account_id' => $dto->bankAccountId,
+            'bank_statement_id' => $dto->bankStatementId,
             'import_hash' => $dto->importHash,
         ]);
 
@@ -182,6 +186,7 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
                     amount: (float) $bt->unmatched_amount,
                     bankingAccountNumber: $bt->banking_account_number,
                     description: $bt->description,
+                    bankAccountId: $bt->bank_account_id,
                 ),
             ])
             ->all();
@@ -208,15 +213,20 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
     {
         $date = CarbonImmutable::instance($criteria->date);
 
-        $opposite = BankingTransaction::query()
+        $query = BankingTransaction::query()
             ->whereNull('reversed_by_transaction_id')
             ->where('banking_account_number', $criteria->bankingAccountNumber)
             ->where('description', $criteria->description)
             ->whereRaw('ABS(amount + ?) <= 0.01', [$criteria->amount])
             ->whereDate('date', '>=', $date->subDays(56))
             ->whereDate('date', '<=', $date)
-            ->orderByRaw('ABS(amount + ?) ASC', [$criteria->amount])
-            ->first();
+            ->orderByRaw('ABS(amount + ?) ASC', [$criteria->amount]);
+
+        if ($criteria->bankAccountId !== null) {
+            $query->where('bank_account_id', $criteria->bankAccountId);
+        }
+
+        $opposite = $query->first();
 
         if ($opposite === null) {
             return null;
@@ -262,5 +272,136 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
                     'reversed_by_transaction_id' => null,
                 ]);
         });
+    }
+
+    #[Override]
+    public function findInternalTransferMatch(MatchCriteria $criteria): ?BankTransactionId
+    {
+        if ($criteria->bankAccountId === null) {
+            return null;
+        }
+
+        $targetAccount = BankAccount::query()
+            ->where('iban', BankAccount::normalizeIban($criteria->bankingAccountNumber))
+            ->first();
+
+        if ($targetAccount === null || $targetAccount->id === $criteria->bankAccountId) {
+            return null;
+        }
+
+        $ownIban = BankAccount::query()->whereKey($criteria->bankAccountId)->value('iban');
+        if ($ownIban === null) {
+            return null;
+        }
+
+        $date = CarbonImmutable::instance($criteria->date);
+
+        $counterpart = BankingTransaction::query()
+            ->where('bank_account_id', $targetAccount->id)
+            ->whereRaw("UPPER(REPLACE(banking_account_number, ' ', '')) = ?", [$ownIban])
+            ->whereRaw('ABS(amount + ?) <= 0.01', [$criteria->amount])
+            ->whereDate('date', '>=', $date->subDays(56))
+            ->whereDate('date', '<=', $date->addDays(56))
+            ->whereNull('reversed_by_transaction_id')
+            ->orderByRaw('ABS(amount + ?) ASC', [$criteria->amount])
+            ->first();
+
+        if ($counterpart === null) {
+            return null;
+        }
+
+        return BankTransactionId::create($counterpart->id);
+    }
+
+    #[Override]
+    public function linkInternalTransfer(BankTransactionId $a, BankTransactionId $b): void
+    {
+        if ($a->value === $b->value) {
+            return;
+        }
+
+        $first = min($a->value, $b->value);
+        $second = max($a->value, $b->value);
+
+        DB::transaction(static function () use ($first, $second): void {
+            $exists = DB::table('banking_transaction_links')
+                ->where('banking_transaction_id', $first)
+                ->where('linked_transaction_id', $second)
+                ->where('link_type', 'internal_transfer')
+                ->exists();
+
+            if (!$exists) {
+                DB::table('banking_transaction_links')->insert([
+                    'banking_transaction_id' => $first,
+                    'linked_transaction_id' => $second,
+                    'link_type' => 'internal_transfer',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            BankingTransaction::query()
+                ->whereIn('id', [$first, $second])
+                ->update([
+                    'status' => BankTransactionStatus::Completed->value,
+                    'resolve_status' => ResolveStatus::Resolved->value,
+                ]);
+        });
+    }
+
+    #[Override]
+    public function unlinkInternalTransfer(BankTransactionId $id): void
+    {
+        $link = DB::table('banking_transaction_links')
+            ->where('link_type', 'internal_transfer')
+            ->where(static fn ($query) => $query
+                ->where('banking_transaction_id', $id->value)
+                ->orWhere('linked_transaction_id', $id->value))
+            ->first();
+
+        if ($link === null) {
+            return;
+        }
+
+        $otherId = (int) $link->banking_transaction_id === $id->value
+            ? (int) $link->linked_transaction_id
+            : (int) $link->banking_transaction_id;
+
+        DB::transaction(static function () use ($id, $otherId): void {
+            DB::table('banking_transaction_links')
+                ->where('link_type', 'internal_transfer')
+                ->where(static fn ($query) => $query
+                    ->where('banking_transaction_id', $id->value)
+                    ->orWhere('linked_transaction_id', $id->value))
+                ->delete();
+
+            BankingTransaction::query()
+                ->whereIn('id', [$id->value, $otherId])
+                ->update([
+                    'status' => BankTransactionStatus::Open->value,
+                    'resolve_status' => ResolveStatus::Unresolved->value,
+                ]);
+        });
+    }
+
+    #[Override]
+    public function getLinkedInternalTransferId(BankTransactionId $id): ?BankTransactionId
+    {
+        $link = DB::table('banking_transaction_links')
+            ->where('link_type', 'internal_transfer')
+            ->where(static fn ($query) => $query
+                ->where('banking_transaction_id', $id->value)
+                ->orWhere('linked_transaction_id', $id->value))
+            ->first();
+
+        if ($link === null) {
+            return null;
+        }
+
+        $otherId = (int) $link->banking_transaction_id === $id->value
+            ? (int) $link->linked_transaction_id
+            : (int) $link->banking_transaction_id;
+
+        return BankTransactionId::create($otherId);
     }
 }

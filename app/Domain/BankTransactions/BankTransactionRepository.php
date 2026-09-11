@@ -49,4 +49,12 @@ interface BankTransactionRepository
     public function linkReversal(BankTransactionId $reversalId, BankTransactionId $originalId): void;
 
     public function unlinkReversal(BankTransactionId $reversalId): void;
+
+    public function findInternalTransferMatch(MatchCriteria $criteria): ?BankTransactionId;
+
+    public function linkInternalTransfer(BankTransactionId $a, BankTransactionId $b): void;
+
+    public function unlinkInternalTransfer(BankTransactionId $id): void;
+
+    public function getLinkedInternalTransferId(BankTransactionId $id): ?BankTransactionId;
 }

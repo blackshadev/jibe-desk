@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\BankTransactions;
 
+use App\Domain\BankAccounts\BankAccountRepository;
 use App\Domain\Invoices\InvoiceRepository;
 use App\Domain\PurchaseOrders\PurchaseOrderRepository;
 use Override;
@@ -14,11 +15,18 @@ final readonly class TransactionMatchingServiceImpl implements TransactionMatchi
         private InvoiceRepository $invoiceRepository,
         private PurchaseOrderRepository $purchaseOrderRepository,
         private BankTransactionRepository $bankTransactionRepository,
+        private BankAccountRepository $bankAccountRepository,
     ) {}
 
     #[Override]
     public function findMatch(MatchCriteria $criteria): MatchResult
     {
+        if ($this->isInternalTransfer($criteria->bankingAccountNumber)) {
+            $counterpartId = $this->bankTransactionRepository->findInternalTransferMatch($criteria);
+
+            return MatchResult::foundInternalTransfer($counterpartId);
+        }
+
         $result = $criteria->amount > 0 ? $this->findMatchingInvoice($criteria) : $this->findMatchingPurchaseOrder($criteria);
         if ($result->isMatch) {
             return $result;
@@ -36,6 +44,13 @@ final readonly class TransactionMatchingServiceImpl implements TransactionMatchi
     public function findReversalMatch(MatchCriteria $criteria): ?BankTransactionId
     {
         return $this->bankTransactionRepository->findReversalMatch($criteria);
+    }
+
+    private function isInternalTransfer(string $counterpartyIban): bool
+    {
+        $normalized = strtoupper(str_replace(' ', '', $counterpartyIban));
+
+        return in_array($normalized, $this->bankAccountRepository->getOwnAccounts(), true);
     }
 
     private function findMatchingInvoice(MatchCriteria $criteria): MatchResult

@@ -171,6 +171,22 @@ enum ResourcePermission: string
     case DeleteBankingTransactions = 'delete_banking_transactions';
     case DeleteAnyBankingTransactions = 'delete_any_banking_transactions';
 
+    // Bank Statements
+    case ViewAnyBankStatements = 'view_any_bank_statements';
+    case ViewBankStatements = 'view_bank_statements';
+    case CreateBankStatements = 'create_bank_statements';
+    case UpdateBankStatements = 'update_bank_statements';
+    case DeleteBankStatements = 'delete_bank_statements';
+    case DeleteAnyBankStatements = 'delete_any_bank_statements';
+
+    // Bank Accounts
+    case ViewAnyBankAccounts = 'view_any_bank_accounts';
+    case ViewBankAccounts = 'view_bank_accounts';
+    case CreateBankAccounts = 'create_bank_accounts';
+    case UpdateBankAccounts = 'update_bank_accounts';
+    case DeleteBankAccounts = 'delete_bank_accounts';
+    case DeleteAnyBankAccounts = 'delete_any_bank_accounts';
+
     // Inventory Items
     case ViewAnyInventoryItems = 'view_any_inventory_items';
     case ViewInventoryItems = 'view_inventory_items';

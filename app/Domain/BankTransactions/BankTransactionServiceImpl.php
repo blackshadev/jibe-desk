@@ -66,6 +66,10 @@ final readonly class BankTransactionServiceImpl implements BankTransactionServic
             if ($result->reversedByTransactionId !== null) {
                 $this->linkReversal($result->reversedByTransactionId, $id);
             }
+            if ($result->internalTransferCounterpartId !== null) {
+                $this->linkInternalTransfer($id, $result->internalTransferCounterpartId);
+                continue;
+            }
 
             $this->repository->markAsResolved($id);
         }
@@ -96,5 +100,20 @@ final readonly class BankTransactionServiceImpl implements BankTransactionServic
         $this->purchaseOrderService->markAsPending($purchaseOrderIds);
 
         $this->repository->unlinkReversal($reversalId);
+    }
+
+    #[Override]
+    public function linkInternalTransfer(BankTransactionId $a, BankTransactionId $b): void
+    {
+        $this->repository->linkInternalTransfer($a, $b);
+
+        $this->repository->markAsResolved($a);
+        $this->repository->markAsResolved($b);
+    }
+
+    #[Override]
+    public function unlinkInternalTransfer(BankTransactionId $id): void
+    {
+        $this->repository->unlinkInternalTransfer($id);
     }
 }

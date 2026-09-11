@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Domain\BankTransactions\BankTransactionStatus;
+use App\Models\BankAccount;
 use App\Models\BankingTransaction;
+use App\Models\BankStatement;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Override;
 
@@ -30,6 +32,19 @@ final class BankingTransactionFactory extends Factory
     public function forAccount(string $accountNumber): self
     {
         return $this->state(['banking_account_number' => $accountNumber]);
+    }
+
+    public function forBankAccount(BankAccount $account): self
+    {
+        return $this->state(['bank_account_id' => $account->id]);
+    }
+
+    public function forStatement(BankStatement $statement): self
+    {
+        return $this->state([
+            'bank_account_id' => $statement->bank_account_id,
+            'bank_statement_id' => $statement->id,
+        ]);
     }
 
     public function completed(): self

@@ -11,6 +11,7 @@ use App\Filament\Admin\Resources\BankingTransactions\Pages\ViewBankingTransactio
 use App\Filament\Admin\Resources\BankingTransactions\RelationManagers\BookkeepingRecordsRelationManager;
 use App\Filament\Admin\Resources\BankingTransactions\RelationManagers\InvoicesRelationManager;
 use App\Filament\Admin\Resources\BankingTransactions\RelationManagers\PurchaseOrdersRelationManager;
+use App\Models\BankAccount;
 use App\Models\BankingTransaction;
 use App\Models\BookkeepingRecord;
 use App\Models\CostCenter;
@@ -50,19 +51,21 @@ final class BankingTransactionResourceTest extends FeatureTestCase
     {
         $this->withAuthorizedUser();
 
+        BankAccount::factory()->create(['iban' => 'NL35RABO3010166281']);
+
         Livewire::test(CreateBankingTransaction::class)
             ->fillForm([
                 'date' => '2024-01-15',
                 'description' => 'Test payment',
                 'amount' => 100.50,
-                'banking_account_number' => 'NL91ABNA0417164300',
+                'banking_account_number' => 'NL35RABO3010166281',
             ])
             ->call('create')
             ->assertHasNoFormErrors();
 
         $this->assertDatabaseHas('banking_transactions', [
             'description' => 'Test payment',
-            'banking_account_number' => 'NL91ABNA0417164300',
+            'banking_account_number' => 'NL35RABO3010166281',
         ]);
     }
 

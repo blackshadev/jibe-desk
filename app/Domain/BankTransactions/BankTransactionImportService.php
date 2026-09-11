@@ -10,7 +10,7 @@ use JeroenG\Autowire\Attribute\Autowire;
 interface BankTransactionImportService
 {
     /**
-     * @return array{imported: int, skipped: int}
+     * @return array{imported: int, skipped: int, integrity_warnings: int}
      */
     public function importFromFile(string $filePath): array;
 }

@@ -22,4 +22,8 @@ interface BankTransactionService
     public function linkReversal(BankTransactionId $reversalId, BankTransactionId $originalId): void;
 
     public function unlinkReversal(BankTransactionId $reversalId): void;
+
+    public function linkInternalTransfer(BankTransactionId $a, BankTransactionId $b): void;
+
+    public function unlinkInternalTransfer(BankTransactionId $id): void;
 }

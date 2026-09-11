@@ -6,6 +6,7 @@ namespace Tests\Feature\Authorization;
 
 use App\Domain\Authorization\RoleName;
 use App\Filament\Admin\Resources\Activities\Pages\ListActivities;
+use App\Filament\Admin\Resources\BankStatements\Pages\ListBankStatements;
 use App\Filament\Admin\Resources\InvoiceBatches\Pages\ListInvoiceBatches;
 use App\Filament\Admin\Resources\Invoices\Pages\ListInvoices;
 use App\Filament\Admin\Resources\Members\Pages\ListMembers;
@@ -192,6 +193,22 @@ final class AuthorizationTest extends FeatureTestCase
         $this->withUserHavingRole(RoleName::ActivityAdministration);
 
         Livewire::test(ListPurchaseOrders::class)
+            ->assertForbidden();
+    }
+
+    public function test_financial_administration_can_view_bank_statements(): void
+    {
+        $this->withUserHavingRole(RoleName::FinancialAdministration);
+
+        Livewire::test(ListBankStatements::class)
+            ->assertSuccessful();
+    }
+
+    public function test_member_administration_cannot_view_bank_statements(): void
+    {
+        $this->withUserHavingRole(RoleName::MemberAdministration);
+
+        Livewire::test(ListBankStatements::class)
             ->assertForbidden();
     }
 }

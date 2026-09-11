@@ -16,6 +16,8 @@ final class CreateBankTransactionTest extends UnitTestCase
             amount: 150.50,
             description: 'Monthly fee',
             bankingAccountNumber: 'NL91ABNA0417164300',
+            bankAccountId: 1,
+            bankStatementId: null,
             importHash: 'abc123def456',
         );
 
@@ -23,6 +25,8 @@ final class CreateBankTransactionTest extends UnitTestCase
         static::assertSame(150.50, $transaction->amount);
         static::assertSame('Monthly fee', $transaction->description);
         static::assertSame('NL91ABNA0417164300', $transaction->bankingAccountNumber);
+        static::assertSame(1, $transaction->bankAccountId);
+        static::assertNull($transaction->bankStatementId);
         static::assertSame('abc123def456', $transaction->importHash);
     }
 
@@ -33,6 +37,8 @@ final class CreateBankTransactionTest extends UnitTestCase
             amount: 150.50,
             description: 'Monthly fee',
             bankingAccountNumber: 'NL91ABNA0417164300',
+            bankAccountId: 1,
+            bankStatementId: null,
             importHash: 'abc123def456',
         );
 

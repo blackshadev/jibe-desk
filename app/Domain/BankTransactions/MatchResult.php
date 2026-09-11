@@ -14,6 +14,7 @@ final readonly class MatchResult
         public ?InvoiceId $invoiceId = null,
         public ?PurchaseOrderId $purchaseOrderId = null,
         public ?BankTransactionId $reversedByTransactionId = null,
+        public ?BankTransactionId $internalTransferCounterpartId = null,
     ) {}
 
     public static function foundInvoice(InvoiceId $invoiceId): self
@@ -29,6 +30,11 @@ final readonly class MatchResult
     public static function foundReversal(BankTransactionId $reversedById): self
     {
         return new self(isMatch: true, reversedByTransactionId: $reversedById);
+    }
+
+    public static function foundInternalTransfer(?BankTransactionId $counterpartId = null): self
+    {
+        return new self(isMatch: true, internalTransferCounterpartId: $counterpartId);
     }
 
     public static function none(): self

@@ -43,12 +43,15 @@ final class BankingTransactionsTable
                         RunningTotalSummery::make('running_total')
                             ->label(__('labels.running_total')),
                     ]),
+
                 TextColumn::make('unmatched_amount')
                     ->label(__('labels.unmatched'))
                     ->money('EUR')
-                    ->sortable()
                     ->alignEnd()
-                    ->color(static fn (BankingTransaction $record): string => abs($record->unmatched_amount) >= 0.01 ? 'warning' : 'success'),
+                    ->badge(static fn (float $state): bool => abs($state) < 0.01)
+                    ->formatStateUsing(static fn (float $state): string => abs($state) >= 0.01 ? number_format($state, 2) : 'Niets')
+                    ->color(static fn (float $state): string => abs($state) >= 0.01 ? 'warning' : 'success'),
+
                 TextColumn::make('status')
                     ->label(__('labels.status'))
                     ->badge()
@@ -59,20 +62,6 @@ final class BankingTransactionsTable
                     ->color(static fn (BankTransactionStatus $state): string => match ($state) {
                         BankTransactionStatus::Open => 'warning',
                         BankTransactionStatus::Completed => 'success',
-                    })
-                    ->sortable(),
-                TextColumn::make('resolve_status')
-                    ->label(__('labels.resolve_status'))
-                    ->badge()
-                    ->formatStateUsing(static fn (ResolveStatus $state): string => match ($state) {
-                        ResolveStatus::Unresolved => __('labels.resolve_status_unresolved'),
-                        ResolveStatus::Resolved => __('labels.resolve_status_resolved'),
-                        ResolveStatus::Unresolvable => __('labels.resolve_status_unresolvable'),
-                    })
-                    ->color(static fn (ResolveStatus $state): string => match ($state) {
-                        ResolveStatus::Resolved => 'success',
-                        ResolveStatus::Unresolvable => 'danger',
-                        ResolveStatus::Unresolved => 'warning',
                     })
                     ->sortable(),
                 TextColumn::make('banking_account_number')

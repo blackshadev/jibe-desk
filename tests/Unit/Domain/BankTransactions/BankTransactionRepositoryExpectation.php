@@ -125,6 +125,14 @@ final readonly class BankTransactionRepositoryExpectation
             ->andReturn($return);
     }
 
+    public function expectsFindInternalTransferMatch(MatchCriteria $criteria, ?BankTransactionId $return): void
+    {
+        $this->mock
+            ->expects('findInternalTransferMatch')
+            ->with(equalTo($criteria))
+            ->andReturn($return);
+    }
+
     public function expectsLinkReversal(BankTransactionId $reversalId, BankTransactionId $originalId): void
     {
         $this->mock
