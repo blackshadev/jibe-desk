@@ -56,4 +56,43 @@ final readonly class BankStatementRepositoryExpectation
             ->expects('updateIntegrity')
             ->with(equalTo($id), equalTo($status), equalTo($difference));
     }
+
+    public function expectsUpsertAlways(BankStatementId $return): void
+    {
+        $this->mock
+            ->shouldReceive('upsert')
+            ->andReturn($return);
+    }
+
+    public function expectsFindPreviousAlways(?PreviousStatement $return): void
+    {
+        $this->mock
+            ->shouldReceive('findPrevious')
+            ->andReturn($return);
+    }
+
+    public function expectsFindPreviousCapturingDates(array &$dates): void
+    {
+        $this->mock
+            ->shouldReceive('findPrevious')
+            ->andReturnUsing(static function (BankAccountId $id, string $startDate) use (&$dates): null {
+                $dates[] = $startDate;
+
+                return null;
+            });
+    }
+
+    public function expectsUpdateChainAlways(): void
+    {
+        $this->mock
+            ->shouldReceive('updateChain')
+            ->andReturnNull();
+    }
+
+    public function expectsUpdateIntegrityNever(): void
+    {
+        $this->mock
+            ->shouldReceive('updateIntegrity')
+            ->never();
+    }
 }

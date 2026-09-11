@@ -25,6 +25,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Override;
 
+/** @mago-expect lint:cyclomatic-complexity */
 final readonly class BankTransactionDbRepository implements BankTransactionRepository
 {
     #[Override]

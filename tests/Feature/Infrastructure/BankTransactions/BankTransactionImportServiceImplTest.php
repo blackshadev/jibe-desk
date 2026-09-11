@@ -107,6 +107,58 @@ final class BankTransactionImportServiceImplTest extends FeatureTestCase
     }
 
     #[Test]
+    public function test_it_filters_out_empty_statements(): void
+    {
+        $accountId = BankAccountId::create(1);
+        $filePath = base_path('tests/Fixtures/mt940/sample-with-empty-statements.mta');
+
+        $this->bankAccountRepository->expectsGetByIban('NL35RABO3010166281', $accountId);
+        $this->repo->expectsExistsByHashAlways(false);
+        $this->repo->expectsCreateAlways(BankTransactionId::create(1));
+        $this->bankStatementRepository->expectsUpsertAlways(BankStatementId::create(10));
+        $this->bankStatementRepository->expectsFindPreviousAlways(null);
+        $this->bankStatementRepository->expectsUpdateChainAlways();
+        $this->bankStatementRepository->expectsUpdateIntegrityNever();
+
+        $service = new BankTransactionImportServiceImpl(
+            $this->repo->mock,
+            $this->bankAccountRepository->mock,
+            $this->bankStatementRepository->mock,
+        );
+        $result = $service->importFromFile($filePath);
+
+        static::assertSame(2, $result['imported']);
+        static::assertSame(0, $result['skipped']);
+    }
+
+    #[Test]
+    public function test_it_sorts_statements_by_start_date(): void
+    {
+        $accountId = BankAccountId::create(1);
+        $filePath = base_path('tests/Fixtures/mt940/sample-unsorted.mta');
+
+        $this->bankAccountRepository->expectsGetByIban('NL35RABO3010166281', $accountId);
+        $this->repo->expectsExistsByHashAlways(false);
+        $this->repo->expectsCreateAlways(BankTransactionId::create(1));
+        $this->bankStatementRepository->expectsUpsertAlways(BankStatementId::create(10));
+        $this->bankStatementRepository->expectsUpdateChainAlways();
+
+        $findPreviousDates = [];
+        $this->bankStatementRepository->expectsFindPreviousCapturingDates($findPreviousDates);
+
+        $service = new BankTransactionImportServiceImpl(
+            $this->repo->mock,
+            $this->bankAccountRepository->mock,
+            $this->bankStatementRepository->mock,
+        );
+        $result = $service->importFromFile($filePath);
+
+        static::assertSame(3, $result['imported']);
+        static::assertSame(0, $result['skipped']);
+        static::assertSame(['2023-01-01', '2023-01-02', '2023-01-03'], $findPreviousDates);
+    }
+
+    #[Test]
     public function test_it_throws_for_nonexistent_file(): void
     {
         $service = new BankTransactionImportServiceImpl(

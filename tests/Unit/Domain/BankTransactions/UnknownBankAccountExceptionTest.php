@@ -21,7 +21,7 @@ final class UnknownBankAccountExceptionTest extends UnitTestCase
     {
         $subject = new UnknownBankAccountException('NL91ABNA0417164300');
 
-        static::assertSame('NL91ABNA0417164300', $subject->accountNumber);
+        static::assertSame('NL91ABNA0417164300', $subject->iban);
         static::assertSame('Unknown bank account: NL91ABNA0417164300', $subject->getMessage());
     }
 }

@@ -21,6 +21,7 @@ use Kingsquare\Banking\Transaction;
 use Kingsquare\Parser\Banking\Mt940;
 use Override;
 
+/** @mago-expect lint:cyclomatic-complexity */
 final readonly class BankTransactionImportServiceImpl implements BankTransactionImportService
 {
     public function __construct(
@@ -41,11 +42,11 @@ final readonly class BankTransactionImportServiceImpl implements BankTransaction
         $parser = new Mt940();
         $statements = $parser->parse($content);
 
+        $statements = $this->prepareStatements($statements);
+
+        $this->assertKnownAccounts($statements);
+
         return DB::transaction(function () use ($statements, $filePath): array {
-            $statements = $this->sortStatements($statements);
-
-            $this->assertKnownAccounts($statements);
-
             $imported = 0;
             $skipped = 0;
             $integrityWarnings = 0;
@@ -60,7 +61,7 @@ final readonly class BankTransactionImportServiceImpl implements BankTransaction
                     endDate: $this->formatDate($statement->getEndTimestamp('Y-m-d')) ?? '',
                     openingBalance: $statement->getStartPrice(),
                     closingBalance: $statement->getEndPrice(),
-                    currency: $statement->getCurrency() ?: 'EUR',
+                    currency: $statement->getCurrency(),
                     filePath: $filePath,
                 ));
 
@@ -109,24 +110,22 @@ final readonly class BankTransactionImportServiceImpl implements BankTransaction
      * @param array<int, Statement> $statements
      * @return array<int, Statement>
      */
-    private function sortStatements(array $statements): array
+    private function prepareStatements(array $statements): array
     {
-        usort($statements, static fn (Statement $a, Statement $b): int => $a->getStartTimestamp('U') <=> $b->getStartTimestamp('U'));
+        $nonEmpty = array_filter($statements, static fn (Statement $statement): bool => count($statement->getTransactions()) > 0);
+        usort($nonEmpty, static fn (Statement $a, Statement $b): int => $a->getStartTimestamp('U') <=> $b->getStartTimestamp('U'));
 
-        return $statements;
+        return $nonEmpty;
     }
 
     /**
      * @param array<int, Statement> $statements
+     * @throws UnknownBankAccountException
      */
     private function assertKnownAccounts(array $statements): void
     {
         foreach ($statements as $statement) {
-            try {
-                $this->bankAccountRepository->getByIban($statement->getAccount());
-            } catch (InvalidArgumentException $e) {
-                throw new UnknownBankAccountException($statement->getAccount());
-            }
+            $this->bankAccountRepository->getByIban($statement->getAccount());
         }
     }
 

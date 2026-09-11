@@ -9,8 +9,8 @@ use RuntimeException;
 final class UnknownBankAccountException extends RuntimeException
 {
     public function __construct(
-        public readonly string $accountNumber,
+        public readonly string $iban,
     ) {
-        parent::__construct("Unknown bank account: {$accountNumber}");
+        parent::__construct("Unknown bank account: {$iban}");
     }
 }

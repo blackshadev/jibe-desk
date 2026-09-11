@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\BankStatements\RelationManagers;
 
 use App\Domain\BankTransactions\BankTransactionStatus;
-use App\Domain\BankTransactions\ResolveStatus;
 use App\Filament\Admin\Resources\BankingTransactions\BankingTransactionResource;
-use App\Filament\Admin\Utils\ViewOrEdit;
 use App\Models\BankingTransaction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
@@ -64,6 +62,6 @@ final class BankStatementTransactionsRelationManager extends RelationManager
                     })
                     ->sortable(),
             ])
-            ->recordUrl(static fn (BankingTransaction $record): string => BankingTransactionResource::getUrl('view', [ 'record' => $record]));
+            ->recordUrl(static fn (BankingTransaction $record): string => BankingTransactionResource::getUrl('view', ['record' => $record]));
     }
 }

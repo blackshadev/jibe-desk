@@ -30,7 +30,6 @@ final class BankStatementInfolist
                             ->date(),
                         TextEntry::make('currency')
                             ->label(__('labels.currency')),
-
                     ]),
                 Section::make(__('labels.opening_balance'))
                     ->schema([

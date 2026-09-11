@@ -6,7 +6,6 @@ namespace App\Filament\Admin\Resources\BankingTransactions\Tables;
 
 use App\Domain\BankTransactions\BankingTransactionReversalState;
 use App\Domain\BankTransactions\BankTransactionStatus;
-use App\Domain\BankTransactions\ResolveStatus;
 use App\Filament\Admin\Resources\BankingTransactions\BankingTransactionResource;
 use App\Models\BankingTransaction;
 use Filament\Actions\BulkActionGroup;

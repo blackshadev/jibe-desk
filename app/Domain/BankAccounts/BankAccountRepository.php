@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Domain\BankAccounts;
 
+use App\Domain\BankTransactions\UnknownBankAccountException;
 use JeroenG\Autowire\Attribute\Autowire;
 
 #[Autowire]
 interface BankAccountRepository
 {
+    /** @throws UnknownBankAccountException */
     public function getByIban(string $iban): BankAccountId;
 
     /** @return list<string> */

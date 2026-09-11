@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Actions;
 
 use App\Domain\BankTransactions\BankTransactionImportService;
+use App\Domain\BankTransactions\UnknownBankAccountException;
 use App\Domain\Jobs\MatchBankingTransactionsJob;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
@@ -26,9 +27,21 @@ final class ImportMt940Action
                     ->required(),
             ])
             ->action(static function (Page $livewire, array $data, BankTransactionImportService $importService): void {
-                $result = $importService->importFromFile(
-                    storage_path('app/private/' . $data['mt940_file']),
-                );
+                try {
+                    $result = $importService->importFromFile(
+                        storage_path('app/private/' . $data['mt940_file']),
+                    );
+                } catch (UnknownBankAccountException $e) {
+                    Notification::make()
+                        ->title(__('labels.import_failed'))
+                        ->body(__('labels.import_failed_unknown_bank_account', [
+                            'iban' => $e->iban,
+                        ]))
+                        ->danger()
+                        ->send();
+
+                    return;
+                }
 
                 Notification::make()
                     ->title(__('labels.import_complete'))

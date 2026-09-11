@@ -332,4 +332,5 @@ return [
         'ok' => 'Aansluitend',
         'broken' => 'Onderbroken',
     ],
+    'import_failed_unknown_bank_account' => 'Import mislukt: onbekende bankrekening #:iban',
 ];

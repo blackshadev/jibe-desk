@@ -33,7 +33,9 @@ final class BankAccountsTable
                 TextColumn::make('active')
                     ->label(__('labels.status'))
                     ->badge()
+                    /** @mago-expect lint:no-boolean-flag-parameter */
                     ->formatStateUsing(static fn (bool $state): string => $state ? __('labels.active') : __('labels.inactive'))
+                    /** @mago-expect lint:no-boolean-flag-parameter */
                     ->color(static fn (bool $state): string => $state ? 'success' : 'gray'),
                 TextColumn::make('expected_closing_balance')
                     ->label(__('labels.expected_closing_balance'))

@@ -46,11 +46,13 @@ final class BankingTransactionForm
                                 default => '',
                             }),
                         Select::make('banking_account_number')
-                            ->options(static fn (): array => BankAccount::query()
-                                ->select('iban')
-                                ->distinct()
-                                ->pluck('iban', 'iban')
-                                ->toArray())
+                            ->options(
+                                static fn (): array => BankAccount::query()
+                                    ->select('iban')
+                                    ->distinct()
+                                    ->pluck('iban', 'iban')
+                                    ->toArray(),
+                            )
                             ->label(__('labels.banking_account_number'))
                             ->required(),
                     ]),
