@@ -8,8 +8,10 @@ use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\BankTransactions\BankTransactionService;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Filament\Admin\Resources\BankingTransactions\Helpers\GetTransaction;
 use App\Filament\Admin\Resources\BankingTransactions\Helpers\IsOpen;
 use App\Models\BankingTransaction;
+use App\Models\BankStatement;
 use App\Models\CostCenter;
 use App\Models\PurchaseOrder;
 use Filament\Actions\Action;
@@ -20,6 +22,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
+use Filament\Support\Icons\Heroicon;
 use Intervention\Validation\Rules\Iban;
 
 final class CreatePurchaseOrderFromTransactionAction
@@ -28,11 +31,11 @@ final class CreatePurchaseOrderFromTransactionAction
     {
         return Action::make('createPurchaseOrderFromTransaction')
             ->label(__('labels.create_purchase_order_from_transaction'))
+            ->icon(Heroicon::OutlinedShoppingCart)
             ->modalHeading(__('labels.create_purchase_order_from_transaction'))
             ->visible(IsOpen::checkOwner(...))
-            ->schema(static function (RelationManager $livewire): array {
-                /** @var BankingTransaction $record */
-                $record = $livewire->getOwnerRecord();
+            ->schema(static function (RelationManager $livewire, BankingTransaction|BankStatement|null $record): array {
+                $record = GetTransaction::get($livewire, $record);
 
                 return [
                     DatePicker::make('date')
@@ -87,9 +90,8 @@ final class CreatePurchaseOrderFromTransactionAction
                         ->required(),
                 ];
             })
-            ->action(static function (array $data, RelationManager $livewire, BankTransactionService $bankingTransaction): void {
-                /** @var BankingTransaction $record */
-                $record = $livewire->getOwnerRecord();
+            ->action(static function (array $data, RelationManager $livewire, BankingTransaction|BankStatement|null $record, BankTransactionService $bankingTransaction): void {
+                $record = GetTransaction::get($livewire, $record);
 
                 $po = PurchaseOrder::create([
                     'date' => $data['date'],

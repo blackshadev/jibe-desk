@@ -16,6 +16,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Override;
 use UnitEnum;
 
@@ -67,6 +68,16 @@ final class BankStatementResource extends Resource
     public static function getLabel(): string
     {
         return __('labels.bank_statement');
+    }
+
+    #[Override]
+    public static function getRecordTitle(?Model $record): string
+    {
+        if (!$record instanceof BankStatement) {
+            return __('labels.new_bank_statement_title');
+        }
+
+        return __('labels.bank_statement_title', ['statement_number' => $record->statement_number]);
     }
 
     #[Override]

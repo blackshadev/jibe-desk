@@ -7,12 +7,15 @@ namespace App\Filament\Admin\Resources\BankingTransactions\Actions;
 use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\BankTransactions\BankTransactionService;
 use App\Domain\Invoices\InvoiceId;
+use App\Filament\Admin\Resources\BankingTransactions\Helpers\GetTransaction;
 use App\Filament\Admin\Resources\BankingTransactions\Helpers\IsOpen;
 use App\Models\BankingTransaction;
+use App\Models\BankStatement;
 use App\Models\Invoice;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Support\Icons\Heroicon;
 
 final class AttachInvoiceAction
 {
@@ -20,14 +23,14 @@ final class AttachInvoiceAction
     {
         return Action::make('attachInvoice')
             ->label(__('labels.attach_invoice'))
+            ->icon(Heroicon::DocumentCurrencyEuro)
             ->modalHeading(__('labels.attach_invoice'))
             ->visible(IsOpen::checkOwner(...))
             ->schema([
                 Select::make('invoice_id')
                     ->label(__('labels.invoice'))
-                    ->options(static function (RelationManager $livewire) {
-                        /** @var BankingTransaction $model */
-                        $model = $livewire->getOwnerRecord();
+                    ->options(static function (RelationManager $livewire, BankingTransaction|BankStatement|null $record) {
+                        $model = GetTransaction::get($livewire, $record);
 
                         return Invoice::query()
                             ->openOrPending()
@@ -42,9 +45,8 @@ final class AttachInvoiceAction
                     ->preload()
                     ->required(),
             ])
-            ->action(static function (array $data, RelationManager $livewire, BankTransactionService $service): void {
-                /** @var BankingTransaction $record */
-                $record = $livewire->getOwnerRecord();
+            ->action(static function (array $data, RelationManager $livewire, BankingTransaction|BankStatement|null $record, BankTransactionService $service): void {
+                $record = GetTransaction::get($livewire, $record);
 
                 $service->attachInvoice(
                     BankTransactionId::create($record->id),

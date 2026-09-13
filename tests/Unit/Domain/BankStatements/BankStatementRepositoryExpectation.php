@@ -11,6 +11,7 @@ use App\Domain\BankStatements\CreateBankStatement;
 use App\Domain\BankStatements\PreviousStatement;
 use App\Domain\BankStatements\StatementChainStatus;
 use App\Domain\BankStatements\StatementIntegrityStatus;
+use DateTimeInterface;
 use Mockery;
 use Mockery\MockInterface;
 
@@ -35,7 +36,7 @@ final readonly class BankStatementRepositoryExpectation
             ->andReturn($return);
     }
 
-    public function expectsFindPrevious(BankAccountId $accountId, string $startDate, ?PreviousStatement $return): void
+    public function expectsFindPrevious(BankAccountId $accountId, DateTimeInterface $startDate, ?PreviousStatement $return): void
     {
         $this->mock
             ->shouldReceive('findPrevious')
@@ -75,8 +76,8 @@ final readonly class BankStatementRepositoryExpectation
     {
         $this->mock
             ->shouldReceive('findPrevious')
-            ->andReturnUsing(static function (BankAccountId $id, string $startDate) use (&$dates): null {
-                $dates[] = $startDate;
+            ->andReturnUsing(static function (BankAccountId $id, DateTimeInterface $startDate) use (&$dates): null {
+                $dates[] = $startDate->format('Y-m-d');
 
                 return null;
             });

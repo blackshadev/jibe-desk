@@ -9,8 +9,10 @@ use App\Domain\BankTransactions\BankTransactionService;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceNumberGenerator;
 use App\Domain\Invoices\InvoiceStatus;
+use App\Filament\Admin\Resources\BankingTransactions\Helpers\GetTransaction;
 use App\Filament\Admin\Resources\BankingTransactions\Helpers\IsOpen;
 use App\Models\BankingTransaction;
+use App\Models\BankStatement;
 use App\Models\CostCenter;
 use App\Models\Invoice;
 use App\Models\Member;
@@ -20,6 +22,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Utilities\Set;
+use Filament\Support\Icons\Heroicon;
 
 final class CreateInvoiceFromTransactionAction
 {
@@ -27,11 +30,11 @@ final class CreateInvoiceFromTransactionAction
     {
         return Action::make('createInvoiceFromTransaction')
             ->label(__('labels.create_invoice_from_transaction'))
+            ->icon(Heroicon::OutlinedDocumentCurrencyEuro)
             ->modalHeading(__('labels.create_invoice_from_transaction'))
             ->visible(IsOpen::checkOwner(...))
-            ->schema(static function (RelationManager $livewire): array {
-                /** @var BankingTransaction $record */
-                $record = $livewire->getOwnerRecord();
+            ->schema(static function (RelationManager $livewire, BankingTransaction|BankStatement|null $record): array {
+                $record = GetTransaction::get($livewire, $record);
 
                 return [
                     Select::make('member_id')
@@ -105,11 +108,11 @@ final class CreateInvoiceFromTransactionAction
             ->action(static function (
                 array $data,
                 RelationManager $livewire,
+                BankingTransaction|BankStatement|null $record,
                 InvoiceNumberGenerator $invoiceNumberGenerator,
                 BankTransactionService $bankingTransaction,
             ): void {
-                /** @var BankingTransaction $record */
-                $record = $livewire->getOwnerRecord();
+                $record = GetTransaction::get($livewire, $record);
 
                 $member = Member::findOrFail($data['member_id']);
 

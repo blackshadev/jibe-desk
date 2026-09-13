@@ -12,6 +12,7 @@ use App\Domain\BankStatements\PreviousStatement;
 use App\Domain\BankStatements\StatementChainStatus;
 use App\Domain\BankStatements\StatementIntegrityStatus;
 use App\Models\BankStatement;
+use DateTimeInterface;
 use Override;
 
 final readonly class BankStatementDbRepository implements BankStatementRepository
@@ -25,8 +26,8 @@ final readonly class BankStatementDbRepository implements BankStatementRepositor
                 'statement_number' => $dto->statementNumber,
             ],
             [
-                'start_date' => $dto->startDate,
-                'end_date' => $dto->endDate,
+                'start_date' => $dto->startDate->format('Y-m-d'),
+                'end_date' => $dto->endDate->format('Y-m-d'),
                 'opening_balance' => $dto->openingBalance,
                 'closing_balance' => $dto->closingBalance,
                 'currency' => $dto->currency,
@@ -38,11 +39,11 @@ final readonly class BankStatementDbRepository implements BankStatementRepositor
     }
 
     #[Override]
-    public function findPrevious(BankAccountId $accountId, string $startDate): ?PreviousStatement
+    public function findPrevious(BankAccountId $accountId, DateTimeInterface $startDate): ?PreviousStatement
     {
         $statement = BankStatement::query()
             ->where('bank_account_id', $accountId->value)
-            ->where('start_date', '<', $startDate)
+            ->where('start_date', '<', $startDate->format('Y-m-d'))
             ->orderByDesc('start_date')
             ->first();
 

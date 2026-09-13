@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\BankTransactions;
 
-use App\Domain\BankAccounts\BankAccountId;
 use App\Domain\BankAccounts\BankAccountRepository;
 use App\Domain\BankStatements\BankStatementRepository;
 use App\Domain\BankStatements\CreateBankStatement;
+use App\Domain\BankStatements\DetermineBankStatementChainStatus;
+use App\Domain\BankStatements\DetermineBankStatementChainStatusInput;
 use App\Domain\BankStatements\StatementChainStatus;
 use App\Domain\BankStatements\StatementIntegrityStatus;
 use App\Domain\BankTransactions\BankTransactionImportService;
 use App\Domain\BankTransactions\BankTransactionRepository;
 use App\Domain\BankTransactions\CreateBankTransaction;
 use App\Domain\BankTransactions\UnknownBankAccountException;
+use DateTimeImmutable;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Kingsquare\Banking\Statement;
@@ -28,6 +30,7 @@ final readonly class BankTransactionImportServiceImpl implements BankTransaction
         private BankTransactionRepository $repository,
         private BankAccountRepository $bankAccountRepository,
         private BankStatementRepository $bankStatementRepository,
+        private DetermineBankStatementChainStatus $chainStatusService,
     ) {}
 
     #[Override]
@@ -53,12 +56,18 @@ final readonly class BankTransactionImportServiceImpl implements BankTransaction
 
             foreach ($statements as $statement) {
                 $accountId = $this->bankAccountRepository->getByIban($statement->getAccount());
+                $startDate = $this->toDateTime($statement->getStartTimestamp('Y-m-d'));
+                $endDate = $this->toDateTime($statement->getEndTimestamp('Y-m-d'));
+
+                if ($startDate === null || $endDate === null) {
+                    continue;
+                }
 
                 $statementId = $this->bankStatementRepository->upsert(new CreateBankStatement(
                     bankAccountId: $accountId->value,
                     statementNumber: $statement->getNumber(),
-                    startDate: $this->formatDate($statement->getStartTimestamp('Y-m-d')) ?? '',
-                    endDate: $this->formatDate($statement->getEndTimestamp('Y-m-d')) ?? '',
+                    startDate: $startDate,
+                    endDate: $endDate,
                     openingBalance: $statement->getStartPrice(),
                     closingBalance: $statement->getEndPrice(),
                     currency: $statement->getCurrency(),
@@ -74,11 +83,16 @@ final readonly class BankTransactionImportServiceImpl implements BankTransaction
                     );
                 }
 
-                $chainStatus = $this->determineChainStatus($accountId, $statement);
+                $chainStatus = $this->chainStatusService->determine(new DetermineBankStatementChainStatusInput(
+                    id: $statementId,
+                    accountId: $accountId,
+                    startDate: $startDate,
+                    openingBalance: $statement->getStartPrice(),
+                ));
+
                 if ($chainStatus === StatementChainStatus::Broken) {
                     $integrityWarnings++;
                 }
-                $this->bankStatementRepository->updateChain($statementId, $chainStatus);
 
                 foreach ($statement->getTransactions() as $transaction) {
                     $hash = $this->computeHash($transaction, $statement);
@@ -144,21 +158,6 @@ final readonly class BankTransactionImportServiceImpl implements BankTransaction
         return $statement->getStartPrice() + $transactionSum - $statement->getEndPrice();
     }
 
-    private function determineChainStatus(BankAccountId $accountId, Statement $statement): StatementChainStatus
-    {
-        $startDate = $this->formatDate($statement->getStartTimestamp('Y-m-d')) ?? '';
-
-        $previous = $this->bankStatementRepository->findPrevious($accountId, $startDate);
-
-        if ($previous === null) {
-            return StatementChainStatus::Baseline;
-        }
-
-        return abs($previous->closingBalance - $statement->getStartPrice()) < 0.01
-            ? StatementChainStatus::Ok
-            : StatementChainStatus::Broken;
-    }
-
     private function computeHash(Transaction $transaction, Statement $statement): string
     {
         $data = implode('|', [
@@ -184,5 +183,16 @@ final readonly class BankTransactionImportServiceImpl implements BankTransaction
         }
 
         return $date;
+    }
+
+    private function toDateTime(string|bool $date): ?DateTimeImmutable
+    {
+        if ($date === '' || $date === '1970-01-01' || $date === false) {
+            return null;
+        }
+
+        $result = DateTimeImmutable::createFromFormat('!Y-m-d', (string) $date);
+
+        return $result === false ? null : $result;
     }
 }

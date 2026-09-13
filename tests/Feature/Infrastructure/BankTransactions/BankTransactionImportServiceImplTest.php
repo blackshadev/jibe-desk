@@ -7,15 +7,18 @@ namespace Tests\Feature\Infrastructure\BankTransactions;
 use App\Domain\BankAccounts\BankAccountId;
 use App\Domain\BankStatements\BankStatementId;
 use App\Domain\BankStatements\CreateBankStatement;
+use App\Domain\BankStatements\DetermineBankStatementChainStatusInput;
 use App\Domain\BankStatements\StatementChainStatus;
 use App\Domain\BankTransactions\BankTransactionId;
 use App\Infrastructure\BankTransactions\BankTransactionImportServiceImpl;
+use DateTimeImmutable;
 use InvalidArgumentException;
 use Override;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\FeatureTestCase;
 use Tests\Unit\Domain\BankAccounts\BankAccountRepositoryExpectation;
 use Tests\Unit\Domain\BankStatements\BankStatementRepositoryExpectation;
+use Tests\Unit\Domain\BankStatements\DetermineBankStatementChainStatusExpectation;
 use Tests\Unit\Domain\BankTransactions\BankTransactionRepositoryExpectation;
 
 final class BankTransactionImportServiceImplTest extends FeatureTestCase
@@ -23,6 +26,7 @@ final class BankTransactionImportServiceImplTest extends FeatureTestCase
     private BankTransactionRepositoryExpectation $repo;
     private BankAccountRepositoryExpectation $bankAccountRepository;
     private BankStatementRepositoryExpectation $bankStatementRepository;
+    private DetermineBankStatementChainStatusExpectation $chainStatusService;
 
     #[Override]
     protected function setUp(): void
@@ -32,6 +36,7 @@ final class BankTransactionImportServiceImplTest extends FeatureTestCase
         $this->repo = BankTransactionRepositoryExpectation::create();
         $this->bankAccountRepository = BankAccountRepositoryExpectation::create();
         $this->bankStatementRepository = BankStatementRepositoryExpectation::create();
+        $this->chainStatusService = DetermineBankStatementChainStatusExpectation::create();
     }
 
     #[Test]
@@ -39,21 +44,27 @@ final class BankTransactionImportServiceImplTest extends FeatureTestCase
     {
         $accountId = BankAccountId::create(1);
         $statementId = BankStatementId::create(10);
+        $startDate = new DateTimeImmutable('2023-01-01');
+        $endDate = new DateTimeImmutable('2023-01-03');
         $filePath = base_path('tests/Fixtures/mt940/sample.mta');
 
         $this->bankAccountRepository->expectsGetByIban('NL35RABO3010166281', $accountId);
         $this->bankStatementRepository->expectsUpsert(new CreateBankStatement(
             bankAccountId: $accountId->value,
             statementNumber: '1/1',
-            startDate: '2023-01-01',
-            endDate: '2023-01-03',
+            startDate: $startDate,
+            endDate: $endDate,
             openingBalance: 1000.0,
             closingBalance: 1300.0,
             currency: 'EUR',
             filePath: $filePath,
         ), $statementId);
-        $this->bankStatementRepository->expectsFindPrevious($accountId, '2023-01-01', null);
-        $this->bankStatementRepository->expectsUpdateChain($statementId, StatementChainStatus::Baseline);
+        $this->chainStatusService->expectsDetermine(new DetermineBankStatementChainStatusInput(
+            id: $statementId,
+            accountId: $accountId,
+            startDate: $startDate,
+            openingBalance: 1000.0,
+        ), StatementChainStatus::Baseline);
 
         $this->repo->expectsExistsByHashAlways(false);
         $this->repo->expectsCreateAlways(BankTransactionId::create(1));
@@ -62,6 +73,7 @@ final class BankTransactionImportServiceImplTest extends FeatureTestCase
             $this->repo->mock,
             $this->bankAccountRepository->mock,
             $this->bankStatementRepository->mock,
+            $this->chainStatusService->mock,
         );
         $result = $service->importFromFile($filePath);
 
@@ -76,21 +88,27 @@ final class BankTransactionImportServiceImplTest extends FeatureTestCase
     {
         $accountId = BankAccountId::create(1);
         $statementId = BankStatementId::create(10);
+        $startDate = new DateTimeImmutable('2023-01-01');
+        $endDate = new DateTimeImmutable('2023-01-03');
         $filePath = base_path('tests/Fixtures/mt940/sample.mta');
 
         $this->bankAccountRepository->expectsGetByIban('NL35RABO3010166281', $accountId);
         $this->bankStatementRepository->expectsUpsert(new CreateBankStatement(
             bankAccountId: $accountId->value,
             statementNumber: '1/1',
-            startDate: '2023-01-01',
-            endDate: '2023-01-03',
+            startDate: $startDate,
+            endDate: $endDate,
             openingBalance: 1000.0,
             closingBalance: 1300.0,
             currency: 'EUR',
             filePath: $filePath,
         ), $statementId);
-        $this->bankStatementRepository->expectsFindPrevious($accountId, '2023-01-01', null);
-        $this->bankStatementRepository->expectsUpdateChain($statementId, StatementChainStatus::Baseline);
+        $this->chainStatusService->expectsDetermine(new DetermineBankStatementChainStatusInput(
+            id: $statementId,
+            accountId: $accountId,
+            startDate: $startDate,
+            openingBalance: 1000.0,
+        ), StatementChainStatus::Baseline);
 
         $this->repo->expectsExistsByHashAlways(true);
         $this->repo->expectsCreateNever();
@@ -99,6 +117,7 @@ final class BankTransactionImportServiceImplTest extends FeatureTestCase
             $this->repo->mock,
             $this->bankAccountRepository->mock,
             $this->bankStatementRepository->mock,
+            $this->chainStatusService->mock,
         );
         $result = $service->importFromFile($filePath);
 
@@ -116,14 +135,14 @@ final class BankTransactionImportServiceImplTest extends FeatureTestCase
         $this->repo->expectsExistsByHashAlways(false);
         $this->repo->expectsCreateAlways(BankTransactionId::create(1));
         $this->bankStatementRepository->expectsUpsertAlways(BankStatementId::create(10));
-        $this->bankStatementRepository->expectsFindPreviousAlways(null);
-        $this->bankStatementRepository->expectsUpdateChainAlways();
         $this->bankStatementRepository->expectsUpdateIntegrityNever();
+        $this->chainStatusService->expectsDetermineAlways(StatementChainStatus::Baseline);
 
         $service = new BankTransactionImportServiceImpl(
             $this->repo->mock,
             $this->bankAccountRepository->mock,
             $this->bankStatementRepository->mock,
+            $this->chainStatusService->mock,
         );
         $result = $service->importFromFile($filePath);
 
@@ -141,21 +160,21 @@ final class BankTransactionImportServiceImplTest extends FeatureTestCase
         $this->repo->expectsExistsByHashAlways(false);
         $this->repo->expectsCreateAlways(BankTransactionId::create(1));
         $this->bankStatementRepository->expectsUpsertAlways(BankStatementId::create(10));
-        $this->bankStatementRepository->expectsUpdateChainAlways();
 
-        $findPreviousDates = [];
-        $this->bankStatementRepository->expectsFindPreviousCapturingDates($findPreviousDates);
+        $determineDates = [];
+        $this->chainStatusService->expectsDetermineCapturingDates($determineDates, StatementChainStatus::Baseline);
 
         $service = new BankTransactionImportServiceImpl(
             $this->repo->mock,
             $this->bankAccountRepository->mock,
             $this->bankStatementRepository->mock,
+            $this->chainStatusService->mock,
         );
         $result = $service->importFromFile($filePath);
 
         static::assertSame(3, $result['imported']);
         static::assertSame(0, $result['skipped']);
-        static::assertSame(['2023-01-01', '2023-01-02', '2023-01-03'], $findPreviousDates);
+        static::assertSame(['2023-01-01', '2023-01-02', '2023-01-03'], $determineDates);
     }
 
     #[Test]
@@ -165,6 +184,7 @@ final class BankTransactionImportServiceImplTest extends FeatureTestCase
             $this->repo->mock,
             $this->bankAccountRepository->mock,
             $this->bankStatementRepository->mock,
+            $this->chainStatusService->mock,
         );
 
         $this->expectException(InvalidArgumentException::class);

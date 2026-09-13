@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BankStatements\Pages;
 
-use App\Filament\Admin\Resources\BankStatements\Actions\CompleteAllMatchedAction;
+use App\Filament\Admin\Resources\BankStatements\Actions\DetermineChainStatusAction;
 use App\Filament\Admin\Resources\BankStatements\BankStatementResource;
 use App\Filament\Admin\Resources\BankStatements\RelationManagers\BankStatementTransactionsRelationManager;
+use Filament\Actions\ActionGroup;
 use Filament\Resources\Pages\ViewRecord;
 use Livewire\Attributes\On;
 use Override;
@@ -20,7 +21,9 @@ final class ViewBankStatement extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            CompleteAllMatchedAction::make(),
+            ActionGroup::make([
+                DetermineChainStatusAction::make(),
+            ]),
         ];
     }
 

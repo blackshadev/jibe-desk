@@ -6,6 +6,8 @@ namespace App\Filament\Admin\Resources\BankStatements\Tables;
 
 use App\Domain\BankStatements\StatementChainStatus;
 use App\Domain\BankStatements\StatementIntegrityStatus;
+use App\Filament\Admin\Resources\BankStatements\Actions\DetermineChainStatusAction;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
@@ -91,6 +93,11 @@ final class BankStatementsTable
                     ->relationship('bankAccount', 'name')
                     ->searchable()
                     ->preload(),
+            ])
+            ->recordActions([
+                ActionGroup::make([
+                    DetermineChainStatusAction::make(),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -7,14 +7,17 @@ namespace App\Filament\Admin\Resources\BankingTransactions\Actions;
 use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\BankTransactions\BankTransactionRepository;
 use App\Domain\Invoices\Formatters\PriceFormatter;
+use App\Filament\Admin\Resources\BankingTransactions\Helpers\GetTransaction;
 use App\Filament\Admin\Resources\BankingTransactions\Helpers\IsOpen;
 use App\Models\BankingTransaction;
+use App\Models\BankStatement;
 use App\Models\BookkeepingRecord;
 use App\Models\CostCenter;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Support\Icons\Heroicon;
 
 final class CreateBookkeepingRecordFromTransactionAction
 {
@@ -22,11 +25,11 @@ final class CreateBookkeepingRecordFromTransactionAction
     {
         return Action::make('createBookkeepingRecordFromTransaction')
             ->label(__('labels.create_bookkeeping_record_from_transaction'))
+            ->icon(Heroicon::OutlinedBookOpen)
             ->modalHeading(__('labels.create_bookkeeping_record_from_transaction'))
             ->visible(IsOpen::checkOwner(...))
-            ->schema(static function (RelationManager $livewire): array {
-                /** @var BankingTransaction $record */
-                $record = $livewire->getOwnerRecord();
+            ->schema(static function (RelationManager $livewire, BankingTransaction|BankStatement|null $record): array {
+                $record = GetTransaction::get($livewire, $record);
 
                 return [
                     TextInput::make('year')
@@ -60,9 +63,8 @@ final class CreateBookkeepingRecordFromTransactionAction
                         ->required(),
                 ];
             })
-            ->action(static function (array $data, RelationManager $livewire, BankTransactionRepository $repository): void {
-                /** @var BankingTransaction $record */
-                $record = $livewire->getOwnerRecord();
+            ->action(static function (array $data, RelationManager $livewire, BankingTransaction|BankStatement|null $record, BankTransactionRepository $repository): void {
+                $record = GetTransaction::get($livewire, $record);
 
                 $bookkeepingRecord = BookkeepingRecord::create([
                     'year' => $data['year'],

@@ -321,6 +321,7 @@ return [
     'chain_status' => 'Aansluiting controle',
     'matched_percentage' => 'Gekoppeld percentage',
     'complete_all_matched' => 'Rond alle gekoppelde af',
+    'determine_chain_status' => 'Aansluiting controle uitvoeren',
     'currency' => 'Valuta',
     'manage_transaction' => 'Beheer transactie',
     'integrity_statuses' => [
@@ -333,4 +334,6 @@ return [
         'broken' => 'Onderbroken',
     ],
     'import_failed_unknown_bank_account' => 'Import mislukt: onbekende bankrekening #:iban',
+    'new_bank_statement_title' => 'Nieuwe bankafschrift',
+    'bank_statement_title' => 'Bankafschrift #:statement_number',
 ];

@@ -7,9 +7,9 @@ namespace App\Filament\Admin\Resources\BankingTransactions\Actions;
 use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\BankTransactions\BankTransactionService;
 use App\Domain\BankTransactions\BankTransactionStatus;
-use App\Filament\Admin\Resources\BankingTransactions\Pages\ViewBankingTransaction;
 use App\Models\BankingTransaction;
 use Filament\Actions\Action;
+use Livewire\Component;
 
 final class UnlinkReversalAction
 {
@@ -30,6 +30,6 @@ final class UnlinkReversalAction
                 );
             })
             ->successNotificationTitle(__('labels.reversal_unlinked'))
-            ->after(static fn (ViewBankingTransaction $livewire) => $livewire->dispatch('refresh'));
+            ->after(static fn (Component $livewire) => $livewire->dispatch('refresh'));
     }
 }

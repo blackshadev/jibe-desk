@@ -6,9 +6,9 @@ namespace App\Filament\Admin\Resources\BankingTransactions\Actions;
 
 use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\BankTransactions\BankTransactionService;
-use App\Filament\Admin\Resources\BankingTransactions\Pages\ViewBankingTransaction;
 use App\Models\BankingTransaction;
 use Filament\Actions\Action;
+use Livewire\Component;
 
 final class CompleteBankingTransactionAction
 {
@@ -26,6 +26,6 @@ final class CompleteBankingTransactionAction
                 $service->complete(BankTransactionId::create($record->id));
             })
             ->successNotificationTitle(__('labels.completed'))
-            ->after(static fn (ViewBankingTransaction $livewire) => $livewire->dispatch('refresh'));
+            ->after(static fn (Component $livewire) => $livewire->dispatch('refresh'));
     }
 }

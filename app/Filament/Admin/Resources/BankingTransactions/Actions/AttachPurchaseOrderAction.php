@@ -7,12 +7,15 @@ namespace App\Filament\Admin\Resources\BankingTransactions\Actions;
 use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\BankTransactions\BankTransactionService;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
+use App\Filament\Admin\Resources\BankingTransactions\Helpers\GetTransaction;
 use App\Filament\Admin\Resources\BankingTransactions\Helpers\IsOpen;
 use App\Models\BankingTransaction;
+use App\Models\BankStatement;
 use App\Models\PurchaseOrder;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Collection;
 
 final class AttachPurchaseOrderAction
@@ -21,14 +24,14 @@ final class AttachPurchaseOrderAction
     {
         return Action::make('attachPurchaseOrder')
             ->label(__('labels.attach_purchase_order'))
+            ->icon(Heroicon::ShoppingCart)
             ->modalHeading(__('labels.attach_purchase_order'))
             ->visible(IsOpen::checkOwner(...))
             ->schema([
                 Select::make('purchase_order_id')
                     ->label(__('labels.purchase_order'))
-                    ->options(static function (RelationManager $livewire): Collection {
-                        /** @var BankingTransaction $model */
-                        $model = $livewire->getOwnerRecord();
+                    ->options(static function (RelationManager $livewire, BankingTransaction|BankStatement|null $record): Collection {
+                        $model = GetTransaction::get($livewire, $record);
 
                         return PurchaseOrder::query()
                             ->openOrPending()
@@ -42,11 +45,11 @@ final class AttachPurchaseOrderAction
                     ->preload()
                     ->required(),
             ])
-            ->action(static function (array $data, RelationManager $livewire, BankTransactionService $service): void {
-                /** @var BankingTransaction $model */
-                $model = $livewire->getOwnerRecord();
+            ->action(static function (array $data, RelationManager $livewire, BankingTransaction|BankStatement|null $record, BankTransactionService $service): void {
+                $record = GetTransaction::get($livewire, $record);
+
                 $service->attachPurchaseOrder(
-                    BankTransactionId::create((int) $model->id),
+                    BankTransactionId::create((int) $record->id),
                     PurchaseOrderId::create((int) $data['purchase_order_id']),
                 );
             })

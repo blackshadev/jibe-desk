@@ -5,8 +5,19 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\BankStatements\RelationManagers;
 
 use App\Domain\BankTransactions\BankTransactionStatus;
+use App\Filament\Admin\Resources\BankingTransactions\Actions\AttachBookkeepingRecordAction;
+use App\Filament\Admin\Resources\BankingTransactions\Actions\AttachInvoiceAction;
+use App\Filament\Admin\Resources\BankingTransactions\Actions\AttachPurchaseOrderAction;
+use App\Filament\Admin\Resources\BankingTransactions\Actions\CreateBookkeepingRecordFromTransactionAction;
+use App\Filament\Admin\Resources\BankingTransactions\Actions\CreateInvoiceFromTransactionAction;
+use App\Filament\Admin\Resources\BankingTransactions\Actions\CreatePurchaseOrderFromTransactionAction;
+use App\Filament\Admin\Resources\BankingTransactions\Actions\LinkReversalAction;
+use App\Filament\Admin\Resources\BankingTransactions\Actions\RetryMatchingAction;
+use App\Filament\Admin\Resources\BankingTransactions\Actions\UnlinkReversalAction;
 use App\Filament\Admin\Resources\BankingTransactions\BankingTransactionResource;
+use App\Filament\Admin\Resources\BankStatements\Actions\CompleteAllMatchedAction;
 use App\Models\BankingTransaction;
+use Filament\Actions\ActionGroup;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -21,6 +32,9 @@ final class BankStatementTransactionsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->headerActions([
+                CompleteAllMatchedAction::make(),
+            ])
             ->columns([
                 TextColumn::make('date')
                     ->label(__('labels.date'))
@@ -62,6 +76,28 @@ final class BankStatementTransactionsRelationManager extends RelationManager
                     })
                     ->sortable(),
             ])
-            ->recordUrl(static fn (BankingTransaction $record): string => BankingTransactionResource::getUrl('view', ['record' => $record]));
+            ->recordUrl(static fn (BankingTransaction $record): string => BankingTransactionResource::getUrl('view', ['record' => $record]))
+            ->recordActions([
+                ActionGroup::make([
+                    ActionGroup::make([
+                        AttachInvoiceAction::make(),
+                        CreateInvoiceFromTransactionAction::make(),
+                    ])->dropdown(false),
+                    ActionGroup::make([
+                        AttachPurchaseOrderAction::make(),
+                        CreatePurchaseOrderFromTransactionAction::make(),
+                    ])->dropdown(false),
+                    ActionGroup::make([
+                        AttachBookkeepingRecordAction::make(),
+                        CreateBookkeepingRecordFromTransactionAction::make(),
+                    ])->dropdown(false),
+
+                    ActionGroup::make([
+                        RetryMatchingAction::make(),
+                        LinkReversalAction::make(),
+                        UnlinkReversalAction::make(),
+                    ])->dropdown(false),
+                ]),
+            ]);
     }
 }

@@ -35,4 +35,5 @@ return [
     'purchase_order_created_and_attached' => 'Inkooporder aangemaakt en gekoppeld',
     'bookkeeping_record_created_and_attached' => 'Boekhouding mutatie aangemaakt en gekoppeld',
     'credit_invoice_created' => 'Creditfactuur succesvol aangemaakt',
+    'chain_status_updated' => 'Aansluiting controle bijgewerkt',
 ];
