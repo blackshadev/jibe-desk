@@ -7,7 +7,7 @@ namespace App\Filament\Admin\Resources\PurchaseOrders\Pages;
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Resources\PurchaseOrders\Actions\PurchaseOrderStateActions;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
-use App\Filament\Admin\Resources\PurchaseOrders\RelationManagers\PurchaseOrderBankingTransactionsRelationManager;
+use App\Filament\Admin\Resources\PurchaseOrders\RelationManagers\PurchaseOrderBankTransactionsRelationManager;
 use App\Filament\Admin\Resources\PurchaseOrders\RelationManagers\PurchaseOrderBookkeepingRecordsRelationManager;
 use App\Models\PurchaseOrder;
 use Filament\Actions\DeleteAction;
@@ -33,7 +33,7 @@ final class EditPurchaseOrder extends EditRecord
     public function getRelationManagers(): array
     {
         return [
-            PurchaseOrderBankingTransactionsRelationManager::class,
+            PurchaseOrderBankTransactionsRelationManager::class,
             PurchaseOrderBookkeepingRecordsRelationManager::class,
         ];
     }

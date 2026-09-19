@@ -6,7 +6,7 @@ namespace App\Filament\Admin\Actions;
 
 use App\Domain\BankTransactions\BankTransactionImportService;
 use App\Domain\BankTransactions\UnknownBankAccountException;
-use App\Domain\Jobs\MatchBankingTransactionsJob;
+use App\Domain\Jobs\MatchBankTransactionsJob;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
@@ -53,7 +53,7 @@ final class ImportMt940Action
                     ->send();
 
                 if ($result['imported'] > 0) {
-                    MatchBankingTransactionsJob::dispatch();
+                    MatchBankTransactionsJob::dispatch();
                 }
 
                 $livewire->dispatch('refreshTable');

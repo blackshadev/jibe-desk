@@ -17,7 +17,7 @@ use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use App\Models\BankAccount;
-use App\Models\BankingTransaction;
+use App\Models\BankTransaction;
 use App\Models\BookkeepingRecord;
 use App\Models\Invoice;
 use App\Models\PurchaseOrder;
@@ -31,7 +31,7 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
     #[Override]
     public function create(CreateBankTransaction $dto): BankTransactionId
     {
-        $bankingTransaction = BankingTransaction::query()->create([
+        $bankTransaction = BankTransaction::query()->create([
             'date' => $dto->date,
             'amount' => $dto->amount,
             'description' => $dto->description,
@@ -41,45 +41,45 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
             'import_hash' => $dto->importHash,
         ]);
 
-        return BankTransactionId::create($bankingTransaction->id);
+        return BankTransactionId::create($bankTransaction->id);
     }
 
     #[Override]
     public function existsByHash(string $hash): bool
     {
-        return BankingTransaction::query()->where('import_hash', $hash)->exists();
+        return BankTransaction::query()->where('import_hash', $hash)->exists();
     }
 
     #[Override]
     public function attachInvoice(BankTransactionId $bankTransactionId, InvoiceId $invoiceId): void
     {
-        /** @var BankingTransaction $bankingTransaction */
-        $bankingTransaction = BankingTransaction::query()->findOrFail($bankTransactionId->value);
-        $bankingTransaction->invoices()->syncWithoutDetaching([$invoiceId->value]);
+        /** @var BankTransaction $bankTransaction */
+        $bankTransaction = BankTransaction::query()->findOrFail($bankTransactionId->value);
+        $bankTransaction->invoices()->syncWithoutDetaching([$invoiceId->value]);
     }
 
     #[Override]
     public function detachInvoice(BankTransactionId $bankTransactionId, InvoiceId $invoiceId): void
     {
-        /** @var BankingTransaction $bankingTransaction */
-        $bankingTransaction = BankingTransaction::query()->findOrFail($bankTransactionId->value);
-        $bankingTransaction->invoices()->detach($invoiceId->value);
+        /** @var BankTransaction $bankTransaction */
+        $bankTransaction = BankTransaction::query()->findOrFail($bankTransactionId->value);
+        $bankTransaction->invoices()->detach($invoiceId->value);
     }
 
     #[Override]
     public function attachPurchaseOrder(BankTransactionId $bankTransactionId, PurchaseOrderId $purchaseOrderId): void
     {
-        /** @var BankingTransaction $bankingTransaction */
-        $bankingTransaction = BankingTransaction::query()->findOrFail($bankTransactionId->value);
-        $bankingTransaction->purchaseOrders()->syncWithoutDetaching([$purchaseOrderId->value]);
+        /** @var BankTransaction $bankTransaction */
+        $bankTransaction = BankTransaction::query()->findOrFail($bankTransactionId->value);
+        $bankTransaction->purchaseOrders()->syncWithoutDetaching([$purchaseOrderId->value]);
     }
 
     #[Override]
     public function detachPurchaseOrder(BankTransactionId $bankTransactionId, PurchaseOrderId $purchaseOrderId): void
     {
-        /** @var BankingTransaction $bankingTransaction */
-        $bankingTransaction = BankingTransaction::query()->findOrFail($bankTransactionId->value);
-        $bankingTransaction->purchaseOrders()->detach($purchaseOrderId->value);
+        /** @var BankTransaction $bankTransaction */
+        $bankTransaction = BankTransaction::query()->findOrFail($bankTransactionId->value);
+        $bankTransaction->purchaseOrders()->detach($purchaseOrderId->value);
     }
 
     #[Override]
@@ -87,7 +87,7 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
     {
         BookkeepingRecord::query()
             ->where('id', $bookkeepingRecordId)
-            ->update(['banking_transaction_id' => $bankTransactionId->value]);
+            ->update(['bank_transaction_id' => $bankTransactionId->value]);
     }
 
     #[Override]
@@ -95,14 +95,14 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
     {
         BookkeepingRecord::query()
             ->where('id', $bookkeepingRecordId)
-            ->where('banking_transaction_id', $bankTransactionId->value)
-            ->update(['banking_transaction_id' => null]);
+            ->where('bank_transaction_id', $bankTransactionId->value)
+            ->update(['bank_transaction_id' => null]);
     }
 
     #[Override]
     public function getAttachedInvoiceIds(BankTransactionId $bankTransactionId): InvoiceIdList
     {
-        $ids = BankingTransaction::query()
+        $ids = BankTransaction::query()
             ->findOrFail($bankTransactionId->value)
             ->invoices()
             ->pluck('reference_id')
@@ -115,7 +115,7 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
     #[Override]
     public function getAttachedPurchaseOrderIds(BankTransactionId $bankTransactionId): PurchaseOrderIdList
     {
-        $ids = BankingTransaction::query()
+        $ids = BankTransaction::query()
             ->findOrFail($bankTransactionId->value)
             ->purchaseOrders()
             ->pluck('reference_id')
@@ -129,7 +129,7 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
     public function complete(BankTransactionId $bankTransactionId): void
     {
         DB::transaction(static function () use ($bankTransactionId): void {
-            $bt = BankingTransaction::query()
+            $bt = BankTransaction::query()
                 ->with(['invoices.lines', 'purchaseOrders.lines'])
                 ->findOrFail($bankTransactionId->value);
 
@@ -144,7 +144,7 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
                 BookkeepingRecord::query()
                     ->where('reference_type', Invoice::class)
                     ->whereIn('reference_id', $invoiceIds)
-                    ->update(['banking_transaction_id' => $bankTransactionId->value]);
+                    ->update(['bank_transaction_id' => $bankTransactionId->value]);
             }
 
             $poIds = $bt->purchaseOrders->pluck('id');
@@ -152,7 +152,7 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
                 BookkeepingRecord::query()
                     ->where('reference_type', PurchaseOrder::class)
                     ->whereIn('reference_id', $poIds)
-                    ->update(['banking_transaction_id' => $bankTransactionId->value]);
+                    ->update(['bank_transaction_id' => $bankTransactionId->value]);
             }
         });
     }
@@ -160,7 +160,7 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
     #[Override]
     public function getUnresolvedIds(int $limit): BankTransactionIdList
     {
-        $ids = BankingTransaction::query()
+        $ids = BankTransaction::query()
             ->where('resolve_status', 'unresolved')
             ->orderBy('date', 'desc')
             ->limit($limit)
@@ -178,10 +178,10 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
             return [];
         }
 
-        return BankingTransaction::query()
+        return BankTransaction::query()
             ->whereIn('id', $ids->asInts())
             ->get()
-            ->mapWithKeys(static fn (BankingTransaction $bt): array => [
+            ->mapWithKeys(static fn (BankTransaction $bt): array => [
                 $bt->id => new MatchCriteria(
                     date: $bt->date,
                     amount: (float) $bt->unmatched_amount,
@@ -196,7 +196,7 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
     #[Override]
     public function markAsResolved(BankTransactionId $bankTransactionId): void
     {
-        BankingTransaction::query()
+        BankTransaction::query()
             ->where('id', $bankTransactionId->value)
             ->update(['resolve_status' => 'resolved']);
     }
@@ -204,7 +204,7 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
     #[Override]
     public function markAsUnresolvable(BankTransactionId $bankTransactionId): void
     {
-        BankingTransaction::query()
+        BankTransaction::query()
             ->where('id', $bankTransactionId->value)
             ->update(['resolve_status' => 'unresolvable']);
     }
@@ -214,7 +214,7 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
     {
         $date = CarbonImmutable::instance($criteria->date);
 
-        $query = BankingTransaction::query()
+        $query = BankTransaction::query()
             ->whereNull('reversed_by_transaction_id')
             ->where('banking_account_number', $criteria->bankingAccountNumber)
             ->where('description', $criteria->description)
@@ -240,22 +240,22 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
     public function linkReversal(BankTransactionId $reversalId, BankTransactionId $originalId): void
     {
         DB::transaction(static function () use ($reversalId, $originalId): void {
-            BankingTransaction::query()
+            BankTransaction::query()
                 ->where('id', $reversalId->value)
                 ->update([
                     'reversed_by_transaction_id' => $originalId->value,
                 ]);
 
-            DB::table('banking_transaction_references')->insertUsing(
-                ['banking_transaction_id', 'reference_type', 'reference_id', 'created_at', 'updated_at'],
-                DB::table('banking_transaction_references')
+            DB::table('bank_transaction_references')->insertUsing(
+                ['bank_transaction_id', 'reference_type', 'reference_id', 'created_at', 'updated_at'],
+                DB::table('bank_transaction_references')
                     ->selectRaw('?, reference_type, reference_id, ?, ?', [$reversalId->value, now(), now()])
-                    ->where('banking_transaction_id', $originalId->value),
+                    ->where('bank_transaction_id', $originalId->value),
             );
 
             DB::table('bookkeeping_records')
-                ->where('banking_transaction_id', $originalId->value)
-                ->update(['banking_transaction_id' => null]);
+                ->where('bank_transaction_id', $originalId->value)
+                ->update(['bank_transaction_id' => null]);
         });
     }
 
@@ -263,11 +263,11 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
     public function unlinkReversal(BankTransactionId $reversalId): void
     {
         DB::transaction(static function () use ($reversalId): void {
-            DB::table('banking_transaction_references')
-                ->where('banking_transaction_id', $reversalId->value)
+            DB::table('bank_transaction_references')
+                ->where('bank_transaction_id', $reversalId->value)
                 ->delete();
 
-            BankingTransaction::query()
+            BankTransaction::query()
                 ->where('id', $reversalId->value)
                 ->update([
                     'reversed_by_transaction_id' => null,
@@ -297,7 +297,7 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
 
         $date = CarbonImmutable::instance($criteria->date);
 
-        $counterpart = BankingTransaction::query()
+        $counterpart = BankTransaction::query()
             ->where('bank_account_id', $targetAccount->id)
             ->whereRaw("UPPER(REPLACE(banking_account_number, ' ', '')) = ?", [$ownIban])
             ->whereRaw('ABS(amount + ?) <= 0.01', [$criteria->amount])
@@ -325,15 +325,15 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
         $second = max($a->value, $b->value);
 
         DB::transaction(static function () use ($first, $second): void {
-            $exists = DB::table('banking_transaction_links')
-                ->where('banking_transaction_id', $first)
+            $exists = DB::table('bank_transaction_links')
+                ->where('bank_transaction_id', $first)
                 ->where('linked_transaction_id', $second)
                 ->where('link_type', 'internal_transfer')
                 ->exists();
 
             if (!$exists) {
-                DB::table('banking_transaction_links')->insert([
-                    'banking_transaction_id' => $first,
+                DB::table('bank_transaction_links')->insert([
+                    'bank_transaction_id' => $first,
                     'linked_transaction_id' => $second,
                     'link_type' => 'internal_transfer',
                     'created_at' => now(),
@@ -341,7 +341,7 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
                 ]);
             }
 
-            BankingTransaction::query()
+            BankTransaction::query()
                 ->whereIn('id', [$first, $second])
                 ->update([
                     'status' => BankTransactionStatus::Completed->value,
@@ -353,10 +353,10 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
     #[Override]
     public function unlinkInternalTransfer(BankTransactionId $id): void
     {
-        $link = DB::table('banking_transaction_links')
+        $link = DB::table('bank_transaction_links')
             ->where('link_type', 'internal_transfer')
             ->where(static fn ($query) => $query
-                ->where('banking_transaction_id', $id->value)
+                ->where('bank_transaction_id', $id->value)
                 ->orWhere('linked_transaction_id', $id->value))
             ->first();
 
@@ -364,19 +364,19 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
             return;
         }
 
-        $otherId = (int) $link->banking_transaction_id === $id->value
+        $otherId = (int) $link->bank_transaction_id === $id->value
             ? (int) $link->linked_transaction_id
-            : (int) $link->banking_transaction_id;
+            : (int) $link->bank_transaction_id;
 
         DB::transaction(static function () use ($id, $otherId): void {
-            DB::table('banking_transaction_links')
+            DB::table('bank_transaction_links')
                 ->where('link_type', 'internal_transfer')
                 ->where(static fn ($query) => $query
-                    ->where('banking_transaction_id', $id->value)
+                    ->where('bank_transaction_id', $id->value)
                     ->orWhere('linked_transaction_id', $id->value))
                 ->delete();
 
-            BankingTransaction::query()
+            BankTransaction::query()
                 ->whereIn('id', [$id->value, $otherId])
                 ->update([
                     'status' => BankTransactionStatus::Open->value,
@@ -388,10 +388,10 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
     #[Override]
     public function getLinkedInternalTransferId(BankTransactionId $id): ?BankTransactionId
     {
-        $link = DB::table('banking_transaction_links')
+        $link = DB::table('bank_transaction_links')
             ->where('link_type', 'internal_transfer')
             ->where(static fn ($query) => $query
-                ->where('banking_transaction_id', $id->value)
+                ->where('bank_transaction_id', $id->value)
                 ->orWhere('linked_transaction_id', $id->value))
             ->first();
 
@@ -399,9 +399,9 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
             return null;
         }
 
-        $otherId = (int) $link->banking_transaction_id === $id->value
+        $otherId = (int) $link->bank_transaction_id === $id->value
             ? (int) $link->linked_transaction_id
-            : (int) $link->banking_transaction_id;
+            : (int) $link->bank_transaction_id;
 
         return BankTransactionId::create($otherId);
     }

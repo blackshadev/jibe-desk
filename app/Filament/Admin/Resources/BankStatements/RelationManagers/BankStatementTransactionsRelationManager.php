@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\BankStatements\RelationManagers;
 
 use App\Domain\BankTransactions\BankTransactionStatus;
-use App\Filament\Admin\Resources\BankingTransactions\Actions\AttachBookkeepingRecordAction;
-use App\Filament\Admin\Resources\BankingTransactions\Actions\AttachInvoiceAction;
-use App\Filament\Admin\Resources\BankingTransactions\Actions\AttachPurchaseOrderAction;
-use App\Filament\Admin\Resources\BankingTransactions\Actions\CreateBookkeepingRecordFromTransactionAction;
-use App\Filament\Admin\Resources\BankingTransactions\Actions\CreateInvoiceFromTransactionAction;
-use App\Filament\Admin\Resources\BankingTransactions\Actions\CreatePurchaseOrderFromTransactionAction;
-use App\Filament\Admin\Resources\BankingTransactions\Actions\LinkReversalAction;
-use App\Filament\Admin\Resources\BankingTransactions\Actions\RetryMatchingAction;
-use App\Filament\Admin\Resources\BankingTransactions\Actions\UnlinkReversalAction;
-use App\Filament\Admin\Resources\BankingTransactions\BankingTransactionResource;
 use App\Filament\Admin\Resources\BankStatements\Actions\CompleteAllMatchedAction;
-use App\Models\BankingTransaction;
+use App\Filament\Admin\Resources\BankTransactions\Actions\AttachBookkeepingRecordAction;
+use App\Filament\Admin\Resources\BankTransactions\Actions\AttachInvoiceAction;
+use App\Filament\Admin\Resources\BankTransactions\Actions\AttachPurchaseOrderAction;
+use App\Filament\Admin\Resources\BankTransactions\Actions\CreateBookkeepingRecordFromTransactionAction;
+use App\Filament\Admin\Resources\BankTransactions\Actions\CreateInvoiceFromTransactionAction;
+use App\Filament\Admin\Resources\BankTransactions\Actions\CreatePurchaseOrderFromTransactionAction;
+use App\Filament\Admin\Resources\BankTransactions\Actions\LinkReversalAction;
+use App\Filament\Admin\Resources\BankTransactions\Actions\RetryMatchingAction;
+use App\Filament\Admin\Resources\BankTransactions\Actions\UnlinkReversalAction;
+use App\Filament\Admin\Resources\BankTransactions\BankTransactionResource;
+use App\Models\BankTransaction;
 use Filament\Actions\ActionGroup;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
@@ -47,13 +47,13 @@ final class BankStatementTransactionsRelationManager extends RelationManager
                 TextColumn::make('description')
                     ->label(__('labels.description'))
                     ->searchable()
-                    ->tooltip(static fn (BankingTransaction $record): string => $record->description)
+                    ->tooltip(static fn (BankTransaction $record): string => $record->description)
                     ->limit(30),
                 TextColumn::make('amount')
                     ->label(__('labels.price'))
                     ->money('EUR')
                     ->alignEnd()
-                    ->color(static fn (BankingTransaction $record): string => $record->amount < 0 ? 'danger' : 'success'),
+                    ->color(static fn (BankTransaction $record): string => $record->amount < 0 ? 'danger' : 'success'),
 
                 TextColumn::make('unmatched_amount')
                     ->label(__('labels.unmatched'))
@@ -76,7 +76,7 @@ final class BankStatementTransactionsRelationManager extends RelationManager
                     })
                     ->sortable(),
             ])
-            ->recordUrl(static fn (BankingTransaction $record): string => BankingTransactionResource::getUrl('view', ['record' => $record]))
+            ->recordUrl(static fn (BankTransaction $record): string => BankTransactionResource::getUrl('view', ['record' => $record]))
             ->recordActions([
                 ActionGroup::make([
                     ActionGroup::make([

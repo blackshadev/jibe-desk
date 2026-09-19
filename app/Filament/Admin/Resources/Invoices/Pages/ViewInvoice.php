@@ -8,7 +8,7 @@ use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\Invoices\InvoiceService;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
-use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceBankingTransactionsRelationManager;
+use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceBankTransactionsRelationManager;
 use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceBookkeepingRecordsRelationManager;
 use App\Models\Invoice;
 use Filament\Actions\Action;
@@ -93,7 +93,7 @@ final class ViewInvoice extends ViewRecord
     public function getRelationManagers(): array
     {
         return [
-            InvoiceBankingTransactionsRelationManager::class,
+            InvoiceBankTransactionsRelationManager::class,
             InvoiceBookkeepingRecordsRelationManager::class,
         ];
     }

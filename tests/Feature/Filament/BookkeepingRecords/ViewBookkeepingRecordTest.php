@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Filament\BookkeepingRecords;
 
 use App\Filament\Admin\Resources\BookkeepingRecords\Pages\ViewBookkeepingRecord;
-use App\Models\BankingTransaction;
+use App\Models\BankTransaction;
 use App\Models\BookkeepingRecord;
 use App\Models\Invoice;
 use App\Models\Member;
@@ -45,14 +45,14 @@ final class ViewBookkeepingRecordTest extends FeatureTestCase
     public function test_view_page_displays_banking_transaction(): void
     {
         $this->withAuthorizedUser();
-        $bankingTransaction = BankingTransaction::factory()->createQuietly();
+        $bankTransaction = BankTransaction::factory()->createQuietly();
         $record = BookkeepingRecord::factory()
-            ->createQuietly(['banking_transaction_id' => $bankingTransaction->id]);
+            ->createQuietly(['bank_transaction_id' => $bankTransaction->id]);
 
         Livewire::test(ViewBookkeepingRecord::class, ['record' => $record->getRouteKey()])
             ->assertSuccessful()
-            ->assertSee($bankingTransaction->description)
-            ->assertSee($bankingTransaction->date->format('Y-m-d'));
+            ->assertSee($bankTransaction->description)
+            ->assertSee($bankTransaction->date->format('Y-m-d'));
     }
 
     public function test_view_page_hides_reference_when_null(): void
@@ -72,6 +72,6 @@ final class ViewBookkeepingRecordTest extends FeatureTestCase
 
         Livewire::test(ViewBookkeepingRecord::class, ['record' => $record->getRouteKey()])
             ->assertSuccessful()
-            ->assertDontSee(__('labels.banking_transaction'));
+            ->assertDontSee(__('labels.bank_transaction'));
     }
 }

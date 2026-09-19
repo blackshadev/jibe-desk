@@ -28,10 +28,10 @@ final class BookkeepingRecord extends Model
         return $this->belongsTo(CostCenter::class);
     }
 
-    /** @return BelongsTo<BankingTransaction, $this> */
-    public function bankingTransaction(): BelongsTo
+    /** @return BelongsTo<BankTransaction, $this> */
+    public function bankTransaction(): BelongsTo
     {
-        return $this->belongsTo(BankingTransaction::class);
+        return $this->belongsTo(BankTransaction::class);
     }
 
     #[Scope]

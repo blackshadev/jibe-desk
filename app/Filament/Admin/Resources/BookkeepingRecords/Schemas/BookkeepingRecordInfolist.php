@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\BookkeepingRecords\Schemas;
 
 use App\Domain\Invoices\Formatters\PriceFormatter;
-use App\Filament\Admin\Resources\BankingTransactions\BankingTransactionResource;
+use App\Filament\Admin\Resources\BankTransactions\BankTransactionResource;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Filament\Admin\Utils\ViewOrEdit;
@@ -53,21 +53,21 @@ class BookkeepingRecordInfolist
                                 default => null,
                             })
                             ->visible(static fn (BookkeepingRecord $record): bool => $record->reference !== null),
-                        TextEntry::make('bankingTransaction')
-                            ->label(__('labels.banking_transaction'))
+                        TextEntry::make('bankTransaction')
+                            ->label(__('labels.bank_transaction'))
                             ->icon(Heroicon::ArrowTopRightOnSquare)
-                            ->state(static fn (BookkeepingRecord $record): string => $record->bankingTransaction
-                                ? sprintf('[%s] %s', $record->bankingTransaction->date->format('Y-m-d'), $record->bankingTransaction->description)
+                            ->state(static fn (BookkeepingRecord $record): string => $record->bankTransaction
+                                ? sprintf('[%s] %s', $record->bankTransaction->date->format('Y-m-d'), $record->bankTransaction->description)
                                 : '—')
                             ->url(static function (BookkeepingRecord $record): ?string {
-                                /** @var \App\Models\BankingTransaction|null $bankingTransaction */
-                                $bankingTransaction = $record->bankingTransaction;
+                                /** @var \App\Models\BankTransaction|null $bankTransaction */
+                                $bankTransaction = $record->bankTransaction;
 
-                                return $bankingTransaction
-                                    ? ViewOrEdit::routeFor(BankingTransactionResource::class, $bankingTransaction)
+                                return $bankTransaction
+                                    ? ViewOrEdit::routeFor(BankTransactionResource::class, $bankTransaction)
                                     : null;
                             })
-                            ->visible(static fn (BookkeepingRecord $record): bool => $record->bankingTransaction !== null),
+                            ->visible(static fn (BookkeepingRecord $record): bool => $record->bankTransaction !== null),
                     ]),
             ]);
     }

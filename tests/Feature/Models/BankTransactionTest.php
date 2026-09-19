@@ -1,0 +1,151 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Feature\Models;
+
+use App\Domain\BankTransactions\BankTransactionStatus;
+use App\Models\BankTransaction;
+use App\Models\Invoice;
+use App\Models\InvoiceLine;
+use App\Models\Member;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderLine;
+use Tests\FeatureTestCase;
+
+final class BankTransactionTest extends FeatureTestCase
+{
+    public function test_unmatched_amount_returns_full_amount_when_no_references(): void
+    {
+        $transaction = BankTransaction::factory()
+            ->createQuietly(['amount' => 150.500]);
+
+        $result = $transaction->unmatched_amount;
+
+        static::assertSame(150.5, $result);
+    }
+
+    public function test_unmatched_amount_subtracts_invoice_totals_from_pivot(): void
+    {
+        $transaction = BankTransaction::factory()
+            ->createQuietly(['amount' => 200.000]);
+
+        $member = Member::factory()->createQuietly();
+        $invoice = Invoice::factory()->forMember($member)->createQuietly();
+        InvoiceLine::factory()->createQuietly(['invoice_id' => $invoice->id, 'price' => 50.000, 'quantity' => 1]);
+        InvoiceLine::factory()->createQuietly(['invoice_id' => $invoice->id, 'price' => 25.000, 'quantity' => 1]);
+
+        $transaction->invoices()->attach($invoice->id);
+
+        $result = $transaction->unmatched_amount;
+
+        // 200.0 - (50.0 + 25.0) = 200.0 - 75.0 = 125.0
+        static::assertSame(125.0, $result);
+    }
+
+    public function test_unmatched_amount_adds_purchase_order_totals_from_pivot(): void
+    {
+        $transaction = BankTransaction::factory()
+            ->createQuietly(['amount' => -100.000]);
+
+        $po = PurchaseOrder::factory()->createQuietly();
+        PurchaseOrderLine::factory()->createQuietly(['purchase_order_id' => $po->id, 'price' => 30.000]);
+        PurchaseOrderLine::factory()->createQuietly(['purchase_order_id' => $po->id, 'price' => 20.000]);
+
+        $transaction->purchaseOrders()->attach($po->id);
+
+        $result = $transaction->unmatched_amount;
+
+        // -100.0 - 0 + (30.0 + 20.0) = -100.0 + 50.0 = -50.0
+        static::assertSame(-50.0, $result);
+    }
+
+    public function test_unmatched_amount_returns_zero_when_fully_matched(): void
+    {
+        $transaction = BankTransaction::factory()
+            ->createQuietly(['amount' => 100.000]);
+
+        $member = Member::factory()->createQuietly();
+        $invoice = Invoice::factory()->forMember($member)->createQuietly();
+        InvoiceLine::factory()->createQuietly(['invoice_id' => $invoice->id, 'price' => 60.000, 'quantity' => 1]);
+        InvoiceLine::factory()->createQuietly(['invoice_id' => $invoice->id, 'price' => 40.000, 'quantity' => 1]);
+
+        $transaction->invoices()->attach($invoice->id);
+
+        $result = $transaction->unmatched_amount;
+
+        static::assertSame(0.0, $result);
+    }
+
+    public function test_status_defaults_to_open(): void
+    {
+        $transaction = BankTransaction::factory()->createQuietly();
+
+        static::assertSame(BankTransactionStatus::Open, $transaction->status);
+    }
+
+    public function test_is_completed_returns_true_when_status_is_completed(): void
+    {
+        $transaction = BankTransaction::factory()->completed()->createQuietly();
+
+        static::assertTrue($transaction->isCompleted());
+    }
+
+    public function test_is_completed_returns_false_when_status_is_open(): void
+    {
+        $transaction = BankTransaction::factory()->createQuietly();
+
+        static::assertFalse($transaction->isCompleted());
+    }
+
+    public function test_is_reversal_returns_true_when_reversed_by_transaction_id_is_set(): void
+    {
+        $original = BankTransaction::factory()->createQuietly(['amount' => 100.000]);
+        $reversal = BankTransaction::factory()->reversedBy($original)->createQuietly();
+
+        static::assertTrue($reversal->isReversal());
+        static::assertFalse($original->isReversal());
+    }
+
+    public function test_is_reversed_returns_true_when_another_transaction_points_to_it(): void
+    {
+        $original = BankTransaction::factory()->createQuietly(['amount' => 100.000]);
+        BankTransaction::factory()->reversedBy($original)->createQuietly();
+
+        static::assertTrue($original->isReversed());
+    }
+
+    public function test_reversed_by_relationship_loads_original_transaction(): void
+    {
+        $original = BankTransaction::factory()->createQuietly(['amount' => 100.000]);
+        $reversal = BankTransaction::factory()->reversedBy($original)->createQuietly();
+
+        static::assertNotNull($reversal->reversedBy);
+        static::assertSame($original->id, $reversal->reversedBy->id);
+    }
+
+    public function test_unmatched_amount_returns_zero_for_reversal(): void
+    {
+        $original = BankTransaction::factory()->createQuietly(['amount' => 100.000]);
+        $reversal = BankTransaction::factory()->reversedBy($original)->createQuietly(['amount' => -100.000]);
+
+        static::assertSame(0.0, $reversal->unmatched_amount);
+    }
+
+    public function test_matched_amount_equals_amount_for_reversal(): void
+    {
+        $original = BankTransaction::factory()->createQuietly(['amount' => 100.000]);
+        $reversal = BankTransaction::factory()->reversedBy($original)->createQuietly(['amount' => -100.000]);
+
+        static::assertSame(-100.0, $reversal->matched_amount);
+    }
+
+    public function test_unmatched_amount_still_works_normally_for_non_reversal(): void
+    {
+        $transaction = BankTransaction::factory()->createQuietly(['amount' => 150.500]);
+
+        $result = $transaction->unmatched_amount;
+
+        static::assertSame(150.5, $result);
+    }
+}

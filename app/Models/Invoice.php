@@ -59,10 +59,10 @@ final class Invoice extends Model
         return $this->hasMany(InvoiceLine::class);
     }
 
-    /** @return MorphToMany<BankingTransaction, $this> */
-    public function bankingTransactions(): MorphToMany
+    /** @return MorphToMany<BankTransaction, $this> */
+    public function bankTransactions(): MorphToMany
     {
-        return $this->morphToMany(BankingTransaction::class, 'reference', 'banking_transaction_references')
+        return $this->morphToMany(BankTransaction::class, 'reference', 'bank_transaction_references')
             ->withTimestamps();
     }
 

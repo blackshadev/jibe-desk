@@ -41,10 +41,10 @@ final class BankStatement extends Model
         return $this->belongsTo(BankAccount::class);
     }
 
-    /** @return HasMany<BankingTransaction, $this> */
+    /** @return HasMany<BankTransaction, $this> */
     public function transactions(): HasMany
     {
-        return $this->hasMany(BankingTransaction::class);
+        return $this->hasMany(BankTransaction::class);
     }
 
     protected function matchedPercentage(): Attribute
@@ -56,13 +56,13 @@ final class BankStatement extends Model
                 return null;
             }
 
-            $totalAmount = $transactions->sum(static fn (BankingTransaction $t): float => abs($t->amount));
+            $totalAmount = $transactions->sum(static fn (BankTransaction $transaction): float => abs($transaction->amount));
 
             if ($totalAmount < 0.01) {
                 return null;
             }
 
-            $totalMatched = $transactions->sum(static fn (BankingTransaction $t): float => abs($t->matched_amount));
+            $totalMatched = $transactions->sum(static fn (BankTransaction $transaction): float => abs($transaction->matched_amount));
 
             return round(($totalMatched / $totalAmount) * 100, 2);
         });

@@ -9,8 +9,8 @@ use App\Filament\Admin\Resources\BankStatements\Pages\ListBankStatements;
 use App\Filament\Admin\Resources\BankStatements\Pages\ViewBankStatement;
 use App\Filament\Admin\Resources\BankStatements\RelationManagers\BankStatementTransactionsRelationManager;
 use App\Models\BankAccount;
-use App\Models\BankingTransaction;
 use App\Models\BankStatement;
+use App\Models\BankTransaction;
 use Filament\Actions\Testing\TestAction;
 use Livewire\Livewire;
 use Tests\Concerns\WithAuthorizedUser;
@@ -127,11 +127,11 @@ final class BankStatementResourceTest extends FeatureTestCase
 
         $statement = BankStatement::factory()->create();
 
-        BankingTransaction::factory()
+        BankTransaction::factory()
             ->forStatement($statement)
             ->create(['amount' => 100.00]);
 
-        BankingTransaction::factory()
+        BankTransaction::factory()
             ->forStatement($statement)
             ->create(['amount' => 50.00]);
 
@@ -155,7 +155,7 @@ final class BankStatementResourceTest extends FeatureTestCase
         $this->withAuthorizedUser();
 
         $statement = BankStatement::factory()->create();
-        $transaction = BankingTransaction::factory()->forStatement($statement)->create();
+        $transaction = BankTransaction::factory()->forStatement($statement)->create();
 
         Livewire::test(ViewBankStatement::class, ['record' => $statement->id])
             ->assertSuccessful();
@@ -172,7 +172,7 @@ final class BankStatementResourceTest extends FeatureTestCase
         $this->withAuthorizedUser();
 
         $statement = BankStatement::factory()->create();
-        $transaction = BankingTransaction::factory()->forStatement($statement)->create();
+        $transaction = BankTransaction::factory()->forStatement($statement)->create();
 
         Livewire::test(BankStatementTransactionsRelationManager::class, [
             'ownerRecord' => $statement,

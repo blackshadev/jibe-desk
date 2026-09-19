@@ -22,10 +22,10 @@ final class BankAccount extends Model
 {
     use HasFactory;
 
-    /** @return HasMany<BankingTransaction, $this> */
+    /** @return HasMany<BankTransaction, $this> */
     public function transactions(): HasMany
     {
-        return $this->hasMany(BankingTransaction::class);
+        return $this->hasMany(BankTransaction::class);
     }
 
     /** @return HasMany<BankStatement, $this> */

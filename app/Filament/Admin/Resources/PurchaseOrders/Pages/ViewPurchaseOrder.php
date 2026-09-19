@@ -6,7 +6,7 @@ namespace App\Filament\Admin\Resources\PurchaseOrders\Pages;
 
 use App\Filament\Admin\Resources\PurchaseOrders\Actions\PurchaseOrderStateActions;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
-use App\Filament\Admin\Resources\PurchaseOrders\RelationManagers\PurchaseOrderBankingTransactionsRelationManager;
+use App\Filament\Admin\Resources\PurchaseOrders\RelationManagers\PurchaseOrderBankTransactionsRelationManager;
 use App\Filament\Admin\Resources\PurchaseOrders\RelationManagers\PurchaseOrderBookkeepingRecordsRelationManager;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
@@ -38,7 +38,7 @@ final class ViewPurchaseOrder extends ViewRecord
     public function getRelationManagers(): array
     {
         return [
-            PurchaseOrderBankingTransactionsRelationManager::class,
+            PurchaseOrderBankTransactionsRelationManager::class,
             PurchaseOrderBookkeepingRecordsRelationManager::class,
         ];
     }

@@ -14,7 +14,7 @@ use App\Domain\Invoices\InvoiceId;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Infrastructure\BankTransactions\BankTransactionDbRepository;
 use App\Models\BankAccount;
-use App\Models\BankingTransaction;
+use App\Models\BankTransaction;
 use App\Models\BookkeepingRecord;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;
@@ -52,7 +52,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         $id = $this->repository->create($dto);
 
         static::assertInstanceOf(BankTransactionId::class, $id);
-        $this->assertDatabaseHas('banking_transactions', [
+        $this->assertDatabaseHas('bank_transactions', [
             'description' => 'Test payment',
             'banking_account_number' => 'NL91ABNA0417164300',
             'import_hash' => 'abc123',
@@ -61,7 +61,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
 
     public function test_it_checks_if_hash_exists(): void
     {
-        BankingTransaction::factory()->create(['import_hash' => 'existing_hash']);
+        BankTransaction::factory()->create(['import_hash' => 'existing_hash']);
 
         static::assertTrue($this->repository->existsByHash('existing_hash'));
         static::assertFalse($this->repository->existsByHash('nonexistent_hash'));
@@ -69,16 +69,16 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
 
     public function test_it_attaches_an_invoice(): void
     {
-        $bankingTransaction = BankingTransaction::factory()->create();
+        $bankTransaction = BankTransaction::factory()->create();
         $invoice = Invoice::factory()->create();
 
         $this->repository->attachInvoice(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             InvoiceId::create($invoice->id),
         );
 
-        $this->assertDatabaseHas('banking_transaction_references', [
-            'banking_transaction_id' => $bankingTransaction->id,
+        $this->assertDatabaseHas('bank_transaction_references', [
+            'bank_transaction_id' => $bankTransaction->id,
             'reference_type' => Invoice::class,
             'reference_id' => $invoice->id,
         ]);
@@ -86,21 +86,21 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
 
     public function test_it_detaches_an_invoice(): void
     {
-        $bankingTransaction = BankingTransaction::factory()->create();
+        $bankTransaction = BankTransaction::factory()->create();
         $invoice = Invoice::factory()->create();
 
         $this->repository->attachInvoice(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             InvoiceId::create($invoice->id),
         );
 
         $this->repository->detachInvoice(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             InvoiceId::create($invoice->id),
         );
 
-        $this->assertDatabaseMissing('banking_transaction_references', [
-            'banking_transaction_id' => $bankingTransaction->id,
+        $this->assertDatabaseMissing('bank_transaction_references', [
+            'bank_transaction_id' => $bankTransaction->id,
             'reference_type' => Invoice::class,
             'reference_id' => $invoice->id,
         ]);
@@ -108,16 +108,16 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
 
     public function test_it_attaches_a_purchase_order(): void
     {
-        $bankingTransaction = BankingTransaction::factory()->create();
+        $bankTransaction = BankTransaction::factory()->create();
         $purchaseOrder = PurchaseOrder::factory()->create();
 
         $this->repository->attachPurchaseOrder(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             PurchaseOrderId::create($purchaseOrder->id),
         );
 
-        $this->assertDatabaseHas('banking_transaction_references', [
-            'banking_transaction_id' => $bankingTransaction->id,
+        $this->assertDatabaseHas('bank_transaction_references', [
+            'bank_transaction_id' => $bankTransaction->id,
             'reference_type' => PurchaseOrder::class,
             'reference_id' => $purchaseOrder->id,
         ]);
@@ -125,21 +125,21 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
 
     public function test_it_detaches_a_purchase_order(): void
     {
-        $bankingTransaction = BankingTransaction::factory()->create();
+        $bankTransaction = BankTransaction::factory()->create();
         $purchaseOrder = PurchaseOrder::factory()->create();
 
         $this->repository->attachPurchaseOrder(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             PurchaseOrderId::create($purchaseOrder->id),
         );
 
         $this->repository->detachPurchaseOrder(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             PurchaseOrderId::create($purchaseOrder->id),
         );
 
-        $this->assertDatabaseMissing('banking_transaction_references', [
-            'banking_transaction_id' => $bankingTransaction->id,
+        $this->assertDatabaseMissing('bank_transaction_references', [
+            'bank_transaction_id' => $bankTransaction->id,
             'reference_type' => PurchaseOrder::class,
             'reference_id' => $purchaseOrder->id,
         ]);
@@ -147,51 +147,51 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
 
     public function test_it_attaches_a_bookkeeping_record_directly(): void
     {
-        $bankingTransaction = BankingTransaction::factory()->create();
+        $bankTransaction = BankTransaction::factory()->create();
         $bookkeepingRecord = BookkeepingRecord::factory()->create();
 
         $this->repository->attachBookkeepingRecord(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             $bookkeepingRecord->id,
         );
 
         $bookkeepingRecord->refresh();
-        static::assertEquals($bankingTransaction->id, $bookkeepingRecord->banking_transaction_id);
+        static::assertEquals($bankTransaction->id, $bookkeepingRecord->bank_transaction_id);
     }
 
     public function test_it_detaches_a_bookkeeping_record(): void
     {
-        $bankingTransaction = BankingTransaction::factory()->create();
+        $bankTransaction = BankTransaction::factory()->create();
         $bookkeepingRecord = BookkeepingRecord::factory()->create([
-            'banking_transaction_id' => $bankingTransaction->id,
+            'bank_transaction_id' => $bankTransaction->id,
         ]);
 
         $this->repository->detachBookkeepingRecord(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             $bookkeepingRecord->id,
         );
 
         $bookkeepingRecord->refresh();
-        static::assertNull($bookkeepingRecord->banking_transaction_id);
+        static::assertNull($bookkeepingRecord->bank_transaction_id);
     }
 
     public function test_it_gets_attached_invoice_ids(): void
     {
-        $bankingTransaction = BankingTransaction::factory()->create();
+        $bankTransaction = BankTransaction::factory()->create();
         $invoice1 = Invoice::factory()->create();
         $invoice2 = Invoice::factory()->create();
 
         $this->repository->attachInvoice(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             InvoiceId::create($invoice1->id),
         );
         $this->repository->attachInvoice(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             InvoiceId::create($invoice2->id),
         );
 
         $result = $this->repository->getAttachedInvoiceIds(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
         );
 
         static::assertCount(2, $result->ids);
@@ -199,21 +199,21 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
 
     public function test_it_gets_attached_purchase_order_ids(): void
     {
-        $bankingTransaction = BankingTransaction::factory()->create();
+        $bankTransaction = BankTransaction::factory()->create();
         $po1 = PurchaseOrder::factory()->create();
         $po2 = PurchaseOrder::factory()->create();
 
         $this->repository->attachPurchaseOrder(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             PurchaseOrderId::create($po1->id),
         );
         $this->repository->attachPurchaseOrder(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             PurchaseOrderId::create($po2->id),
         );
 
         $result = $this->repository->getAttachedPurchaseOrderIds(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
         );
 
         static::assertCount(2, $result->ids);
@@ -221,7 +221,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
 
     public function test_it_completes_a_banking_transaction(): void
     {
-        $bankingTransaction = BankingTransaction::factory()->create(['amount' => 100.00]);
+        $bankTransaction = BankTransaction::factory()->create(['amount' => 100.00]);
         $invoice = Invoice::factory()->create();
         InvoiceLine::factory()->create(['invoice_id' => $invoice->id, 'price' => 100.00, 'quantity' => 1]);
         $bookkeepingRecord = BookkeepingRecord::factory()->create([
@@ -230,81 +230,81 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         ]);
 
         $this->repository->attachInvoice(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             InvoiceId::create($invoice->id),
         );
 
-        $this->repository->complete(BankTransactionId::create($bankingTransaction->id));
+        $this->repository->complete(BankTransactionId::create($bankTransaction->id));
 
-        $bankingTransaction->refresh();
-        static::assertSame(BankTransactionStatus::Completed, $bankingTransaction->status);
+        $bankTransaction->refresh();
+        static::assertSame(BankTransactionStatus::Completed, $bankTransaction->status);
 
         $bookkeepingRecord->refresh();
-        static::assertEquals($bankingTransaction->id, $bookkeepingRecord->banking_transaction_id);
+        static::assertEquals($bankTransaction->id, $bookkeepingRecord->bank_transaction_id);
     }
 
     public function test_it_throws_when_completing_with_unmatched_amount(): void
     {
-        $bankingTransaction = BankingTransaction::factory()->create(['amount' => 200.00]);
+        $bankTransaction = BankTransaction::factory()->create(['amount' => 200.00]);
         $invoice = Invoice::factory()->create();
         InvoiceLine::factory()->create(['invoice_id' => $invoice->id, 'price' => 100.00, 'quantity' => 1]);
 
         $this->repository->attachInvoice(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             InvoiceId::create($invoice->id),
         );
 
         $this->expectException(CouldNotCompleteTransaction::class);
-        $this->repository->complete(BankTransactionId::create($bankingTransaction->id));
+        $this->repository->complete(BankTransactionId::create($bankTransaction->id));
     }
 
     public function test_it_completes_when_po_total_offsets_difference(): void
     {
-        $bankingTransaction = BankingTransaction::factory()->create(['amount' => 150.00]);
+        $bankTransaction = BankTransaction::factory()->create(['amount' => 150.00]);
         $invoice = Invoice::factory()->create();
         InvoiceLine::factory()->create(['invoice_id' => $invoice->id, 'price' => 200.00, 'quantity' => 1]);
         $purchaseOrder = PurchaseOrder::factory()->create();
         PurchaseOrderLine::factory()->create(['purchase_order_id' => $purchaseOrder->id, 'price' => 50.00]);
 
         $this->repository->attachInvoice(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             InvoiceId::create($invoice->id),
         );
         $this->repository->attachPurchaseOrder(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             PurchaseOrderId::create($purchaseOrder->id),
         );
 
-        $this->repository->complete(BankTransactionId::create($bankingTransaction->id));
+        $this->repository->complete(BankTransactionId::create($bankTransaction->id));
 
-        $bankingTransaction->refresh();
-        static::assertSame(BankTransactionStatus::Completed, $bankingTransaction->status);
+        $bankTransaction->refresh();
+        static::assertSame(BankTransactionStatus::Completed, $bankTransaction->status);
     }
 
     public function test_it_throws_when_po_total_causes_unmatched_amount(): void
     {
-        $bankingTransaction = BankingTransaction::factory()->create(['amount' => 100.00]);
+        $bankTransaction = BankTransaction::factory()->create(['amount' => 100.00]);
         $invoice = Invoice::factory()->create();
         InvoiceLine::factory()->create(['invoice_id' => $invoice->id, 'price' => 100.00, 'quantity' => 1]);
         $purchaseOrder = PurchaseOrder::factory()->create();
         PurchaseOrderLine::factory()->create(['purchase_order_id' => $purchaseOrder->id, 'price' => 50.00]);
 
         $this->repository->attachInvoice(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             InvoiceId::create($invoice->id),
         );
         $this->repository->attachPurchaseOrder(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             PurchaseOrderId::create($purchaseOrder->id),
         );
 
         $this->expectException(CouldNotCompleteTransaction::class);
-        $this->repository->complete(BankTransactionId::create($bankingTransaction->id));
+        $this->repository->complete(BankTransactionId::create($bankTransaction->id));
     }
 
     public function test_it_completes_with_multiple_invoices_and_purchase_orders(): void
     {
-        $bankingTransaction = BankingTransaction::factory()->create(['amount' => 50.00]);
+        $bankTransaction = BankTransaction::factory()->create(['amount' => 50.00]);
         $invoice1 = Invoice::factory()->create();
         InvoiceLine::factory()->create(['invoice_id' => $invoice1->id, 'price' => 100.00, 'quantity' => 1]);
         $invoice2 = Invoice::factory()->create();
@@ -315,34 +315,34 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         PurchaseOrderLine::factory()->create(['purchase_order_id' => $po2->id, 'price' => 25.00]);
 
         $this->repository->attachInvoice(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             InvoiceId::create($invoice1->id),
         );
         $this->repository->attachInvoice(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             InvoiceId::create($invoice2->id),
         );
         $this->repository->attachPurchaseOrder(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             PurchaseOrderId::create($po1->id),
         );
         $this->repository->attachPurchaseOrder(
-            BankTransactionId::create($bankingTransaction->id),
+            BankTransactionId::create($bankTransaction->id),
             PurchaseOrderId::create($po2->id),
         );
 
-        $this->repository->complete(BankTransactionId::create($bankingTransaction->id));
+        $this->repository->complete(BankTransactionId::create($bankTransaction->id));
 
-        $bankingTransaction->refresh();
-        static::assertSame(BankTransactionStatus::Completed, $bankingTransaction->status);
+        $bankTransaction->refresh();
+        static::assertSame(BankTransactionStatus::Completed, $bankTransaction->status);
     }
 
     public function test_get_unresolved_ids_returns_only_unresolved(): void
     {
-        $unresolved1 = BankingTransaction::factory()->create(['resolve_status' => ResolveStatus::Unresolved->value]);
-        $unresolved2 = BankingTransaction::factory()->create(['resolve_status' => ResolveStatus::Unresolved->value]);
-        BankingTransaction::factory()->create(['resolve_status' => ResolveStatus::Resolved->value]);
-        BankingTransaction::factory()->create(['resolve_status' => ResolveStatus::Unresolvable->value]);
+        $unresolved1 = BankTransaction::factory()->create(['resolve_status' => ResolveStatus::Unresolved->value]);
+        $unresolved2 = BankTransaction::factory()->create(['resolve_status' => ResolveStatus::Unresolved->value]);
+        BankTransaction::factory()->create(['resolve_status' => ResolveStatus::Resolved->value]);
+        BankTransaction::factory()->create(['resolve_status' => ResolveStatus::Unresolvable->value]);
 
         $result = $this->repository->getUnresolvedIds(50);
 
@@ -355,7 +355,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
 
     public function test_get_unresolved_unresolved_ids_respects_limit(): void
     {
-        BankingTransaction::factory()->count(10)->create(['resolve_status' => ResolveStatus::Unresolved->value]);
+        BankTransaction::factory()->count(10)->create(['resolve_status' => ResolveStatus::Unresolved->value]);
 
         $result = $this->repository->getUnresolvedIds(5);
 
@@ -364,32 +364,32 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
 
     public function test_mark_as_resolved(): void
     {
-        $bankingTransaction = BankingTransaction::factory()->create(['resolve_status' => ResolveStatus::Unresolved->value]);
+        $bankTransaction = BankTransaction::factory()->create(['resolve_status' => ResolveStatus::Unresolved->value]);
 
-        $this->repository->markAsResolved(BankTransactionId::create($bankingTransaction->id));
+        $this->repository->markAsResolved(BankTransactionId::create($bankTransaction->id));
 
-        $bankingTransaction->refresh();
-        static::assertSame(ResolveStatus::Resolved, $bankingTransaction->resolve_status);
+        $bankTransaction->refresh();
+        static::assertSame(ResolveStatus::Resolved, $bankTransaction->resolve_status);
     }
 
     public function test_mark_as_unresolvable(): void
     {
-        $bankingTransaction = BankingTransaction::factory()->create(['resolve_status' => ResolveStatus::Unresolved->value]);
+        $bankTransaction = BankTransaction::factory()->create(['resolve_status' => ResolveStatus::Unresolved->value]);
 
-        $this->repository->markAsUnresolvable(BankTransactionId::create($bankingTransaction->id));
+        $this->repository->markAsUnresolvable(BankTransactionId::create($bankTransaction->id));
 
-        $bankingTransaction->refresh();
-        static::assertSame(ResolveStatus::Unresolvable, $bankingTransaction->resolve_status);
+        $bankTransaction->refresh();
+        static::assertSame(ResolveStatus::Unresolvable, $bankTransaction->resolve_status);
     }
 
     public function test_get_match_criteria_for_ids(): void
     {
-        $bt1 = BankingTransaction::factory()->create([
+        $bt1 = BankTransaction::factory()->create([
             'date' => '2026-01-15',
             'amount' => 100.50,
             'banking_account_number' => 'NL91ABNA0417164300',
         ]);
-        $bt2 = BankingTransaction::factory()->create([
+        $bt2 = BankTransaction::factory()->create([
             'date' => '2026-01-16',
             'amount' => -50.25,
             'banking_account_number' => 'NL91ABNA0417164301',
