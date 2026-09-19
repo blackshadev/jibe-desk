@@ -86,7 +86,7 @@ final class BankStatementsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->modifyQueryUsing(static fn ($query) => $query->with('transactions'))
-            ->defaultSort('start_date', 'desc')
+            ->defaultSort('end_date', 'desc')
             ->filters([
                 SelectFilter::make('bank_account_id')
                     ->label(__('labels.bank_account'))

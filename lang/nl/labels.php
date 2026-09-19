@@ -88,7 +88,7 @@ return [
     'number' => 'Nummer',
     'title' => 'Titel',
     'bill_period' => 'Factuurperiode',
-    'bill_month' => 'Factuurmaand',
+    'bill_month' => 'Start maand factuurperiode',
     'months' => [
         1 => 'Januari',
         2 => 'Februari',

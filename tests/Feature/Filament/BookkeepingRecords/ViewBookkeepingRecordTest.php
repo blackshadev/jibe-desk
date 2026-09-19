@@ -42,7 +42,7 @@ final class ViewBookkeepingRecordTest extends FeatureTestCase
             ->assertSee($invoice->display_name);
     }
 
-    public function test_view_page_displays_banking_transaction(): void
+    public function test_view_page_displays_bank_transaction(): void
     {
         $this->withAuthorizedUser();
         $bankTransaction = BankTransaction::factory()->createQuietly();
@@ -65,7 +65,7 @@ final class ViewBookkeepingRecordTest extends FeatureTestCase
             ->assertDontSee(__('labels.reference'));
     }
 
-    public function test_view_page_hides_banking_transaction_when_null(): void
+    public function test_view_page_hides_bank_transaction_when_null(): void
     {
         $this->withAuthorizedUser();
         $record = BookkeepingRecord::factory()->createQuietly();

@@ -35,7 +35,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         $this->repository = new BankTransactionDbRepository();
     }
 
-    public function test_it_creates_a_banking_transaction_and_returns_id(): void
+    public function test_it_creates_a_bank_transaction_and_returns_id(): void
     {
         $bankAccount = BankAccount::factory()->create();
 
@@ -219,7 +219,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         static::assertCount(2, $result->ids);
     }
 
-    public function test_it_completes_a_banking_transaction(): void
+    public function test_it_completes_a_bank_transaction(): void
     {
         $bankTransaction = BankTransaction::factory()->create(['amount' => 100.00]);
         $invoice = Invoice::factory()->create();

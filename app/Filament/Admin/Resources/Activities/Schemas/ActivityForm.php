@@ -41,7 +41,7 @@ final class ActivityForm
                         ->label(__('labels.price'))
                         ->required(),
                     Select::make('bill_period')
-                        ->label(__('labels.billing_period'))
+                        ->label(__('labels.bill_period'))
                         ->options(BillPeriodLabels::options())
                         ->required(),
                     Select::make('bill_month')

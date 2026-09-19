@@ -22,7 +22,7 @@ final class MonthGroup
             ->getKeyFromRecordUsing(static fn (BankTransaction $record): string => $record->date->format('Y-m'))
             ->getTitleFromRecordUsing(static fn (BankTransaction $record): string => $record->date->format('Y-m'))
             ->groupQueryUsing(static fn (QueryBuilder $query): QueryBuilder => $query->groupByRaw($monthExpression))
-            ->orderQueryUsing(static fn (Builder $query, string $direction): Builder => $query->orderBy('date', $direction))
+            ->orderQueryUsing(static fn (Builder $query, string $direction): Builder => $query->orderBy('date', 'desc'))
             ->scopeQueryByKeyUsing(static fn (Builder $query, ?string $key): Builder => (
                 $key === null
                     ? $query

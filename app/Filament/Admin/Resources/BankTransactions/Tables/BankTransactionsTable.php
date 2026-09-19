@@ -23,7 +23,6 @@ final class BankTransactionsTable
             ->columns([
                 TextColumn::make('date')
                     ->label(__('labels.date'))
-                    ->sortable()
                     ->date(),
                 TextColumn::make('description')
                     ->label(__('labels.description'))
@@ -32,7 +31,6 @@ final class BankTransactionsTable
                 TextColumn::make('amount')
                     ->label(__('labels.price'))
                     ->money('EUR')
-                    ->sortable()
                     ->alignEnd()
                     ->color(static fn (BankTransaction $record): string => $record->amount < 0 ? 'danger' : 'success')
                     ->summarize([
@@ -61,8 +59,7 @@ final class BankTransactionsTable
                     ->color(static fn (BankTransactionStatus $state): string => match ($state) {
                         BankTransactionStatus::Open => 'warning',
                         BankTransactionStatus::Completed => 'success',
-                    })
-                    ->sortable(),
+                    }),
                 TextColumn::make('banking_account_number')
                     ->label(__('labels.banking_account_number'))
                     ->searchable(),
@@ -83,7 +80,6 @@ final class BankTransactionsTable
                 TextColumn::make('created_at')
                     ->label(__('labels.created_at'))
                     ->dateTime()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->toolbarActions([
