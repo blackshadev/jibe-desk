@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Memberships\Schemas;
 
-use App\Filament\Admin\Labels\BillMonthLabels;
-use App\Filament\Admin\Labels\BillPeriodLabels;
-use App\Models\CostCenter;
+use App\Filament\Admin\Sections\BillableItemSection;
 use App\Models\Membership;
 use App\Rules\UniqueDefaultMembership;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
@@ -31,65 +28,14 @@ final class MembershipForm
                             ->rule(static fn (?Membership $record) => new UniqueDefaultMembership($record?->id))
                             ->label(__('labels.default_membership')),
                     ]),
-                Section::make(__('labels.billing_adults'))
-                    ->relationship('adultBillableItem')
-                    ->schema([
-                        TextInput::make('description')
-                            ->label(__('labels.description'))
-                            ->required(),
-                        TextInput::make('price')
-                            ->label(__('labels.price'))
-                            ->required(),
-                        Select::make('bill_period')
-                            ->label(__('labels.bill_period'))
-                            ->options(BillPeriodLabels::options())
-                            ->required(),
-                        Select::make('bill_month')
-                            ->label(__('labels.bill_month'))
-                            ->options(BillMonthLabels::options())
-                            ->default(1)
-                            ->required(),
-                        Select::make('cost_center_id')
-                            ->label(__('labels.cost_center'))
-                            ->options(static fn () => CostCenter::query()->orderBy('number')->pluck('title', 'id'))
-                            ->searchable()
-                            ->preload()
-                            ->required(),
-                    ])
-                    ->mutateRelationshipDataBeforeCreateUsing(static fn (array $data): array => [
-                        ...$data,
-                        'vat' => $data['price'] * 0.21,
-                    ]),
-
-                Section::make(__('labels.billing_kids'))
-                    ->relationship('kidsBillableItem')
-                    ->schema([
-                        TextInput::make('description')
-                            ->label(__('labels.description'))
-                            ->required(),
-                        TextInput::make('price')
-                            ->label(__('labels.price'))
-                            ->required(),
-                        Select::make('bill_period')
-                            ->label(__('labels.bill_period'))
-                            ->options(BillPeriodLabels::options())
-                            ->required(),
-                        Select::make('bill_month')
-                            ->label(__('labels.bill_month'))
-                            ->options(BillMonthLabels::options())
-                            ->default(1)
-                            ->required(),
-                        Select::make('cost_center_id')
-                            ->label(__('labels.cost_center'))
-                            ->options(static fn () => CostCenter::query()->orderBy('number')->pluck('title', 'id'))
-                            ->searchable()
-                            ->preload()
-                            ->required(),
-                    ])
-                    ->mutateRelationshipDataBeforeCreateUsing(static fn (array $data): array => [
-                        ...$data,
-                        'vat' => $data['price'] * 0.21,
-                    ]),
+                BillableItemSection::make(
+                    relationship: 'adultBillableItem',
+                    label: __('labels.billing_adults'),
+                ),
+                BillableItemSection::make(
+                    relationship: 'kidsBillableItem',
+                    label: __('labels.billing_kids'),
+                ),
             ]);
     }
 }
