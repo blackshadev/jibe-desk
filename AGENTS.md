@@ -31,6 +31,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - You must follow all existing code conventions used in this application. When creating or editing a file, check sibling files for the correct structure, approach, and naming.
 - Use descriptive names for variables and methods. For example, `isRegisteredForDiscounts`, not `discount()`.
 - Check for existing components to reuse before writing a new one.
+- Single character variable names are NOT allowed.
 
 ## Verification Scripts
 
@@ -47,11 +48,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 ## Documentation Files
 
-- You must only create documentation files if explicitly requested by the user.
-
-## Replies
-
-- Be concise in your explanations - focus on what's important rather than explaining obvious details.
+- You must ONLY create documentation files if explicitly requested by the user.
 
 === boost rules ===
 
@@ -81,16 +78,16 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 ## Artisan
 
-- Run Artisan commands directly via the command line (e.g., `php artisan route:list`). Use `php artisan list` to discover available commands and `php artisan [command] --help` to check parameters.
-- Inspect routes with `php artisan route:list`. Filter with: `--method=GET`, `--name=users`, `--path=api`, `--except-vendor`, `--only-vendor`.
-- Read configuration values using dot notation: `php artisan config:show app.name`, `php artisan config:show database.default`. Or read config files directly from the `config/` directory.
+- Run Artisan commands directly via the command line (e.g., `./Taskfile artisan route:list`). Use `./Taskfile artisan list` to discover available commands and `./Taskfile artisan [command] --help` to check parameters.
+- Inspect routes with `./Taskfile artisan route:list`. Filter with: `--method=GET`, `--name=users`, `--path=api`, `--except-vendor`, `--only-vendor`.
+- Read configuration values using dot notation: `./Taskfile artisan config:show app.name`, `php artisan config:show database.default`. Or read config files directly from the `config/` directory.
 - To check environment variables, read the `.env` file directly.
 
 ## Tinker
 
 - Execute PHP in app context for debugging and testing code. Do not create models without user approval, prefer tests with factories instead. Prefer existing Artisan commands over custom tinker code.
-- Always use single quotes to prevent shell expansion: `php artisan tinker --execute 'Your::code();'`
-  - Double quotes for PHP strings inside: `php artisan tinker --execute 'User::where("active", true)->count();'`
+- Always use single quotes to prevent shell expansion: `./Taskfile artisan tinker --execute 'Your::code();'`
+  - Double quotes for PHP strings inside: `./Taskfile artisan tinker --execute 'User::where("active", true)->count();'`
 
 === php rules ===
 
@@ -103,25 +100,19 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Prefer PHPDoc blocks over inline comments. Only add inline comments for exceptionally complex logic.
 - Use array shape type definitions in PHPDoc blocks.
 
-=== deployments rules ===
-
-# Deployment
-
-- Laravel can be deployed using [Laravel Cloud](https://cloud.laravel.com/), which is the fastest way to deploy and scale production Laravel applications.
-
 === tests rules ===
 
 # Test Enforcement
 
 - Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
-- Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test --compact` with a specific filename or filter.
+- Run the minimum number of tests needed to ensure code quality and speed. Use `./Taskfile artisan test --compact` with a specific filename or filter.
 
 === laravel/core rules ===
 
 # Do Things the Laravel Way
 
-- Use `php artisan make:` commands to create new files (i.e. migrations, controllers, models, etc.). You can list available Artisan commands using `php artisan list` and check their parameters with `php artisan [command] --help`.
-- If you're creating a generic PHP class, use `php artisan make:class`.
+- Use `./Taskfile artisan make:` commands to create new files (i.e. migrations, controllers, models, etc.). You can list available Artisan commands using `php artisan list` and check their parameters with `php artisan [command] --help`.
+- If you're creating a generic PHP class, use `./Taskfile artisan make:class`.
 - Pass `--no-interaction` to all Artisan commands to ensure they work without user input. You should also pass the correct `--options` to ensure correct behavior.
 
 ### Model Creation
@@ -140,7 +131,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 - When creating models for tests, use the factories for the models. Check if the factory has custom states that can be used before manually setting up the model.
 - Faker: Use methods such as `$this->faker->word()` or `fake()->randomDigit()`. Follow existing conventions whether to use `$this->faker` or `fake()`.
-- When creating tests, make use of `php artisan make:test [options] {name}` to create a feature test, and pass `--unit` to create a unit test. Most tests should be feature tests.
+- When creating tests, make use of `./Taskfile artisan make:test [options] {name}` to create a feature test, and pass `--unit` to create a unit test. Most tests should be feature tests.
 
 ## Vite Error
 
@@ -150,7 +141,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 # PHPUnit
 
-- This application uses PHPUnit for testing. All tests must be written as PHPUnit classes. Use `php artisan make:test --phpunit {name}` to create a new test.
+- This application uses PHPUnit for testing. All tests must be written as PHPUnit classes. Use `./Taskfile artisan make:test --phpunit {name}` to create a new test.
 - If you see a test using "Pest", convert it to PHPUnit.
 - Every time a test has been updated, run that singular test.
 - When the tests relating to your feature are passing, ask the user if they would like to also run the entire test suite to make sure everything is still passing.
@@ -160,9 +151,9 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 ## Running Tests
 
 - Run the minimal number of tests, using an appropriate filter, before finalizing.
-- To run all tests: `php artisan test --compact`.
-- To run all tests in a file: `php artisan test --compact tests/Feature/ExampleTest.php`.
-- To filter on a particular test name: `php artisan test --compact --filter=testName` (recommended after making a change to a related file).
+- To run all tests: `./Taskfile artisan test --compact`.
+- To run all tests in a file: `./Taskfile artisan test --compact tests/Feature/ExampleTest.php`.
+- To filter on a particular test name: `./Taskfile artisan test --compact --filter=testName` (recommended after making a change to a related file).
 
 </laravel-boost-guidelines>
 
