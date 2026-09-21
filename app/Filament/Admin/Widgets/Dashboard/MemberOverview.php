@@ -37,12 +37,11 @@ final class MemberOverview extends StatsOverviewWidget
             CarbonPeriodImmutable::create($start, CarbonImmutable::now())
                 ->map(
                     static fn (CarbonImmutable $date) => Member::query()
-                        ->withTrashed()
                         ->where('created_at', '<=', $date)
                         ->where(
                             static fn (Builder $query) => $query
-                                ->whereNull('deleted_at')
-                                ->orWhere('deleted_at', '<=', $date),
+                                ->whereNull('stopped_at')
+                                ->orWhere('stopped_at', '<=', $date),
                         )
                         ->count(),
                 ),

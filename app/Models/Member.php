@@ -9,6 +9,7 @@ use App\Domain\Members\MemberNameFormatter;
 use App\Models\Pivots\ActivityMember;
 use App\Observers\MemberObserver;
 use Carbon\Carbon;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -18,15 +19,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Override;
+use RuntimeException;
 
+/**
+ * @property null|DateTimeInterface $stopped_at
+ */
 #[Guarded('id', 'updated_at', 'created_at')]
 #[ObservedBy([MemberObserver::class])]
 final class Member extends Model
 {
     use HasFactory;
-    use SoftDeletes;
 
     /** @return HasMany<Invoice, $this> */
     public function invoices(): HasMany
@@ -104,6 +107,16 @@ final class Member extends Model
         return $this->hasMany(OutgoingEmail::class);
     }
 
+    public function stop(): void
+    {
+        if ($this->stopped_at !== null) {
+            throw new RuntimeException('Already stopped');
+        }
+
+        $this->stopped_at = now();
+        $this->save();
+    }
+
     /** @return array<string, string> */
     #[Override]
     protected function casts(): array
@@ -113,6 +126,7 @@ final class Member extends Model
             'is_volunteer' => 'boolean',
             'gender' => Gender::class,
             'registration_data' => 'array',
+            'stopped_at' => 'timestamp',
         ];
     }
 

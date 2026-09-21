@@ -125,7 +125,7 @@ final class BillableItemDbInstanceRepositoryTest extends FeatureTestCase
     {
         $member = Member::factory()->createQuietly();
 
-        $billable = BillableItem::factory()->create();
+        $billable = BillableItem::factory()->create(['bill_period' => 'monthly']);
 
         $instance = BillableItemInstance::factory()->create([
             'member_id' => $member->id,
@@ -137,8 +137,47 @@ final class BillableItemDbInstanceRepositoryTest extends FeatureTestCase
 
         $repo = new BillableItemDbInstanceRepository();
 
-        $repo->stop(BillableItemInstanceId::create($instance->id));
+        $repo->stop(BillableItemInstanceId::create($instance->id), CarbonImmutable::parse(self::NOW));
 
-        $this->assertDatabaseHas('billable_item_instances', ['id' => $instance->id, 'end_date' => self::NOW]);
+        $this->assertDatabaseHas('billable_item_instances', ['id' => $instance->id, 'end_date' => '2023-01-31 23:59:59']);
+    }
+
+    public function test_stop_all_updates_end_date_for_all_member_instances(): void
+    {
+        $member = Member::factory()->createQuietly();
+        $other = Member::factory()->createQuietly();
+
+        $monthly = BillableItem::factory()->create(['bill_period' => 'monthly']);
+        $annually = BillableItem::factory()->create(['bill_period' => 'annually']);
+
+        $monthlyInstance = BillableItemInstance::factory()->create([
+            'member_id' => $member->id,
+            'billable_item_id' => $monthly->id,
+            'bill_cycle_in_months' => 1,
+            'start_date' => '2023-01-01',
+            'end_date' => null,
+        ]);
+        $annualInstance = BillableItemInstance::factory()->create([
+            'member_id' => $member->id,
+            'billable_item_id' => $annually->id,
+            'bill_cycle_in_months' => 12,
+            'start_date' => '2023-01-01',
+            'end_date' => null,
+        ]);
+        $otherInstance = BillableItemInstance::factory()->create([
+            'member_id' => $other->id,
+            'billable_item_id' => $monthly->id,
+            'bill_cycle_in_months' => 1,
+            'start_date' => '2023-01-01',
+            'end_date' => null,
+        ]);
+
+        $repo = new BillableItemDbInstanceRepository();
+
+        $repo->stopAll(MemberId::create($member->id), CarbonImmutable::parse(self::NOW));
+
+        $this->assertDatabaseHas('billable_item_instances', ['id' => $monthlyInstance->id, 'end_date' => '2023-01-31 23:59:59']);
+        $this->assertDatabaseHas('billable_item_instances', ['id' => $annualInstance->id, 'end_date' => '2023-12-31 23:59:59']);
+        $this->assertDatabaseHas('billable_item_instances', ['id' => $otherInstance->id, 'end_date' => null]);
     }
 }

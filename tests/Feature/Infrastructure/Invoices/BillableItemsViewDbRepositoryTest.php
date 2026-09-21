@@ -91,7 +91,7 @@ final class BillableItemsViewDbRepositoryTest extends FeatureTestCase
     {
         $when = new DateTimeImmutable('2026-05-15');
         $membership = Membership::factory()->create();
-        $futureMember = Member::factory()->createQuietly(['deleted_at' => '2026-05-15T00:00:00Z', 'membership_id' => $membership->id]);
+        $futureMember = Member::factory()->createQuietly(['stopped_at' => '2026-04-15T00:00:00Z', 'membership_id' => $membership->id]);
         $billable = BillableItem::factory()->create(['bill_period' => 'monthly']);
 
         BillableItemInstance::factory()->create([
@@ -113,7 +113,7 @@ final class BillableItemsViewDbRepositoryTest extends FeatureTestCase
     {
         $when = new DateTimeImmutable('2026-05-15');
         $membership = Membership::factory()->create();
-        $futureMember = Member::factory()->createQuietly(['deleted_at' => '2026-07-15T00:00:00Z', 'membership_id' => $membership->id]);
+        $futureMember = Member::factory()->createQuietly(['stopped_at' => '2026-07-15T00:00:00Z', 'membership_id' => $membership->id]);
         $billable = BillableItem::factory()->create(['bill_period' => 'monthly']);
 
         BillableItemInstance::factory()->create([

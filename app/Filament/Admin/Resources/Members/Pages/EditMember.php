@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Members\Pages;
 
+use App\Filament\Admin\Resources\Members\Actions\StopAction;
 use App\Filament\Admin\Resources\Members\MemberResource;
-use Filament\Actions\DeleteAction;
+use Filament\Actions\ActionGroup;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Override;
@@ -31,10 +32,9 @@ final class EditMember extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make()
-                ->after(static function (): void {
-                    Notification::make()->success()->title(__('notifications.member_deleted'))->send();
-                }),
+            ActionGroup::make([
+                StopAction::make(),
+            ]),
         ];
     }
 

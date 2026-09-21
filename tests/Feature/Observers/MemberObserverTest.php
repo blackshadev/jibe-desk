@@ -15,6 +15,7 @@ use Tests\FeatureTestCase;
 use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplyMembershipBillingExpectation;
 use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplyMemberVolunteerBillingExpectation;
 use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplySameHouseholdBillingExpectation;
+use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplyStoppedMembershipExpectation;
 
 final class MemberObserverTest extends FeatureTestCase
 {
@@ -23,6 +24,8 @@ final class MemberObserverTest extends FeatureTestCase
     private ApplyMemberVolunteerBillingExpectation $applyVolunteer;
 
     private ApplySameHouseholdBillingExpectation $applySameHousehold;
+
+    private ApplyStoppedMembershipExpectation $applyStoppedMembership;
 
     private MemberObserver $subject;
 
@@ -35,11 +38,13 @@ final class MemberObserverTest extends FeatureTestCase
 
         $this->applyVolunteer = ApplyMemberVolunteerBillingExpectation::create();
         $this->applySameHousehold = ApplySameHouseholdBillingExpectation::create();
+        $this->applyStoppedMembership = ApplyStoppedMembershipExpectation::create();
 
         $this->subject = new MemberObserver(
             $this->applyVolunteer->mock,
             $this->applyMembership->mock,
             $this->applySameHousehold->mock,
+            $this->applyStoppedMembership->mock,
         );
     }
 

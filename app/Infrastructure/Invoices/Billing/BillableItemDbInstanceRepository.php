@@ -64,15 +64,39 @@ final class BillableItemDbInstanceRepository implements BillableItemInstanceRepo
     }
 
     #[Override]
-    public function stop(BillableItemInstanceId $instanceId): void
+    public function stop(BillableItemInstanceId $instanceId, DateTimeInterface $endDate): void
     {
-        BillableItemInstance::query()
-            ->where('id', $instanceId->value)
-            ->update(
-                [
-                    'end_date' => CarbonImmutable::now(),
-                ],
-            );
+        $instance = BillableItemInstance::query()
+            ->with('billableItem')
+            ->find($instanceId->value);
+
+        $billPeriod = $instance->billableItem->bill_period->toPeriodName();
+
+        $actualEndDate = CarbonImmutable::instance($endDate)->endOf($billPeriod);
+
+        $instance->update([
+            'end_date' => $actualEndDate,
+        ]);
+    }
+
+    #[Override]
+    public function stopAll(MemberId $memberId, DateTimeInterface $endDate): void
+    {
+        $instances = BillableItemInstance::query()
+            ->with('billableItem')
+            ->where('member_id', $memberId->value)
+            ->get();
+
+        /** @var BillableItemInstance $instance */
+        foreach ($instances as $instance) {
+            $billPeriod = $instance->billableItem->bill_period->toPeriodName();
+
+            $actualEndDate = CarbonImmutable::instance($endDate)->endOf($billPeriod);
+
+            $instance->update([
+                'end_date' => $actualEndDate,
+            ]);
+        }
     }
 
     #[Override]

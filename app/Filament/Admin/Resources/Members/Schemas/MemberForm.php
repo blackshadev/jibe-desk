@@ -7,6 +7,7 @@ namespace App\Filament\Admin\Resources\Members\Schemas;
 use App\Domain\Members\Gender;
 use App\Models\Member;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -69,8 +70,14 @@ final class MemberForm
                                     ->relationship('membership', 'name')
                                     ->required(),
 
+                                DateTimePicker::make('stopped_at')
+                                    ->label(__('labels.stopped_at'))
+                                    ->readonly()
+                                    ->disabled()
+                                    ->date()
+                                    ->native(false),
+
                                 Toggle::make('is_volunteer')
-                                    ->columnSpanFull()
                                     ->label(__('labels.is_volunteer')),
                             ]),
 

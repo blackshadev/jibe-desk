@@ -10,12 +10,14 @@ use App\Domain\Invoices\Billing\BillableItemInstanceId;
 use App\Domain\Invoices\Billing\BillableItemInstanceRepository;
 use App\Domain\Members\MemberId;
 use Override;
+use Psr\Clock\ClockInterface;
 
 final readonly class ApplyActivityBillingImpl implements ApplyActivityBilling
 {
     public function __construct(
         private ActivityRepository $activityRepository,
         private BillableItemInstanceRepository $billableItemInstanceRepository,
+        private ClockInterface $clock,
     ) {}
 
     #[Override]
@@ -31,6 +33,7 @@ final readonly class ApplyActivityBillingImpl implements ApplyActivityBilling
     #[Override]
     public function stop(BillableItemInstanceId $billableItemInstanceId): void
     {
-        $this->billableItemInstanceRepository->stop($billableItemInstanceId);
+        $endDate = $this->clock->now();
+        $this->billableItemInstanceRepository->stop($billableItemInstanceId, $endDate);
     }
 }

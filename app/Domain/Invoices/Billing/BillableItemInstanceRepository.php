@@ -15,9 +15,11 @@ interface BillableItemInstanceRepository
 
     public function add(MemberId $memberId, BillableItemId $billableItemId, ?DateTimeInterface $endDate = null, ?DateTimeInterface $startDate = null): BillableItemInstanceId;
 
-    public function ensure(MemberId $memberId, BillableItemId $contributionId): void;
+    public function ensure(MemberId $memberId, BillableItemId $billableItemId): void;
 
-    public function stop(BillableItemInstanceId $instanceId): void;
+    public function stop(BillableItemInstanceId $instanceId, DateTimeInterface $endDate): void;
+
+    public function stopAll(MemberId $memberId, DateTimeInterface $endDate): void;
 
     public function updateEndDate(BillableItemInstanceId $instanceId, ?DateTimeInterface $endDate): void;
 }

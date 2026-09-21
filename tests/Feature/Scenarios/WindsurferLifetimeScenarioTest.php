@@ -50,7 +50,7 @@ final class WindsurferLifetimeScenarioTest extends MemberLifecycleScenario
         $this->generateInvoiceFor($member);
 
         $firstInvoice = $this->invoiceFor($member, '2026-08-15');
-        $this->assertSame(3, $firstInvoice->lines()->count());
+        static::assertSame(3, $firstInvoice->lines()->count());
         $this->assertInvoiceLine($firstInvoice, 'Lidmaatschap Windsurfer (volwassenen)', 68.00, 0.42);
         $this->assertInvoiceLine($firstInvoice, 'Vrijwilligersbijdrage', 20.00, 0.42);
         $this->assertInvoiceLine($firstInvoice, 'Activiteit: Reguliere les volwassenen', 37.00, 1.0);
@@ -60,7 +60,7 @@ final class WindsurferLifetimeScenarioTest extends MemberLifecycleScenario
         $this->generateInvoiceFor($member);
 
         $secondInvoice = $this->invoiceFor($member, '2026-09-20');
-        $this->assertSame(1, $secondInvoice->lines()->count());
+        static::assertSame(1, $secondInvoice->lines()->count());
         $this->assertInvoiceLine($secondInvoice, 'Activiteit: Reguliere les volwassenen', 37.00, 1.0);
 
         // Step 5 — a week later the member becomes a volunteer (adds a restitution credit).
@@ -83,7 +83,7 @@ final class WindsurferLifetimeScenarioTest extends MemberLifecycleScenario
         $this->generateInvoiceFor($member);
 
         $thirdInvoice = $this->invoiceFor($member, '2026-10-15');
-        $this->assertSame(2, $thirdInvoice->lines()->count());
+        static::assertSame(2, $thirdInvoice->lines()->count());
         $this->assertInvoiceLine($thirdInvoice, 'Activiteit: Reguliere les volwassenen', 37.00, 1.0);
         $this->assertInvoiceLine($thirdInvoice, 'Vrijwilligersbijdrage restitutie', -22.00, 0.33);
 
@@ -92,7 +92,7 @@ final class WindsurferLifetimeScenarioTest extends MemberLifecycleScenario
         $this->generateInvoiceFor($member);
 
         $fourthInvoice = $this->invoiceFor($member, '2027-01-10');
-        $this->assertSame(3, $fourthInvoice->lines()->count());
+        static::assertSame(3, $fourthInvoice->lines()->count());
         $this->assertInvoiceLine($fourthInvoice, 'Lidmaatschap Windsurfer (volwassenen)', 68.00, 1.0);
         $this->assertInvoiceLine($fourthInvoice, 'Vrijwilligersbijdrage', 20.00, 1.0);
         $this->assertInvoiceLine($fourthInvoice, 'Vrijwilligersbijdrage restitutie', -22.00, 1.0);
@@ -102,6 +102,6 @@ final class WindsurferLifetimeScenarioTest extends MemberLifecycleScenario
             'description' => 'Activiteit: Reguliere les volwassenen',
         ]);
 
-        $this->assertSame(4, Invoice::query()->where('member_id', $member->id)->count());
+        static::assertSame(4, Invoice::query()->where('member_id', $member->id)->count());
     }
 }

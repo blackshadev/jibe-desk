@@ -10,9 +10,11 @@ use App\Domain\Invoices\Billing\BillableItemId;
 use App\Domain\Invoices\Billing\BillableItemInstanceId;
 use App\Domain\Invoices\Billing\BillingItemApplicators\ApplyActivityBillingImpl;
 use App\Domain\Members\MemberId;
+use Carbon\CarbonImmutable;
 use DateTimeImmutable;
 use Override;
 use Tests\Unit\Domain\Activities\ActivityRepositoryExpectation;
+use Tests\Unit\Domain\Clock\ClockExpectation;
 use Tests\Unit\Domain\Invoices\BillableItemRepositoryExpectation;
 use Tests\UnitTestCase;
 
@@ -24,6 +26,8 @@ final class ApplyActivityBillingImplTest extends UnitTestCase
 
     private ApplyActivityBillingImpl $subject;
 
+    private ClockExpectation $clock;
+
     #[Override]
     protected function setup(): void
     {
@@ -31,7 +35,9 @@ final class ApplyActivityBillingImplTest extends UnitTestCase
         $this->activities = ActivityRepositoryExpectation::create();
         $this->billableItems = BillableItemRepositoryExpectation::create();
 
-        $this->subject = new ApplyActivityBillingImpl($this->activities->mock, $this->billableItems->mock);
+        $this->clock = ClockExpectation::create();
+
+        $this->subject = new ApplyActivityBillingImpl($this->activities->mock, $this->billableItems->mock, $this->clock->mock);
     }
 
     public function test_it_fetches_activity_and_creates_billable_item_instance(): void
@@ -69,8 +75,10 @@ final class ApplyActivityBillingImplTest extends UnitTestCase
     public function test_stop_forwards_to_repository(): void
     {
         $instanceId = BillableItemInstanceId::create(11);
+        $now = CarbonImmutable::parse('2023-06-15');
 
-        $this->billableItems->expectsStop($instanceId);
+        $this->clock->expectsNow($now);
+        $this->billableItems->expectsStop($instanceId, $now);
 
         $this->subject->stop($instanceId);
     }

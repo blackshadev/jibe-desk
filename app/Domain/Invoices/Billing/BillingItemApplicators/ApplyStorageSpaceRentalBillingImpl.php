@@ -10,12 +10,14 @@ use App\Domain\StorageSpaceRentals\StorageSpaceRentalId;
 use App\Domain\StorageSpaceRentals\StorageSpaceRentalRepository;
 use DateTimeInterface;
 use Override;
+use Psr\Clock\ClockInterface;
 
 final readonly class ApplyStorageSpaceRentalBillingImpl implements ApplyStorageSpaceRentalBilling
 {
     public function __construct(
         private StorageSpaceRentalRepository $storageSpaceRentalRepository,
         private BillableItemInstanceRepository $billableItemInstanceRepository,
+        private ClockInterface $clock,
     ) {}
 
     #[Override]
@@ -42,6 +44,7 @@ final readonly class ApplyStorageSpaceRentalBillingImpl implements ApplyStorageS
     #[Override]
     public function stop(BillableItemInstanceId $billableItemInstanceId): void
     {
-        $this->billableItemInstanceRepository->stop($billableItemInstanceId);
+        $endDate = $this->clock->now();
+        $this->billableItemInstanceRepository->stop($billableItemInstanceId, $endDate);
     }
 }

@@ -66,10 +66,8 @@ final class BillableItemsViewDbRepository implements BillableItemsViewRepository
             ->whereHas(
                 'member',
                 static fn (Builder $query) => $query
-                    /** @phpstan-ignore method.notFound */
-                    ->withTrashed()
-                    ->whereNull('deleted_at')
-                    ->orWhere('deleted_at', '>', $when),
+                    ->whereNull('stopped_at')
+                    ->orWhere('stopped_at', '>', $when),
             )
             ->whereNotExists(
                 InvoiceLine::query()

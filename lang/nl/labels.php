@@ -336,4 +336,7 @@ return [
     'import_failed_unknown_bank_account' => 'Import mislukt: onbekende bankrekening #:iban',
     'new_bank_statement_title' => 'Nieuwe bankafschrift',
     'bank_statement_title' => 'Bankafschrift #:statement_number',
+    'stop_member' => 'Lidmaatschap stopzetten',
+    'member_stopped' => 'Lidmaatschap opgezegt',
+    'stopped_at' => 'Lidmaatschap opgezegt op',
 ];

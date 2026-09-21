@@ -48,10 +48,10 @@ final readonly class BillableItemRepositoryExpectation
             ->with(equalTo($memberId), equalTo($billableItemId));
     }
 
-    public function expectsStop(BillableItemInstanceId $instanceId): void
+    public function expectsStop(BillableItemInstanceId $instanceId, DateTimeInterface $endDate): void
     {
         $this->mock
             ->expects('stop')
-            ->with(equalTo($instanceId));
+            ->with(equalTo($instanceId), equalTo($endDate));
     }
 }

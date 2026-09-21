@@ -20,11 +20,15 @@ final class ListMembers extends ListRecords
     public function getTabs(): array
     {
         return [
-            'active' => Tab::make(__('labels.active')),
+            'active' => Tab::make(__('labels.active'))
+                ->modifyQueryUsing(
+                    static fn (Builder $query) => $query
+                        ->whereNull('stopped_at'),
+                ),
             'inactive' => Tab::make(__('labels.inactive'))
                 ->modifyQueryUsing(
-                    /** @phpstan-ignore-next-line method.notFound */
-                    static fn (Builder $query) => $query->onlyTrashed(),
+                    static fn (Builder $query) => $query
+                        ->whereNotNull('stopped_at'),
                 ),
         ];
     }

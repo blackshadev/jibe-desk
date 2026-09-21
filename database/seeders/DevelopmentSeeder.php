@@ -82,7 +82,7 @@ final class DevelopmentSeeder extends Seeder
         ]);
 
         Member::factory()
-            ->deleted()
+            ->stopped()
             ->count(100)
             ->state([
                 'membership_id' => $memberships->first()?->id,

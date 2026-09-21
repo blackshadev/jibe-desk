@@ -7,6 +7,7 @@ namespace App\Observers;
 use App\Domain\Invoices\Billing\BillingItemApplicators\ApplyMembershipBilling;
 use App\Domain\Invoices\Billing\BillingItemApplicators\ApplyMemberVolunteerBilling;
 use App\Domain\Invoices\Billing\BillingItemApplicators\ApplySameHouseholdBilling;
+use App\Domain\Invoices\Billing\BillingItemApplicators\ApplyStoppedMembership;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MembershipId;
 use App\Models\Member;
@@ -17,6 +18,7 @@ final readonly class MemberObserver
         private ApplyMemberVolunteerBilling $applyMemberVolunteerBilling,
         private ApplyMembershipBilling $applyMembershipBilling,
         private ApplySameHouseholdBilling $applySameHouseholdBilling,
+        private ApplyStoppedMembership $applyStoppedMembership,
     ) {}
 
     public function created(Member $member): void
@@ -45,6 +47,10 @@ final readonly class MemberObserver
 
         if ($member->wasChanged('household_id')) {
             $this->applySameHouseholdBilling->apply(MemberId::create($member->id));
+        }
+
+        if ($member->wasChanged('stopped_at')) {
+            $this->applyStoppedMembership->apply(MemberId::create($member->id));
         }
     }
 }

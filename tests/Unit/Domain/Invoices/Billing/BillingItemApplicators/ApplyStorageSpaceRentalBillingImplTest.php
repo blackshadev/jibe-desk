@@ -12,6 +12,7 @@ use App\Domain\StorageSpaceRentals\StorageSpaceRental;
 use App\Domain\StorageSpaceRentals\StorageSpaceRentalId;
 use Carbon\CarbonImmutable;
 use Override;
+use Tests\Unit\Domain\Clock\ClockExpectation;
 use Tests\Unit\Domain\Invoices\Billing\BillableItemInstanceRepositoryExpectation;
 use Tests\Unit\Domain\StorageSpaceRentals\StorageSpaceRentalRepositoryExpectation;
 use Tests\UnitTestCase;
@@ -21,6 +22,7 @@ final class ApplyStorageSpaceRentalBillingImplTest extends UnitTestCase
     private StorageSpaceRentalRepositoryExpectation $rentalRepo;
     private BillableItemInstanceRepositoryExpectation $instanceRepo;
     private ApplyStorageSpaceRentalBillingImpl $subject;
+    private ClockExpectation $clock;
 
     #[Override]
     protected function setUp(): void
@@ -29,10 +31,12 @@ final class ApplyStorageSpaceRentalBillingImplTest extends UnitTestCase
 
         $this->rentalRepo = StorageSpaceRentalRepositoryExpectation::create();
         $this->instanceRepo = BillableItemInstanceRepositoryExpectation::create();
+        $this->clock = ClockExpectation::create();
 
         $this->subject = new ApplyStorageSpaceRentalBillingImpl(
             $this->rentalRepo->mock,
             $this->instanceRepo->mock,
+            $this->clock->mock,
         );
     }
 
@@ -53,11 +57,7 @@ final class ApplyStorageSpaceRentalBillingImplTest extends UnitTestCase
             endDate: $endDate,
         );
 
-        $this->rentalRepo
-            ->mock
-            ->shouldReceive('getById')
-            ->with($rentalId)
-            ->andReturn($rental);
+        $this->rentalRepo->expectsGetById($rentalId, $rental);
 
         $this->instanceRepo->expectsAdd($memberId, 10, $endDate, $startDate, $instanceId);
         $this->rentalRepo->expectsAttachBillableItemInstance($rentalId, $instanceId);
@@ -78,8 +78,10 @@ final class ApplyStorageSpaceRentalBillingImplTest extends UnitTestCase
     public function test_stop_delegates_to_instance_repo(): void
     {
         $instanceId = BillableItemInstanceId::create(99);
+        $now = CarbonImmutable::parse('2023-06-15');
 
-        $this->instanceRepo->expectsStop($instanceId);
+        $this->clock->expectsNow($now);
+        $this->instanceRepo->expectsStop($instanceId, $now);
 
         $this->subject->stop($instanceId);
     }

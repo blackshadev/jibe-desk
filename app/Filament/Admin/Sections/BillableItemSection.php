@@ -43,10 +43,12 @@ final class BillableItemSection
                     ->searchable()
                     ->preload()
                     ->required(),
-            ])->mutateRelationshipDataBeforeCreateUsing(static fn (array $data): array => [
+            ])
+            ->mutateRelationshipDataBeforeCreateUsing(static fn (array $data): array => [
                 ...$data,
                 'vat' => $data['price'] * self::VAT_RATE,
-            ])->mutateRelationshipDataBeforeSaveUsing(static fn (array $data): array => [
+            ])
+            ->mutateRelationshipDataBeforeSaveUsing(static fn (array $data): array => [
                 ...$data,
                 'vat' => $data['price'] * self::VAT_RATE,
             ]);
