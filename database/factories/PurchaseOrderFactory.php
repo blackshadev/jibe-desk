@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Models\Member;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -38,6 +39,19 @@ final class PurchaseOrderFactory extends Factory
     public function paid(): self
     {
         return $this->state(['status' => PurchaseOrderStatus::Paid]);
+    }
+
+    public function declined(?string $reason = null): self
+    {
+        return $this->state([
+            'status' => PurchaseOrderStatus::Declined,
+            'declined_reason' => $reason ?? fake()->sentence(),
+        ]);
+    }
+
+    public function forMember(Member $member): self
+    {
+        return $this->state(['member_id' => $member->id]);
     }
 
     public function withLines(?int $count = null): self

@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -23,12 +24,21 @@ use Override;
 /**
  * @property PurchaseOrderStatus $status
  * @property DateTimeInterface $date
+ * @property ?string $notes
+ * @property ?string $declined_reason
+ * @property ?int $member_id
  */
 #[Guarded(['id', 'created_at', 'updated_at'])]
 #[ObservedBy([PurchaseOrderObserver::class])]
 final class PurchaseOrder extends Model
 {
     use HasFactory;
+
+    /** @return BelongsTo<Member, $this> */
+    public function member(): BelongsTo
+    {
+        return $this->belongsTo(Member::class);
+    }
 
     /** @return HasMany<PurchaseOrderLine, $this> */
     public function lines(): HasMany

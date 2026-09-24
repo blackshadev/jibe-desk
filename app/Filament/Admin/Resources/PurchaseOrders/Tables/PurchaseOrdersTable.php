@@ -35,6 +35,10 @@ final class PurchaseOrdersTable
                     ->label(__('labels.creditor_name'))
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('member.name')
+                    ->label(__('labels.member'))
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('description')
                     ->label(__('labels.description'))
                     ->searchable()
@@ -51,6 +55,14 @@ final class PurchaseOrdersTable
                     ->label(__('labels.total'))
                     ->formatStateUsing(static fn (CompoundPrice $state) => (string) $state)
                     ->alignEnd(),
+                TextColumn::make('declined_reason')
+                    ->label(__('labels.declined_reason'))
+                    ->limit(30)
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('notes')
+                    ->label(__('labels.notes'))
+                    ->limit(50)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label(__('labels.created_at'))
                     ->dateTime()

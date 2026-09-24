@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Models;
 
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Models\Member;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use Tests\FeatureTestCase;
@@ -74,5 +75,14 @@ final class PurchaseOrderTest extends FeatureTestCase
             ->all();
 
         static::assertSame([$po2->id, $po1->id], $results);
+    }
+
+    public function test_purchase_order_belongs_to_assigned_member(): void
+    {
+        $member = Member::factory()->createQuietly();
+        $purchaseOrder = PurchaseOrder::factory()->forMember($member)->createQuietly();
+
+        static::assertTrue($purchaseOrder->member->is($member));
+        static::assertTrue($member->purchaseOrders->contains($purchaseOrder));
     }
 }

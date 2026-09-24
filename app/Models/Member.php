@@ -37,6 +37,12 @@ final class Member extends Model
         return $this->hasMany(Invoice::class);
     }
 
+    /** @return HasMany<PurchaseOrder, $this> */
+    public function purchaseOrders(): HasMany
+    {
+        return $this->hasMany(PurchaseOrder::class);
+    }
+
     /** @return BelongsTo<Membership, $this> */
     public function membership(): BelongsTo
     {

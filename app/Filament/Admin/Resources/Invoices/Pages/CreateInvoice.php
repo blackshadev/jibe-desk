@@ -7,6 +7,8 @@ namespace App\Filament\Admin\Resources\Invoices\Pages;
 use App\Domain\Invoices\InvoiceNumberGenerator;
 use App\Domain\Invoices\InvoiceStatus;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
+use App\Filament\Admin\Resources\PurchaseOrders\Helpers\MemberCreditorPrefill;
+use App\Models\Member;
 use Carbon\CarbonImmutable;
 use Filament\Resources\Pages\CreateRecord;
 use Override;
@@ -37,6 +39,21 @@ final class CreateInvoice extends CreateRecord
         $this->data['date'] = CarbonImmutable::now();
         $this->data['status'] = InvoiceStatus::Open;
         $this->data['invoice_number'] = '';
+
+        $memberId = request()->query('member_id');
+        if (!is_numeric($memberId)) {
+            return;
+        }
+
+        $member = Member::find((int) $memberId);
+        if ($member === null) {
+            return;
+        }
+
+        $this->data['member_id'] = $member->id;
+        $this->data['recipient_address'] = $member->address;
+        $this->data['recipient_name'] = $member->name;
+        $this->data['recipient_email'] = $member->email;
     }
 
     #[Override]

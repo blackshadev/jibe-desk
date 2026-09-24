@@ -34,6 +34,10 @@ final class ListPurchaseOrders extends ListRecords
                 ->modifyQueryUsing(
                     static fn (Builder $query) => $query->where('status', PurchaseOrderStatus::Paid),
                 ),
+            'declined' => Tabs\Tab::make(__('labels.purchase_order_status.declined'))
+                ->modifyQueryUsing(
+                    static fn (Builder $query) => $query->where('status', PurchaseOrderStatus::Declined),
+                ),
         ];
     }
 

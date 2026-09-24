@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\PurchaseOrders\Schemas;
 
 use App\Domain\Invoices\Formatters\PriceFormatter;
+use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Labels\PurchaseOrderStatusLabels;
+use App\Filament\Admin\Resources\PurchaseOrders\Helpers\MemberCreditorPrefill;
 use App\Models\CostCenter;
+use App\Models\Member;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -40,6 +44,17 @@ final class PurchaseOrderForm
                             ->label(__('labels.status'))
                             ->options(PurchaseOrderStatusLabels::options())
                             ->disabled(),
+                        Textarea::make('declined_reason')
+                            ->label(__('labels.declined_reason'))
+                            ->rows(4)
+                            ->columnSpanFull()
+                            ->disabled()
+                            ->dehydrated()
+                            ->visible(static fn (Get $get): bool => $get('status') === PurchaseOrderStatus::Declined->value),
+                        Textarea::make('notes')
+                            ->label(__('labels.notes'))
+                            ->rows(5)
+                            ->columnSpanFull(),
                         FileUpload::make('image_path')
                             ->label(__('labels.image'))
                             ->image()
@@ -52,11 +67,40 @@ final class PurchaseOrderForm
                     ]),
                 Section::make(__('labels.creditor_information'))
                     ->schema([
+                        Select::make('member_id')
+                            ->label(__('labels.member'))
+                            ->options(
+                                static fn (): array => Member::query()
+                                    ->get()
+                                    ->mapWithKeys(static fn (Member $member): array => [$member->id => $member->name])
+                                    ->all(),
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->live()
+                            ->afterStateUpdated(static function (?string $state, Set $set): void {
+                                if ($state === null) {
+                                    return;
+                                }
+
+                                $member = Member::query()->find($state);
+                                if ($member === null) {
+                                    return;
+                                }
+
+                                foreach (MemberCreditorPrefill::for($member) as $field => $value) {
+                                    $set($field, $value);
+                                }
+                            }),
                         TextInput::make('creditor_name')
-                            ->label(__('labels.name')),
+                            ->label(__('labels.name'))
+                            ->disabled(static fn (Get $get): bool => filled($get('member_id')))
+                            ->dehydrated(),
                         TextInput::make('creditor_iban')
                             ->label(__('labels.iban'))
-                            ->rule(new Iban()),
+                            ->rule(new Iban())
+                            ->disabled(static fn (Get $get): bool => filled($get('member_id')))
+                            ->dehydrated(),
                     ]),
                 Section::make(__('labels.purchase_order_lines'))
                     ->columnSpanFull()

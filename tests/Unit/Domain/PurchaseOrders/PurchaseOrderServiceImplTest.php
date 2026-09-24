@@ -52,4 +52,20 @@ final class PurchaseOrderServiceImplTest extends UnitTestCase
 
         $this->service->markAsPaid($ids);
     }
+
+    public function test_mark_as_declined_stores_reason_on_repository(): void
+    {
+        $ids = PurchaseOrderIdList::fromArray([1]);
+        $this->repo->expectsMarkAsDeclined($ids, 'Niet geautoriseerd door penningmeester');
+
+        $this->service->markAsDeclined($ids, 'Niet geautoriseerd door penningmeester');
+    }
+
+    public function test_mark_as_declined_without_reason_passes_null(): void
+    {
+        $ids = PurchaseOrderIdList::fromArray([1]);
+        $this->repo->expectsMarkAsDeclined($ids, null);
+
+        $this->service->markAsDeclined($ids);
+    }
 }

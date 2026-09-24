@@ -12,7 +12,10 @@ use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Resources\PurchaseOrders\Pages\CreatePurchaseOrder;
 use App\Filament\Admin\Resources\PurchaseOrders\Pages\EditPurchaseOrder;
 use App\Filament\Admin\Resources\PurchaseOrders\Pages\ListPurchaseOrders;
+use App\Filament\Admin\Resources\PurchaseOrders\Pages\ViewPurchaseOrder;
 use App\Models\CostCenter;
+use App\Models\Member;
+use App\Models\PaymentInformation;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use Illuminate\Support\Facades\Gate;
@@ -105,5 +108,118 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
         $po = PurchaseOrder::factory()->create(['status' => PurchaseOrderStatus::Pending]);
 
         static::assertFalse(Gate::allows('update', $po));
+    }
+
+    public function test_assigning_member_fills_creditor_name_and_iban(): void
+    {
+        $this->withAuthorizedUser();
+        $member = Member::factory()->has(PaymentInformation::factory()->state([
+            'banking_account_number' => 'NL02ABNA0123456789',
+        ]))->createQuietly();
+        $costCenter = CostCenter::factory()->create();
+
+        Livewire::test(CreatePurchaseOrder::class)
+            ->fillForm([
+                'member_id' => $member->id,
+                'description' => 'Vlaggetjes voor de haven',
+                'date' => '2026-09-23',
+                'lines' => [
+                    ['description' => 'Vlaggetjes', 'price' => 25, 'price_vat' => 5.25, 'cost_center_id' => $costCenter->id],
+                ],
+            ])
+            ->assertFormSet([
+                'creditor_iban' => 'NL02ABNA0123456789',
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('purchase_orders', [
+            'member_id' => $member->id,
+            'creditor_iban' => 'NL02ABNA0123456789',
+        ]);
+    }
+
+    public function test_create_page_prefills_creditor_data_from_member_query_parameter(): void
+    {
+        $this->withAuthorizedUser();
+        $member = Member::factory()->has(PaymentInformation::factory()->state([
+            'banking_account_number' => 'NL02ABNA0123456789',
+        ]))->createQuietly();
+        $costCenter = CostCenter::factory()->create();
+
+        Livewire::withQueryParams(['member_id' => (string) $member->id])
+            ->test(CreatePurchaseOrder::class)
+            ->assertFormSet([
+                'member_id' => $member->id,
+                'creditor_iban' => 'NL02ABNA0123456789',
+            ])
+            ->fillForm([
+                'description' => 'Vlaggetjes voor de haven',
+                'date' => '2026-09-23',
+                'lines' => [
+                    ['description' => 'Vlaggetjes', 'price' => 25, 'price_vat' => 5.25, 'cost_center_id' => $costCenter->id],
+                ],
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('purchase_orders', [
+            'member_id' => $member->id,
+            'creditor_iban' => 'NL02ABNA0123456789',
+        ]);
+    }
+
+    public function test_declining_purchase_order_stores_reason(): void
+    {
+        $this->withAuthorizedUser();
+        $po = PurchaseOrder::factory()->open()->create();
+
+        Livewire::test(ViewPurchaseOrder::class, ['record' => $po->getRouteKey()])
+            ->callAction('markAsDeclined', data: ['declined_reason' => 'Factuur overtrof het budget']);
+
+        $po->refresh();
+        static::assertSame(PurchaseOrderStatus::Declined, $po->status);
+        static::assertSame('Factuur overtrof het budget', $po->declined_reason);
+    }
+
+    public function test_decline_reason_is_required(): void
+    {
+        $this->withAuthorizedUser();
+        $po = PurchaseOrder::factory()->open()->create();
+
+        Livewire::test(ViewPurchaseOrder::class, ['record' => $po->getRouteKey()])
+            ->callAction('markAsDeclined', data: ['declined_reason' => ''])
+            ->assertHasActionErrors(['declined_reason']);
+    }
+
+    public function test_cannot_decline_purchase_order_when_not_open(): void
+    {
+        $this->withAuthorizedUser();
+        $po = PurchaseOrder::factory()->pending()->create();
+
+        Livewire::test(ViewPurchaseOrder::class, ['record' => $po->getRouteKey()])
+            ->assertActionHidden('markAsDeclined');
+    }
+
+    public function test_declined_reason_is_shown_on_form(): void
+    {
+        $this->withAuthorizedUser();
+        $po = PurchaseOrder::factory()->declined('Te duur')->create();
+
+        Livewire::test(ViewPurchaseOrder::class, ['record' => $po->getRouteKey()])
+            ->assertFormSet(['declined_reason' => 'Te duur']);
+    }
+
+    public function test_can_fill_notes_on_purchase_order(): void
+    {
+        $this->withAuthorizedUser();
+        $po = PurchaseOrder::factory()->open()->create();
+
+        Livewire::test(EditPurchaseOrder::class, ['record' => $po->getRouteKey()])
+            ->fillForm(['notes' => 'Gekocht voor het zeilkamp'])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('purchase_orders', ['id' => $po->id, 'notes' => 'Gekocht voor het zeilkamp']);
     }
 }

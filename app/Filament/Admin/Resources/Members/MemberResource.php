@@ -16,6 +16,7 @@ use App\Filament\Admin\Resources\Members\RelationManagers\HouseholdMembersRelati
 use App\Filament\Admin\Resources\Members\RelationManagers\InvoicesRelationManager;
 use App\Filament\Admin\Resources\Members\RelationManagers\MemberObjectsRelationManager;
 use App\Filament\Admin\Resources\Members\RelationManagers\OutgoingEmailsRelationManager;
+use App\Filament\Admin\Resources\Members\RelationManagers\PurchaseOrdersRelationManager;
 use App\Filament\Admin\Resources\Members\RelationManagers\StorageSpaceRentalsRelationManager;
 use App\Filament\Admin\Resources\Members\Schemas\MemberForm;
 use App\Filament\Admin\Resources\Members\Tables\MembersTable;
@@ -66,6 +67,7 @@ final class MemberResource extends Resource
         return [
             HouseholdMembersRelationManager::make(),
             InvoicesRelationManager::make(),
+            PurchaseOrdersRelationManager::make(),
             BillableItemInstancesRelationManager::make(),
             ActivitiesRelationManager::make(),
             MemberObjectsRelationManager::make(),

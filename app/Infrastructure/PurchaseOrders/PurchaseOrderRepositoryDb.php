@@ -22,7 +22,10 @@ final class PurchaseOrderRepositoryDb implements PurchaseOrderRepository
     {
         PurchaseOrder::query()
             ->whereIn('id', array_map(static fn (PurchaseOrderId $id) => $id->value, $ids->ids))
-            ->update(['status' => PurchaseOrderStatus::Pending]);
+            ->update([
+                'status' => PurchaseOrderStatus::Pending,
+                'declined_reason' => null,
+            ]);
     }
 
     #[Override]
@@ -34,11 +37,14 @@ final class PurchaseOrderRepositoryDb implements PurchaseOrderRepository
     }
 
     #[Override]
-    public function markAsDeclined(PurchaseOrderIdList $ids): void
+    public function markAsDeclined(PurchaseOrderIdList $ids, ?string $reason = null): void
     {
         PurchaseOrder::query()
             ->whereIn('id', array_map(static fn (PurchaseOrderId $id) => $id->value, $ids->ids))
-            ->update(['status' => PurchaseOrderStatus::Declined]);
+            ->update([
+                'status' => PurchaseOrderStatus::Declined,
+                'declined_reason' => $reason,
+            ]);
     }
 
     #[Override]

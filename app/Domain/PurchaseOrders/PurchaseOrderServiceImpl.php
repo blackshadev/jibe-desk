@@ -29,8 +29,8 @@ final readonly class PurchaseOrderServiceImpl implements PurchaseOrderService
     }
 
     #[Override]
-    public function markAsDeclined(PurchaseOrderIdList $ids): void
+    public function markAsDeclined(PurchaseOrderIdList $ids, ?string $reason = null): void
     {
-        $this->repository->markAsDeclined($ids);
+        $this->repository->markAsDeclined($ids, $reason);
     }
 }

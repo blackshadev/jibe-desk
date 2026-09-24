@@ -141,7 +141,6 @@ final class InvoiceForm
                                     ->required(),
                                 TextInput::make('price')
                                     ->label(__('labels.price'))
-                                    ->default(1.99)
                                     ->required(),
                                 Select::make('cost_center_id')
                                     ->label(__('labels.cost_center'))

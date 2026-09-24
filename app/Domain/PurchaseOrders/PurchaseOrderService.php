@@ -13,5 +13,5 @@ interface PurchaseOrderService
 
     public function markAsPaid(PurchaseOrderIdList $ids): void;
 
-    public function markAsDeclined(PurchaseOrderIdList $ids): void;
+    public function markAsDeclined(PurchaseOrderIdList $ids, ?string $reason = null): void;
 }

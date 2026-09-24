@@ -30,6 +30,7 @@ final class ViewPurchaseOrder extends ViewRecord
     #[Override]
     #[On('markedAsPaid')]
     #[On('markedAsPending')]
+    #[On('markedAsDeclined')]
     public function refresh(): void
     {
     }

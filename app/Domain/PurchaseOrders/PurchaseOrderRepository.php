@@ -14,7 +14,7 @@ interface PurchaseOrderRepository
 
     public function markAsPaid(PurchaseOrderIdList $ids): void;
 
-    public function markAsDeclined(PurchaseOrderIdList $ids): void;
+    public function markAsDeclined(PurchaseOrderIdList $ids, ?string $reason = null): void;
 
     /**
      * Find an open or pending PurchaseOrder that matches the given debit criteria.

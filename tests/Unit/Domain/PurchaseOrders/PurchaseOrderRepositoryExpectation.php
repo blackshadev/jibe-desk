@@ -38,6 +38,13 @@ final readonly class PurchaseOrderRepositoryExpectation
             ->with(equalTo($ids));
     }
 
+    public function expectsMarkAsDeclined(PurchaseOrderIdList $ids, ?string $reason = null): void
+    {
+        $this->mock
+            ->expects('markAsDeclined')
+            ->with(equalTo($ids), equalTo($reason));
+    }
+
     public function expectsFindMatchingDebit(string $creditorIban, float $amount, DateTimeInterface $date, ?PurchaseOrderId $return): void
     {
         $this->mock
