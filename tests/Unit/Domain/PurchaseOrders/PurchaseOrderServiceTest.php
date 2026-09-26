@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\PurchaseOrders;
 
+use App\Domain\PurchaseOrders\PurchaseOrderCompleteness;
+use App\Domain\PurchaseOrders\PurchaseOrderCompletenessServiceImpl;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Domain\PurchaseOrders\PurchaseOrderIdList;
+use App\Domain\PurchaseOrders\PurchaseOrderLineCompleteness;
 use App\Domain\PurchaseOrders\PurchaseOrderServiceImpl;
 use Override;
 use Tests\Unit\Domain\Bookkeeping\BookkeepingRecordRepositoryExpectation;
@@ -26,6 +29,7 @@ final class PurchaseOrderServiceTest extends UnitTestCase
         $this->bookkeepingRepo = BookkeepingRecordRepositoryExpectation::create();
 
         $this->service = new PurchaseOrderServiceImpl(
+            new PurchaseOrderCompletenessServiceImpl($this->repo->mock),
             $this->repo->mock,
             $this->bookkeepingRepo->mock,
         );
@@ -36,6 +40,14 @@ final class PurchaseOrderServiceTest extends UnitTestCase
         $id = PurchaseOrderId::create(1);
         $ids = new PurchaseOrderIdList([$id]);
 
+        $this->repo->expectsGetCompleteness($ids, [
+            new PurchaseOrderCompleteness(
+                $id,
+                'Creditor Name',
+                'NL91ABNA0417164300',
+                [new PurchaseOrderLineCompleteness(1)],
+            ),
+        ]);
         $this->repo->expectsMarkAsPending($ids);
         $this->bookkeepingRepo->expectsCreateForPurchaseOrder($ids);
 
@@ -47,6 +59,14 @@ final class PurchaseOrderServiceTest extends UnitTestCase
         $id = PurchaseOrderId::create(2);
         $ids = new PurchaseOrderIdList([$id]);
 
+        $this->repo->expectsGetCompleteness($ids, [
+            new PurchaseOrderCompleteness(
+                $id,
+                'Creditor Name',
+                'NL91ABNA0417164300',
+                [new PurchaseOrderLineCompleteness(1)],
+            ),
+        ]);
         $this->repo->expectsMarkAsPaid($ids);
         $this->bookkeepingRepo->expectsCreateForPurchaseOrder($ids);
 

@@ -10,6 +10,13 @@ use JeroenG\Autowire\Attribute\Autowire;
 #[Autowire]
 interface PurchaseOrderRepository
 {
+    /**
+     * Load the facts needed to check purchase order completeness for a status transition.
+     *
+     * @return list<PurchaseOrderCompleteness>
+     */
+    public function getCompleteness(PurchaseOrderIdList $ids): array;
+
     public function markAsPending(PurchaseOrderIdList $ids): void;
 
     public function markAsPaid(PurchaseOrderIdList $ids): void;

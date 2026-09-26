@@ -20,6 +20,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Operation;
 use Intervention\Validation\Rules\Iban;
 
 final class PurchaseOrderForm
@@ -63,6 +64,7 @@ final class PurchaseOrderForm
                             ->disk('local')
                             ->visibility('private')
                             ->previewable()
+                            ->required(static fn (string $operation): bool => $operation === Operation::Create->value)
                             ->columnSpanFull(),
                     ]),
                 Section::make(__('labels.creditor_information'))
@@ -144,7 +146,7 @@ final class PurchaseOrderForm
                                     ->options(static fn () => CostCenter::query()->orderBy('number')->pluck('title', 'id'))
                                     ->searchable()
                                     ->preload()
-                                    ->required(),
+                                    ->helperText(__('labels.cost_center_optional_hint')),
                             ]),
                     ]),
             ]);

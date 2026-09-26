@@ -157,7 +157,7 @@ function task:exec { ## Run anything in the application shell
 
 function task:artisan { ## Run any artisan command
     docker:ensure-running
-    task:exec "php -d memory_limit=-1 artisan ${*}"
+    task:exec "php artisan ${*}"
 }
 
 function task:composer { ## Run any composer command

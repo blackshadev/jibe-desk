@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\PurchaseOrders\Actions;
 
 use App\Domain\PurchaseOrders\PurchaseOrderIdList;
+use App\Domain\PurchaseOrders\PurchaseOrderIncompleteException;
 use App\Domain\PurchaseOrders\PurchaseOrderService;
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Filament\Admin\Labels\PurchaseOrderProblemLabels;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Models\PurchaseOrder;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Resources\Pages\Page;
 
@@ -26,7 +29,15 @@ final class PurchaseOrderStateActions
                 ->requiresConfirmation()
                 ->visible(static fn (PurchaseOrder $record): bool => $record->status === PurchaseOrderStatus::Open)
                 ->action(static function (PurchaseOrder $record, PurchaseOrderService $service): void {
-                    $service->markAsPending(PurchaseOrderIdList::fromArray([$record->id]));
+                    try {
+                        $service->markAsPending(PurchaseOrderIdList::fromArray([$record->id]));
+                    } catch (PurchaseOrderIncompleteException $exception) {
+                        Notification::make()
+                            ->title(__('notifications.purchase_order_incomplete'))
+                            ->body(PurchaseOrderProblemLabels::describeAll($exception->problems))
+                            ->danger()
+                            ->send();
+                    }
                 })
                 ->successRedirectUrl(static fn (Page $livewire, PurchaseOrder $record) => (
                     $livewire instanceof EditRecord ? PurchaseOrderResource::getUrl('view', ['record' => $record]) : null
@@ -41,7 +52,15 @@ final class PurchaseOrderStateActions
                 ->requiresConfirmation()
                 ->visible(static fn (PurchaseOrder $record): bool => $record->status === PurchaseOrderStatus::Pending)
                 ->action(static function (PurchaseOrder $record, PurchaseOrderService $service): void {
-                    $service->markAsPaid(PurchaseOrderIdList::fromArray([$record->id]));
+                    try {
+                        $service->markAsPaid(PurchaseOrderIdList::fromArray([$record->id]));
+                    } catch (PurchaseOrderIncompleteException $exception) {
+                        Notification::make()
+                            ->title(__('notifications.purchase_order_incomplete'))
+                            ->body(PurchaseOrderProblemLabels::describeAll($exception->problems))
+                            ->danger()
+                            ->send();
+                    }
                 })
                 ->after(static fn (Page $livewire) => $livewire->dispatch('markedAsPaid'))
                 ->successNotificationTitle(__('notifications.purchase_order_marked_paid')),

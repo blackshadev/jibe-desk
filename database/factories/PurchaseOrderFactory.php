@@ -49,6 +49,11 @@ final class PurchaseOrderFactory extends Factory
         ]);
     }
 
+    public function withoutCreditor(): self
+    {
+        return $this->state(['creditor_name' => null, 'creditor_iban' => null]);
+    }
+
     public function forMember(Member $member): self
     {
         return $this->state(['member_id' => $member->id]);

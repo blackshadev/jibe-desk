@@ -26,4 +26,13 @@ final class PurchaseOrderIdList
             ),
         );
     }
+
+    /** @return int[] */
+    public function values(): array
+    {
+        return array_map(
+            static fn (PurchaseOrderId $id) => $id->value,
+            $this->ids,
+        );
+    }
 }

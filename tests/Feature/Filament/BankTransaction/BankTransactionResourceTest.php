@@ -20,6 +20,7 @@ use App\Models\InvoiceLine;
 use App\Models\Member;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
+use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
 use Tests\Concerns\WithAuthorizedUser;
 use Tests\FeatureTestCase;
@@ -128,6 +129,7 @@ final class BankTransactionResourceTest extends FeatureTestCase
         ])
             ->callTableAction('createPurchaseOrderFromTransaction', data: [
                 'cost_center_id' => $costCenter->id,
+                'image_path' => UploadedFile::fake()->image('bonordnetje.jpg'),
             ])
             ->assertHasNoFormErrors();
 
@@ -135,6 +137,7 @@ final class BankTransactionResourceTest extends FeatureTestCase
         static::assertNotNull($po);
         static::assertSame('open', $po->status->value);
         static::assertSame('NL91ABNA0417164300', $po->creditor_iban);
+        static::assertNotNull($po->image_path);
 
         $line = PurchaseOrderLine::query()->where('purchase_order_id', $po->id)->first();
         static::assertNotNull($line);

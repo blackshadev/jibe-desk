@@ -34,6 +34,7 @@ return [
     'purchase_order_marked_declined' => 'Inkooporder gemarkeerd als geweigerd',
     'invoice_created_and_attached' => 'Factuur aangemaakt en gekoppeld',
     'purchase_order_created_and_attached' => 'Inkooporder aangemaakt en gekoppeld',
+    'purchase_order_incomplete' => 'Inkooporder is niet compleet',
     'bookkeeping_record_created_and_attached' => 'Boekhouding mutatie aangemaakt en gekoppeld',
     'credit_invoice_created' => 'Creditfactuur succesvol aangemaakt',
     'chain_status_updated' => 'Aansluiting controle bijgewerkt',

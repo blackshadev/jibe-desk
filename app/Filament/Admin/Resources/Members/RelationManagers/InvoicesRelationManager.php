@@ -9,7 +9,6 @@ use App\Domain\Invoices\InvoiceStatus;
 use App\Domain\Invoices\InvoiceTarget;
 use App\Domain\Members\MemberId;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
-use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Filament\Admin\Utils\ViewOrEdit;
 use App\Models\Invoice;
 use App\Models\Member;
@@ -52,8 +51,8 @@ final class InvoicesRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->url(static fn (RelationManager $livewire): string => InvoiceResource::getUrl('create', [
-                    'member_id' => $livewire->getOwnerRecord()->getKey(),
-                ])),
+                        'member_id' => $livewire->getOwnerRecord()->getKey(),
+                    ])),
                 Action::make('generate')
                     ->label(__('labels.generate_invoice'))
                     ->visible(static fn (): bool => auth()->user()?->can('create', Invoice::class) ?? false)

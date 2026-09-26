@@ -24,4 +24,9 @@ final class PurchaseOrderLineFactory extends Factory
             'cost_center_id' => CostCenter::factory(),
         ];
     }
+
+    public function withoutCostCenter(): self
+    {
+        return $this->state(['cost_center_id' => null]);
+    }
 }

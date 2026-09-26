@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\PurchaseOrders;
 
+use App\Domain\PurchaseOrders\PurchaseOrderCompleteness;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderRepository;
@@ -22,6 +23,17 @@ final readonly class PurchaseOrderRepositoryExpectation
     public static function create(): self
     {
         return new self(Mockery::mock(PurchaseOrderRepository::class));
+    }
+
+    /**
+     * @param list<PurchaseOrderCompleteness> $return
+     */
+    public function expectsGetCompleteness(PurchaseOrderIdList $ids, array $return): void
+    {
+        $this->mock
+            ->expects('getCompleteness')
+            ->with(equalTo($ids))
+            ->andReturn($return);
     }
 
     public function expectsMarkAsPending(PurchaseOrderIdList $ids): void
@@ -51,5 +63,15 @@ final readonly class PurchaseOrderRepositoryExpectation
             ->expects('findMatchingDebit')
             ->with(equalTo($creditorIban), equalTo($amount), equalTo($date))
             ->andReturn($return);
+    }
+
+    public function neverExpectsMarkAsPending(): void
+    {
+        $this->mock->expects('markAsPending')->never();
+    }
+
+    public function neverExpectsMarkAsPaid(): void
+    {
+        $this->mock->expects('markAsPaid')->never();
     }
 }

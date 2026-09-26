@@ -81,13 +81,14 @@ final class CreatePurchaseOrderFromTransactionAction
                         ->disk('local')
                         ->visibility('private')
                         ->previewable()
+                        ->required()
                         ->columnSpanFull(),
                     Select::make('cost_center_id')
                         ->label(__('labels.cost_center'))
                         ->options(static fn () => CostCenter::query()->orderBy('number')->pluck('title', 'id'))
                         ->searchable()
                         ->preload()
-                        ->required(),
+                        ->helperText(__('labels.cost_center_optional_hint')),
                 ];
             })
             ->action(static function (array $data, RelationManager $livewire, BankTransaction|BankStatement|null $record, BankTransactionService $bankTransaction): void {
@@ -98,6 +99,7 @@ final class CreatePurchaseOrderFromTransactionAction
                     'description' => $data['description'],
                     'creditor_iban' => $data['creditor_iban'] ?? null,
                     'creditor_name' => $data['creditor_name'] ?? null,
+                    'image_path' => $data['image_path'],
                     'status' => PurchaseOrderStatus::Open,
                 ]);
 
@@ -105,7 +107,7 @@ final class CreatePurchaseOrderFromTransactionAction
                     'description' => $data['description'],
                     'price' => $data['line_price'],
                     'price_vat' => $data['line_price_vat'],
-                    'cost_center_id' => $data['cost_center_id'],
+                    'cost_center_id' => $data['cost_center_id'] ?? null,
                 ]);
 
                 $bankTransaction->attachPurchaseOrder(

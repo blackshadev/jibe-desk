@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Override;
 
+/** @property ?int $cost_center_id */
 #[Fillable(['description', 'price', 'price_vat', 'cost_center_id'])]
 final class PurchaseOrderLine extends Model
 {

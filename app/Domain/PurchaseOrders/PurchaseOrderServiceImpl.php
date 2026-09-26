@@ -10,6 +10,7 @@ use Override;
 final readonly class PurchaseOrderServiceImpl implements PurchaseOrderService
 {
     public function __construct(
+        private PurchaseOrderCompletenessService $completenessService,
         private PurchaseOrderRepository $repository,
         private BookkeepingRecordRepository $bookkeepingRepository,
     ) {}
@@ -17,6 +18,8 @@ final readonly class PurchaseOrderServiceImpl implements PurchaseOrderService
     #[Override]
     public function markAsPending(PurchaseOrderIdList $ids): void
     {
+        $this->completenessService->findProblems($ids)->assertComplete();
+
         $this->repository->markAsPending($ids);
         $this->bookkeepingRepository->createForPurchaseOrder($ids);
     }
@@ -24,6 +27,8 @@ final readonly class PurchaseOrderServiceImpl implements PurchaseOrderService
     #[Override]
     public function markAsPaid(PurchaseOrderIdList $ids): void
     {
+        $this->completenessService->findProblems($ids)->assertComplete();
+
         $this->repository->markAsPaid($ids);
         $this->bookkeepingRepository->createForPurchaseOrder($ids);
     }

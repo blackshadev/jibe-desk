@@ -7,6 +7,7 @@ namespace Tests\Feature\Filament\Admin\Resources;
 use App\Domain\Authorization\RoleName;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Domain\PurchaseOrders\PurchaseOrderIdList;
+use App\Domain\PurchaseOrders\PurchaseOrderIncompleteException;
 use App\Domain\PurchaseOrders\PurchaseOrderService;
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Resources\PurchaseOrders\Pages\CreatePurchaseOrder;
@@ -18,6 +19,7 @@ use App\Models\Member;
 use App\Models\PaymentInformation;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 use Tests\Concerns\WithAuthorizedUser;
@@ -45,6 +47,7 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
                 'creditor_name' => 'Acme Corp',
                 'description' => 'Office supplies',
                 'date' => '2026-06-26',
+                'image_path' => UploadedFile::fake()->image('factuur.jpg'),
                 'lines' => [
                     ['description' => 'Paper', 'price' => 100, 'price_vat' => 21, 'cost_center_id' => $costCenter->id],
                 ],
@@ -57,6 +60,89 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
             'description' => 'Office supplies',
             'status' => PurchaseOrderStatus::Open->value,
         ]);
+    }
+
+    public function test_can_create_purchase_order_without_cost_center(): void
+    {
+        $this->withAuthorizedUser();
+
+        Livewire::test(CreatePurchaseOrder::class)
+            ->fillForm([
+                'creditor_name' => 'Acme Corp',
+                'description' => 'Office supplies',
+                'date' => '2026-06-26',
+                'image_path' => UploadedFile::fake()->image('factuur.jpg'),
+                'lines' => [
+                    ['description' => 'Paper', 'price' => 100, 'price_vat' => 21, 'cost_center_id' => null],
+                ],
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $purchaseOrder = PurchaseOrder::query()->sole();
+        $this->assertDatabaseHas('purchase_order_lines', [
+            'purchase_order_id' => $purchaseOrder->id,
+            'cost_center_id' => null,
+        ]);
+    }
+
+    public function test_image_is_required_when_creating_a_purchase_order(): void
+    {
+        $this->withAuthorizedUser();
+
+        Livewire::test(CreatePurchaseOrder::class)
+            ->fillForm([
+                'creditor_name' => 'Acme Corp',
+                'description' => 'Office supplies',
+                'date' => '2026-06-26',
+                'lines' => [
+                    ['description' => 'Paper', 'price' => 100, 'price_vat' => 21, 'cost_center_id' => null],
+                ],
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['image_path']);
+    }
+
+    public function test_mark_as_pending_is_blocked_when_a_line_has_no_cost_center(): void
+    {
+        $this->withAuthorizedUser();
+        $purchaseOrder = PurchaseOrder::factory()->open()->withLines()->create();
+        $purchaseOrder->lines()->update(['cost_center_id' => null]);
+
+        Livewire::test(EditPurchaseOrder::class, ['record' => $purchaseOrder->getRouteKey()])
+            ->callAction('markAsPending')
+            ->assertNotified();
+
+        static::assertSame(PurchaseOrderStatus::Open, $purchaseOrder->fresh()->status);
+        $this->assertDatabaseMissing('bookkeeping_records', ['reference_id' => $purchaseOrder->id]);
+    }
+
+    public function test_mark_as_pending_is_blocked_without_creditor_information(): void
+    {
+        $this->withAuthorizedUser();
+        $purchaseOrder = PurchaseOrder::factory()->open()->withoutCreditor()->withLines()->create();
+
+        Livewire::test(EditPurchaseOrder::class, ['record' => $purchaseOrder->getRouteKey()])
+            ->callAction('markAsPending')
+            ->assertNotified();
+
+        static::assertSame(PurchaseOrderStatus::Open, $purchaseOrder->fresh()->status);
+    }
+
+    public function test_mark_as_paid_is_blocked_when_incomplete(): void
+    {
+        $this->withAuthorizedUser();
+        $purchaseOrder = PurchaseOrder::factory()->open()->withLines()->create();
+        $purchaseOrder->lines()->update(['cost_center_id' => null]);
+
+        try {
+            app(PurchaseOrderService::class)->markAsPaid(new PurchaseOrderIdList([PurchaseOrderId::create($purchaseOrder->id)]));
+            static::fail('Expected PurchaseOrderIncompleteException was not thrown.');
+        } catch (PurchaseOrderIncompleteException) {
+            static::assertSame(PurchaseOrderStatus::Open, $purchaseOrder->fresh()->status);
+        }
+
+        $this->assertDatabaseMissing('bookkeeping_records', ['reference_id' => $purchaseOrder->id]);
     }
 
     public function test_mark_as_pending_creates_bookkeeping_records(): void
@@ -123,6 +209,7 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
                 'member_id' => $member->id,
                 'description' => 'Vlaggetjes voor de haven',
                 'date' => '2026-09-23',
+                'image_path' => UploadedFile::fake()->image('factuur.jpg'),
                 'lines' => [
                     ['description' => 'Vlaggetjes', 'price' => 25, 'price_vat' => 5.25, 'cost_center_id' => $costCenter->id],
                 ],
@@ -156,6 +243,7 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
             ->fillForm([
                 'description' => 'Vlaggetjes voor de haven',
                 'date' => '2026-09-23',
+                'image_path' => UploadedFile::fake()->image('factuur.jpg'),
                 'lines' => [
                     ['description' => 'Vlaggetjes', 'price' => 25, 'price_vat' => 5.25, 'cost_center_id' => $costCenter->id],
                 ],

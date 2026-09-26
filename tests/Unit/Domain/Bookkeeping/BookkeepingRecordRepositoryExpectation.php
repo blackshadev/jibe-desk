@@ -44,4 +44,9 @@ final readonly class BookkeepingRecordRepositoryExpectation
             ->expects('createForInvoice')
             ->with(equalTo($ids));
     }
+
+    public function neverExpectsCreateForPurchaseOrder(): void
+    {
+        $this->mock->expects('createForPurchaseOrder')->never();
+    }
 }
