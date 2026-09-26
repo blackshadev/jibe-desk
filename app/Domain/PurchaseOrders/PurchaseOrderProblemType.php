@@ -9,4 +9,5 @@ enum PurchaseOrderProblemType: string
     case MissingCostCenter = 'missing_cost_center';
     case MissingCreditorName = 'missing_creditor_name';
     case MissingCreditorIban = 'missing_creditor_iban';
+    case MissingOrderLines = 'missing_order_lines';
 }

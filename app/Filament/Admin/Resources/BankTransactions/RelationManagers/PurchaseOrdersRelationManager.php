@@ -36,6 +36,10 @@ final class PurchaseOrdersRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('description')
                     ->label(__('labels.description')),
+                TextColumn::make('total')
+                    ->label(__('labels.total'))
+                    ->money('EUR'),
+
                 TextColumn::make('date')
                     ->label(__('labels.date'))
                     ->date()

@@ -280,10 +280,10 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
             ->assertHasActionErrors(['declined_reason']);
     }
 
-    public function test_cannot_decline_purchase_order_when_not_open(): void
+    public function test_cannot_decline_purchase_order_is_paid(): void
     {
         $this->withAuthorizedUser();
-        $po = PurchaseOrder::factory()->pending()->create();
+        $po = PurchaseOrder::factory()->paid()->create();
 
         Livewire::test(ViewPurchaseOrder::class, ['record' => $po->getRouteKey()])
             ->assertActionHidden('markAsDeclined');

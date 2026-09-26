@@ -7,7 +7,6 @@ namespace App\Filament\Admin\Resources\PurchaseOrders\Actions;
 use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderIncompleteException;
 use App\Domain\PurchaseOrders\PurchaseOrderService;
-use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Labels\PurchaseOrderProblemLabels;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Models\PurchaseOrder;
@@ -27,8 +26,8 @@ final class PurchaseOrderStateActions
                 ->icon('heroicon-m-clock')
                 ->color('warning')
                 ->requiresConfirmation()
-                ->visible(static fn (PurchaseOrder $record): bool => $record->status === PurchaseOrderStatus::Open)
-                ->action(static function (PurchaseOrder $record, PurchaseOrderService $service): void {
+                ->visible(static fn (PurchaseOrder $record): bool => auth()->user()->can('markAsPending', $record))
+                ->action(static function (PurchaseOrder $record, PurchaseOrderService $service, Action $action): void {
                     try {
                         $service->markAsPending(PurchaseOrderIdList::fromArray([$record->id]));
                     } catch (PurchaseOrderIncompleteException $exception) {
@@ -37,6 +36,7 @@ final class PurchaseOrderStateActions
                             ->body(PurchaseOrderProblemLabels::describeAll($exception->problems))
                             ->danger()
                             ->send();
+                        $action->failure();
                     }
                 })
                 ->successRedirectUrl(static fn (Page $livewire, PurchaseOrder $record) => (
@@ -50,7 +50,7 @@ final class PurchaseOrderStateActions
                 ->icon('heroicon-m-banknotes')
                 ->color('success')
                 ->requiresConfirmation()
-                ->visible(static fn (PurchaseOrder $record): bool => $record->status === PurchaseOrderStatus::Pending)
+                ->visible(static fn (PurchaseOrder $record): bool => auth()->user()->can('markAsPaid', $record))
                 ->action(static function (PurchaseOrder $record, PurchaseOrderService $service): void {
                     try {
                         $service->markAsPaid(PurchaseOrderIdList::fromArray([$record->id]));
@@ -77,7 +77,7 @@ final class PurchaseOrderStateActions
                         ->rows(4)
                         ->required(),
                 ])
-                ->visible(static fn (PurchaseOrder $record): bool => $record->status === PurchaseOrderStatus::Open)
+                ->visible(static fn (PurchaseOrder $record): bool => auth()->user()->can('markAsDeclined', $record))
                 ->action(static function (PurchaseOrder $record, PurchaseOrderService $service, array $data): void {
                     $service->markAsDeclined(
                         PurchaseOrderIdList::fromArray([$record->id]),

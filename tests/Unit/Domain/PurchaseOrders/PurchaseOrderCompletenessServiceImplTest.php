@@ -55,21 +55,37 @@ final class PurchaseOrderCompletenessServiceImplTest extends UnitTestCase
             null,
             'NL02ABNA0123456789',
             [],
-            [new PurchaseOrderProblem(PurchaseOrderId::create(1), PurchaseOrderProblemType::MissingCreditorName)],
+            [
+                new PurchaseOrderProblem(PurchaseOrderId::create(1), PurchaseOrderProblemType::MissingCreditorName),
+                new PurchaseOrderProblem(PurchaseOrderId::create(1), PurchaseOrderProblemType::MissingOrderLines),
+            ],
         ];
 
         yield 'blank creditor name counts as missing' => [
             '  ',
             'NL02ABNA0123456789',
             [],
-            [new PurchaseOrderProblem(PurchaseOrderId::create(1), PurchaseOrderProblemType::MissingCreditorName)],
+            [
+                new PurchaseOrderProblem(PurchaseOrderId::create(1), PurchaseOrderProblemType::MissingCreditorName),
+                new PurchaseOrderProblem(PurchaseOrderId::create(1), PurchaseOrderProblemType::MissingOrderLines),
+            ],
         ];
 
         yield 'blank creditor iban counts as missing' => [
             'Achmeer',
             ' ',
             [],
-            [new PurchaseOrderProblem(PurchaseOrderId::create(1), PurchaseOrderProblemType::MissingCreditorIban)],
+            [
+                new PurchaseOrderProblem(PurchaseOrderId::create(1), PurchaseOrderProblemType::MissingCreditorIban),
+                new PurchaseOrderProblem(PurchaseOrderId::create(1), PurchaseOrderProblemType::MissingOrderLines),
+            ],
+        ];
+
+        yield 'a purchase order without order lines is a problem' => [
+            'Achmeer',
+            'NL02ABNA0123456789',
+            [],
+            [new PurchaseOrderProblem(PurchaseOrderId::create(1), PurchaseOrderProblemType::MissingOrderLines)],
         ];
 
         yield 'every line without a cost center is numbered from one' => [
@@ -137,6 +153,7 @@ final class PurchaseOrderCompletenessServiceImplTest extends UnitTestCase
                 new PurchaseOrderProblem(PurchaseOrderId::create(1), PurchaseOrderProblemType::MissingCostCenter, 1),
                 new PurchaseOrderProblem(PurchaseOrderId::create(2), PurchaseOrderProblemType::MissingCreditorName),
                 new PurchaseOrderProblem(PurchaseOrderId::create(2), PurchaseOrderProblemType::MissingCreditorIban),
+                new PurchaseOrderProblem(PurchaseOrderId::create(2), PurchaseOrderProblemType::MissingOrderLines),
             ],
             $problems->problems,
         );

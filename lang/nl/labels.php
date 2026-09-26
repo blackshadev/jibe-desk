@@ -88,6 +88,7 @@ return [
     'problem_missing_cost_center' => 'Regel :line heeft geen kostenplaats',
     'problem_missing_creditor_name' => 'De crediteursnaam ontbreekt',
     'problem_missing_creditor_iban' => 'Het IBAN van de crediteur ontbreekt',
+    'problem_missing_order_lines' => 'De inkooporder heeft geen orderregels',
     'cost_centers' => 'Kostenplaatsen',
     'number' => 'Nummer',
     'title' => 'Titel',

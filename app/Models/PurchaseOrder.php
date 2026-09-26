@@ -70,9 +70,9 @@ final class PurchaseOrder extends Model
     }
 
     #[Scope]
-    protected function openOrPending(Builder $query): Builder
+    protected function pending(Builder $query): Builder
     {
-        return $query->whereIn('status', [PurchaseOrderStatus::Open, PurchaseOrderStatus::Pending]);
+        return $query->whereIn('status', [PurchaseOrderStatus::Pending]);
     }
 
     #[Scope]

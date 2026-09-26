@@ -35,6 +35,7 @@ final readonly class PurchaseOrderCompletenessServiceImpl implements PurchaseOrd
     {
         $missingCreditorName = $completeness->creditorName === null || trim($completeness->creditorName) === '';
         $missingCreditorIban = $completeness->creditorIban === null || trim($completeness->creditorIban) === '';
+        $missingOrderLines = $completeness->lines === [];
 
         return array_merge(
             $missingCreditorName
@@ -42,6 +43,9 @@ final readonly class PurchaseOrderCompletenessServiceImpl implements PurchaseOrd
                 : [],
             $missingCreditorIban
                 ? [new PurchaseOrderProblem($completeness->id, PurchaseOrderProblemType::MissingCreditorIban)]
+                : [],
+            $missingOrderLines
+                ? [new PurchaseOrderProblem($completeness->id, PurchaseOrderProblemType::MissingOrderLines)]
                 : [],
             self::problemsForLines($completeness),
         );

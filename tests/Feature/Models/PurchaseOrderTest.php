@@ -12,16 +12,15 @@ use Tests\FeatureTestCase;
 
 final class PurchaseOrderTest extends FeatureTestCase
 {
-    public function test_open_or_pending_scope_filters_correct_statuses(): void
+    public function test_pending_scope_filters_correct_statuses(): void
     {
         PurchaseOrder::factory()->open()->createQuietly();
         PurchaseOrder::factory()->pending()->createQuietly();
         PurchaseOrder::factory()->paid()->createQuietly();
 
-        $results = PurchaseOrder::query()->openOrPending()->get();
+        $results = PurchaseOrder::query()->pending()->get();
 
-        static::assertCount(2, $results);
-        static::assertTrue($results->contains('status', PurchaseOrderStatus::Open));
+        static::assertFalse($results->contains('status', PurchaseOrderStatus::Open));
         static::assertTrue($results->contains('status', PurchaseOrderStatus::Pending));
         static::assertFalse($results->contains('status', PurchaseOrderStatus::Paid));
     }
@@ -31,22 +30,22 @@ final class PurchaseOrderTest extends FeatureTestCase
         $iban = 'NL00ABCD1234567890';
 
         $po1 = PurchaseOrder::factory()
-            ->open()
+            ->pending()
             ->has(PurchaseOrderLine::factory()->state(['price' => 105.00]), 'lines')
             ->createQuietly(['creditor_iban' => 'NL99XXXX0000000000']);
 
         $po2 = PurchaseOrder::factory()
-            ->open()
+            ->pending()
             ->has(PurchaseOrderLine::factory()->state(['price' => 150.00]), 'lines')
             ->createQuietly(['creditor_iban' => $iban]);
 
         $po3 = PurchaseOrder::factory()
-            ->open()
+            ->pending()
             ->has(PurchaseOrderLine::factory()->state(['price' => 90.00]), 'lines')
             ->createQuietly(['creditor_iban' => $iban]);
 
         $results = PurchaseOrder::query()
-            ->openOrPending()
+            ->pending()
             ->orderByRelevancy(100.00, $iban)
             ->pluck('id')
             ->all();
@@ -59,17 +58,17 @@ final class PurchaseOrderTest extends FeatureTestCase
         $iban = 'NL00ABCD1234567890';
 
         $po1 = PurchaseOrder::factory()
-            ->open()
+            ->pending()
             ->has(PurchaseOrderLine::factory()->state(['price' => 500.00]), 'lines')
             ->createQuietly(['creditor_iban' => null]);
 
         $po2 = PurchaseOrder::factory()
-            ->open()
+            ->pending()
             ->has(PurchaseOrderLine::factory()->state(['price' => 100.00]), 'lines')
             ->createQuietly(['creditor_iban' => $iban]);
 
         $results = PurchaseOrder::query()
-            ->openOrPending()
+            ->pending()
             ->orderByRelevancy(100.00, $iban)
             ->pluck('id')
             ->all();

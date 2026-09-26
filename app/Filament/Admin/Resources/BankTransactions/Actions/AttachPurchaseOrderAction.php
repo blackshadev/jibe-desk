@@ -34,7 +34,10 @@ final class AttachPurchaseOrderAction
                         $model = GetTransaction::get($livewire, $record);
 
                         return PurchaseOrder::query()
-                            ->openOrPending()
+                            ->pending()
+                            ->whereDoesntHave('bankTransactions', static function ($query) use ($model): void {
+                                $query->where('bank_transaction_id', $model->id);
+                            })
                             ->orderByRelevancy(-$model->amount, $model->banking_account_number)
                             ->get()
                             ->mapWithKeys(static fn (PurchaseOrder $po): array => [

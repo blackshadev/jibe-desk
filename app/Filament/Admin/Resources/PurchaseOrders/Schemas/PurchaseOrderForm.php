@@ -68,6 +68,7 @@ final class PurchaseOrderForm
                             ->columnSpanFull(),
                     ]),
                 Section::make(__('labels.creditor_information'))
+                    ->disabled(static fn (): bool => auth()->user()->cannot('update_purchase_orders'))
                     ->schema([
                         Select::make('member_id')
                             ->label(__('labels.member'))
@@ -142,6 +143,7 @@ final class PurchaseOrderForm
                                     ->prefix('€')
                                     ->required(),
                                 Select::make('cost_center_id')
+                                    ->visible(static fn () => auth()->user()?->can('viewAny', CostCenter::class))
                                     ->label(__('labels.cost_center'))
                                     ->options(static fn () => CostCenter::query()->orderBy('number')->pluck('title', 'id'))
                                     ->searchable()

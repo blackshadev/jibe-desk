@@ -24,9 +24,14 @@ final class PurchaseOrderProblemTypeTest extends UnitTestCase
         static::assertSame('missing_creditor_iban', PurchaseOrderProblemType::MissingCreditorIban->value);
     }
 
-    public function test_it_has_exactly_three_cases(): void
+    public function test_it_has_missing_order_lines_type(): void
     {
-        static::assertCount(3, PurchaseOrderProblemType::cases());
+        static::assertSame('missing_order_lines', PurchaseOrderProblemType::MissingOrderLines->value);
+    }
+
+    public function test_it_has_exactly_four_cases(): void
+    {
+        static::assertCount(4, PurchaseOrderProblemType::cases());
     }
 
     public function test_it_resolves_a_case_from_its_value(): void

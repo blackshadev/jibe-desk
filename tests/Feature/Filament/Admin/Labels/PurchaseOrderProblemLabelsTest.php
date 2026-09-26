@@ -33,6 +33,13 @@ final class PurchaseOrderProblemLabelsTest extends FeatureTestCase
         static::assertSame('#12: Het IBAN van de crediteur ontbreekt', PurchaseOrderProblemLabels::describe($problem));
     }
 
+    public function test_it_describes_missing_order_lines(): void
+    {
+        $problem = new PurchaseOrderProblem(PurchaseOrderId::create(4), PurchaseOrderProblemType::MissingOrderLines);
+
+        static::assertSame('#4: De inkooporder heeft geen orderregels', PurchaseOrderProblemLabels::describe($problem));
+    }
+
     public function test_it_describes_all_problems_separated_by_newlines(): void
     {
         $problems = [

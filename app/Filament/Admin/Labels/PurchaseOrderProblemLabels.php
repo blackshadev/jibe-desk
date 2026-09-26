@@ -15,6 +15,7 @@ final class PurchaseOrderProblemLabels
             PurchaseOrderProblemType::MissingCostCenter => __('labels.problem_missing_cost_center', ['line' => $problem->lineNumber]),
             PurchaseOrderProblemType::MissingCreditorName => __('labels.problem_missing_creditor_name'),
             PurchaseOrderProblemType::MissingCreditorIban => __('labels.problem_missing_creditor_iban'),
+            PurchaseOrderProblemType::MissingOrderLines => __('labels.problem_missing_order_lines'),
         };
 
         return sprintf('#%d: %s', $problem->purchaseOrderId->value, $label);
