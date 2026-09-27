@@ -13,34 +13,10 @@ use App\Models\Invoice;
 use App\Models\Member;
 use App\Models\Membership;
 use Carbon\CarbonImmutable;
-use Database\Seeders\ActivitySeeder;
-use Database\Seeders\CostCenterSeeder;
-use Database\Seeders\MembershipSeeder;
 use Livewire\Livewire;
 
 trait TestsMemberLifecycle
 {
-    protected function seedBillingFixtures(): void
-    {
-        $this->seed(CostCenterSeeder::class);
-        $this->seed(ActivitySeeder::class);
-        $this->seed(MembershipSeeder::class);
-    }
-
-    protected function travelToDate(string $date): CarbonImmutable
-    {
-        $now = CarbonImmutable::parse($date);
-
-        CarbonImmutable::setTestNow($now);
-
-        return $now;
-    }
-
-    protected function resetTime(): void
-    {
-        CarbonImmutable::setTestNow();
-    }
-
     protected function defaultMembership(): Membership
     {
         return Membership::query()->where('is_default', true)->firstOrFail();

@@ -8,9 +8,12 @@ use App\Domain\Members\ExtraMembershipItemCode;
 use App\Models\ExtraMembershipItem;
 use App\Models\Invoice;
 use Override;
+use Tests\Concerns\TestsMemberLifecycle;
 
 final class WindsurferLifetimeScenarioTest extends MemberLifecycleScenario
 {
+    use TestsMemberLifecycle;
+
     #[Override]
     public function setUp(): void
     {
