@@ -36,10 +36,10 @@ final readonly class PurchaseOrderRepositoryExpectation
             ->andReturn($return);
     }
 
-    public function expectsMarkAsPending(PurchaseOrderIdList $ids): void
+    public function expectsMarkAsApproved(PurchaseOrderIdList $ids): void
     {
         $this->mock
-            ->expects('markAsPending')
+            ->expects('markAsApproved')
             ->with(equalTo($ids));
     }
 
@@ -48,6 +48,14 @@ final readonly class PurchaseOrderRepositoryExpectation
         $this->mock
             ->expects('markAsPaid')
             ->with(equalTo($ids));
+    }
+
+    public function expectsHasCompletedTransactions(PurchaseOrderId $id, bool $return = true): void
+    {
+        $this->mock
+            ->expects('hasCompletedTransactions')
+            ->with(equalTo($id))
+            ->andReturn($return);
     }
 
     public function expectsMarkAsDeclined(PurchaseOrderIdList $ids, ?string $reason = null): void
@@ -65,9 +73,9 @@ final readonly class PurchaseOrderRepositoryExpectation
             ->andReturn($return);
     }
 
-    public function neverExpectsMarkAsPending(): void
+    public function neverExpectsMarkAsApproved(): void
     {
-        $this->mock->expects('markAsPending')->never();
+        $this->mock->expects('markAsApproved')->never();
     }
 
     public function neverExpectsMarkAsPaid(): void

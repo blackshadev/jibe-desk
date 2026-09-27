@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Domain\BankTransactions\BankTransactionStatus;
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Models\PurchaseOrder;
 use App\Models\User;
@@ -41,7 +42,7 @@ final class PurchaseOrderPolicy extends ResourcePolicy
         return $user->can('delete_purchase_orders') || $purchaseOrder->member_id === $user->id;
     }
 
-    public function markAsPending(User $user, Model $purchaseOrder): bool
+    public function markAsApproved(User $user, Model $purchaseOrder): bool
     {
         Assert::isInstanceOf($purchaseOrder, PurchaseOrder::class);
         if ($purchaseOrder->status !== PurchaseOrderStatus::Open) {
@@ -52,6 +53,20 @@ final class PurchaseOrderPolicy extends ResourcePolicy
     }
 
     public function markAsPaid(User $user, Model $purchaseOrder): bool
+    {
+        Assert::isInstanceOf($purchaseOrder, PurchaseOrder::class);
+        if ($purchaseOrder->status !== PurchaseOrderStatus::Pending) {
+            return false;
+        }
+
+        if ($purchaseOrder->bankTransactions()->where('status', BankTransactionStatus::Completed->value)->doesntExist()) {
+            return false;
+        }
+
+        return $user->can('update_purchase_orders');
+    }
+
+    public function attachTransaction(User $user, Model $purchaseOrder): bool
     {
         Assert::isInstanceOf($purchaseOrder, PurchaseOrder::class);
         if ($purchaseOrder->status !== PurchaseOrderStatus::Pending) {

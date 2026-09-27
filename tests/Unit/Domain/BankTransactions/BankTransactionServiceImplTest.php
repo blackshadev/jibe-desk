@@ -283,7 +283,7 @@ final class BankTransactionServiceImplTest extends FeatureTestCase
         $this->repo->expectsGetAttachedInvoiceIds($reversalId, $invoiceIds);
         $this->invoiceService->expectsMarkAsPending($invoiceIds);
         $this->repo->expectsGetAttachedPurchaseOrderIds($reversalId, $purchaseOrderIds);
-        $this->purchaseOrderService->expectsMarkAsPending($purchaseOrderIds);
+        $this->purchaseOrderService->expectsMarkAsApproved($purchaseOrderIds);
         $this->repo->expectsUnlinkReversal($reversalId);
 
         $this->service->unlinkReversal($reversalId);

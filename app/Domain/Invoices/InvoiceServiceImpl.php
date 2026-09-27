@@ -37,5 +37,6 @@ final readonly class InvoiceServiceImpl implements InvoiceService
     public function markAsPending(InvoiceIdList $ids): void
     {
         $this->invoiceRepository->markAsPending($ids);
+        $this->bookkeepingRepository->createForInvoice($ids);
     }
 }

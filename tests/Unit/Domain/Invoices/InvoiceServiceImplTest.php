@@ -81,17 +81,7 @@ final class InvoiceServiceImplTest extends UnitTestCase
         $ids = new InvoiceIdList([$id]);
 
         $this->repo->expectsMarkAsPending($ids);
-
-        $this->service->markAsPending($ids);
-    }
-
-    public function test_mark_as_pending_does_not_create_bookkeeping_records(): void
-    {
-        $id = InvoiceId::create(1);
-        $ids = new InvoiceIdList([$id]);
-
-        $this->repo->expectsMarkAsPending($ids);
-        $this->bookkeepingRepo->mock->shouldNotHaveReceived('createForInvoice');
+        $this->bookkeepingRepo->expectsCreateForInvoice($ids);
 
         $this->service->markAsPending($ids);
     }

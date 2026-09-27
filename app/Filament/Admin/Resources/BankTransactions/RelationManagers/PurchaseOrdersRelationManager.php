@@ -7,6 +7,7 @@ namespace App\Filament\Admin\Resources\BankTransactions\RelationManagers;
 use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\BankTransactions\BankTransactionRepository;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
+use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Resources\BankTransactions\Actions\AttachPurchaseOrderAction;
 use App\Filament\Admin\Resources\BankTransactions\Actions\CreatePurchaseOrderFromTransactionAction;
 use App\Filament\Admin\Resources\BankTransactions\Helpers\IsOpen;
@@ -36,14 +37,16 @@ final class PurchaseOrdersRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('description')
                     ->label(__('labels.description')),
-                TextColumn::make('total')
-                    ->label(__('labels.total'))
-                    ->money('EUR'),
-
                 TextColumn::make('date')
                     ->label(__('labels.date'))
                     ->date()
                     ->sortable(),
+                TextColumn::make('status')
+                    ->formatStateUsing(static fn (PurchaseOrderStatus $state) => __('labels.purchase_order_status.' . $state->value))
+                    ->label(__('labels.status')),
+                TextColumn::make('total')
+                    ->label(__('labels.total'))
+                    ->money('EUR'),
             ])
             ->filters([])
             ->recordUrl(ViewOrEdit::route(PurchaseOrderResource::class))
@@ -60,7 +63,11 @@ final class PurchaseOrdersRelationManager extends RelationManager
                         ->color('danger')
                         ->icon('heroicon-o-x-mark')
                         ->requiresConfirmation()
-                        ->visible(IsOpen::checkOwner(...))
+                        ->visible(
+                            static fn (RelationManager $livewire, PurchaseOrder $record): bool => (
+                                IsOpen::checkOwner($livewire, $record) && auth()->user()->can('attachTransaction', $record)
+                            ),
+                        )
                         ->action(function (PurchaseOrder $record, BankTransactionRepository $repository): void {
                             /** @var BankTransaction $model */
                             $model = $this->getOwnerRecord();

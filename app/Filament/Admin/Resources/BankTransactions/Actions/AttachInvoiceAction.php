@@ -34,6 +34,9 @@ final class AttachInvoiceAction
 
                         return Invoice::query()
                             ->openOrPending()
+                            ->whereDoesntHave('bankTransactions', static function ($query) use ($model): void {
+                                $query->where('bank_transaction_id', $model->id);
+                            })
                             ->orderByAmountProximity((float) $model->amount)
                             ->with(['member'])
                             ->get()

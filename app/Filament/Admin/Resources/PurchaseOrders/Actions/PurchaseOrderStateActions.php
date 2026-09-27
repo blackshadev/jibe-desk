@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\PurchaseOrders\Actions;
 
+use App\Domain\PurchaseOrders\PurchaseOrderHasNoCompletedTransactionsException;
 use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderIncompleteException;
 use App\Domain\PurchaseOrders\PurchaseOrderService;
@@ -15,21 +16,22 @@ use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Resources\Pages\Page;
+use Filament\Support\Icons\Heroicon;
 
 final class PurchaseOrderStateActions
 {
     public static function make(): array
     {
         return [
-            Action::make('markAsPending')
-                ->label(__('labels.mark_as_pending'))
-                ->icon('heroicon-m-clock')
-                ->color('warning')
+            Action::make('markAsApproved')
+                ->label(__('labels.mark_as_approved'))
+                ->icon(Heroicon::CheckCircle)
+                ->color('success')
                 ->requiresConfirmation()
-                ->visible(static fn (PurchaseOrder $record): bool => auth()->user()->can('markAsPending', $record))
+                ->visible(static fn (PurchaseOrder $record): bool => auth()->user()->can('markAsApproved', $record))
                 ->action(static function (PurchaseOrder $record, PurchaseOrderService $service, Action $action): void {
                     try {
-                        $service->markAsPending(PurchaseOrderIdList::fromArray([$record->id]));
+                        $service->markAsApproved(PurchaseOrderIdList::fromArray([$record->id]));
                     } catch (PurchaseOrderIncompleteException $exception) {
                         Notification::make()
                             ->title(__('notifications.purchase_order_incomplete'))
@@ -42,8 +44,8 @@ final class PurchaseOrderStateActions
                 ->successRedirectUrl(static fn (Page $livewire, PurchaseOrder $record) => (
                     $livewire instanceof EditRecord ? PurchaseOrderResource::getUrl('view', ['record' => $record]) : null
                 ))
-                ->after(static fn (Page $livewire) => $livewire->dispatch('markedAsPending'))
-                ->successNotificationTitle(__('notifications.purchase_order_marked_pending')),
+                ->after(static fn (Page $livewire) => $livewire->dispatch('markedAsApproved'))
+                ->successNotificationTitle(__('notifications.purchase_order_marked_approved')),
 
             Action::make('markAsPaid')
                 ->label(__('labels.mark_as_paid'))
@@ -58,6 +60,11 @@ final class PurchaseOrderStateActions
                         Notification::make()
                             ->title(__('notifications.purchase_order_incomplete'))
                             ->body(PurchaseOrderProblemLabels::describeAll($exception->problems))
+                            ->danger()
+                            ->send();
+                    } catch (PurchaseOrderHasNoCompletedTransactionsException) {
+                        Notification::make()
+                            ->title(__('notifications.purchase_order_without_completed_transactions'))
                             ->danger()
                             ->send();
                     }

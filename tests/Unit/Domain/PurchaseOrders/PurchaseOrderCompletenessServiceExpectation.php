@@ -28,4 +28,9 @@ final readonly class PurchaseOrderCompletenessServiceExpectation
             ->with($ids)
             ->andReturn($return);
     }
+
+    public function neverExpectsFindProblems(): void
+    {
+        $this->mock->expects('findProblems')->never();
+    }
 }

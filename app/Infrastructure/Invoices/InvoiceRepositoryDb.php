@@ -202,7 +202,7 @@ final class InvoiceRepositoryDb implements InvoiceRepository
         $endDate = CarbonImmutable::instance($date)->addDays(30);
 
         $invoice = Invoice::query()
-            ->whereIn('status', [InvoiceStatus::Open, InvoiceStatus::Pending])
+            ->where('status', InvoiceStatus::Pending)
             ->whereBetween('date', [$startDate, $endDate])
             ->whereHas('member.paymentInformation', static function ($query) use ($bankingAccountNumber): void {
                 $query->where('banking_account_number', $bankingAccountNumber);

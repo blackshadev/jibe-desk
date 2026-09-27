@@ -28,12 +28,19 @@ final class AttachBookkeepingRecordAction
             ->schema([
                 Select::make('bookkeeping_record_id')
                     ->label(__('labels.bookkeeping_record'))
-                    ->options(static fn () => BookkeepingRecord::query()
-                        ->orderBy('description')
-                        ->get()
-                        ->mapWithKeys(static fn (BookkeepingRecord $record): array => [
-                            $record->id => sprintf('%s - %s', $record->year, $record->description),
-                        ]))
+                    ->options(static function (RelationManager $livewire, BankTransaction|BankStatement|null $record) {
+                        $record = GetTransaction::get($livewire, $record);
+
+                        return BookkeepingRecord::query()
+                            ->orderBy('description')
+                            ->whereDoesntHave('bankTransaction', static function ($query) use ($record): void {
+                                $query->where('bank_transaction_id', $record->id);
+                            })
+                            ->get()
+                            ->mapWithKeys(static fn (BookkeepingRecord $record): array => [
+                                $record->id => sprintf('%s - %s', $record->year, $record->description),
+                            ]);
+                    })
                     ->searchable()
                     ->preload()
                     ->required(),

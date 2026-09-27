@@ -9,7 +9,7 @@ use JeroenG\Autowire\Attribute\Autowire;
 #[Autowire]
 interface PurchaseOrderService
 {
-    public function markAsPending(PurchaseOrderIdList $id): void;
+    public function markAsApproved(PurchaseOrderIdList $id): void;
 
     public function markAsPaid(PurchaseOrderIdList $ids): void;
 

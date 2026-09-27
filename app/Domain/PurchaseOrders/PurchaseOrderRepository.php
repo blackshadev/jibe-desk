@@ -17,9 +17,11 @@ interface PurchaseOrderRepository
      */
     public function getCompleteness(PurchaseOrderIdList $ids): array;
 
-    public function markAsPending(PurchaseOrderIdList $ids): void;
+    public function markAsApproved(PurchaseOrderIdList $ids): void;
 
     public function markAsPaid(PurchaseOrderIdList $ids): void;
+
+    public function hasCompletedTransactions(PurchaseOrderId $id): bool;
 
     public function markAsDeclined(PurchaseOrderIdList $ids, ?string $reason = null): void;
 

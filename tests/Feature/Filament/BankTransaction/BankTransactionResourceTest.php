@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Filament\BankTransaction;
 
 use App\Domain\BankTransactions\BankTransactionStatus;
+use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Resources\BankTransactions\Pages\CreateBankTransaction;
 use App\Filament\Admin\Resources\BankTransactions\Pages\ListBankTransactions;
 use App\Filament\Admin\Resources\BankTransactions\Pages\ViewBankTransaction;
@@ -20,6 +21,7 @@ use App\Models\InvoiceLine;
 use App\Models\Member;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
+use Filament\Forms\Components\Select;
 use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
 use Tests\Concerns\WithAuthorizedUser;
@@ -52,21 +54,22 @@ final class BankTransactionResourceTest extends FeatureTestCase
     {
         $this->withAuthorizedUser();
 
-        BankAccount::factory()->create(['iban' => 'NL35RABO3010166281']);
+        $bank = BankAccount::factory()->create(['iban' => 'NL35RABO3010166281']);
 
         Livewire::test(CreateBankTransaction::class)
             ->fillForm([
                 'date' => '2024-01-15',
                 'description' => 'Test payment',
                 'amount' => 100.50,
-                'banking_account_number' => 'NL35RABO3010166281',
+                'banking_account_number' => 'NL35RABO3010166282',
+                'bank_account_id' => $bank->id,
             ])
             ->call('create')
             ->assertHasNoFormErrors();
 
         $this->assertDatabaseHas('bank_transactions', [
             'description' => 'Test payment',
-            'banking_account_number' => 'NL35RABO3010166281',
+            'banking_account_number' => 'NL35RABO3010166282',
         ]);
     }
 
@@ -151,6 +154,41 @@ final class BankTransactionResourceTest extends FeatureTestCase
             'reference_type' => PurchaseOrder::class,
             'reference_id' => $po->id,
         ]);
+    }
+
+    public function test_attach_purchase_order_only_offers_pending_purchase_orders(): void
+    {
+        $this->withAuthorizedUser();
+
+        $transaction = BankTransaction::factory()->create([
+            'amount' => -200.000,
+            'banking_account_number' => 'NL91ABNA0417164300',
+            'status' => BankTransactionStatus::Open,
+        ]);
+
+        $open = PurchaseOrder::factory()
+            ->open()
+            ->create([
+                'creditor_iban' => 'NL91ABNA0417164300',
+                'date' => now()->toDateString(),
+            ]);
+        $pending = PurchaseOrder::factory()->create([
+            'status' => PurchaseOrderStatus::Pending,
+            'creditor_iban' => 'NL91ABNA0417164300',
+            'date' => now()->toDateString(),
+        ]);
+
+        Livewire::test(PurchaseOrdersRelationManager::class, [
+            'ownerRecord' => $transaction,
+            'pageClass' => ViewBankTransaction::class,
+        ])
+            ->mountTableAction('attachPurchaseOrder')
+            ->assertSchemaComponentExists('purchase_order_id', 'mountedActionSchema0', static function (Select $select): bool {
+                /** @var array<int, string> $options */
+                $options = $select->getOptions();
+
+                return array_keys($options) === [PurchaseOrder::query()->pending()->sole()->id];
+            });
     }
 
     public function test_can_create_bookkeeping_record_from_transaction(): void

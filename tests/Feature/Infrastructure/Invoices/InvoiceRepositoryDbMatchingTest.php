@@ -38,7 +38,7 @@ final class InvoiceRepositoryDbMatchingTest extends FeatureTestCase
 
         $invoice = Invoice::factory()->create([
             'member_id' => $member->id,
-            'status' => InvoiceStatus::Open,
+            'status' => InvoiceStatus::Pending,
             'date' => '2026-01-15',
         ]);
         InvoiceLine::factory()->create([
@@ -188,7 +188,7 @@ final class InvoiceRepositoryDbMatchingTest extends FeatureTestCase
 
         $invoice1 = Invoice::factory()->create([
             'member_id' => $member->id,
-            'status' => InvoiceStatus::Open,
+            'status' => InvoiceStatus::Pending,
             'date' => '2026-01-15',
         ]);
         InvoiceLine::factory()->create([
@@ -199,7 +199,7 @@ final class InvoiceRepositoryDbMatchingTest extends FeatureTestCase
 
         $invoice2 = Invoice::factory()->create([
             'member_id' => $member->id,
-            'status' => InvoiceStatus::Open,
+            'status' => InvoiceStatus::Pending,
             'date' => '2026-01-16',
         ]);
         InvoiceLine::factory()->create([

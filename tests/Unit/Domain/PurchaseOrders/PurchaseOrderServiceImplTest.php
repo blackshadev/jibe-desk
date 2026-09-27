@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\PurchaseOrders;
 
+use App\Domain\PurchaseOrders\PurchaseOrderHasNoCompletedTransactionsException;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderIncompleteException;
@@ -37,19 +38,20 @@ final class PurchaseOrderServiceImplTest extends UnitTestCase
         );
     }
 
-    public function test_mark_as_pending_updates_status_and_creates_bookkeeping_records(): void
+    public function test_mark_as_approved_updates_status_and_creates_bookkeeping_records(): void
     {
         $ids = new PurchaseOrderIdList([PurchaseOrderId::create(1)]);
         $this->completenessService->expectsFindProblems($ids, new PurchaseOrderProblems());
-        $this->repo->expectsMarkAsPending($ids);
+        $this->repo->expectsMarkAsApproved($ids);
         $this->bookkeepingRepo->expectsCreateForPurchaseOrder($ids);
 
-        $this->service->markAsPending($ids);
+        $this->service->markAsApproved($ids);
     }
 
     public function test_mark_as_paid_updates_status_and_creates_bookkeeping_records(): void
     {
         $ids = new PurchaseOrderIdList([PurchaseOrderId::create(2)]);
+        $this->repo->expectsHasCompletedTransactions($ids->ids[0]);
         $this->completenessService->expectsFindProblems($ids, new PurchaseOrderProblems());
         $this->repo->expectsMarkAsPaid($ids);
         $this->bookkeepingRepo->expectsCreateForPurchaseOrder($ids);
@@ -57,23 +59,37 @@ final class PurchaseOrderServiceImplTest extends UnitTestCase
         $this->service->markAsPaid($ids);
     }
 
-    public function test_mark_as_pending_applies_assert_completeness(): void
+    public function test_mark_as_paid_is_blocked_without_completed_transactions(): void
+    {
+        $ids = new PurchaseOrderIdList([PurchaseOrderId::create(2)]);
+        $this->repo->expectsHasCompletedTransactions($ids->ids[0], false);
+        $this->completenessService->neverExpectsFindProblems();
+        $this->repo->neverExpectsMarkAsPaid();
+        $this->bookkeepingRepo->neverExpectsCreateForPurchaseOrder();
+
+        $this->expectException(PurchaseOrderHasNoCompletedTransactionsException::class);
+
+        $this->service->markAsPaid($ids);
+    }
+
+    public function test_mark_as_approved_applies_assert_completeness(): void
     {
         $ids = new PurchaseOrderIdList([PurchaseOrderId::create(1)]);
         $problem = new PurchaseOrderProblem(PurchaseOrderId::create(1), PurchaseOrderProblemType::MissingCostCenter, 1);
         $this->completenessService->expectsFindProblems($ids, new PurchaseOrderProblems([$problem]));
-        $this->repo->neverExpectsMarkAsPending();
+        $this->repo->neverExpectsMarkAsApproved();
         $this->bookkeepingRepo->neverExpectsCreateForPurchaseOrder();
 
         $this->expectException(PurchaseOrderIncompleteException::class);
 
-        $this->service->markAsPending($ids);
+        $this->service->markAsApproved($ids);
     }
 
     public function test_mark_as_paid_applies_assert_completeness(): void
     {
         $ids = new PurchaseOrderIdList([PurchaseOrderId::create(1)]);
         $problem = new PurchaseOrderProblem(PurchaseOrderId::create(1), PurchaseOrderProblemType::MissingCostCenter, 1);
+        $this->repo->expectsHasCompletedTransactions($ids->ids[0]);
         $this->completenessService->expectsFindProblems($ids, new PurchaseOrderProblems([$problem]));
         $this->repo->neverExpectsMarkAsPaid();
         $this->bookkeepingRepo->neverExpectsCreateForPurchaseOrder();

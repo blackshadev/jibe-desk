@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\PurchaseOrders;
 
+use App\Domain\BankTransactions\BankTransactionStatus;
 use App\Domain\PurchaseOrders\PurchaseOrderCompleteness;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Domain\PurchaseOrders\PurchaseOrderIdList;
@@ -43,7 +44,7 @@ final class PurchaseOrderRepositoryDb implements PurchaseOrderRepository
     }
 
     #[Override]
-    public function markAsPending(PurchaseOrderIdList $ids): void
+    public function markAsApproved(PurchaseOrderIdList $ids): void
     {
         PurchaseOrder::query()
             ->whereIn('id', array_map(static fn (PurchaseOrderId $id) => $id->value, $ids->ids))
@@ -59,6 +60,15 @@ final class PurchaseOrderRepositoryDb implements PurchaseOrderRepository
         PurchaseOrder::query()
             ->whereIn('id', array_map(static fn (PurchaseOrderId $id) => $id->value, $ids->ids))
             ->update(['status' => PurchaseOrderStatus::Paid]);
+    }
+
+    #[Override]
+    public function hasCompletedTransactions(PurchaseOrderId $id): bool
+    {
+        return PurchaseOrder::query()
+            ->whereKey($id->value)
+            ->whereHas('bankTransactions', static fn ($query) => $query->where('status', BankTransactionStatus::Completed->value))
+            ->exists();
     }
 
     #[Override]

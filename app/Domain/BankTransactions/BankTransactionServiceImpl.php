@@ -37,10 +37,10 @@ final readonly class BankTransactionServiceImpl implements BankTransactionServic
         $invoiceIdList = $this->repository->getAttachedInvoiceIds($bankTransactionId);
         $purchaseOrderIdList = $this->repository->getAttachedPurchaseOrderIds($bankTransactionId);
 
+        $this->repository->complete($bankTransactionId);
+
         $this->invoiceService->markAsPaid($invoiceIdList);
         $this->purchaseOrderService->markAsPaid($purchaseOrderIdList);
-
-        $this->repository->complete($bankTransactionId);
     }
 
     #[Override]
@@ -97,7 +97,7 @@ final readonly class BankTransactionServiceImpl implements BankTransactionServic
         $this->invoiceService->markAsPending($invoiceIds);
 
         $purchaseOrderIds = $this->repository->getAttachedPurchaseOrderIds($reversalId);
-        $this->purchaseOrderService->markAsPending($purchaseOrderIds);
+        $this->purchaseOrderService->markAsApproved($purchaseOrderIds);
 
         $this->repository->unlinkReversal($reversalId);
     }

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature\Filament\Admin\Resources;
 
 use App\Domain\Authorization\RoleName;
+use App\Domain\BankTransactions\BankTransactionStatus;
+use App\Domain\PurchaseOrders\PurchaseOrderHasNoCompletedTransactionsException;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderIncompleteException;
@@ -14,6 +16,7 @@ use App\Filament\Admin\Resources\PurchaseOrders\Pages\CreatePurchaseOrder;
 use App\Filament\Admin\Resources\PurchaseOrders\Pages\EditPurchaseOrder;
 use App\Filament\Admin\Resources\PurchaseOrders\Pages\ListPurchaseOrders;
 use App\Filament\Admin\Resources\PurchaseOrders\Pages\ViewPurchaseOrder;
+use App\Models\BankTransaction;
 use App\Models\CostCenter;
 use App\Models\Member;
 use App\Models\PaymentInformation;
@@ -103,27 +106,27 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
             ->assertHasFormErrors(['image_path']);
     }
 
-    public function test_mark_as_pending_is_blocked_when_a_line_has_no_cost_center(): void
+    public function test_mark_as_approved_is_blocked_when_a_line_has_no_cost_center(): void
     {
         $this->withAuthorizedUser();
         $purchaseOrder = PurchaseOrder::factory()->open()->withLines()->create();
         $purchaseOrder->lines()->update(['cost_center_id' => null]);
 
         Livewire::test(EditPurchaseOrder::class, ['record' => $purchaseOrder->getRouteKey()])
-            ->callAction('markAsPending')
+            ->callAction('markAsApproved')
             ->assertNotified();
 
         static::assertSame(PurchaseOrderStatus::Open, $purchaseOrder->fresh()->status);
         $this->assertDatabaseMissing('bookkeeping_records', ['reference_id' => $purchaseOrder->id]);
     }
 
-    public function test_mark_as_pending_is_blocked_without_creditor_information(): void
+    public function test_mark_as_approved_is_blocked_without_creditor_information(): void
     {
         $this->withAuthorizedUser();
         $purchaseOrder = PurchaseOrder::factory()->open()->withoutCreditor()->withLines()->create();
 
         Livewire::test(EditPurchaseOrder::class, ['record' => $purchaseOrder->getRouteKey()])
-            ->callAction('markAsPending')
+            ->callAction('markAsApproved')
             ->assertNotified();
 
         static::assertSame(PurchaseOrderStatus::Open, $purchaseOrder->fresh()->status);
@@ -134,6 +137,7 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
         $this->withAuthorizedUser();
         $purchaseOrder = PurchaseOrder::factory()->open()->withLines()->create();
         $purchaseOrder->lines()->update(['cost_center_id' => null]);
+        $this->attachCompletedTransaction($purchaseOrder);
 
         try {
             app(PurchaseOrderService::class)->markAsPaid(new PurchaseOrderIdList([PurchaseOrderId::create($purchaseOrder->id)]));
@@ -145,7 +149,88 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
         $this->assertDatabaseMissing('bookkeeping_records', ['reference_id' => $purchaseOrder->id]);
     }
 
-    public function test_mark_as_pending_creates_bookkeeping_records(): void
+    public function test_mark_as_paid_is_blocked_without_completed_transactions(): void
+    {
+        $this->withAuthorizedUser();
+        $purchaseOrder = PurchaseOrder::factory()->open()->withLines()->create();
+        $purchaseOrder
+            ->bankTransactions()
+            ->attach(
+                BankTransaction::factory()->create(),
+            );
+
+        try {
+            app(PurchaseOrderService::class)->markAsPaid(new PurchaseOrderIdList([PurchaseOrderId::create($purchaseOrder->id)]));
+            static::fail('Expected PurchaseOrderHasNoCompletedTransactionsException was not thrown.');
+        } catch (PurchaseOrderHasNoCompletedTransactionsException) {
+            static::assertSame(PurchaseOrderStatus::Open, $purchaseOrder->fresh()->status);
+        }
+
+        $this->assertDatabaseMissing('bookkeeping_records', ['reference_id' => $purchaseOrder->id]);
+    }
+
+    public function test_mark_as_paid_action_is_hidden_without_completed_transactions(): void
+    {
+        $this->withAuthorizedUser();
+        $purchaseOrder = PurchaseOrder::factory()
+            ->open()
+            ->withLines()
+            ->create([
+                'status' => PurchaseOrderStatus::Pending,
+            ]);
+
+        Livewire::test(ViewPurchaseOrder::class, ['record' => $purchaseOrder->getRouteKey()])
+            ->assertActionHidden('markAsPaid');
+    }
+
+    public function test_mark_as_paid_action_is_hidden_when_linked_transaction_is_not_completed(): void
+    {
+        $this->withAuthorizedUser();
+        $purchaseOrder = PurchaseOrder::factory()
+            ->open()
+            ->withLines()
+            ->create([
+                'status' => PurchaseOrderStatus::Pending,
+            ]);
+        $purchaseOrder
+            ->bankTransactions()
+            ->attach(
+                BankTransaction::factory()->create(['status' => BankTransactionStatus::Open]),
+            );
+
+        Livewire::test(ViewPurchaseOrder::class, ['record' => $purchaseOrder->getRouteKey()])
+            ->assertActionHidden('markAsPaid');
+    }
+
+    public function test_mark_as_paid_action_is_visible_with_a_completed_transaction(): void
+    {
+        $this->withAuthorizedUser();
+        $purchaseOrder = PurchaseOrder::factory()
+            ->open()
+            ->withLines()
+            ->create([
+                'status' => PurchaseOrderStatus::Pending,
+            ]);
+        $this->attachCompletedTransaction($purchaseOrder);
+
+        Livewire::test(ViewPurchaseOrder::class, ['record' => $purchaseOrder->getRouteKey()])
+            ->assertActionVisible('markAsPaid');
+    }
+
+    public function test_attach_transaction_is_only_allowed_for_pending_purchase_orders(): void
+    {
+        $this->withAuthorizedUser();
+
+        $open = PurchaseOrder::factory()->open()->create();
+        $pending = PurchaseOrder::factory()->create(['status' => PurchaseOrderStatus::Pending]);
+        $paid = PurchaseOrder::factory()->paid()->create();
+
+        static::assertFalse(Gate::allows('attachTransaction', $open));
+        static::assertTrue(Gate::allows('attachTransaction', $pending));
+        static::assertFalse(Gate::allows('attachTransaction', $paid));
+    }
+
+    public function test_mark_as_approved_creates_bookkeeping_records(): void
     {
         $this->withAuthorizedUser();
         $costCenter = CostCenter::factory()->create();
@@ -155,7 +240,7 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
             ->create(['status' => PurchaseOrderStatus::Open, 'date' => '2026-06-15']);
 
         Livewire::test(EditPurchaseOrder::class, ['record' => $po->getRouteKey()])
-            ->callAction('markAsPending');
+            ->callAction('markAsApproved');
 
         $po->refresh();
         static::assertSame(PurchaseOrderStatus::Pending, $po->status);
@@ -176,6 +261,7 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
         $po = PurchaseOrder::factory()
             ->has(PurchaseOrderLine::factory()->state(['cost_center_id' => $costCenter->id, 'price' => 100, 'price_vat' => 21]), 'lines')
             ->create(['status' => PurchaseOrderStatus::Pending, 'date' => '2026-06-15']);
+        $this->attachCompletedTransaction($po);
 
         app(PurchaseOrderService::class)->markAsPaid(new PurchaseOrderIdList([PurchaseOrderId::create($po->id)]));
 
@@ -309,5 +395,13 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
             ->assertHasNoFormErrors();
 
         $this->assertDatabaseHas('purchase_orders', ['id' => $po->id, 'notes' => 'Gekocht voor het zeilkamp']);
+    }
+
+    private function attachCompletedTransaction(PurchaseOrder $purchaseOrder): BankTransaction
+    {
+        $transaction = BankTransaction::factory()->create(['status' => BankTransactionStatus::Completed]);
+        $purchaseOrder->bankTransactions()->attach($transaction);
+
+        return $transaction;
     }
 }

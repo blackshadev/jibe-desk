@@ -16,17 +16,23 @@ final readonly class PurchaseOrderServiceImpl implements PurchaseOrderService
     ) {}
 
     #[Override]
-    public function markAsPending(PurchaseOrderIdList $ids): void
+    public function markAsApproved(PurchaseOrderIdList $ids): void
     {
         $this->completenessService->findProblems($ids)->assertComplete();
 
-        $this->repository->markAsPending($ids);
+        $this->repository->markAsApproved($ids);
         $this->bookkeepingRepository->createForPurchaseOrder($ids);
     }
 
     #[Override]
     public function markAsPaid(PurchaseOrderIdList $ids): void
     {
+        foreach ($ids->ids as $id) {
+            if (!$this->repository->hasCompletedTransactions($id)) {
+                throw new PurchaseOrderHasNoCompletedTransactionsException($id);
+            }
+        }
+
         $this->completenessService->findProblems($ids)->assertComplete();
 
         $this->repository->markAsPaid($ids);

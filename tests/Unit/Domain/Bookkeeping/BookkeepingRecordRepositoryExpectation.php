@@ -49,4 +49,9 @@ final readonly class BookkeepingRecordRepositoryExpectation
     {
         $this->mock->expects('createForPurchaseOrder')->never();
     }
+
+    public function neverExpectsCreateForInvoice(): void
+    {
+        $this->mock->expects('createForInvoice')->never();
+    }
 }

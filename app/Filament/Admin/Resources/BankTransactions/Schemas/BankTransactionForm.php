@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\BankTransactions\Schemas;
 
 use App\Domain\BankTransactions\BankTransactionStatus;
-use App\Models\BankAccount;
 use App\Models\BankTransaction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -45,15 +44,13 @@ final class BankTransactionForm
                                 BankTransactionStatus::Completed => __('labels.completed'),
                                 default => '',
                             }),
-                        Select::make('banking_account_number')
-                            ->options(
-                                static fn (): array => BankAccount::query()
-                                    ->select('iban')
-                                    ->distinct()
-                                    ->pluck('iban', 'iban')
-                                    ->toArray(),
-                            )
+                        TextInput::make('banking_account_number')
                             ->label(__('labels.banking_account_number'))
+                            ->required(),
+
+                        Select::make('bank_account_id')
+                            ->relationship('bankAccount', 'name')
+                            ->label(__('labels.bank_account'))
                             ->required(),
                     ]),
             ]);

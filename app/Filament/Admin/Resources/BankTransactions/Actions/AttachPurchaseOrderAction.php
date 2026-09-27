@@ -40,6 +40,7 @@ final class AttachPurchaseOrderAction
                             })
                             ->orderByRelevancy(-$model->amount, $model->banking_account_number)
                             ->get()
+                            ->filter(static fn (PurchaseOrder $po): bool => auth()->user()->can('attachTransaction', $po))
                             ->mapWithKeys(static fn (PurchaseOrder $po): array => [
                                 $po->id => $po->displayName,
                             ]);

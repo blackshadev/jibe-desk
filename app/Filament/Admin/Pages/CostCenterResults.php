@@ -117,11 +117,13 @@ final class CostCenterResults extends Page implements HasForms, HasTable
                     ->money('EUR')
                     ->sortable(),
                 TextColumn::make('total_amount')
-                    ->label(__('labels.total_amount'))
-                    ->money('EUR'),
+                    ->label(__('labels.total'))
+                    ->money('EUR')
+                    ->sortable(),
                 TextColumn::make('result')
                     ->label(__('labels.result'))
-                    ->money('EUR'),
+                    ->money('EUR')
+                    ->sortable(),
             ]);
     }
 
