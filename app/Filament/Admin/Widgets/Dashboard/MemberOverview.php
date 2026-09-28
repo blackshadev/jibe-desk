@@ -20,7 +20,7 @@ final class MemberOverview extends StatsOverviewWidget
         return [
             Stat::make(
                 label: __('labels.members'),
-                value: Member::query()->count(),
+                value: Member::query()->active()->count(),
             )
                 ->chart(
                     $this->getMembersByCreatedByMonth(),
