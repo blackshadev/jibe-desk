@@ -11,7 +11,7 @@ use App\Filament\Admin\Resources\BankTransactions\Actions\AttachInvoiceAction;
 use App\Filament\Admin\Resources\BankTransactions\Actions\CreateInvoiceFromTransactionAction;
 use App\Filament\Admin\Resources\BankTransactions\Helpers\IsOpen;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
-use App\Filament\Admin\Utils\ViewOrEdit;
+use App\Filament\Admin\Utils\ResourceRouteHelper;
 use App\Models\BankTransaction;
 use App\Models\Invoice;
 use Filament\Actions\Action;
@@ -44,7 +44,7 @@ final class InvoicesRelationManager extends RelationManager
                     ->label(__('labels.total'))
                     ->alignEnd(),
             ])
-            ->recordUrl(ViewOrEdit::route(InvoiceResource::class))
+            ->recordUrl(ResourceRouteHelper::viewOrEdit(InvoiceResource::class))
             ->headerActions([
                 AttachInvoiceAction::make(),
                 CreateInvoiceFromTransactionAction::make(),

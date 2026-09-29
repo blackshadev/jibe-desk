@@ -7,7 +7,7 @@ namespace App\Filament\Admin\Resources\BookkeepingRecords\Tables;
 use App\Filament\Admin\Resources\BookkeepingRecords\BookkeepingRecordResource;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
-use App\Filament\Admin\Utils\ViewOrEdit;
+use App\Filament\Admin\Utils\ResourceRouteHelper;
 use App\Models\BookkeepingRecord;
 use App\Models\Invoice;
 use App\Models\PurchaseOrder;
@@ -70,8 +70,8 @@ final class BookkeepingRecordsTable
                     ->label(__('labels.goto_related'))
                     ->icon(Heroicon::ArrowTopRightOnSquare)
                     ->url(static fn (BookkeepingRecord $record): string => match (get_class($record->reference)) {
-                        Invoice::class => ViewOrEdit::routeFor(InvoiceResource::class, $record->reference),
-                        PurchaseOrder::class => ViewOrEdit::routeFor(PurchaseOrderResource::class, $record->reference),
+                        Invoice::class => ResourceRouteHelper::viewOrEditFor(InvoiceResource::class, $record->reference),
+                        PurchaseOrder::class => ResourceRouteHelper::viewOrEditFor(PurchaseOrderResource::class, $record->reference),
                         default => '',
                     })
                     ->visible(static fn (BookkeepingRecord $record): bool => $record->reference !== null),

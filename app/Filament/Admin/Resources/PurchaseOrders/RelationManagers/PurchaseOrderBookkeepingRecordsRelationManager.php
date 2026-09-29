@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\PurchaseOrders\RelationManagers;
 
 use App\Filament\Admin\Resources\BookkeepingRecords\BookkeepingRecordResource;
-use App\Filament\Admin\Utils\ViewOrEdit;
+use App\Filament\Admin\Utils\ResourceRouteHelper;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -39,7 +39,7 @@ final class PurchaseOrderBookkeepingRecordsRelationManager extends RelationManag
                     ->label(__('labels.price'))
                     ->money('EUR'),
             ])
-            ->recordUrl(ViewOrEdit::route(BookkeepingRecordResource::class))
+            ->recordUrl(ResourceRouteHelper::view(BookkeepingRecordResource::class))
             ->headerActions([])
             ->filters([])
             ->recordActions([]);

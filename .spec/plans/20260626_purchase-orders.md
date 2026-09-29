@@ -1010,7 +1010,7 @@ namespace App\Filament\Admin\Resources\PurchaseOrders\Tables;
 use App\Domain\Invoices\CompoundPrice;
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
-use App\Filament\Admin\Utils\ViewOrEdit;
+use App\Filament\Admin\Utils\ResourceRouteHelper;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\ImageColumn;
@@ -1060,7 +1060,7 @@ final class PurchaseOrdersTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->recordUrl(ViewOrEdit::route(PurchaseOrderResource::class))
+            ->recordUrl(ResourceRouteHelper::viewOrEdit(PurchaseOrderResource::class))
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

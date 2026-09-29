@@ -9,7 +9,7 @@ use App\Domain\Invoices\InvoiceStatus;
 use App\Domain\Invoices\InvoiceTarget;
 use App\Domain\Members\MemberId;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
-use App\Filament\Admin\Utils\ViewOrEdit;
+use App\Filament\Admin\Utils\ResourceRouteHelper;
 use App\Models\Invoice;
 use App\Models\Member;
 use Carbon\CarbonImmutable;
@@ -47,7 +47,7 @@ final class InvoicesRelationManager extends RelationManager
                     ->label(__('labels.total'))
                     ->alignEnd(),
             ])
-            ->recordUrl(ViewOrEdit::route(InvoiceResource::class))
+            ->recordUrl(ResourceRouteHelper::viewOrEdit(InvoiceResource::class))
             ->headerActions([
                 CreateAction::make()
                     ->url(static fn (RelationManager $livewire): string => InvoiceResource::getUrl('create', [

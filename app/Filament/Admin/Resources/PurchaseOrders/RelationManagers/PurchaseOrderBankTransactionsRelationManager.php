@@ -10,7 +10,7 @@ use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Filament\Admin\Resources\BankTransactions\Actions\AttachBankTransactionAction;
 use App\Filament\Admin\Resources\BankTransactions\BankTransactionResource;
 use App\Filament\Admin\Resources\BankTransactions\Helpers\IsOpen;
-use App\Filament\Admin\Utils\ViewOrEdit;
+use App\Filament\Admin\Utils\ResourceRouteHelper;
 use App\Models\BankTransaction;
 use App\Models\PurchaseOrder;
 use Filament\Actions\Action;
@@ -44,7 +44,7 @@ final class PurchaseOrderBankTransactionsRelationManager extends RelationManager
                     ->money('EUR')
                     ->alignEnd(),
             ])
-            ->recordUrl(ViewOrEdit::route(BankTransactionResource::class))
+            ->recordUrl(ResourceRouteHelper::view(BankTransactionResource::class))
             ->headerActions([
                 AttachBankTransactionAction::make(),
             ])

@@ -8,7 +8,7 @@ use App\Domain\Invoices\Formatters\PriceFormatter;
 use App\Filament\Admin\Resources\BankTransactions\BankTransactionResource;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
-use App\Filament\Admin\Utils\ViewOrEdit;
+use App\Filament\Admin\Utils\ResourceRouteHelper;
 use App\Models\BookkeepingRecord;
 use App\Models\Invoice;
 use App\Models\PurchaseOrder;
@@ -48,8 +48,8 @@ class BookkeepingRecordInfolist
                                 default => '—',
                             })
                             ->url(static fn (BookkeepingRecord $record): ?string => match (true) {
-                                $record->reference instanceof Invoice => ViewOrEdit::routeFor(InvoiceResource::class, $record->reference),
-                                $record->reference instanceof PurchaseOrder => ViewOrEdit::routeFor(PurchaseOrderResource::class, $record->reference),
+                                $record->reference instanceof Invoice => ResourceRouteHelper::viewOrEditFor(InvoiceResource::class, $record->reference),
+                                $record->reference instanceof PurchaseOrder => ResourceRouteHelper::viewOrEditFor(PurchaseOrderResource::class, $record->reference),
                                 default => null,
                             })
                             ->visible(static fn (BookkeepingRecord $record): bool => $record->reference !== null),
@@ -64,7 +64,7 @@ class BookkeepingRecordInfolist
                                 $bankTransaction = $record->bankTransaction;
 
                                 return $bankTransaction
-                                    ? ViewOrEdit::routeFor(BankTransactionResource::class, $bankTransaction)
+                                    ? ResourceRouteHelper::viewOrEditFor(BankTransactionResource::class, $bankTransaction)
                                     : null;
                             })
                             ->visible(static fn (BookkeepingRecord $record): bool => $record->bankTransaction !== null),

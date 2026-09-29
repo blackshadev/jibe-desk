@@ -10,7 +10,7 @@ use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\Invoices\InvoiceService;
 use App\Domain\Invoices\InvoiceStatus;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
-use App\Filament\Admin\Utils\ViewOrEdit;
+use App\Filament\Admin\Utils\ResourceRouteHelper;
 use App\Models\Invoice;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -82,7 +82,7 @@ final class InvoicesTable
                     }),
             ])
             ->filtersLayout(FiltersLayout::BeforeContent)
-            ->recordUrl(ViewOrEdit::route(InvoiceResource::class))
+            ->recordUrl(ResourceRouteHelper::viewOrEdit(InvoiceResource::class))
             ->recordActions([
                 ActionGroup::make([
                     Action::make('markAsPending')

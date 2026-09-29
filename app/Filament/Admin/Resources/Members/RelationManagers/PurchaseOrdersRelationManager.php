@@ -7,7 +7,7 @@ namespace App\Filament\Admin\Resources\Members\RelationManagers;
 use App\Domain\Invoices\CompoundPrice;
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
-use App\Filament\Admin\Utils\ViewOrEdit;
+use App\Filament\Admin\Utils\ResourceRouteHelper;
 use App\Models\PurchaseOrder;
 use Filament\Actions\CreateAction;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -52,7 +52,7 @@ final class PurchaseOrdersRelationManager extends RelationManager
                     ->formatStateUsing(static fn (CompoundPrice $state) => (string) $state)
                     ->alignEnd(),
             ])
-            ->recordUrl(ViewOrEdit::route(PurchaseOrderResource::class))
+            ->recordUrl(ResourceRouteHelper::viewOrEdit(PurchaseOrderResource::class))
             ->filters([])
             ->headerActions([
                 CreateAction::make()

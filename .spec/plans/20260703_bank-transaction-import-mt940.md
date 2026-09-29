@@ -891,7 +891,7 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\BankingTransactions\Tables;
 
 use App\Filament\Admin\Resources\BankingTransactions\BankingTransactionResource;
-use App\Filament\Admin\Utils\ViewOrEdit;
+use App\Filament\Admin\Utils\ResourceRouteHelper;
 use App\Models\BankingTransaction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -950,7 +950,7 @@ final class BankingTransactionsTable
                         ->whereDoesntHave('purchaseOrders')
                         ->whereDoesntHave('bookkeepingRecords')),
             ])
-            ->recordUrl(ViewOrEdit::route(BankingTransactionResource::class))
+            ->recordUrl(ResourceRouteHelper::viewOrEdit(BankingTransactionResource::class))
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

@@ -66,11 +66,12 @@ This class follows the same pattern as `BookkeepingRecordForm`. It builds an inf
 - Check if the morph reference is `Invoice` vs `PurchaseOrder` to build correct URLs (matching the `match()` logic in `BookkeepingRecordsTable` line 72-76).
 
 **Imports needed**:
+
 ```php
 use App\Filament\Admin\Resources\BankingTransactions\BankingTransactionResource;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
-use App\Filament\Admin\Utils\ViewOrEdit;
+use App\Filament\Admin\Utils\ResourceRouteHelper;
 use App\Models\BookkeepingRecord;
 use App\Models\Invoice;
 use App\Models\PurchaseOrder;

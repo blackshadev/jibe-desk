@@ -12,7 +12,7 @@ use App\Domain\Invoices\InvoiceStatus;
 use App\Filament\Admin\Labels\InvoiceStatusLabels;
 use App\Filament\Admin\Resources\InvoiceBatches\Helpers\OnPendingInvoice;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
-use App\Filament\Admin\Utils\ViewOrEdit;
+use App\Filament\Admin\Utils\ResourceRouteHelper;
 use App\Models\Invoice;
 use App\Models\InvoiceBatch;
 use Filament\Actions\Action;
@@ -48,7 +48,7 @@ final class InvoiceBatchInvoicesRelationManager extends RelationManager
                     ->label(__('labels.status'))
                     ->formatStateUsing(static fn (InvoiceStatus $state) => InvoiceStatusLabels::options()[$state->value]),
             ])
-            ->recordUrl(ViewOrEdit::route(InvoiceResource::class))
+            ->recordUrl(ResourceRouteHelper::viewOrEdit(InvoiceResource::class))
             ->recordActions([
                 Action::make('markAsPaid')
                     ->label(__('labels.mark_as_paid'))

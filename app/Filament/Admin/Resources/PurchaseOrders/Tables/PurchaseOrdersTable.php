@@ -7,7 +7,7 @@ namespace App\Filament\Admin\Resources\PurchaseOrders\Tables;
 use App\Domain\Invoices\CompoundPrice;
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
-use App\Filament\Admin\Utils\ViewOrEdit;
+use App\Filament\Admin\Utils\ResourceRouteHelper;
 use App\Models\PurchaseOrder;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -97,7 +97,7 @@ final class PurchaseOrdersTable
                     }),
             ])
             ->filtersLayout(FiltersLayout::BeforeContent)
-            ->recordUrl(ViewOrEdit::route(PurchaseOrderResource::class))
+            ->recordUrl(ResourceRouteHelper::viewOrEdit(PurchaseOrderResource::class))
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
