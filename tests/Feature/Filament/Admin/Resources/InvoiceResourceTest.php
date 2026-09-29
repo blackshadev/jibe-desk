@@ -8,8 +8,11 @@ use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\Invoices\InvoiceService;
 use App\Domain\Invoices\InvoiceStatus;
+use App\Filament\Admin\Resources\Invoices\Pages\EditInvoice;
 use App\Filament\Admin\Resources\Invoices\Pages\ListInvoices;
 use App\Filament\Admin\Resources\Invoices\Pages\ViewInvoice;
+use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceBankTransactionsRelationManager;
+use App\Models\BankTransaction;
 use App\Models\BookkeepingRecord;
 use App\Models\Invoice;
 use Livewire\Livewire;
@@ -23,7 +26,10 @@ final class InvoiceResourceTest extends FeatureTestCase
     public function test_mark_as_paid_creates_bookkeeping_records(): void
     {
         $this->withAuthorizedUser();
-        $invoice = Invoice::factory()->withLines(1)->createQuietly(['status' => InvoiceStatus::Pending, 'date' => '2026-01-15']);
+        $invoice = Invoice::factory()
+            ->has(BankTransaction::factory())
+            ->withLines(1)
+            ->createQuietly(['status' => InvoiceStatus::Pending, 'date' => '2026-01-15']);
 
         Livewire::test(ViewInvoice::class, ['record' => $invoice->getRouteKey()])
             ->assertSuccessful()
@@ -38,6 +44,79 @@ final class InvoiceResourceTest extends FeatureTestCase
             'reference_type' => Invoice::class,
             'reference_id' => $invoice->id,
         ]);
+    }
+
+    public function test_mark_as_paid_action_hidden_without_bank_transaction(): void
+    {
+        $this->withAuthorizedUser();
+        $invoice = Invoice::factory()->withLines(1)->createQuietly(['status' => InvoiceStatus::Pending]);
+
+        Livewire::test(ViewInvoice::class, ['record' => $invoice->getRouteKey()])
+            ->assertSuccessful()
+            ->assertActionHidden('markAsPaid');
+    }
+
+    public function test_attach_bank_transaction_action_dispatches_refresh(): void
+    {
+        $this->withAuthorizedUser();
+        $invoice = Invoice::factory()->withLines(1)->createQuietly(['status' => InvoiceStatus::Pending]);
+        $transaction = BankTransaction::factory()->createQuietly();
+
+        Livewire::test(InvoiceBankTransactionsRelationManager::class, [
+            'ownerRecord' => $invoice,
+            'pageClass' => ViewInvoice::class,
+        ])
+            ->callTableAction('attachBankTransaction', data: ['bank_transaction_id' => $transaction->id])
+            ->assertHasNoTableActionErrors()
+            ->assertDispatched('refresh');
+
+        $this->assertDatabaseHas('bank_transaction_references', [
+            'bank_transaction_id' => $transaction->id,
+            'reference_type' => Invoice::class,
+            'reference_id' => $invoice->id,
+        ]);
+    }
+
+    public function test_detach_bank_transaction_action_dispatches_refresh(): void
+    {
+        $this->withAuthorizedUser();
+        $invoice = Invoice::factory()->withLines(1)->createQuietly(['status' => InvoiceStatus::Pending]);
+        $transaction = BankTransaction::factory()->createQuietly();
+        $invoice->bankTransactions()->attach($transaction);
+
+        Livewire::test(InvoiceBankTransactionsRelationManager::class, [
+            'ownerRecord' => $invoice,
+            'pageClass' => ViewInvoice::class,
+        ])
+            ->callTableAction('detach', $transaction)
+            ->assertHasNoTableActionErrors()
+            ->assertDispatched('refresh');
+    }
+
+    public function test_mark_as_paid_action_becomes_visible_after_refresh(): void
+    {
+        $this->withAuthorizedUser();
+        $invoice = Invoice::factory()->withLines(1)->createQuietly(['status' => InvoiceStatus::Pending]);
+
+        Livewire::test(ViewInvoice::class, ['record' => $invoice->getRouteKey()])
+            ->assertSuccessful()
+            ->assertActionHidden('markAsPaid')
+            ->tap(static function () use ($invoice): void {
+                $invoice->bankTransactions()->attach(BankTransaction::factory()->createQuietly());
+            })
+            ->dispatch('refresh')
+            ->assertActionVisible('markAsPaid');
+    }
+
+    public function test_edit_invoice_listens_for_refresh_event(): void
+    {
+        $this->withAuthorizedUser();
+        $invoice = Invoice::factory()->withLines(1)->createQuietly(['status' => InvoiceStatus::Open]);
+
+        Livewire::test(EditInvoice::class, ['record' => $invoice->getRouteKey()])
+            ->assertSuccessful()
+            ->dispatch('refresh')
+            ->assertSuccessful();
     }
 
     public function test_mark_as_declined_does_not_create_bookkeeping_records(): void

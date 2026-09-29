@@ -43,12 +43,15 @@ final class PaymentMatchingScenarioTest extends MemberLifecycleScenario
             ]))
             ->createOneQuietly();
 
-
         // Step 2 — an invoice with explicit lines is created and marked pending (which books it).
-        $invoice = $this->createInvoice($member, [
-            ['description' => 'Lidmaatschap Windsurfer (volwassenen)', 'price' => 68.00, 'quantity' => 1],
-            ['description' => 'Vrijwilligersbijdrage', 'price' => 20.00, 'quantity' => 1],
-        ], ['date' => '2026-08-15']);
+        $invoice = $this->createInvoice(
+            $member,
+            [
+                ['description' => 'Lidmaatschap Windsurfer (volwassenen)', 'price' => 68.00, 'quantity' => 1],
+                ['description' => 'Vrijwilligersbijdrage', 'price' => 20.00, 'quantity' => 1],
+            ],
+            ['date' => '2026-08-15'],
+        );
         static::assertEqualsWithDelta(88.00, $invoice->total->price, 0.001);
 
         $this->markInvoiceAsPending($invoice);

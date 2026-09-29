@@ -5,18 +5,7 @@ declare(strict_types=1);
 namespace Tests\Concerns;
 
 use App\Filament\Admin\Resources\BankTransactions\Pages\ListBankTransactions;
-use App\Filament\Admin\Resources\BankTransactions\Pages\ViewBankTransaction;
-use App\Filament\Admin\Resources\Invoices\Pages\ViewInvoice;
-use App\Filament\Admin\Resources\PurchaseOrders\Pages\CreatePurchaseOrder;
-use App\Filament\Admin\Resources\PurchaseOrders\Pages\EditPurchaseOrder;
-use App\Domain\Invoices\InvoiceStatus;
 use App\Models\BankAccount;
-use App\Models\BankTransaction;
-use App\Models\CostCenter;
-use App\Models\Invoice;
-use App\Models\InvoiceLine;
-use App\Models\Member;
-use App\Models\PurchaseOrder;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;

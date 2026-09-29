@@ -65,7 +65,7 @@ final class PurchaseOrdersRelationManager extends RelationManager
                         ->requiresConfirmation()
                         ->visible(
                             static fn (RelationManager $livewire, PurchaseOrder $record): bool => (
-                                IsOpen::checkOwner($livewire, $record) && auth()->user()->can('attachTransaction', $record)
+                                IsOpen::checkOwner($livewire, $record) && auth()->user()->can('attachBankTransaction', $record)
                             ),
                         )
                         ->action(function (PurchaseOrder $record, BankTransactionRepository $repository): void {

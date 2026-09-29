@@ -9,6 +9,8 @@ use App\Domain\BankTransactions\BankTransactionStatus;
 use App\Domain\BankTransactions\ResolveStatus;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -183,5 +185,37 @@ final class BankTransaction extends Model
         return Attribute::get(fn (): float => $this->isReversal()
             ? 0.0
             : $this->amount - $this->matched_amount);
+    }
+
+    #[Scope]
+    protected function notCompleted(Builder $query): Builder
+    {
+        return $query->where('status', BankTransactionStatus::Open);
+    }
+
+    #[Scope]
+    protected function orderByRelevancy(Builder $query, float $targetAmount, ?string $iban = null, ?DateTimeInterface $targetDate = null): Builder
+    {
+        $query = $query
+            ->orderByRaw('ABS(amount - ?) ASC', [$targetAmount]);
+
+        if ($iban !== null) {
+            $query = $query
+                ->orderByRaw('CASE WHEN banking_account_number = ? THEN 0 ELSE 1 END ASC', [$iban]);
+        }
+
+        if ($targetDate !== null) {
+            $query = $query->orderByRaw('ABS(date - ?) ASC', [$targetDate->format('Y-m-d')]);
+        }
+
+        return $query->orderBy('id', 'asc');
+    }
+
+    /** @return Attribute<non-falsy-string, never> */
+    protected function displayName(): Attribute
+    {
+        return Attribute::get(
+            fn () => sprintf('[%s] %s - %s', $this->date->format('Y-m-d'), $this->description, number_format($this->amount, 2, ',', '.')),
+        );
     }
 }

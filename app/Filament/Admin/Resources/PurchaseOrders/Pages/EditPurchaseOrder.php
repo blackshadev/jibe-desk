@@ -12,6 +12,7 @@ use App\Filament\Admin\Resources\PurchaseOrders\RelationManagers\PurchaseOrderBo
 use App\Models\PurchaseOrder;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Livewire\Attributes\On;
 use Override;
 
 final class EditPurchaseOrder extends EditRecord
@@ -48,5 +49,11 @@ final class EditPurchaseOrder extends EditRecord
     public function getContentTabLabel(): string
     {
         return __('labels.purchase_order');
+    }
+
+    #[Override]
+    #[On('refresh')]
+    public function refresh(): void
+    {
     }
 }

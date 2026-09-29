@@ -46,13 +46,36 @@ final class InvoicePolicy extends ResourcePolicy
     public function markPaid(User $user, Model $invoice): bool
     {
         Assert::isInstanceOf($invoice, Invoice::class);
-        return $user->can('update_invoices', $invoice) && $invoice->status === InvoiceStatus::Pending;
+
+        if ($invoice->status !== InvoiceStatus::Pending) {
+            return false;
+        }
+
+        if (!$user->can('update_invoices', $invoice)) {
+            return false;
+        }
+
+        if ($invoice->bankTransactions()->doesntExist()) {
+            return false;
+        }
+
+        return true;
     }
 
     public function markPending(User $user, Model $invoice): bool
     {
         Assert::isInstanceOf($invoice, Invoice::class);
         return $user->can('update_invoices', $invoice) && $invoice->status === InvoiceStatus::Open;
+    }
+
+    public function attachBankTransaction(User $user, Model $invoice): bool
+    {
+        Assert::isInstanceOf($invoice, Invoice::class);
+        if ($invoice->status !== InvoiceStatus::Pending) {
+            return false;
+        }
+
+        return $user->can('update_invoices') && $user->can('view_bank_transactions');
     }
 
     #[Override]

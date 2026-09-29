@@ -14,6 +14,7 @@ use App\Models\Invoice;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Livewire\Attributes\On;
 use Override;
 
 final class EditInvoice extends EditRecord
@@ -98,5 +99,12 @@ final class EditInvoice extends EditRecord
     public function getContentTabLabel(): string
     {
         return __('labels.invoice');
+    }
+
+    #[On('refresh')]
+    #[Override]
+    public function refresh(): void
+    {
+
     }
 }

@@ -59,21 +59,25 @@ final class PurchaseOrderPolicy extends ResourcePolicy
             return false;
         }
 
-        if ($purchaseOrder->bankTransactions()->where('status', BankTransactionStatus::Completed->value)->doesntExist()) {
+        if (!$user->can('update_purchase_orders')) {
             return false;
         }
 
-        return $user->can('update_purchase_orders');
+        if ($purchaseOrder->bankTransactions()->doesntExist()) {
+            return false;
+        }
+
+        return true;
     }
 
-    public function attachTransaction(User $user, Model $purchaseOrder): bool
+    public function attachBankTransaction(User $user, Model $purchaseOrder): bool
     {
         Assert::isInstanceOf($purchaseOrder, PurchaseOrder::class);
         if ($purchaseOrder->status !== PurchaseOrderStatus::Pending) {
             return false;
         }
 
-        return $user->can('update_purchase_orders');
+        return $user->can('update_purchase_orders') && $user->can('view_bank_transactions');
     }
 
     public function markAsDeclined(User $user, Model $purchaseOrder): bool

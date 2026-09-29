@@ -4,20 +4,17 @@ declare(strict_types=1);
 
 namespace Tests\Concerns;
 
-use App\Filament\Admin\Resources\BankTransactions\Pages\ListBankTransactions;
+use App\Domain\Invoices\InvoiceStatus;
 use App\Filament\Admin\Resources\BankTransactions\Pages\ViewBankTransaction;
 use App\Filament\Admin\Resources\Invoices\Pages\ViewInvoice;
 use App\Filament\Admin\Resources\PurchaseOrders\Pages\CreatePurchaseOrder;
 use App\Filament\Admin\Resources\PurchaseOrders\Pages\EditPurchaseOrder;
-use App\Domain\Invoices\InvoiceStatus;
-use App\Models\BankAccount;
 use App\Models\BankTransaction;
 use App\Models\CostCenter;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;
 use App\Models\Member;
 use App\Models\PurchaseOrder;
-use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
 
@@ -39,7 +36,7 @@ trait TestsBankingLifecycle
                     'description' => $line['description'],
                     'price' => $line['price'],
                     'quantity' => $line['quantity'] ?? 1,
-                    'vat' => $line['vat'] ?? $line['price'] * 0.21,
+                    'vat' => $line['vat'] ?? ($line['price'] * 0.21),
                     'cost_center_id' => $line['cost_center_id'] ?? CostCenter::query()->firstOrFail()->id,
                 ]),
                 'lines',
@@ -98,7 +95,6 @@ trait TestsBankingLifecycle
         Livewire::test(ViewInvoice::class, ['record' => $invoice->getRouteKey()])
             ->callAction('markAsPending');
     }
-
 
     protected function completeTransaction(BankTransaction $transaction): void
     {

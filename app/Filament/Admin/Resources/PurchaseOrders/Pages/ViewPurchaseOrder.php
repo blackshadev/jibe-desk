@@ -28,6 +28,7 @@ final class ViewPurchaseOrder extends ViewRecord
     }
 
     #[Override]
+    #[On('refresh')]
     #[On('markedAsPaid')]
     #[On('markedAsPending')]
     #[On('markedAsDeclined')]

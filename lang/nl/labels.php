@@ -267,6 +267,7 @@ return [
     'import_result' => ':imported nieuw geïmporteerd, :skipped overgeslagen (duplicaten)',
     'attach_invoice' => 'Koppel factuur',
     'attach_purchase_order' => 'Koppel inkooporder',
+    'attach_bank_transaction' => 'Koppel banktransactie',
     'attach_bookkeeping_record' => 'Koppel boekhouding mutatie',
     'attached' => 'Gekoppeld',
     'detach' => 'Ontkoppelen',

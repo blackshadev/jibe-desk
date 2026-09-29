@@ -183,25 +183,6 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
             ->assertActionHidden('markAsPaid');
     }
 
-    public function test_mark_as_paid_action_is_hidden_when_linked_transaction_is_not_completed(): void
-    {
-        $this->withAuthorizedUser();
-        $purchaseOrder = PurchaseOrder::factory()
-            ->open()
-            ->withLines()
-            ->create([
-                'status' => PurchaseOrderStatus::Pending,
-            ]);
-        $purchaseOrder
-            ->bankTransactions()
-            ->attach(
-                BankTransaction::factory()->create(['status' => BankTransactionStatus::Open]),
-            );
-
-        Livewire::test(ViewPurchaseOrder::class, ['record' => $purchaseOrder->getRouteKey()])
-            ->assertActionHidden('markAsPaid');
-    }
-
     public function test_mark_as_paid_action_is_visible_with_a_completed_transaction(): void
     {
         $this->withAuthorizedUser();
@@ -215,19 +196,6 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
 
         Livewire::test(ViewPurchaseOrder::class, ['record' => $purchaseOrder->getRouteKey()])
             ->assertActionVisible('markAsPaid');
-    }
-
-    public function test_attach_transaction_is_only_allowed_for_pending_purchase_orders(): void
-    {
-        $this->withAuthorizedUser();
-
-        $open = PurchaseOrder::factory()->open()->create();
-        $pending = PurchaseOrder::factory()->create(['status' => PurchaseOrderStatus::Pending]);
-        $paid = PurchaseOrder::factory()->paid()->create();
-
-        static::assertFalse(Gate::allows('attachTransaction', $open));
-        static::assertTrue(Gate::allows('attachTransaction', $pending));
-        static::assertFalse(Gate::allows('attachTransaction', $paid));
     }
 
     public function test_mark_as_approved_creates_bookkeeping_records(): void

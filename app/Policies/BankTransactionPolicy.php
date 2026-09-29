@@ -36,4 +36,22 @@ final class BankTransactionPolicy extends ResourcePolicy
 
         return parent::delete($user, $record);
     }
+
+    public function attachInvoices(User $user, Model $record): bool
+    {
+        if ($record instanceof BankTransaction && $record->isCompleted()) {
+            return false;
+        }
+
+        return $user->can('update_bank_transactions');
+    }
+
+    public function attachPurchaseOrders(User $user, Model $record): bool
+    {
+        if ($record instanceof BankTransaction && $record->isCompleted()) {
+            return false;
+        }
+
+        return $user->can('update_bank_transactions');
+    }
 }
