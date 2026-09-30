@@ -7,14 +7,18 @@ namespace Tests\Unit\Domain\Invoices;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\Invoices\InvoiceServiceImpl;
+use App\Domain\Invoices\Jobs\SendInvoiceEmail;
+use App\Domain\Invoices\SendInvoiceEmailData;
 use Override;
 use Tests\Unit\Domain\Bookkeeping\BookkeepingRecordRepositoryExpectation;
+use Tests\Unit\Domain\Jobs\JobDispatcherExpectation;
 use Tests\UnitTestCase;
 
 final class InvoiceServiceImplTest extends UnitTestCase
 {
     private CreateInvoiceExpectation $repo;
     private BookkeepingRecordRepositoryExpectation $bookkeepingRepo;
+    private JobDispatcherExpectation $jobDispatcher;
     private InvoiceServiceImpl $service;
 
     #[Override]
@@ -24,10 +28,12 @@ final class InvoiceServiceImplTest extends UnitTestCase
 
         $this->repo = CreateInvoiceExpectation::create();
         $this->bookkeepingRepo = BookkeepingRecordRepositoryExpectation::create();
+        $this->jobDispatcher = JobDispatcherExpectation::create();
 
         $this->service = new InvoiceServiceImpl(
             $this->repo->mock,
             $this->bookkeepingRepo->mock,
+            $this->jobDispatcher->mock,
         );
     }
 
@@ -75,13 +81,16 @@ final class InvoiceServiceImplTest extends UnitTestCase
         $this->service->markAsDeclined($ids);
     }
 
-    public function test_mark_as_pending_delegates_to_repository(): void
+    public function test_mark_as_pending_delegates_to_repository_and_dispatches_job(): void
     {
-        $id = InvoiceId::create(1);
-        $ids = new InvoiceIdList([$id]);
+        $id1 = InvoiceId::create(1);
+        $id2 = InvoiceId::create(2);
+        $ids = new InvoiceIdList([$id1, $id2]);
 
         $this->repo->expectsMarkAsPending($ids);
         $this->bookkeepingRepo->expectsCreateForInvoice($ids);
+        $this->jobDispatcher->expectsDispatch(new SendInvoiceEmail(new SendInvoiceEmailData($id1)));
+        $this->jobDispatcher->expectsDispatch(new SendInvoiceEmail(new SendInvoiceEmailData($id2)));
 
         $this->service->markAsPending($ids);
     }

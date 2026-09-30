@@ -90,6 +90,19 @@ final class InvoiceMailRepositoryDbTest extends FeatureTestCase
 
         static::assertSame(60.00, $result->total->price);
         static::assertSame(12.60, $result->total->vat);
+        static::assertNull($result->sentAt);
+    }
+
+    public function test_get_invoice_mail_data_returns_sent_at_when_invoice_was_sent(): void
+    {
+        $invoice = Invoice::factory()->createQuietly([
+            'sent_at' => '2026-05-26 09:30:00',
+        ]);
+
+        $result = $this->repository->getInvoiceMailData(InvoiceId::create($invoice->id));
+
+        static::assertNotNull($result->sentAt);
+        static::assertSame('2026-05-26 09:30:00', $result->sentAt->format('Y-m-d H:i:s'));
     }
 
     public function test_get_invoice_mail_data_sets_sepa_transfer_date_when_mandate_and_batch_present(): void
@@ -170,5 +183,14 @@ final class InvoiceMailRepositoryDbTest extends FeatureTestCase
         static::assertCount(0, $result->lines);
         static::assertSame(0.0, $result->total->price);
         static::assertSame(0.0, $result->total->vat);
+    }
+
+    public function test_mark_invoice_as_sent_sets_sent_at(): void
+    {
+        $invoice = Invoice::factory()->createQuietly(['sent_at' => null]);
+
+        $this->repository->markInvoiceAsSent(InvoiceId::create($invoice->id));
+
+        static::assertNotNull($invoice->fresh()->sent_at);
     }
 }

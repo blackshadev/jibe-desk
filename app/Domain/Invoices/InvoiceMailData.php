@@ -22,5 +22,6 @@ final readonly class InvoiceMailData
         public CompoundPrice $total,
         public array $lines,
         public ?DateTimeInterface $sepaTransferDate,
+        public ?DateTimeInterface $sentAt,
     ) {}
 }

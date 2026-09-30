@@ -43,6 +43,12 @@ final class InvoicePolicy extends ResourcePolicy
         return $user->can('update_invoices', $invoice) && $invoice->status === InvoiceStatus::Pending;
     }
 
+    public function resendEmail(User $user, Model $invoice): bool
+    {
+        Assert::isInstanceOf($invoice, Invoice::class);
+        return $user->can('update_invoices', $invoice) && $invoice->status === InvoiceStatus::Pending;
+    }
+
     public function markPaid(User $user, Model $invoice): bool
     {
         Assert::isInstanceOf($invoice, Invoice::class);

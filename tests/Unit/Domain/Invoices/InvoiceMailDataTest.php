@@ -18,6 +18,7 @@ final class InvoiceMailDataTest extends UnitTestCase
         $recipient = new Recipient('Jan de Vries', 'jan@example.com');
         $invoiceDate = CarbonImmutable::parse('2026-05-25');
         $sepaTransferDate = CarbonImmutable::parse('2026-06-01');
+        $sentAt = CarbonImmutable::parse('2026-05-26');
         $total = new CompoundPrice(100.0, 21.0);
         $lines = [
             new InvoiceMailLine('Membership fee', 1.0, new CompoundPrice(50.0, 10.5), new CompoundPrice(50.0, 10.5)),
@@ -33,6 +34,7 @@ final class InvoiceMailDataTest extends UnitTestCase
             total: $total,
             lines: $lines,
             sepaTransferDate: $sepaTransferDate,
+            sentAt: $sentAt,
         );
 
         static::assertSame(42, $subject->invoiceId);
@@ -44,6 +46,7 @@ final class InvoiceMailDataTest extends UnitTestCase
         static::assertSame($total, $subject->total);
         static::assertSame($lines, $subject->lines);
         static::assertSame($sepaTransferDate, $subject->sepaTransferDate);
+        static::assertSame($sentAt, $subject->sentAt);
     }
 
     public function test_it_allows_null_sepa_transfer_date(): void
@@ -58,6 +61,7 @@ final class InvoiceMailDataTest extends UnitTestCase
             total: new CompoundPrice(0.0, 0.0),
             lines: [],
             sepaTransferDate: null,
+            sentAt: null,
         );
 
         static::assertNull($subject->sepaTransferDate);

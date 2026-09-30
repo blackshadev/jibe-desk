@@ -67,7 +67,8 @@ Mailbook::add(InvoiceMail::class)
                     subTotal: new CompoundPrice(20, 4.2),
                 ),
             ],
-            sepaTransferDate: new DateTimeImmutable('2024-01-02')
+            sepaTransferDate: new DateTimeImmutable('2024-01-02'),
+            sentAt: null,
         );
 
         return new MailMailable(new InvoiceMail($data, $config));
@@ -96,7 +97,8 @@ Mailbook::add(InvoiceMail::class)
                     subTotal: new CompoundPrice(20, 4.2),
                 ),
             ],
-            sepaTransferDate: null
+            sepaTransferDate: null,
+            sentAt: null,
         );
 
         return new MailMailable(new InvoiceMail($data, $config));
@@ -125,7 +127,8 @@ Mailbook::add(InvoiceMail::class)
                     subTotal: new CompoundPrice(-20, -4.2),
                 ),
             ],
-            sepaTransferDate: null
+            sepaTransferDate: null,
+            sentAt: null,
         );
 
         return new MailMailable(new InvoiceMail($data, $config));

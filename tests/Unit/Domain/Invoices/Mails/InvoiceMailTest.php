@@ -61,6 +61,7 @@ final class InvoiceMailTest extends UnitTestCase
                 total: $total,
                 lines: $lines,
                 sepaTransferDate: $sepaTransferDate,
+                sentAt: null,
             ),
             $sepa,
         );
@@ -110,6 +111,7 @@ final class InvoiceMailTest extends UnitTestCase
             total: new CompoundPrice(100.0, 21.0),
             lines: [],
             sepaTransferDate: CarbonImmutable::parse('2026-06-01'),
+            sentAt: null,
         );
     }
 

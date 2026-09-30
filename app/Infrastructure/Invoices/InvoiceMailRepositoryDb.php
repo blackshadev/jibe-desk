@@ -11,6 +11,7 @@ use App\Domain\Invoices\InvoiceMailRepository;
 use App\Domain\Mail\Recipient;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;
+use Carbon\CarbonImmutable;
 use Override;
 
 final readonly class InvoiceMailRepositoryDb implements InvoiceMailRepository
@@ -42,6 +43,15 @@ final readonly class InvoiceMailRepositoryDb implements InvoiceMailRepository
             total: $invoice->total,
             lines: $lines,
             sepaTransferDate: $invoice->member?->paymentInformation?->mandate_accepted_date !== null ? $invoice->invoiceBatch?->invoice_date : null,
+            sentAt: $invoice->sent_at,
         );
+    }
+
+    #[Override]
+    public function markInvoiceAsSent(InvoiceId $id): void
+    {
+        Invoice::query()
+            ->whereKey($id->value)
+            ->update(['sent_at' => CarbonImmutable::now()]);
     }
 }

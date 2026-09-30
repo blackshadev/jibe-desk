@@ -9,6 +9,7 @@ use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\Jobs\SendInvoiceEmail;
 use App\Domain\Invoices\Listeners\QueueInvoiceEmails;
+use App\Domain\Invoices\SendInvoiceEmailData;
 use App\Domain\Jobs\JobBatch;
 use Override;
 use Tests\Unit\Domain\Invoices\InvoiceBatchRepositoryExpectation;
@@ -44,7 +45,7 @@ final class QueueInvoiceEmailsTest extends UnitTestCase
         $this->dispatcher->expectsDispatch(
             new JobBatch(
                 'invoice-emails-batch-10',
-                array_map(static fn (InvoiceId $id) => new SendInvoiceEmail($id), $invoiceIds),
+                array_map(static fn (InvoiceId $id) => new SendInvoiceEmail(new SendInvoiceEmailData($id)), $invoiceIds),
             ),
         );
 

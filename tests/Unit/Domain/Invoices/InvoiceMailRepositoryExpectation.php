@@ -30,4 +30,11 @@ final readonly class InvoiceMailRepositoryExpectation
             ->with(equalTo($invoiceId))
             ->andReturn($return);
     }
+
+    public function expectsMarkInvoiceAsSent(InvoiceId $invoiceId): void
+    {
+        $this->mock
+            ->expects('markInvoiceAsSent')
+            ->with(equalTo($invoiceId));
+    }
 }

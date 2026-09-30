@@ -8,6 +8,7 @@ use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\Invoices\InvoiceService;
 use App\Domain\Invoices\InvoiceStatus;
+use App\Domain\Invoices\Jobs\SendInvoiceEmail;
 use App\Filament\Admin\Resources\Invoices\Pages\EditInvoice;
 use App\Filament\Admin\Resources\Invoices\Pages\ListInvoices;
 use App\Filament\Admin\Resources\Invoices\Pages\ViewInvoice;
@@ -15,6 +16,7 @@ use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceBankTransactio
 use App\Models\BankTransaction;
 use App\Models\BookkeepingRecord;
 use App\Models\Invoice;
+use Illuminate\Support\Facades\Bus;
 use Livewire\Livewire;
 use Tests\Concerns\WithAuthorizedUser;
 use Tests\FeatureTestCase;
@@ -362,5 +364,43 @@ final class InvoiceResourceTest extends FeatureTestCase
             'id' => $pendingInvoice->id,
             'status' => InvoiceStatus::Pending->value,
         ]);
+    }
+
+    public function test_resend_invoice_email_action_dispatches_job_for_pending_invoice_on_view_page(): void
+    {
+        $this->withAuthorizedUser();
+        Bus::fake();
+        $invoice = Invoice::factory()->withLines(1)->createQuietly(['status' => InvoiceStatus::Pending]);
+
+        Livewire::test(ViewInvoice::class, ['record' => $invoice->getRouteKey()])
+            ->assertSuccessful()
+            ->assertActionVisible('resendInvoiceEmail')
+            ->callAction('resendInvoiceEmail')
+            ->assertDispatched('refresh');
+
+        Bus::assertDispatched(
+            SendInvoiceEmail::class,
+            static fn (SendInvoiceEmail $job): bool => $job->data->invoiceId->value === $invoice->id && $job->data->isResend,
+        );
+    }
+
+    public function test_resend_invoice_email_action_hidden_for_open_invoice_on_view_page(): void
+    {
+        $this->withAuthorizedUser();
+        $invoice = Invoice::factory()->withLines(1)->createQuietly(['status' => InvoiceStatus::Open]);
+
+        Livewire::test(ViewInvoice::class, ['record' => $invoice->getRouteKey()])
+            ->assertSuccessful()
+            ->assertActionHidden('resendInvoiceEmail');
+    }
+
+    public function test_resend_invoice_email_action_hidden_for_open_invoice_on_edit_page(): void
+    {
+        $this->withAuthorizedUser();
+        $invoice = Invoice::factory()->withLines(1)->createQuietly(['status' => InvoiceStatus::Open]);
+
+        Livewire::test(EditInvoice::class, ['record' => $invoice->getRouteKey()])
+            ->assertSuccessful()
+            ->assertActionHidden('resendInvoiceEmail');
     }
 }

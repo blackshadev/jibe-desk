@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Domain\Invoices;
 
 use App\Domain\Bookkeeping\BookkeepingRecordRepository;
+use App\Domain\Invoices\Jobs\SendInvoiceEmail;
+use App\Domain\Jobs\JobDispatcher;
 use Override;
 
 final readonly class InvoiceServiceImpl implements InvoiceService
@@ -12,6 +14,7 @@ final readonly class InvoiceServiceImpl implements InvoiceService
     public function __construct(
         private InvoiceRepository $invoiceRepository,
         private BookkeepingRecordRepository $bookkeepingRepository,
+        private JobDispatcher $jobDispatcher,
     ) {}
 
     #[Override]
@@ -38,5 +41,9 @@ final readonly class InvoiceServiceImpl implements InvoiceService
     {
         $this->invoiceRepository->markAsPending($ids);
         $this->bookkeepingRepository->createForInvoice($ids);
+
+        foreach ($ids->ids as $id) {
+            $this->jobDispatcher->dispatch(new SendInvoiceEmail(new SendInvoiceEmailData($id)));
+        }
     }
 }

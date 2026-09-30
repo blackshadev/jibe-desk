@@ -10,4 +10,6 @@ use JeroenG\Autowire\Attribute\Autowire;
 interface InvoiceMailRepository
 {
     public function getInvoiceMailData(InvoiceId $id): InvoiceMailData;
+
+    public function markInvoiceAsSent(InvoiceId $id): void;
 }

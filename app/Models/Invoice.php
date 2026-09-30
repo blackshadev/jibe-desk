@@ -23,6 +23,7 @@ use Override;
 /**
  * @property InvoiceStatus $status
  * @property DateTimeInterface $date
+ * @property DateTimeInterface|null $sent_at
  */
 #[Guarded(['id', 'created_at', 'updated_at'])]
 final class Invoice extends Model
@@ -77,6 +78,7 @@ final class Invoice extends Model
     {
         return [
             'date' => 'datetime',
+            'sent_at' => 'datetime',
             'status' => InvoiceStatus::class,
         ];
     }

@@ -38,5 +38,6 @@ return [
     'purchase_order_incomplete' => 'Inkooporder is niet compleet',
     'bookkeeping_record_created_and_attached' => 'Boekhouding mutatie aangemaakt en gekoppeld',
     'credit_invoice_created' => 'Creditfactuur succesvol aangemaakt',
+    'invoice_email_resent' => 'Factuurmail opnieuw verzonden',
     'chain_status_updated' => 'Aansluiting controle bijgewerkt',
 ];
