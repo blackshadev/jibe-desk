@@ -9,6 +9,7 @@ use App\Filament\Admin\Navigation\NavigationGroup;
 use App\Filament\Admin\Resources\CostCenters\Pages\CreateCostCenter;
 use App\Filament\Admin\Resources\CostCenters\Pages\EditCostCenter;
 use App\Filament\Admin\Resources\CostCenters\Pages\ListCostCenters;
+use App\Filament\Admin\Resources\CostCenters\RelationManagers\CostCenterBudgetsRelationManager;
 use App\Filament\Admin\Resources\CostCenters\Schemas\CostCenterForm;
 use App\Filament\Admin\Resources\CostCenters\Tables\CostCentersTable;
 use App\Models\CostCenter;
@@ -65,6 +66,14 @@ final class CostCenterResource extends Resource
     public static function getPluralLabel(): string
     {
         return __('labels.cost_centers');
+    }
+
+    #[Override]
+    public static function getRelations(): array
+    {
+        return [
+            CostCenterBudgetsRelationManager::make(),
+        ];
     }
 
     #[Override]

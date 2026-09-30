@@ -21,6 +21,7 @@ final class CostCenterBudgetFactory extends Factory
             'year' => now()->year,
             'cost_center_id' => CostCenter::factory(),
             'starting_amount' => fake()->randomFloat(2, 0, 10_000),
+            'budget_amount' => fake()->randomFloat(2, 0, 10_000),
         ];
     }
 }

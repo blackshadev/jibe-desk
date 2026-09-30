@@ -105,6 +105,5 @@ final class EditInvoice extends EditRecord
     #[Override]
     public function refresh(): void
     {
-
     }
 }

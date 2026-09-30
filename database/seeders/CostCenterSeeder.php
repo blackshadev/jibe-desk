@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Models\CostCenter;
+use App\Models\CostCenterBudget;
 use Illuminate\Database\Seeder;
 
 final class CostCenterSeeder extends Seeder
@@ -13,6 +14,11 @@ final class CostCenterSeeder extends Seeder
     {
         CostCenter::factory()
             ->state(['description' => ''])
+            ->has(CostCenterBudget::factory()->state([
+                'starting_amount' => 0,
+                'budget_amount' => 0,
+                'year' => now()->year,
+            ]), 'budgets')
             ->createMany([
                 ['number' => CostCenterNumber::Lessons, 'title' => 'Lesgelden'],
                 ['number' => CostCenterNumber::Contribution, 'title' => 'Contributie leden'],

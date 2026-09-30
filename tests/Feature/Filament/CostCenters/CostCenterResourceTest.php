@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament\CostCenters;
 
+use App\Domain\Authorization\RoleName;
 use App\Filament\Admin\Resources\CostCenters\Pages\CreateCostCenter;
 use App\Filament\Admin\Resources\CostCenters\Pages\EditCostCenter;
 use App\Filament\Admin\Resources\CostCenters\Pages\ListCostCenters;
@@ -78,5 +79,45 @@ final class CostCenterResourceTest extends FeatureTestCase
         $this->assertDatabaseMissing('cost_centers', [
             'id' => $costCenter->id,
         ]);
+    }
+
+    public function test_list_page_has_create_budgets_for_year_action(): void
+    {
+        $this->withAuthorizedUser();
+
+        Livewire::test(ListCostCenters::class)
+            ->assertActionVisible('createCostCenterBudgets');
+    }
+
+    public function test_create_budgets_for_year_action_creates_zeroed_budgets_for_every_cost_center(): void
+    {
+        $this->withAuthorizedUser();
+
+        $firstCostCenter = CostCenter::factory()->createOne();
+        $secondCostCenter = CostCenter::factory()->createOne();
+
+        Livewire::test(ListCostCenters::class)
+            ->callAction('createCostCenterBudgets', data: ['year' => 2027]);
+
+        $this->assertDatabaseHas('cost_center_budgets', [
+            'cost_center_id' => $firstCostCenter->id,
+            'year' => 2027,
+            'starting_amount' => 0,
+            'budget_amount' => 0,
+        ]);
+        $this->assertDatabaseHas('cost_center_budgets', [
+            'cost_center_id' => $secondCostCenter->id,
+            'year' => 2027,
+            'starting_amount' => 0,
+            'budget_amount' => 0,
+        ]);
+    }
+
+    public function test_create_budgets_for_year_action_is_hidden_without_budget_permission(): void
+    {
+        $this->withUserHavingRole(RoleName::MemberAdministration);
+
+        Livewire::test(ListCostCenters::class)
+            ->assertActionHidden('createCostCenterBudgets');
     }
 }

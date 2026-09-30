@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Domain\BankTransactions\BankTransactionStatus;
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Models\PurchaseOrder;
 use App\Models\User;

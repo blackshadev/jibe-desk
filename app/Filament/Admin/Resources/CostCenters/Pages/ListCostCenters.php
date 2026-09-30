@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\CostCenters\Pages;
 
+use App\Filament\Admin\Actions\CreateCostCenterBudgetsAction;
 use App\Filament\Admin\Resources\CostCenters\CostCenterResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
@@ -19,6 +20,7 @@ final class ListCostCenters extends ListRecords
     {
         return [
             CreateAction::make(),
+            CreateCostCenterBudgetsAction::make(),
         ];
     }
 }

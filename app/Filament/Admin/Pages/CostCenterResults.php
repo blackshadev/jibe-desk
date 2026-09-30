@@ -15,6 +15,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\Summarizers\Summarizer;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -115,14 +116,63 @@ final class CostCenterResults extends Page implements HasForms, HasTable
                 TextColumn::make('starting_amount')
                     ->label(__('labels.starting_amount'))
                     ->money('EUR')
-                    ->sortable(),
+                    ->alignEnd()
+                    ->sortable()
+                    ->summarize([
+                        Summarizer::make('total_starting_amount')
+                            ->hiddenLabel()
+                            ->using($this->sumStartingAmount(...))
+                            ->numeric()
+                            ->money('EUR'),
+                    ]),
+                TextColumn::make('budget_amount')
+                    ->label(__('labels.budget'))
+                    ->money('EUR')
+                    ->alignEnd()
+                    ->sortable()
+                    ->summarize([
+                        Summarizer::make('total_budget')
+                            ->hiddenLabel()
+                            ->using($this->sumBudgetAmount(...))
+                            ->numeric()
+                            ->money('EUR'),
+                    ]),
                 TextColumn::make('total_amount')
-                    ->label(__('labels.total'))
+                    ->label(__('labels.revenue'))
                     ->money('EUR')
-                    ->sortable(),
-                TextColumn::make('result')
-                    ->label(__('labels.result'))
+                    ->alignEnd()
+                    ->sortable()
+                    ->summarize([
+                        Summarizer::make('total_amount_sum')
+                            ->hiddenLabel()
+                            ->using($this->sumTotalAmount(...))
+                            ->numeric()
+                            ->money('EUR'),
+                    ]),
+                TextColumn::make('closing_balance')
+                    ->label(__('labels.closing_balance'))
                     ->money('EUR')
+                    ->alignEnd()
+                    ->sortable()
+                    ->summarize([
+                        Summarizer::make('total_closing_balance')
+                            ->hiddenLabel()
+                            ->using($this->sumClosingBalance(...))
+                            ->numeric()
+                            ->money('EUR'),
+                    ]),
+                TextColumn::make('budget_difference')
+                    ->label(__('labels.budget_difference'))
+                    ->color(static fn (float $state): string => $state < 0 ? 'danger' : 'success')
+                    ->money('EUR')
+                    ->summarize([
+                        Summarizer::make('total_budget_difference')
+                            ->hiddenLabel()
+                            ->using($this->sumBudgetDifference(...))
+                            ->numeric()
+                            ->money('EUR'),
+                    ])
+                    ->alignEnd()
                     ->sortable(),
             ]);
     }
@@ -138,16 +188,49 @@ final class CostCenterResults extends Page implements HasForms, HasTable
                 $join->on('br.cost_center_id', '=', 'cost_centers.id')
                     ->where('br.year', '=', $this->selectedYear);
             })
-            ->groupBy('cost_centers.id', 'cost_centers.number', 'cost_centers.title', 'cb.starting_amount')
+            ->groupBy('cost_centers.id', 'cost_centers.number', 'cost_centers.title', 'cb.starting_amount', 'cb.budget_amount')
             ->select(
                 'cost_centers.id',
                 'cost_centers.number',
                 'cost_centers.title',
                 DB::raw('COALESCE(cb.starting_amount, 0) as starting_amount'),
+                DB::raw('COALESCE(cb.budget_amount, 0) as budget_amount'),
                 DB::raw('COALESCE(SUM(br.amount_price), 0) as total_amount'),
-                DB::raw('COALESCE(cb.starting_amount, 0) + COALESCE(SUM(br.amount_price), 0) as result'),
+                DB::raw('COALESCE(cb.starting_amount, 0) + COALESCE(SUM(br.amount_price), 0) as closing_balance'),
+                DB::raw('COALESCE(SUM(br.amount_price), 0) - COALESCE(cb.budget_amount, 0) as budget_difference'),
             )
             ->orderBy('cost_centers.number');
+    }
+
+    private function sumStartingAmount(): float
+    {
+        return (float) CostCenterBudget::query()
+            ->where('year', $this->selectedYear)
+            ->sum('starting_amount');
+    }
+
+    private function sumBudgetAmount(): float
+    {
+        return (float) CostCenterBudget::query()
+            ->where('year', $this->selectedYear)
+            ->sum('budget_amount');
+    }
+
+    private function sumTotalAmount(): float
+    {
+        return (float) BookkeepingRecord::query()
+            ->where('year', $this->selectedYear)
+            ->sum('amount_price');
+    }
+
+    private function sumClosingBalance(): float
+    {
+        return $this->sumStartingAmount() + $this->sumTotalAmount();
+    }
+
+    private function sumBudgetDifference(): float
+    {
+        return $this->sumTotalAmount() - $this->sumBudgetAmount();
     }
 
     #[Override]
