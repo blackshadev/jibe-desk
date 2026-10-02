@@ -8,6 +8,8 @@ use App\Filament\Admin\Resources\PurchaseOrders\Actions\PurchaseOrderStateAction
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Filament\Admin\Resources\PurchaseOrders\RelationManagers\PurchaseOrderBankTransactionsRelationManager;
 use App\Filament\Admin\Resources\PurchaseOrders\RelationManagers\PurchaseOrderBookkeepingRecordsRelationManager;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Livewire\Attributes\On;
@@ -22,8 +24,13 @@ final class ViewPurchaseOrder extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            ...PurchaseOrderStateActions::make(),
             EditAction::make(),
+            ActionGroup::make([
+                ...PurchaseOrderStateActions::make(),
+                DeleteAction::make(),
+            ])
+                ->button()
+                ->color('gray'),
         ];
     }
 

@@ -17,11 +17,14 @@ use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceBankTransactio
 use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceBookkeepingRecordsRelationManager;
 use App\Models\Invoice;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Support\Enums\Size;
 use Livewire\Attributes\On;
 use Override;
+use Filament\Support\Enums\ActionSize;
 
 final class ViewInvoice extends ViewRecord
 {
@@ -32,13 +35,17 @@ final class ViewInvoice extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            MarkAsPendingAction::make(),
-            MarkAsPaidAction::make(),
-            MarkAsDeclinedAction::make(),
-            ResendInvoiceEmailAction::make(),
-            CreateCreditAction::make(),
+            ActionGroup::make([
+                MarkAsPendingAction::make(),
+                MarkAsPaidAction::make(),
+                MarkAsDeclinedAction::make(),
+                ResendInvoiceEmailAction::make(),
+                CreateCreditAction::make(),
+                DeleteAction::make(),
+            ])
+                ->button()
+                ->color('gray'),
             EditAction::make(),
-            DeleteAction::make(),
         ];
     }
 

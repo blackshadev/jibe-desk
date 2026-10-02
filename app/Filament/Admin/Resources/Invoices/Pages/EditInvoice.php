@@ -18,6 +18,7 @@ use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceBookkeepingRec
 use App\Filament\Admin\Utils\ResourceRouteHelper;
 use App\Models\Invoice;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Livewire\Attributes\On;
@@ -32,15 +33,19 @@ final class EditInvoice extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            MarkAsPendingAction::make()
-                ->successRedirectUrl(ResourceRouteHelper::view(InvoiceResource::class)),
-            MarkAsPaidAction::make()
-                ->successRedirectUrl(ResourceRouteHelper::view(InvoiceResource::class)),
-            MarkAsDeclinedAction::make()
-                ->successRedirectUrl(ResourceRouteHelper::view(InvoiceResource::class)),
-            ResendInvoiceEmailAction::make(),
-            CreateCreditAction::make(),
-            DeleteAction::make(),
+            ActionGroup::make([
+                MarkAsPendingAction::make()
+                    ->successRedirectUrl(ResourceRouteHelper::view(InvoiceResource::class)),
+                MarkAsPaidAction::make()
+                    ->successRedirectUrl(ResourceRouteHelper::view(InvoiceResource::class)),
+                MarkAsDeclinedAction::make()
+                    ->successRedirectUrl(ResourceRouteHelper::view(InvoiceResource::class)),
+                ResendInvoiceEmailAction::make(),
+                CreateCreditAction::make(),
+                DeleteAction::make(),
+            ])
+                ->button()
+                ->color('gray'),
         ];
     }
 

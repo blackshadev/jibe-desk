@@ -34,7 +34,9 @@ final class EditMember extends EditRecord
         return [
             ActionGroup::make([
                 StopAction::make(),
-            ]),
+            ])
+                ->button()
+                ->color('gray'),
         ];
     }
 

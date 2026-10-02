@@ -10,6 +10,7 @@ use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Filament\Admin\Resources\PurchaseOrders\RelationManagers\PurchaseOrderBankTransactionsRelationManager;
 use App\Filament\Admin\Resources\PurchaseOrders\RelationManagers\PurchaseOrderBookkeepingRecordsRelationManager;
 use App\Models\PurchaseOrder;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Livewire\Attributes\On;
@@ -24,9 +25,13 @@ final class EditPurchaseOrder extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            ...PurchaseOrderStateActions::make(),
-            DeleteAction::make()
-                ->visible(static fn (PurchaseOrder $record): bool => $record->status === PurchaseOrderStatus::Open),
+            ActionGroup::make([
+                ...PurchaseOrderStateActions::make(),
+                DeleteAction::make(),
+            ])
+                ->button()
+                ->color('gray')
+
         ];
     }
 
