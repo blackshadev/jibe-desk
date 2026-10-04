@@ -27,7 +27,7 @@ final class SendInvoiceEmail extends BaseJob
 
         $mailData = $repository->getInvoiceMailData($this->data->invoiceId);
 
-        if (! $this->data->isResend && $mailData->sentAt !== null) {
+        if (!$this->data->isResend && $mailData->sentAt !== null) {
             return;
         }
 

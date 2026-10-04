@@ -13,6 +13,7 @@ use App\Models\Invoice;
 use App\Models\Member;
 use App\Models\Membership;
 use Carbon\CarbonImmutable;
+use Filament\Actions\Testing\TestAction;
 use Livewire\Livewire;
 
 trait TestsMemberLifecycle
@@ -105,7 +106,7 @@ trait TestsMemberLifecycle
         Livewire::test(InvoicesRelationManager::class, [
             'ownerRecord' => $member,
             'pageClass' => EditMember::class,
-        ])->callTableAction('generate');
+        ])->callAction(TestAction::make('generate')->table());
     }
 
     protected function invoiceFor(Member $member, string $date): Invoice

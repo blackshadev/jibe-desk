@@ -21,11 +21,13 @@ use App\Filament\Admin\Resources\Members\RelationManagers\StorageSpaceRentalsRel
 use App\Filament\Admin\Resources\Members\Schemas\MemberForm;
 use App\Filament\Admin\Resources\Members\Tables\MembersTable;
 use App\Models\Member;
+use App\Models\User;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Override;
 use UnitEnum;
 
@@ -59,6 +61,20 @@ final class MemberResource extends Resource
     public static function table(Table $table): Table
     {
         return MembersTable::configure($table);
+    }
+
+    #[Override]
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        $user = auth()->user();
+
+        if (!$user instanceof User || $user->isAdmin()) {
+            return $query;
+        }
+
+        return $query->whereIn('id', $user->visibleMemberIds());
     }
 
     #[Override]

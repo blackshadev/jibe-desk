@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
+use App\Filament\Admin\Resources\Members\MemberResource;
+use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationBuilder;
+use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Facades\FilamentTimezone;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -59,6 +64,28 @@ final class AdminPanelProvider extends PanelProvider
             ])
             ->login()
             ->default()
+            ->navigation(static function (): NavigationBuilder|bool {
+                if (!auth()->user()?->isMember()) {
+                    return true;
+                }
+
+                return new NavigationBuilder()
+                    ->items([
+                        NavigationItem::make(__('labels.dashboard'))
+                            ->icon(Heroicon::Home)
+                            ->url(Filament::getUrl())
+                            ->sort(-10),
+                        NavigationItem::make(__('labels.my_membership'))
+                            ->icon(Heroicon::User)
+                            ->url(MemberResource::getUrl('view', ['record' => auth()->user()->member]))
+                            ->sort(1),
+                        NavigationItem::make(__('labels.profile'))
+                            ->icon(Heroicon::UserCircle)
+                            ->url(Filament::getProfileUrl())
+                            ->sort(3),
+                    ]);
+            })
+            ->profile(isSimple: false)
             ->authMiddleware([
                 Authenticate::class,
             ]);

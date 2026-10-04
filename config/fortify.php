@@ -75,7 +75,22 @@ return [
     |
     */
 
-    'home' => '/home',
+    'home' => '/admin',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Fortify Routes Prefix / Subdomain
+    |--------------------------------------------------------------------------
+    |
+    | Here you may specify which prefix Fortify will assign to all the routes
+    | that it registers with the application. If necessary, you may change
+    | subdomain under which all of the Fortify routes will be available.
+    |
+    */
+
+    'redirects' => [
+        'password-reset' => '/admin',
+    ],
 
     /*
     |--------------------------------------------------------------------------

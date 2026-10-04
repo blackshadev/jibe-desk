@@ -5,7 +5,11 @@ Beste {{ $memberName }},
 
 Wat leuk dat je lid wilt worden van Watersportvereniging Almere Centraal!
 
-We hebben je aanmelding ontvangen en gaan deze verwerken. We verwachten dit binnen ongeveer twee weken af te ronden. Daarna nemen we contact met je op voor meer informatie.
+We hebben een account voor je aangemaakt. Klik op onderstaande knop om je wachtwoord in te stellen en in te loggen op je persoonlijke omgeving.
+
+@component('mail::button', ['url' => $setPasswordUrl])
+Stel wachtwoord in
+@endcomponent
 
 Mocht je in de tussentijd vragen hebben, neem dan gerust contact met ons op.
 

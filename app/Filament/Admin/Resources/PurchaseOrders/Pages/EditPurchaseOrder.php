@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\PurchaseOrders\Pages;
 
-use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Resources\PurchaseOrders\Actions\PurchaseOrderStateActions;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Filament\Admin\Resources\PurchaseOrders\RelationManagers\PurchaseOrderBankTransactionsRelationManager;
 use App\Filament\Admin\Resources\PurchaseOrders\RelationManagers\PurchaseOrderBookkeepingRecordsRelationManager;
-use App\Models\PurchaseOrder;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
@@ -30,13 +28,12 @@ final class EditPurchaseOrder extends EditRecord
                 DeleteAction::make(),
             ])
                 ->button()
-                ->color('gray')
-
+                ->color('gray'),
         ];
     }
 
     #[Override]
-    public function getRelationManagers(): array
+    protected function getAllRelationManagers(): array
     {
         return [
             PurchaseOrderBankTransactionsRelationManager::class,

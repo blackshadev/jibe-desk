@@ -18,10 +18,21 @@ final class CreatePurchaseOrder extends CreateRecord
     protected static string $resource = PurchaseOrderResource::class;
 
     #[Override]
+    public static function authorizeResourceAccess(): void
+    {
+        abort_unless(static::getResource()::canCreate(), 403);
+    }
+
+    #[Override]
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['date'] ??= CarbonImmutable::now();
         $data['status'] = PurchaseOrderStatus::Open;
+
+        $member = auth()->user()?->member;
+        if ($member !== null) {
+            $data['member_id'] = $member->id;
+        }
 
         return $data;
     }
@@ -31,12 +42,7 @@ final class CreatePurchaseOrder extends CreateRecord
         $this->data['date'] = CarbonImmutable::now();
         $this->data['status'] = PurchaseOrderStatus::Open;
 
-        $memberId = request()->query('member_id');
-        if (!is_numeric($memberId)) {
-            return;
-        }
-
-        $member = Member::find((int) $memberId);
+        $member = $this->getDefaultMember();
         if ($member === null) {
             return;
         }
@@ -46,5 +52,20 @@ final class CreatePurchaseOrder extends CreateRecord
         foreach (MemberCreditorPrefill::for($member) as $field => $value) {
             $this->data[$field] = $value;
         }
+    }
+
+    private function getDefaultMember(): ?Member
+    {
+        $member = auth()->user()?->member;
+        if ($member !== null) {
+            return $member;
+        }
+
+        $memberId = request()->query('member_id');
+        if (!is_numeric($memberId)) {
+            return null;
+        }
+
+        return Member::find((int) $memberId);
     }
 }

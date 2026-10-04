@@ -69,7 +69,8 @@ final class MemberFactory extends Factory
 
     public function inHousehold(Household $household): self
     {
-        return $this->state(static fn (array $_attributes) => [
+        // @mago-expect lint:prefer-static-closure
+        return $this->state(fn (array $_attributes) => [
             'household_id' => $household->id,
         ]);
     }

@@ -20,26 +20,29 @@ use Illuminate\Contracts\Mail\Mailable;
 use Xammie\Mailbook\Facades\Mailbook;
 
 Mailbook::add(NewMemberAdminNotification::class)
-    ->variant('New member admin notification', static fn (): Mailable =>
-        new MailMailable(new NewMemberAdminNotification(
+    ->variant(
+        'New member admin notification',
+        static fn (): Mailable => new MailMailable(new NewMemberAdminNotification(
             MemberId::create(1),
-            "Jan de Vries",
+            'Jan de Vries',
             new MembershipData(
                 true,
                 false,
                 true,
                 true,
-                "123"
+                '123',
             ),
-            new Recipient("admin", "admin@admin.nl"),
-        ))
+            new Recipient('admin', 'admin@admin.nl'),
+        )),
     );
 
 Mailbook::add(NewMemberWelcome::class)
-    ->variant('New member welcome', static fn (): Mailable =>
-        new MailMailable(new NewMemberWelcome(
-            new Recipient("Jan de Vries", "jan@devries.nl"),
-        ))
+    ->variant(
+        'New member welcome',
+        static fn (): Mailable => new MailMailable(new NewMemberWelcome(
+            new Recipient('Jan de Vries', 'jan@devries.nl'),
+            'https://example.test/reset-password/token?email=jan%40example.com',
+        )),
     );
 
 Mailbook::add(InvoiceMail::class)
@@ -143,6 +146,6 @@ Mailbook::add(InvoiceBatchCreatedMail::class)
                 invoiceCount: 12,
                 total: new CompoundPrice(1500.00, 315.00),
             ),
-            new Recipient('Financiële administratie', 'financieel@domain.nl')
+            new Recipient('Financiële administratie', 'financieel@domain.nl'),
         ));
     });

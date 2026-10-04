@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Members\RelationManagers;
 
+use App\Filament\Admin\RelationManagers\MemberRelationManager;
 use App\Filament\Admin\Resources\Activities\ActivityResource;
 use App\Models\Activity as ActivityModel;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
-use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Override;
 
-final class ActivitiesRelationManager extends RelationManager
+final class ActivitiesRelationManager extends MemberRelationManager
 {
     #[Override]
     protected static string $relationship = 'activities';
@@ -56,11 +56,13 @@ final class ActivitiesRelationManager extends RelationManager
             ])
             ->recordActions([
                 DetachAction::make()
+                    ->visible(static fn (): bool => auth()->user()?->can('update_activities') ?? false)
                     ->successNotificationTitle(__('notifications.activity_detached')),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DetachBulkAction::make(),
+                    DetachBulkAction::make()
+                        ->visible(static fn (): bool => auth()->user()?->can('update_activities') ?? false),
                 ]),
             ]);
     }

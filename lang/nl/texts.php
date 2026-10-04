@@ -40,4 +40,7 @@ return [
             'message' => 'Bedankt voor je inschrijving. We nemen zo snel mogelijk contact met je op.',
         ],
     ],
+    'reset_password' => [
+        'explainer' => 'Kies een nieuw wachtwoord voor je account. Na het instellen word je doorgestuurd naar je persoonlijke omgeving.',
+    ],
 ];

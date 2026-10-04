@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Member;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Override;
@@ -29,13 +31,20 @@ final class UserFactory extends Factory
         ];
     }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
+    public function memberUser(): self
     {
-        return $this->state(static fn (array $_attributes) => [
-            'email_verified_at' => null,
-        ]);
+        return $this->has(
+            Member::factory()
+                ->withPaymentInfo()
+                ->state(function (array $attributes, Model $user) {
+                    assert($user instanceof User);
+                    
+                    return [
+                        'email' => $user->email,
+                    ];
+                })
+        );
     }
+
+
 }

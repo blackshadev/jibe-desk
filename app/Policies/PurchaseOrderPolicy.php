@@ -20,6 +20,24 @@ final class PurchaseOrderPolicy extends ResourcePolicy
     }
 
     #[Override]
+    public function view(User $user, Model $purchaseOrder): bool
+    {
+        Assert::isInstanceOf($purchaseOrder, PurchaseOrder::class);
+
+        if ($user->can('view_purchase_orders')) {
+            return true;
+        }
+
+        return $user->member?->id === $purchaseOrder->member_id;
+    }
+
+    #[Override]
+    public function create(User $user): bool
+    {
+        return $user->can('create_purchase_orders') || $user->isMember();
+    }
+
+    #[Override]
     public function update(User $user, Model $purchaseOrder): bool
     {
         Assert::isInstanceOf($purchaseOrder, PurchaseOrder::class);
@@ -27,7 +45,7 @@ final class PurchaseOrderPolicy extends ResourcePolicy
             return false;
         }
 
-        return $user->can('update_purchase_orders') || $purchaseOrder->member_id === $user->id;
+        return $user->can('update_purchase_orders');
     }
 
     #[Override]
@@ -38,7 +56,7 @@ final class PurchaseOrderPolicy extends ResourcePolicy
             return false;
         }
 
-        return $user->can('delete_purchase_orders') || $purchaseOrder->member_id === $user->id;
+        return $user->can('delete_purchase_orders');
     }
 
     public function markAsApproved(User $user, Model $purchaseOrder): bool

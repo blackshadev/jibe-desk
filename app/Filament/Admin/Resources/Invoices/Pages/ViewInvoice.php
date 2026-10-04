@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Invoices\Pages;
 
-use App\Domain\Invoices\InvoiceId;
-use App\Domain\Invoices\InvoiceIdList;
-use App\Domain\Invoices\InvoiceService;
 use App\Filament\Admin\Resources\Invoices\Actions\CreateCreditAction;
 use App\Filament\Admin\Resources\Invoices\Actions\MarkAsDeclinedAction;
 use App\Filament\Admin\Resources\Invoices\Actions\MarkAsPaidAction;
@@ -15,21 +12,26 @@ use App\Filament\Admin\Resources\Invoices\Actions\ResendInvoiceEmailAction;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceBankTransactionsRelationManager;
 use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceBookkeepingRecordsRelationManager;
-use App\Models\Invoice;
-use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Support\Enums\Size;
 use Livewire\Attributes\On;
 use Override;
-use Filament\Support\Enums\ActionSize;
 
 final class ViewInvoice extends ViewRecord
 {
     #[Override]
     protected static string $resource = InvoiceResource::class;
+
+    #[Override]
+    public static function authorizeResourceAccess(): void
+    {
+        abort_unless(
+            static::getResource()::canAccess() || (auth()->user()?->isMember() ?? false),
+            403,
+        );
+    }
 
     #[Override]
     protected function getHeaderActions(): array
@@ -58,7 +60,7 @@ final class ViewInvoice extends ViewRecord
     }
 
     #[Override]
-    public function getRelationManagers(): array
+    protected function getAllRelationManagers(): array
     {
         return [
             InvoiceBankTransactionsRelationManager::class,
@@ -69,7 +71,7 @@ final class ViewInvoice extends ViewRecord
     #[Override]
     public function hasCombinedRelationManagerTabsWithContent(): bool
     {
-        return true;
+        return auth()->user()->isAdmin();
     }
 
     #[Override]

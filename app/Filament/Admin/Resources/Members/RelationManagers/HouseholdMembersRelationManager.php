@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Members\RelationManagers;
 
+use App\Filament\Admin\RelationManagers\MemberRelationManager;
 use App\Filament\Admin\Resources\Households\Actions\HouseholdMemberActions;
-use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Override;
 
-final class HouseholdMembersRelationManager extends RelationManager
+final class HouseholdMembersRelationManager extends MemberRelationManager
 {
     #[Override]
     protected static string $relationship = 'householdMembers';

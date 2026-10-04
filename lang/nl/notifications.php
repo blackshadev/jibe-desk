@@ -40,4 +40,5 @@ return [
     'credit_invoice_created' => 'Creditfactuur succesvol aangemaakt',
     'invoice_email_resent' => 'Factuurmail opnieuw verzonden',
     'chain_status_updated' => 'Aansluiting controle bijgewerkt',
+    'user_account_created' => 'Account aangemaakt; het lid ontvangt een e-mail om een wachtwoord in te stellen',
 ];

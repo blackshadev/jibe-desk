@@ -22,6 +22,10 @@ final class MembersTable
                     ->label(__('labels.name')),
                 TextColumn::make('membership.name')
                     ->label(__('labels.membership')),
+                TextColumn::make('user.email')
+                    ->label(__('labels.account'))
+                    ->placeholder(__('labels.no_account'))
+                    ->searchable(),
                 TextColumn::make('created_at')
                     ->label(__('labels.created_at'))
                     ->dateTime()

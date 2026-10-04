@@ -13,6 +13,7 @@ final readonly class NewMemberWelcome extends BaseMail
 {
     public function __construct(
         public Recipient $recipient,
+        public string $setPasswordUrl,
     ) {}
 
     #[Override]
@@ -22,6 +23,7 @@ final readonly class NewMemberWelcome extends BaseMail
             markdown: 'mail.new-member-welcome',
             with: [
                 'memberName' => $this->recipient->name,
+                'setPasswordUrl' => $this->setPasswordUrl,
             ],
         );
     }

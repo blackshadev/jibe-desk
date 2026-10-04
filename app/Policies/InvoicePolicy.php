@@ -20,6 +20,14 @@ final class InvoicePolicy extends ResourcePolicy
     }
 
     #[Override]
+    public function view(User $user, Model $invoice): bool
+    {
+        Assert::isInstanceOf($invoice, Invoice::class);
+
+        return $user->can('view_invoices') || ($user->member !== null && $invoice->member_id === $user->member->id);
+    }
+
+    #[Override]
     public function update(User $user, Model $invoice): bool
     {
         Assert::isInstanceOf($invoice, Invoice::class);

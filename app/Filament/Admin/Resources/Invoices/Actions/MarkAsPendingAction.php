@@ -20,8 +20,8 @@ final class MarkAsPendingAction
             ->icon('heroicon-m-clock')
             ->color('gray')
             ->requiresConfirmation()
-            ->modalDescription(static fn (Invoice $record) => __($record->member_id !== null ?  'labels.manual_mark_pending_warning' : 'labels.manual_mark_pending_check'))
-            ->modalIcon(static fn (Invoice $record) =>  $record->member_id !== null ? 'heroicon-m-exclamation-triangle' : null)
+            ->modalDescription(static fn (Invoice $record) => __($record->member_id !== null ? 'labels.manual_mark_pending_warning' : 'labels.manual_mark_pending_check'))
+            ->modalIcon(static fn (Invoice $record) => $record->member_id !== null ? 'heroicon-m-exclamation-triangle' : null)
             ->modalIconColor(static fn (Invoice $record) => $record->member_id !== null ? 'danger' : 'primary')
             ->visible(static fn (Invoice $record) => auth()->user()?->can('mark-pending', $record) ?? false)
             ->action(static function (Invoice $record, InvoiceService $invoiceService): void {

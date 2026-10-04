@@ -6,9 +6,9 @@ namespace App\Filament\Admin\Resources\Members\RelationManagers;
 
 use App\Domain\Invoices\Billing\BillPeriod;
 use App\Domain\Invoices\Formatters\PriceFormatter;
+use App\Filament\Admin\RelationManagers\MemberRelationManager;
 use App\Models\BillableItemInstance;
 use Filament\Actions\Action;
-use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Override;
 
-final class BillableItemInstancesRelationManager extends RelationManager
+final class BillableItemInstancesRelationManager extends MemberRelationManager
 {
     #[Override]
     protected static string $relationship = 'billableItemInstances';

@@ -21,6 +21,16 @@ final class ViewPurchaseOrder extends ViewRecord
     protected static string $resource = PurchaseOrderResource::class;
 
     #[Override]
+    public static function authorizeResourceAccess(): void
+    {
+
+        abort_unless(
+            static::getResource()::canAccess() || (auth()->user()?->isMember() ?? false),
+            403,
+        );
+    }
+
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [
@@ -44,7 +54,7 @@ final class ViewPurchaseOrder extends ViewRecord
     }
 
     #[Override]
-    public function getRelationManagers(): array
+    protected function getAllRelationManagers(): array
     {
         return [
             PurchaseOrderBankTransactionsRelationManager::class,
@@ -55,7 +65,7 @@ final class ViewPurchaseOrder extends ViewRecord
     #[Override]
     public function hasCombinedRelationManagerTabsWithContent(): bool
     {
-        return true;
+        return auth()->user()->isAdmin();
     }
 
     #[Override]

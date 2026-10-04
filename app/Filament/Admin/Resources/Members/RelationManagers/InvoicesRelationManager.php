@@ -8,6 +8,7 @@ use App\Domain\Invoices\InvoiceGenerator;
 use App\Domain\Invoices\InvoiceStatus;
 use App\Domain\Invoices\InvoiceTarget;
 use App\Domain\Members\MemberId;
+use App\Filament\Admin\RelationManagers\MemberRelationManager;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Filament\Admin\Utils\ResourceRouteHelper;
 use App\Models\Invoice;
@@ -21,7 +22,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Override;
 
-final class InvoicesRelationManager extends RelationManager
+final class InvoicesRelationManager extends MemberRelationManager
 {
     #[Override]
     protected static string $relationship = 'invoices';

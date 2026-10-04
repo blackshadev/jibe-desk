@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Invoices\Pages;
 
-use App\Domain\Invoices\InvoiceId;
-use App\Domain\Invoices\InvoiceIdList;
-use App\Domain\Invoices\InvoiceService;
 use App\Filament\Admin\Resources\Invoices\Actions\CreateCreditAction;
 use App\Filament\Admin\Resources\Invoices\Actions\MarkAsDeclinedAction;
 use App\Filament\Admin\Resources\Invoices\Actions\MarkAsPaidAction;
@@ -16,8 +13,6 @@ use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceBankTransactionsRelationManager;
 use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceBookkeepingRecordsRelationManager;
 use App\Filament\Admin\Utils\ResourceRouteHelper;
-use App\Models\Invoice;
-use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
@@ -50,7 +45,7 @@ final class EditInvoice extends EditRecord
     }
 
     #[Override]
-    public function getRelationManagers(): array
+    protected function getAllRelationManagers(): array
     {
         return [
             InvoiceBankTransactionsRelationManager::class,

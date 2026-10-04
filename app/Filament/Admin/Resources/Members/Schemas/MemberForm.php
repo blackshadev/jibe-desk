@@ -15,6 +15,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Operation;
 
 final class MemberForm
 {
@@ -37,6 +38,11 @@ final class MemberForm
 
                                 TextInput::make('last_name')
                                     ->label(__('labels.last_name'))
+                                    ->required(),
+
+                                TextInput::make('email')
+                                    ->label(__('labels.email'))
+                                    ->email()
                                     ->required(),
 
                                 Select::make('gender')
@@ -79,11 +85,18 @@ final class MemberForm
 
                                 Toggle::make('is_volunteer')
                                     ->label(__('labels.is_volunteer')),
+
+                                TextInput::make('user.email')
+                                    ->label(__('labels.account'))
+                                    ->formatStateUsing(static fn (?Member $record): ?string => $record?->user?->email)
+                                    ->disabled()
+                                    ->dehydrated(false)
+                                    ->visible(static fn (string $operation): bool => $operation === Operation::Edit->value),
                             ]),
 
                         Tabs\Tab::make(__('labels.address_information'))
                             ->columns(12)
-                            ->disabled(static fn (): bool => !auth()->user()?->can('update_member_address_information'))
+                            ->disabled(static fn (Member $record): bool => !auth()->user()?->can('update-address-information', $record))
                             ->schema([
                                 TextInput::make('address_street')
                                     ->columnSpan(6)
@@ -111,7 +124,7 @@ final class MemberForm
                                     ->columnSpan(6)
                                     ->label(__('labels.address_city')),
                             ])
-                            ->visible(static fn (): bool => auth()->user()?->can('view_member_address_information') ?? false),
+                            ->visible(static fn (Member $record): bool => auth()->user()?->can('view-address-information', $record) ?? false),
 
                         Tabs\Tab::make(__('labels.payment_information'))
                             ->schema([
@@ -119,7 +132,7 @@ final class MemberForm
                                     ->relationship('paymentInformation')
                                     ->columns(2)
                                     ->columnSpanFull()
-                                    ->disabled(static fn (): bool => !auth()->user()?->can('update_member_payment_information'))
+                                    ->disabled(static fn (Member $record): bool => !auth()->user()?->can('update-payment-information', $record))
                                     ->schema([
                                         TextInput::make('banking_account_number')
                                             ->label(__('labels.banking_account_number'))
@@ -147,7 +160,7 @@ final class MemberForm
                                             ->dehydrated(false),
                                     ]),
                             ])
-                            ->visible(static fn (): bool => auth()->user()?->can('view_member_payment_information') ?? false),
+                            ->visible(static fn (Member $record): bool => auth()->user()?->can('view-payment-information', $record) ?? false),
 
                         Tabs\Tab::make(__('labels.registration_details'))
                             ->schema([
@@ -183,7 +196,7 @@ final class MemberForm
                                             ]),
                                     ]),
                             ])
-                            ->visible(static fn (): bool => auth()->user()?->can('view_member_registration_data') ?? false),
+                            ->visible(static fn (Member $record): bool => auth()->user()?->can('view-registration-data', $record) ?? false),
                     ]),
             ]);
     }

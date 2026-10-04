@@ -11,11 +11,13 @@ use Tests\UnitTestCase;
 
 final class NewMemberWelcomeTest extends UnitTestCase
 {
+    private const SET_PASSWORD_URL = 'https://example.test/reset-password/abc?email=jan%40example.com';
+
     public function test_it_exposes_the_recipient(): void
     {
         $recipient = new Recipient('Vries, Jan de', 'jan@example.com');
 
-        $mail = new NewMemberWelcome($recipient);
+        $mail = new NewMemberWelcome($recipient, self::SET_PASSWORD_URL);
 
         static::assertSame($recipient, $mail->to());
     }
@@ -24,15 +26,17 @@ final class NewMemberWelcomeTest extends UnitTestCase
     {
         $mail = new NewMemberWelcome(
             new Recipient('Vries, Jan de', 'jan@example.com'),
+            self::SET_PASSWORD_URL,
         );
 
         static::assertSame('Welkom bij Almere Centraal!', $mail->subject());
     }
 
-    public function test_content_uses_the_welcome_template_and_passes_the_member_name(): void
+    public function test_content_uses_the_welcome_template_and_passes_the_member_name_and_url(): void
     {
         $mail = new NewMemberWelcome(
             new Recipient('Vries, Jan de', 'jan@example.com'),
+            self::SET_PASSWORD_URL,
         );
 
         $content = $mail->content();
@@ -40,12 +44,14 @@ final class NewMemberWelcomeTest extends UnitTestCase
         static::assertInstanceOf(Content::class, $content);
         static::assertSame('mail.new-member-welcome', $content->markdown);
         static::assertSame('Vries, Jan de', $content->with['memberName']);
+        static::assertSame(self::SET_PASSWORD_URL, $content->with['setPasswordUrl']);
     }
 
     public function test_related_is_null_by_default(): void
     {
         $mail = new NewMemberWelcome(
             new Recipient('Vries, Jan de', 'jan@example.com'),
+            self::SET_PASSWORD_URL,
         );
 
         static::assertNull($mail->related());

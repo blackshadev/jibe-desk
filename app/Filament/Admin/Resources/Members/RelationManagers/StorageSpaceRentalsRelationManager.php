@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Members\RelationManagers;
 
+use App\Filament\Admin\RelationManagers\MemberRelationManager;
 use App\Filament\Admin\Resources\StorageSpaces\Schemas\StorageSpaceRentalForm;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Override;
 
-final class StorageSpaceRentalsRelationManager extends RelationManager
+final class StorageSpaceRentalsRelationManager extends MemberRelationManager
 {
     #[Override]
     protected static string $relationship = 'storageSpaceRentals';

@@ -9,6 +9,8 @@ use App\Domain\Mail\FinancialAdministrationRecipient;
 use App\Domain\Mail\MemberAdministrationRecipient;
 use App\Domain\Mail\Recipient;
 use Carbon\FactoryImmutable;
+use Illuminate\Auth\Passwords\PasswordBroker;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\ServiceProvider;
 use Override;
 use Psr\Clock\ClockInterface;
@@ -44,6 +46,11 @@ final class AppServiceProvider extends ServiceProvider
                     email: config('mail.invoicing.address'),
                 ),
             ));
+
+        $this->app->bind(
+            PasswordBroker::class,
+            static fn () => Password::broker('users'),
+        );
     }
 
     public function boot(): void

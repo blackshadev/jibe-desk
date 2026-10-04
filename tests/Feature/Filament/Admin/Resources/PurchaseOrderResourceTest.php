@@ -16,6 +16,8 @@ use App\Filament\Admin\Resources\PurchaseOrders\Pages\CreatePurchaseOrder;
 use App\Filament\Admin\Resources\PurchaseOrders\Pages\EditPurchaseOrder;
 use App\Filament\Admin\Resources\PurchaseOrders\Pages\ListPurchaseOrders;
 use App\Filament\Admin\Resources\PurchaseOrders\Pages\ViewPurchaseOrder;
+use App\Filament\Admin\Resources\PurchaseOrders\RelationManagers\PurchaseOrderBankTransactionsRelationManager;
+use App\Filament\Admin\Resources\PurchaseOrders\RelationManagers\PurchaseOrderBookkeepingRecordsRelationManager;
 use App\Models\BankTransaction;
 use App\Models\CostCenter;
 use App\Models\Member;
@@ -363,6 +365,22 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
             ->assertHasNoFormErrors();
 
         $this->assertDatabaseHas('purchase_orders', ['id' => $po->id, 'notes' => 'Gekocht voor het zeilkamp']);
+    }
+
+    public function test_admin_sees_financial_relation_managers_on_purchase_order(): void
+    {
+        $this->withAuthorizedUser();
+        $purchaseOrder = PurchaseOrder::factory()->open()->withLines()->create();
+
+        $component = Livewire::test(ViewPurchaseOrder::class, ['record' => $purchaseOrder->getRouteKey()])->instance();
+
+        static::assertSame(
+            [
+                PurchaseOrderBankTransactionsRelationManager::class,
+                PurchaseOrderBookkeepingRecordsRelationManager::class,
+            ],
+            array_values($component->getRelationManagers()),
+        );
     }
 
     private function attachCompletedTransaction(PurchaseOrder $purchaseOrder): BankTransaction

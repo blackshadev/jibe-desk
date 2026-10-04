@@ -11,4 +11,5 @@ return [
     'payment_information' => 'Betaling informatie',
     'confirmation' => 'Bevestigen',
     'success' => 'Gelukt!',
+    'reset_password' => 'Wachtwoord instellen',
 ];

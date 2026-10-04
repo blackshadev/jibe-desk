@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Domain\Authorization\RoleName;
 use App\Notifications\QueuedResetPassword;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
@@ -18,7 +19,7 @@ use Override;
 use SensitiveParameter;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'email_verified_at'])]
 #[Hidden(['password', 'remember_token'])]
 final class User extends Authenticatable implements FilamentUser
 {
@@ -52,8 +53,26 @@ final class User extends Authenticatable implements FilamentUser
         return $this->hasVerifiedEmail();
     }
 
+    /** @return HasOne<Member, $this> */
     public function member(): HasOne
     {
         return $this->hasOne(Member::class);
+    }
+
+    public function isMember(): bool
+    {
+        return $this->member()->exists();
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->hasAnyRole(
+            array_map(static fn (RoleName $role): string => $role->value, RoleName::cases()),
+        );
+    }
+
+    public function visibleMemberIds(): array
+    {
+        return $this->member?->visibleMemberIds() ?? [];
     }
 }

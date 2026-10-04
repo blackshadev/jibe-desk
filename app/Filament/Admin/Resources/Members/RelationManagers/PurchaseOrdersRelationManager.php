@@ -6,6 +6,7 @@ namespace App\Filament\Admin\Resources\Members\RelationManagers;
 
 use App\Domain\Invoices\CompoundPrice;
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Filament\Admin\RelationManagers\MemberRelationManager;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Filament\Admin\Utils\ResourceRouteHelper;
 use App\Models\PurchaseOrder;
@@ -17,7 +18,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Override;
 
-final class PurchaseOrdersRelationManager extends RelationManager
+final class PurchaseOrdersRelationManager extends MemberRelationManager
 {
     #[Override]
     protected static string $relationship = 'purchaseOrders';
@@ -56,6 +57,7 @@ final class PurchaseOrdersRelationManager extends RelationManager
             ->filters([])
             ->headerActions([
                 CreateAction::make()
+                    ->visible(static fn (): bool => auth()->user()?->can('create', PurchaseOrder::class) ?? false)
                     ->url(static fn (RelationManager $livewire): string => PurchaseOrderResource::getUrl('create', [
                         'member_id' => $livewire->getOwnerRecord()->getKey(),
                     ])),

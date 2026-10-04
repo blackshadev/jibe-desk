@@ -13,6 +13,7 @@ use App\Filament\Admin\Resources\Invoices\Pages\EditInvoice;
 use App\Filament\Admin\Resources\Invoices\Pages\ListInvoices;
 use App\Filament\Admin\Resources\Invoices\Pages\ViewInvoice;
 use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceBankTransactionsRelationManager;
+use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceBookkeepingRecordsRelationManager;
 use App\Models\BankTransaction;
 use App\Models\BookkeepingRecord;
 use App\Models\Invoice;
@@ -402,5 +403,21 @@ final class InvoiceResourceTest extends FeatureTestCase
         Livewire::test(EditInvoice::class, ['record' => $invoice->getRouteKey()])
             ->assertSuccessful()
             ->assertActionHidden('resendInvoiceEmail');
+    }
+
+    public function test_admin_sees_financial_relation_managers_on_invoice(): void
+    {
+        $this->withAuthorizedUser();
+        $invoice = Invoice::factory()->withLines(1)->createQuietly();
+
+        $component = Livewire::test(ViewInvoice::class, ['record' => $invoice->getRouteKey()])->instance();
+
+        static::assertSame(
+            [
+                InvoiceBankTransactionsRelationManager::class,
+                InvoiceBookkeepingRecordsRelationManager::class,
+            ],
+            array_values($component->getRelationManagers()),
+        );
     }
 }

@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Concerns;
 
-use App\Domain\Authorization\ResourcePermission;
 use App\Domain\Authorization\RoleName;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 trait WithAuthorizedUser
@@ -26,16 +24,8 @@ trait WithAuthorizedUser
     {
         $this->seedPermissionsAndRoles();
 
-        $role = Role::firstOrCreate(['name' => 'full_access']);
-
-        $permissions = collect(ResourcePermission::cases())
-            ->map(static fn (ResourcePermission $p) => $p->value)
-            ->all();
-
-        $role->syncPermissions($permissions);
-
         $user = User::factory()->createQuietly();
-        $user->assignRole($role);
+        $user->syncRoles(RoleName::cases());
 
         $this->actingAs($user);
 

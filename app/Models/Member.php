@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Domain\Members\Gender;
 use App\Domain\Members\MemberNameFormatter;
+use App\Domain\Registration\FormData;
 use App\Models\Pivots\ActivityMember;
 use App\Observers\MemberObserver;
 use Carbon\Carbon;
@@ -25,7 +26,10 @@ use Override;
 use RuntimeException;
 
 /**
+ * @phpstan-import-type FormDataArray from FormData
+ *
  * @property null|DateTimeInterface $stopped_at
+ * @property FormDataArray|null $registration_data
  */
 #[Guarded('id', 'updated_at', 'created_at')]
 #[ObservedBy([MemberObserver::class])]
@@ -33,10 +37,34 @@ final class Member extends Model
 {
     use HasFactory;
 
+    /** @return BelongsTo<User, $this> */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     /** @return HasMany<Invoice, $this> */
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    /**
+     * The member ids visible to this member's login: self + household members.
+     *
+     * @return list<int>
+     */
+    public function visibleMemberIds(): array
+    {
+        if ($this->household_id === null) {
+            return [$this->id];
+        }
+
+        return self::query()
+            ->where('household_id', $this->household_id)
+            ->pluck('id')
+            ->map(static fn (int $id): int => $id)
+            ->all();
     }
 
     /** @return HasMany<PurchaseOrder, $this> */

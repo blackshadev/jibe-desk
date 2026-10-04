@@ -72,6 +72,7 @@ final class PurchaseOrderForm
                     ->schema([
                         Select::make('member_id')
                             ->label(__('labels.member'))
+                            ->visible(static fn (): bool => auth()->user()?->can('update_purchase_orders') ?? false)
                             ->options(
                                 static fn (): array => Member::query()
                                     ->get()

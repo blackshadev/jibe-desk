@@ -28,4 +28,11 @@ final readonly class MailSenderExpectation
             ->expects('send')
             ->with(equalTo($mail));
     }
+
+    public function expectsNotToSend(): void
+    {
+        $this->mock
+            ->expects('send')
+            ->never();
+    }
 }

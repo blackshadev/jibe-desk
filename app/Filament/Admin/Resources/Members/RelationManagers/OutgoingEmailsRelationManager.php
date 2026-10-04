@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\Members\RelationManagers;
 
 use App\Filament\Admin\Labels\OutgoingEmailStatusLabels;
-use Filament\Resources\RelationManagers\RelationManager;
+use App\Filament\Admin\RelationManagers\MemberRelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Override;
 
-final class OutgoingEmailsRelationManager extends RelationManager
+final class OutgoingEmailsRelationManager extends MemberRelationManager
 {
     #[Override]
     protected static string $relationship = 'outgoingEmails';
