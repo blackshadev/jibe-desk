@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Bookkeeping;
 
+use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderIdList;
@@ -17,6 +18,12 @@ interface BookkeepingRecordRepository
     public function createForPurchaseOrder(PurchaseOrderIdList $ids): void;
 
     public function createForInvoice(InvoiceIdList $ids): void;
+
+    public function linkToBankTransaction(
+        BankTransactionId $bankTransactionId,
+        InvoiceIdList $invoiceIds,
+        PurchaseOrderIdList $purchaseOrderIds,
+    ): void;
 
     /**
      * @return list<CostCenterYearResult>

@@ -7,6 +7,7 @@ namespace Tests\Unit\Domain\Invoices;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceIdList;
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use stdClass;
 use Tests\UnitTestCase;
 
@@ -31,5 +32,21 @@ final class InvoiceIdListTest extends UnitTestCase
         $this->expectException(InvalidArgumentException::class);
 
         new InvoiceIdList([new stdClass()]);
+    }
+
+    /** @return iterable<string, array{int[], int[]}> */
+    public static function valuesProvider(): iterable
+    {
+        yield 'multiple ids' => [[1, 2, 3], [1, 2, 3]];
+        yield 'empty list' => [[], []];
+    }
+
+    /** @param int[] $input @param int[] $expected */
+    #[DataProvider('valuesProvider')]
+    public function test_it_returns_values(array $input, array $expected): void
+    {
+        $subject = InvoiceIdList::fromArray($input);
+
+        static::assertSame($expected, $subject->values());
     }
 }

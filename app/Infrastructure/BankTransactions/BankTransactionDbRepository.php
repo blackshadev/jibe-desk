@@ -12,22 +12,28 @@ use App\Domain\BankTransactions\CouldNotCompleteTransaction;
 use App\Domain\BankTransactions\CreateBankTransaction;
 use App\Domain\BankTransactions\MatchCriteria;
 use App\Domain\BankTransactions\ResolveStatus;
+use App\Domain\Bookkeeping\BookkeepingRecordRepository;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceIdList;
+use App\Domain\Invoices\InvoiceRepository;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Domain\PurchaseOrders\PurchaseOrderIdList;
+use App\Domain\PurchaseOrders\PurchaseOrderRepository;
 use App\Models\BankAccount;
 use App\Models\BankTransaction;
 use App\Models\BookkeepingRecord;
-use App\Models\Invoice;
-use App\Models\PurchaseOrder;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Override;
 
-/** @mago-expect lint:cyclomatic-complexity */
 final readonly class BankTransactionDbRepository implements BankTransactionRepository
 {
+    public function __construct(
+        private InvoiceRepository $invoiceRepository,
+        private PurchaseOrderRepository $purchaseOrderRepository,
+        private BookkeepingRecordRepository $bookkeepingRecordRepository,
+    ) {}
+
     #[Override]
     public function create(CreateBankTransaction $dto): BankTransactionId
     {
@@ -128,32 +134,38 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
     #[Override]
     public function complete(BankTransactionId $bankTransactionId): void
     {
-        DB::transaction(static function () use ($bankTransactionId): void {
+        DB::transaction(function () use ($bankTransactionId): void {
             $bt = BankTransaction::query()
                 ->with(['invoices.lines', 'purchaseOrders.lines'])
+                ->lockForUpdate()
                 ->findOrFail($bankTransactionId->value);
 
             if (abs($bt->unmatched_amount) >= 0.01) {
                 throw new CouldNotCompleteTransaction();
             }
 
+            $invoiceIds = new InvoiceIdList(
+                $bt
+                    ->invoices
+                    ->pluck('id')
+                    ->map(InvoiceId::create(...))
+                    ->all(),
+            );
+            $purchaseOrderIds = new PurchaseOrderIdList(
+                $bt
+                    ->purchaseOrders
+                    ->pluck('id')
+                    ->map(PurchaseOrderId::create(...))
+                    ->all(),
+            );
+
+            $this->invoiceRepository->markAsPaid($invoiceIds);
+            $this->purchaseOrderRepository->markAsPaid($purchaseOrderIds);
+            $this->bookkeepingRecordRepository->createForInvoice($invoiceIds);
+            $this->bookkeepingRecordRepository->createForPurchaseOrder($purchaseOrderIds);
+            $this->bookkeepingRecordRepository->linkToBankTransaction($bankTransactionId, $invoiceIds, $purchaseOrderIds);
+
             $bt->update(['status' => BankTransactionStatus::Completed]);
-
-            $invoiceIds = $bt->invoices->pluck('id');
-            if ($invoiceIds->isNotEmpty()) {
-                BookkeepingRecord::query()
-                    ->where('reference_type', Invoice::class)
-                    ->whereIn('reference_id', $invoiceIds)
-                    ->update(['bank_transaction_id' => $bankTransactionId->value]);
-            }
-
-            $poIds = $bt->purchaseOrders->pluck('id');
-            if ($poIds->isNotEmpty()) {
-                BookkeepingRecord::query()
-                    ->where('reference_type', PurchaseOrder::class)
-                    ->whereIn('reference_id', $poIds)
-                    ->update(['bank_transaction_id' => $bankTransactionId->value]);
-            }
         });
     }
 

@@ -66,6 +66,7 @@ final class InvoicesRelationManager extends RelationManager
                                 InvoiceId::create($record->id),
                             );
                         })
+                        ->after(static fn (RelationManager $livewire) => $livewire->dispatch('refresh'))
                         ->successNotificationTitle(__('labels.detached')),
                 ],
             );

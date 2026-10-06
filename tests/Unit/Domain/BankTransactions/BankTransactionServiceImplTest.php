@@ -68,16 +68,7 @@ final class BankTransactionServiceImplTest extends FeatureTestCase
     public function test_complete_marks_as_paid_and_completes(): void
     {
         $bankTransactionId = BankTransactionId::create(1);
-        $invoiceId = InvoiceId::create(2);
-        $purchaseOrderId = PurchaseOrderId::create(3);
 
-        $invoiceIdList = new InvoiceIdList([$invoiceId]);
-        $purchaseOrderIdList = new PurchaseOrderIdList([$purchaseOrderId]);
-
-        $this->repo->expectsGetAttachedInvoiceIds($bankTransactionId, $invoiceIdList);
-        $this->repo->expectsGetAttachedPurchaseOrderIds($bankTransactionId, $purchaseOrderIdList);
-        $this->invoiceService->expectsMarkAsPaid($invoiceIdList);
-        $this->purchaseOrderService->expectsMarkAsPaid($purchaseOrderIdList);
         $this->repo->expectsComplete($bankTransactionId);
 
         $this->service->complete($bankTransactionId);

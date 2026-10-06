@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Infrastructure\Bookkeeping;
 
+use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use App\Infrastructure\Bookkeeping\BookkeepingRecordDbRepository;
+use App\Models\BankTransaction;
 use App\Models\BookkeepingRecord;
 use App\Models\CostCenter;
 use App\Models\CostCenterBudget;
@@ -332,5 +334,40 @@ final class BookkeepingRecordDbRepositoryTest extends FeatureTestCase
             'amount_price' => 100.0,
             'amount_vat' => 21.0,
         ]);
+    }
+
+    public function test_link_to_bank_transaction_links_records_of_given_references(): void
+    {
+        $costCenter = CostCenter::factory()->create();
+        $bankTransaction = BankTransaction::factory()->create();
+        $invoice = Invoice::factory()->create(['date' => '2026-06-15', 'status' => 'open']);
+        $purchaseOrder = PurchaseOrder::factory()->create(['date' => '2026-06-15']);
+        $otherInvoice = Invoice::factory()->create(['date' => '2026-06-15', 'status' => 'open']);
+
+        $invoiceRecord = BookkeepingRecord::factory()->create([
+            'reference_type' => Invoice::class,
+            'reference_id' => $invoice->id,
+            'cost_center_id' => $costCenter->id,
+        ]);
+        $purchaseOrderRecord = BookkeepingRecord::factory()->create([
+            'reference_type' => PurchaseOrder::class,
+            'reference_id' => $purchaseOrder->id,
+            'cost_center_id' => $costCenter->id,
+        ]);
+        $otherRecord = BookkeepingRecord::factory()->create([
+            'reference_type' => Invoice::class,
+            'reference_id' => $otherInvoice->id,
+            'cost_center_id' => $costCenter->id,
+        ]);
+
+        $this->repository->linkToBankTransaction(
+            BankTransactionId::create($bankTransaction->id),
+            new InvoiceIdList([InvoiceId::create($invoice->id)]),
+            new PurchaseOrderIdList([PurchaseOrderId::create($purchaseOrder->id)]),
+        );
+
+        static::assertSame($bankTransaction->id, $invoiceRecord->refresh()->bank_transaction_id);
+        static::assertSame($bankTransaction->id, $purchaseOrderRecord->refresh()->bank_transaction_id);
+        static::assertNull($otherRecord->refresh()->bank_transaction_id);
     }
 }

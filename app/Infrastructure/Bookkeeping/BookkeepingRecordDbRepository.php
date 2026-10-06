@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Bookkeeping;
 
+use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\Bookkeeping\BookkeepingRecordRepository;
 use App\Domain\Bookkeeping\CostCenterYearResult;
 use App\Domain\Invoices\Billing\CostCenterId;
@@ -139,6 +140,23 @@ final class BookkeepingRecordDbRepository implements BookkeepingRecordRepository
                     DB::raw(DB::escape($now->format('c'))),
                 ),
         );
+    }
+
+    #[Override]
+    public function linkToBankTransaction(
+        BankTransactionId $bankTransactionId,
+        InvoiceIdList $invoiceIds,
+        PurchaseOrderIdList $purchaseOrderIds,
+    ): void {
+        BookkeepingRecord::query()
+            ->where('reference_type', Invoice::class)
+            ->whereIn('reference_id', $invoiceIds->values())
+            ->update(['bank_transaction_id' => $bankTransactionId->value]);
+
+        BookkeepingRecord::query()
+            ->where('reference_type', PurchaseOrder::class)
+            ->whereIn('reference_id', $purchaseOrderIds->values())
+            ->update(['bank_transaction_id' => $bankTransactionId->value]);
     }
 
     /** @return list<CostCenterYearResult> */

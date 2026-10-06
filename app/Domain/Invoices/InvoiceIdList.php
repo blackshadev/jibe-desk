@@ -26,4 +26,13 @@ final class InvoiceIdList
             ),
         );
     }
+
+    /** @return int[] */
+    public function values(): array
+    {
+        return array_map(
+            static fn (InvoiceId $id): int => $id->value,
+            $this->ids,
+        );
+    }
 }

@@ -102,7 +102,7 @@ final class Invoice extends Model
     protected function displayName(): Attribute
     {
         return Attribute::get(
-            fn () => sprintf('[%s] %s -  %s - %s', $this->date->format('Y-m-d'), $this->invoice_number, $this->member->name, $this->total),
+            fn () => sprintf('[%s] %s -  %s - %s', $this->date->format('Y-m-d'), $this->invoice_number, $this->recipient_name, $this->total),
         );
     }
 

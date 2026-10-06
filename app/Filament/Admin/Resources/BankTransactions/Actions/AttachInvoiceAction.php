@@ -56,6 +56,7 @@ final class AttachInvoiceAction
                     InvoiceId::create((int) $data['invoice_id']),
                 );
             })
+            ->after(static fn (RelationManager $livewire) => $livewire->dispatch('refresh'))
             ->successNotificationTitle(__('labels.attached'));
     }
 }

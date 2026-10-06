@@ -11,7 +11,9 @@ use App\Domain\BankTransactions\CouldNotCompleteTransaction;
 use App\Domain\BankTransactions\CreateBankTransaction;
 use App\Domain\BankTransactions\ResolveStatus;
 use App\Domain\Invoices\InvoiceId;
+use App\Domain\Invoices\InvoiceStatus;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
+use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Infrastructure\BankTransactions\BankTransactionDbRepository;
 use App\Models\BankAccount;
 use App\Models\BankTransaction;
@@ -32,7 +34,7 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
     {
         parent::setUp();
 
-        $this->repository = new BankTransactionDbRepository();
+        $this->repository = app(BankTransactionDbRepository::class);
     }
 
     public function test_it_creates_a_bank_transaction_and_returns_id(): void
@@ -239,8 +241,54 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
         $bankTransaction->refresh();
         static::assertSame(BankTransactionStatus::Completed, $bankTransaction->status);
 
+        $invoice->refresh();
+        static::assertSame(InvoiceStatus::Paid, $invoice->status);
+
         $bookkeepingRecord->refresh();
         static::assertEquals($bankTransaction->id, $bookkeepingRecord->bank_transaction_id);
+    }
+
+    public function test_it_completes_marks_references_as_paid_and_creates_linked_bookkeeping_records(): void
+    {
+        $bankTransaction = BankTransaction::factory()->create(['amount' => 150.00]);
+        $invoice = Invoice::factory()->create(['status' => InvoiceStatus::Open]);
+        InvoiceLine::factory()->create(['invoice_id' => $invoice->id, 'price' => 200.00, 'quantity' => 1]);
+        $purchaseOrder = PurchaseOrder::factory()->create(['status' => PurchaseOrderStatus::Open]);
+        PurchaseOrderLine::factory()->create(['purchase_order_id' => $purchaseOrder->id, 'price' => 50.00]);
+
+        $this->repository->attachInvoice(
+            BankTransactionId::create($bankTransaction->id),
+            InvoiceId::create($invoice->id),
+        );
+        $this->repository->attachPurchaseOrder(
+            BankTransactionId::create($bankTransaction->id),
+            PurchaseOrderId::create($purchaseOrder->id),
+        );
+
+        static::assertDatabaseMissing('bookkeeping_records', [
+            'reference_type' => Invoice::class,
+            'reference_id' => $invoice->id,
+        ]);
+        static::assertDatabaseMissing('bookkeeping_records', [
+            'reference_type' => PurchaseOrder::class,
+            'reference_id' => $purchaseOrder->id,
+        ]);
+
+        $this->repository->complete(BankTransactionId::create($bankTransaction->id));
+
+        static::assertSame(InvoiceStatus::Paid, $invoice->refresh()->status);
+        static::assertSame(PurchaseOrderStatus::Paid, $purchaseOrder->refresh()->status);
+
+        $this->assertDatabaseHas('bookkeeping_records', [
+            'reference_type' => Invoice::class,
+            'reference_id' => $invoice->id,
+            'bank_transaction_id' => $bankTransaction->id,
+        ]);
+        $this->assertDatabaseHas('bookkeeping_records', [
+            'reference_type' => PurchaseOrder::class,
+            'reference_id' => $purchaseOrder->id,
+            'bank_transaction_id' => $bankTransaction->id,
+        ]);
     }
 
     public function test_it_throws_when_completing_with_unmatched_amount(): void
@@ -335,6 +383,27 @@ final class BankTransactionDbRepositoryTest extends FeatureTestCase
 
         $bankTransaction->refresh();
         static::assertSame(BankTransactionStatus::Completed, $bankTransaction->status);
+
+        static::assertSame(InvoiceStatus::Paid, $invoice1->refresh()->status);
+        static::assertSame(InvoiceStatus::Paid, $invoice2->refresh()->status);
+        static::assertSame(PurchaseOrderStatus::Paid, $po1->refresh()->status);
+        static::assertSame(PurchaseOrderStatus::Paid, $po2->refresh()->status);
+
+        foreach ([$invoice1, $invoice2] as $invoice) {
+            $this->assertDatabaseHas('bookkeeping_records', [
+                'reference_type' => Invoice::class,
+                'reference_id' => $invoice->id,
+                'bank_transaction_id' => $bankTransaction->id,
+            ]);
+        }
+
+        foreach ([$po1, $po2] as $purchaseOrder) {
+            $this->assertDatabaseHas('bookkeeping_records', [
+                'reference_type' => PurchaseOrder::class,
+                'reference_id' => $purchaseOrder->id,
+                'bank_transaction_id' => $bankTransaction->id,
+            ]);
+        }
     }
 
     public function test_get_unresolved_ids_returns_only_unresolved(): void
