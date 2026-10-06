@@ -6,8 +6,9 @@ namespace App\Domain\Members\Listeners;
 
 use App\Domain\Mail\MailSender;
 use App\Domain\Mail\MemberAdministrationRecipient;
-use App\Domain\Members\Events\NewMemberRegistration;
+use App\Domain\Registration\Events\NewMemberRegistration;
 use App\Domain\Registration\Mails\NewMemberAdminNotification;
+use App\Domain\Registration\RegistrationSource;
 
 final readonly class SendAdminNewMemberNotification
 {
@@ -18,6 +19,10 @@ final readonly class SendAdminNewMemberNotification
 
     public function handle(NewMemberRegistration $event): void
     {
+        if ($event->source === RegistrationSource::AdminPanel) {
+            return;
+        }
+
         $this->mailSender->send(
             new NewMemberAdminNotification(
                 memberId: $event->memberId,

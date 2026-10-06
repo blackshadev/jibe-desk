@@ -23,7 +23,6 @@ final class ViewPurchaseOrder extends ViewRecord
     #[Override]
     public static function authorizeResourceAccess(): void
     {
-
         abort_unless(
             static::getResource()::canAccess() || (auth()->user()?->isMember() ?? false),
             403,

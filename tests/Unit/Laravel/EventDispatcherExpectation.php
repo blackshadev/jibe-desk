@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Laravel;
 
-use App\Domain\Members\Events\NewMemberRegistration;
+use App\Domain\Registration\Events\NewMemberRegistration;
 use Illuminate\Contracts\Events\Dispatcher;
 use Mockery;
 use Mockery\MockInterface;

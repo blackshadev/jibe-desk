@@ -8,8 +8,9 @@ use App\Domain\Members\Dto\NewMember;
 use App\Domain\Members\Dto\NewMemberMembershipInformation;
 use App\Domain\Members\Dto\NewMemberPaymentInformation;
 use App\Domain\Members\Dto\NewMemberPersonalInformation;
-use App\Domain\Members\Events\NewMemberRegistration;
+use App\Domain\Registration\Events\NewMemberRegistration;
 use App\Domain\Registration\FormData;
+use App\Domain\Registration\RegistrationSource;
 use Illuminate\Contracts\Events\Dispatcher;
 use RuntimeException;
 
@@ -48,6 +49,7 @@ final readonly class NewMemberService
             ),
             memberEmail: $formData->personalInfo->email,
             membershipData: $formData->membership,
+            source: RegistrationSource::RegistrationForm,
         );
     }
 

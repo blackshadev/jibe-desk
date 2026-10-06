@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Mail\Listeners;
 
+use App\Domain\Mail\BaseMail;
 use App\Domain\Mail\OutgoingEmail;
 use App\Domain\Mail\OutgoingEmailRepository;
 use App\Domain\Mail\Recipient;
@@ -27,7 +28,7 @@ final readonly class LogOutgoingMail
 
         $mailableClass = $mailable
             ->getHeaders()
-            ->get('X-Mailable-Class')
+            ->get(BaseMail::MAILABLE_CLASS_HEADER)
             ?->getBodyAsString();
 
         $to = $event->message->getTo()[0] ?? null;

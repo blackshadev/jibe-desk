@@ -8,15 +8,16 @@ use App\Domain\Members\Dto\NewMember;
 use App\Domain\Members\Dto\NewMemberMembershipInformation;
 use App\Domain\Members\Dto\NewMemberPaymentInformation;
 use App\Domain\Members\Dto\NewMemberPersonalInformation;
-use App\Domain\Members\Events\NewMemberRegistration;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MemberNameFormatter;
 use App\Domain\Members\MembershipId;
 use App\Domain\Members\NewMemberService;
+use App\Domain\Registration\Events\NewMemberRegistration;
 use App\Domain\Registration\FormData;
 use App\Domain\Registration\MembershipData;
 use App\Domain\Registration\PaymentInfoData;
 use App\Domain\Registration\PersonalInfoData;
+use App\Domain\Registration\RegistrationSource;
 use Override;
 use RuntimeException;
 use Tests\Unit\Laravel\EventDispatcherExpectation;
@@ -74,6 +75,7 @@ final class NewMemberServiceTest extends UnitTestCase
             ),
             $formData->personalInfo->email,
             $formData->membership,
+            RegistrationSource::RegistrationForm,
         );
 
         $this->eventDispatcher->expectsDispatchWith($expectedRegistration);

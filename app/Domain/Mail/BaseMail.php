@@ -8,6 +8,8 @@ use Illuminate\Mail\Mailables\Content;
 
 abstract readonly class BaseMail
 {
+    public const MAILABLE_CLASS_HEADER = 'X-Mailable-Class';
+
     public function related(): ?Related
     {
         return null;

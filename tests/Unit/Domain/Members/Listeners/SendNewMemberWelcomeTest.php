@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Tests\Unit\Domain\Members\Listeners;
 
 use App\Domain\Mail\Recipient;
-use App\Domain\Members\Events\NewMemberRegistration;
 use App\Domain\Members\Listeners\SendNewMemberWelcome;
 use App\Domain\Members\MemberId;
+use App\Domain\Registration\Events\NewMemberRegistration;
 use App\Domain\Registration\Mails\NewMemberWelcome;
 use App\Domain\Registration\MembershipData;
+use App\Domain\Registration\RegistrationSource;
 use Override;
 use RuntimeException;
 use Tests\Unit\Domain\Mail\MailSenderExpectation;
@@ -54,6 +55,7 @@ final class SendNewMemberWelcomeTest extends UnitTestCase
             memberName: 'Vries, Jan de',
             memberEmail: 'jan@example.com',
             membershipData: MembershipData::createDefault(),
+            source: RegistrationSource::RegistrationForm,
         );
 
         $this->subject->handle($event);
@@ -78,6 +80,7 @@ final class SendNewMemberWelcomeTest extends UnitTestCase
             memberName: 'Doe, John',
             memberEmail: 'john.doe@example.com',
             membershipData: MembershipData::createDefault(),
+            source: RegistrationSource::RegistrationForm,
         ));
     }
 }

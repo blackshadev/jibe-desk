@@ -31,7 +31,7 @@ final class MailMailable extends Mailable implements ShouldQueue
     {
         $related = $this->mail->related();
         $headers = [
-            'X-Mail-Class' => get_class($this->mail),
+            BaseMail::MAILABLE_CLASS_HEADER => get_class($this->mail),
         ];
 
         if ($related) {

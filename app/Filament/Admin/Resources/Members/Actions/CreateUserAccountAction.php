@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Members\Actions;
 
-use App\Domain\Members\Events\NewMemberRegistration;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MemberNameFormatter;
 use App\Domain\Members\MemberUserRepository;
+use App\Domain\Registration\Events\NewMemberRegistration;
 use App\Domain\Registration\MembershipData;
+use App\Domain\Registration\RegistrationSource;
 use App\Models\Member;
 use Filament\Actions\Action;
 use Filament\Support\Icons\Heroicon;
@@ -41,6 +42,7 @@ final class CreateUserAccountAction
                     ),
                     memberEmail: $record->email,
                     membershipData: $record->registration_data ? MembershipData::createFromArray($record->registration_data['membership']) : MembershipData::createDefault(),
+                    source: RegistrationSource::AdminPanel,
                 ));
             })
             ->successNotificationTitle(__('notifications.user_account_created'));

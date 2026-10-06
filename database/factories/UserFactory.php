@@ -36,15 +36,14 @@ final class UserFactory extends Factory
         return $this->has(
             Member::factory()
                 ->withPaymentInfo()
+                // @mago-expect lint:prefer-static-closure
                 ->state(function (array $attributes, Model $user) {
-                    assert($user instanceof User);
-                    
+                    assert($user instanceof User, 'Expected user to be an instance of User, got ' . get_class($user));
+
                     return [
                         'email' => $user->email,
                     ];
-                })
+                }),
         );
     }
-
-
 }

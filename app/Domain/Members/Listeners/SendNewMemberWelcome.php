@@ -6,8 +6,8 @@ namespace App\Domain\Members\Listeners;
 
 use App\Domain\Mail\MailSender;
 use App\Domain\Mail\Recipient;
-use App\Domain\Members\Events\NewMemberRegistration;
 use App\Domain\Members\MemberPasswordResetLink;
+use App\Domain\Registration\Events\NewMemberRegistration;
 use App\Domain\Registration\Mails\NewMemberWelcome;
 
 final readonly class SendNewMemberWelcome

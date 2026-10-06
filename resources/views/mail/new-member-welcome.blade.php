@@ -3,7 +3,7 @@
 
 Beste {{ $memberName }},
 
-Wat leuk dat je lid wilt worden van Watersportvereniging Almere Centraal!
+Wat leuk dat je lid bent geworden van Watersportvereniging Almere Centraal!
 
 We hebben een account voor je aangemaakt. Klik op onderstaande knop om je wachtwoord in te stellen en in te loggen op je persoonlijke omgeving.
 
