@@ -42,7 +42,7 @@ final readonly class InvoiceMailRepositoryDb implements InvoiceMailRepository
             invoiceDate: $invoice->date,
             total: $invoice->total,
             lines: $lines,
-            sepaTransferDate: $invoice->member?->paymentInformation?->mandate_accepted_date !== null ? $invoice->invoiceBatch?->invoice_date : null,
+            sepaTransferDate: $invoice->member?->paymentInformation?->mandate_accepted_date !== null ? $invoice->invoiceBatch?->sepa_transfer_date : null,
             sentAt: $invoice->sent_at,
         );
     }

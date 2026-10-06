@@ -20,6 +20,10 @@ final class InvoiceBatchesTable
                     ->label(__('labels.invoice_date'))
                     ->date()
                     ->sortable(),
+                TextColumn::make('sepa_transfer_date')
+                    ->label(__('labels.sepa_transfer_date'))
+                    ->date()
+                    ->sortable(),
                 TextColumn::make('status')
                     ->label(__('labels.status'))
                     ->formatStateUsing(static fn (InvoiceBatchStatus $state) => InvoiceBatchStatusLabels::options()[$state->value]),

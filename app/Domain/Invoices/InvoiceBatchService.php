@@ -10,7 +10,7 @@ use JeroenG\Autowire\Attribute\Autowire;
 #[Autowire]
 interface InvoiceBatchService
 {
-    public function createBatch(DateTimeInterface $invoiceDate): InvoiceBatchId;
+    public function createBatch(DateTimeInterface $invoiceDate, DateTimeInterface $sepaTransferDate): InvoiceBatchId;
 
     public function attachBatchMonth(InvoiceBatchId $batchId): void;
 

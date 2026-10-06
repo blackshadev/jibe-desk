@@ -43,7 +43,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
     {
         $batchId = InvoiceBatchId::create(1);
 
-        $this->repo->expectsGetBatchDate($batchId, CarbonImmutable::parse('2026-06-30'));
+        $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [
             $this->createDebitInvoice(invoiceNumber: 'INV-001', amount: 25.00),
         ]);
@@ -65,7 +65,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
     {
         $batchId = InvoiceBatchId::create(1);
 
-        $this->repo->expectsGetBatchDate($batchId, CarbonImmutable::parse('2026-06-30'));
+        $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [
             $this->createCreditInvoice(invoiceNumber: 'INV-002', amount: 25.00),
         ]);
@@ -87,7 +87,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
     {
         $batchId = InvoiceBatchId::create(1);
 
-        $this->repo->expectsGetBatchDate($batchId, CarbonImmutable::parse('2026-06-30'));
+        $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [
             $this->createDebitInvoice(invoiceNumber: 'INV-001', amount: 25.00),
             $this->createCreditInvoice(invoiceNumber: 'INV-002', amount: 25.00),
@@ -113,7 +113,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
     {
         $batchId = InvoiceBatchId::create(1);
 
-        $this->repo->expectsGetBatchDate($batchId, CarbonImmutable::parse('2026-06-30'));
+        $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, []);
 
         $exportService = new SepaExportServiceImpl($this->repo->mock, $this->config);
@@ -127,7 +127,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
     {
         $batchId = InvoiceBatchId::create(1);
 
-        $this->repo->expectsGetBatchDate($batchId, CarbonImmutable::parse('2026-06-30'));
+        $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [
             $this->createDebitInvoice(invoiceNumber: 'INV-001', amount: 0.0),
         ]);
@@ -143,7 +143,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
     {
         $batchId = InvoiceBatchId::create(1);
 
-        $this->repo->expectsGetBatchDate($batchId, CarbonImmutable::parse('2026-06-30'));
+        $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [
             $this->createDebitInvoice(invoiceNumber: 'INV-001', amount: 25.00),
         ]);
@@ -161,7 +161,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
     {
         $batchId = InvoiceBatchId::create(1);
 
-        $this->repo->expectsGetBatchDate($batchId, CarbonImmutable::parse('2026-06-30'));
+        $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [
             $this->createCreditInvoice(invoiceNumber: 'INV-001', amount: 25.00),
         ]);
@@ -178,7 +178,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
     {
         $batchId = InvoiceBatchId::create(1);
 
-        $this->repo->expectsGetBatchDate($batchId, CarbonImmutable::parse('2026-06-30'));
+        $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [
             $this->createDebitInvoice(
                 invoiceNumber: 'INV-001',
@@ -224,7 +224,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
     {
         $batchId = InvoiceBatchId::create(1);
 
-        $this->repo->expectsGetBatchDate($batchId, CarbonImmutable::parse('2026-06-30'));
+        $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [
             $this->createCreditInvoice(
                 invoiceNumber: 'INV-CR-001',
@@ -269,7 +269,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
     {
         $batchId = InvoiceBatchId::create(1);
 
-        $this->repo->expectsGetBatchDate($batchId, CarbonImmutable::parse('2026-06-30'));
+        $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [
             $this->createDebitInvoice(invoiceNumber: 'INV-001', amount: 10.00, recipientName: 'Alice', iban: 'NL91ABNA0417164300', bic: 'ABNANL2A'),
             $this->createDebitInvoice(invoiceNumber: 'INV-002', amount: 20.00, recipientName: 'Bob', iban: 'NL20RABO0123456789', bic: 'RABONL2U'),
@@ -295,7 +295,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
     {
         $batchId = InvoiceBatchId::create(1);
 
-        $this->repo->expectsGetBatchDate($batchId, CarbonImmutable::parse('2026-06-30'));
+        $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [
             $this->createCreditInvoice(invoiceNumber: 'INV-CR-001', amount: 15.00, recipientName: 'Alice', iban: 'NL91ABNA0417164300', bic: 'ABNANL2A'),
             $this->createCreditInvoice(invoiceNumber: 'INV-CR-002', amount: 30.00, recipientName: 'Bob', iban: 'NL20RABO0123456789', bic: 'RABONL2U'),
@@ -321,7 +321,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
     {
         $batchId = InvoiceBatchId::create(1);
 
-        $this->repo->expectsGetBatchDate($batchId, CarbonImmutable::parse('2026-06-30'));
+        $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [
             $this->createDebitInvoice(invoiceNumber: 'INV-001', amount: 100.00, recipientName: 'Debtor Member'),
             $this->createCreditInvoice(invoiceNumber: 'INV-CR-001', amount: 25.00, recipientName: 'Creditor Member'),

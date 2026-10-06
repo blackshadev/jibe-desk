@@ -37,6 +37,7 @@ return [
     'recipient_address' => 'Factuuradres',
     'invoice_lines' => 'Factuurregels',
     'invoice_date' => 'Factuurdatum',
+    'sepa_transfer_date' => 'SEPA incassodatum',
     'attach_invoices' => 'Openstaande facturen van periode automatisch toevoegen',
     'description' => 'Omschrijving',
     'quantity' => 'Aantal',

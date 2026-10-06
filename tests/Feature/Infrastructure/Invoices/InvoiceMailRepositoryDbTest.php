@@ -36,6 +36,7 @@ final class InvoiceMailRepositoryDbTest extends FeatureTestCase
 
         $batch = InvoiceBatch::factory()->createQuietly([
             'invoice_date' => '2026-06-30',
+            'sepa_transfer_date' => '2026-07-15',
         ]);
 
         $invoice = Invoice::factory()
@@ -113,7 +114,8 @@ final class InvoiceMailRepositoryDbTest extends FeatureTestCase
         ]);
 
         $batch = InvoiceBatch::factory()->createQuietly([
-            'invoice_date' => '2026-07-01',
+            'invoice_date' => '2026-06-30',
+            'sepa_transfer_date' => '2026-07-15',
         ]);
 
         $invoice = Invoice::factory()
@@ -124,7 +126,7 @@ final class InvoiceMailRepositoryDbTest extends FeatureTestCase
         $result = $this->repository->getInvoiceMailData(InvoiceId::create($invoice->id));
 
         static::assertNotNull($result->sepaTransferDate);
-        static::assertSame('2026-07-01', $result->sepaTransferDate->format('Y-m-d'));
+        static::assertSame('2026-07-15', $result->sepaTransferDate->format('Y-m-d'));
     }
 
     public function test_get_invoice_mail_data_sepa_transfer_date_null_when_no_payment_information(): void
@@ -133,6 +135,7 @@ final class InvoiceMailRepositoryDbTest extends FeatureTestCase
 
         $batch = InvoiceBatch::factory()->createQuietly([
             'invoice_date' => '2026-07-01',
+            'sepa_transfer_date' => '2026-07-15',
         ]);
 
         $invoice = Invoice::factory()

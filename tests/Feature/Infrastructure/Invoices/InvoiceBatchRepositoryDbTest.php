@@ -35,12 +35,14 @@ final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
     public function test_create_batch(): void
     {
         $date = CarbonImmutable::parse('2026-05-15');
+        $sepaDate = CarbonImmutable::parse('2026-05-29');
 
-        $batchId = $this->repository->create($date, InvoiceBatchStatus::Open);
+        $batchId = $this->repository->create($date, $sepaDate, InvoiceBatchStatus::Open);
 
         $this->assertDatabaseHas('invoice_batches', [
             'id' => $batchId->value,
             'status' => InvoiceBatchStatus::Open->value,
+            'sepa_transfer_date' => '2026-05-29 00:00:00',
         ]);
     }
 
@@ -276,21 +278,45 @@ final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
         static::assertEmpty($result);
     }
 
-    public function test_get_batch_date_returns_invoice_date(): void
+    public function test_get_sepa_transfer_date_returns_sepa_transfer_date(): void
     {
         $date = CarbonImmutable::parse('2026-06-15');
-        $batch = InvoiceBatch::factory()->create(['invoice_date' => $date]);
+        $sepaDate = CarbonImmutable::parse('2026-06-29');
+        $batch = InvoiceBatch::factory()->create([
+            'invoice_date' => $date,
+            'sepa_transfer_date' => $sepaDate,
+        ]);
 
-        $result = $this->repository->getBatchDate(InvoiceBatchId::create($batch->id));
+        $result = $this->repository->getSepaTransferDate(InvoiceBatchId::create($batch->id));
 
-        static::assertEquals($date->toDateString(), $result->format('Y-m-d'));
+        static::assertEquals($sepaDate->toDateString(), $result->format('Y-m-d'));
     }
 
-    public function test_get_batch_date_throws_for_nonexistent_batch(): void
+    public function test_get_sepa_transfer_date_throws_for_nonexistent_batch(): void
     {
         $this->expectException(ModelNotFoundException::class);
 
-        $this->repository->getBatchDate(InvoiceBatchId::create(999_999));
+        $this->repository->getSepaTransferDate(InvoiceBatchId::create(999_999));
+    }
+
+    public function test_mark_invoices_as_pending_overrides_invoice_date(): void
+    {
+        $batch = InvoiceBatch::factory()->create(['invoice_date' => '2026-06-15']);
+
+        $invoice = Invoice::factory()
+            ->forBatch($batch)
+            ->createQuietly([
+                'status' => InvoiceStatus::Open,
+                'date' => '2026-05-01',
+            ]);
+
+        $this->repository->markInvoicesAsPending(InvoiceBatchId::create($batch->id));
+
+        $this->assertDatabaseHas('invoices', [
+            'id' => $invoice->id,
+            'status' => InvoiceStatus::Pending->value,
+            'date' => '2026-06-15 00:00:00',
+        ]);
     }
 
     public function test_get_batch_email_data_returns_aggregated_data(): void

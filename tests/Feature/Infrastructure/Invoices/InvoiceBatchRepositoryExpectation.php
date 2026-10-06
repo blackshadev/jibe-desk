@@ -24,10 +24,10 @@ final readonly class InvoiceBatchRepositoryExpectation
         return new self(Mockery::mock(InvoiceBatchRepository::class));
     }
 
-    public function expectsGetBatchDate(InvoiceBatchId $batchId, DateTimeInterface $return): void
+    public function expectsGetSepaTransferDate(InvoiceBatchId $batchId, DateTimeInterface $return): void
     {
         $this->mock
-            ->expects('getBatchDate')
+            ->expects('getSepaTransferDate')
             ->with(equalTo($batchId))
             ->andReturn($return);
     }

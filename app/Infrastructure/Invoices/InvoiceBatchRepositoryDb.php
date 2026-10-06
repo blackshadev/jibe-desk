@@ -26,10 +26,11 @@ use Override;
 final class InvoiceBatchRepositoryDb implements InvoiceBatchRepository
 {
     #[Override]
-    public function create(DateTimeInterface $invoiceDate, InvoiceBatchStatus $status): InvoiceBatchId
+    public function create(DateTimeInterface $invoiceDate, DateTimeInterface $sepaTransferDate, InvoiceBatchStatus $status): InvoiceBatchId
     {
         $model = InvoiceBatch::query()->create([
             'invoice_date' => $invoiceDate,
+            'sepa_transfer_date' => $sepaTransferDate,
             'status' => $status,
         ]);
 
@@ -101,10 +102,15 @@ final class InvoiceBatchRepositoryDb implements InvoiceBatchRepository
     #[Override]
     public function markInvoicesAsPending(InvoiceBatchId $batchId): void
     {
+        $batch = InvoiceBatch::findOrFail($batchId->value);
+
         Invoice::query()
             ->where('invoice_batch_id', $batchId->value)
             ->where('status', InvoiceStatus::Open)
-            ->update(['status' => InvoiceStatus::Pending]);
+            ->update([
+                'status' => InvoiceStatus::Pending,
+                'date' => $batch->invoice_date,
+            ]);
     }
 
     #[Override]
@@ -145,11 +151,11 @@ final class InvoiceBatchRepositoryDb implements InvoiceBatchRepository
     }
 
     #[Override]
-    public function getBatchDate(InvoiceBatchId $batchId): DateTimeInterface
+    public function getSepaTransferDate(InvoiceBatchId $batchId): DateTimeInterface
     {
         /** @var InvoiceBatch $batch */
         $batch = InvoiceBatch::findOrFail($batchId->value);
-        return $batch->invoice_date;
+        return $batch->sepa_transfer_date;
     }
 
     #[Override]

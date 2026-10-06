@@ -27,11 +27,11 @@ final readonly class InvoiceBatchRepositoryExpectation
         return new self(Mockery::mock(InvoiceBatchRepository::class));
     }
 
-    public function expectsCreate(DateTimeInterface $invoiceDate, InvoiceBatchStatus $status, InvoiceBatchId $return): void
+    public function expectsCreate(DateTimeInterface $invoiceDate, DateTimeInterface $sepaTransferDate, InvoiceBatchStatus $status, InvoiceBatchId $return): void
     {
         $this->mock
             ->expects('create')
-            ->with(equalTo($invoiceDate), equalTo($status))
+            ->with(equalTo($invoiceDate), equalTo($sepaTransferDate), equalTo($status))
             ->andReturn($return);
     }
 

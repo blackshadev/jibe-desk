@@ -18,8 +18,9 @@ use Override;
 /**
  * @property InvoiceBatchStatus $status
  * @property DateTimeInterface $invoice_date
+ * @property DateTimeInterface $sepa_transfer_date
  */
-#[Fillable(['invoice_date', 'status'])]
+#[Fillable(['invoice_date', 'sepa_transfer_date', 'status'])]
 final class InvoiceBatch extends Model
 {
     use HasFactory;
@@ -35,6 +36,7 @@ final class InvoiceBatch extends Model
     {
         return [
             'invoice_date' => 'date',
+            'sepa_transfer_date' => 'date',
             'status' => InvoiceBatchStatus::class,
         ];
     }

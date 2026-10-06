@@ -10,5 +10,6 @@ final readonly class InvoiceBatch
 {
     public function __construct(
         public DateTimeInterface $invoiceDate,
+        public DateTimeInterface $sepaTransferDate,
     ) {}
 }

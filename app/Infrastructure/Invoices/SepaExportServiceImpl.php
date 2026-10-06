@@ -24,7 +24,7 @@ final readonly class SepaExportServiceImpl implements SepaExportService
     #[Override]
     public function export(InvoiceBatchId $batchId): SepaExport
     {
-        $dueDate = $this->batchRepository->getBatchDate($batchId);
+        $dueDate = $this->batchRepository->getSepaTransferDate($batchId);
 
         /** @var list<SepaExportInvoice> $invoices */
         $invoices = $this->batchRepository->getInvoicesForExport($batchId);

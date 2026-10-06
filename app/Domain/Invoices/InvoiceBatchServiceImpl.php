@@ -19,9 +19,9 @@ final readonly class InvoiceBatchServiceImpl implements InvoiceBatchService
     ) {}
 
     #[Override]
-    public function createBatch(DateTimeInterface $invoiceDate): InvoiceBatchId
+    public function createBatch(DateTimeInterface $invoiceDate, DateTimeInterface $sepaTransferDate): InvoiceBatchId
     {
-        return $this->batchRepository->create($invoiceDate, InvoiceBatchStatus::Open);
+        return $this->batchRepository->create($invoiceDate, $sepaTransferDate, InvoiceBatchStatus::Open);
     }
 
     #[Override]

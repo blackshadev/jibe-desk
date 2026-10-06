@@ -24,7 +24,7 @@ final readonly class InvoiceBatchGeneratorImpl implements InvoiceBatchGenerator
     #[Override]
     public function generate(InvoiceBatch $invoiceBatch): void
     {
-        $batchId = $this->batchService->createBatch($invoiceBatch->invoiceDate);
+        $batchId = $this->batchService->createBatch($invoiceBatch->invoiceDate, $invoiceBatch->sepaTransferDate);
         $this->batchService->attachBatchMonth($batchId);
 
         $billableMembers = $this->billableItemRepository->listBillableMembers($invoiceBatch->invoiceDate);

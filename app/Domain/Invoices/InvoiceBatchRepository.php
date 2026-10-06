@@ -10,7 +10,7 @@ use JeroenG\Autowire\Attribute\Autowire;
 #[Autowire]
 interface InvoiceBatchRepository
 {
-    public function create(DateTimeInterface $invoiceDate, InvoiceBatchStatus $status): InvoiceBatchId;
+    public function create(DateTimeInterface $invoiceDate, DateTimeInterface $sepaTransferDate, InvoiceBatchStatus $status): InvoiceBatchId;
 
     public function addOpenInvoicesFromBatchMonth(InvoiceBatchId $batchId): void;
 
@@ -26,7 +26,7 @@ interface InvoiceBatchRepository
     /** @return list<InvoiceId> */
     public function getPendingInvoicesForBatch(InvoiceBatchId $batchId): array;
 
-    public function getBatchDate(InvoiceBatchId $batchId): DateTimeInterface;
+    public function getSepaTransferDate(InvoiceBatchId $batchId): DateTimeInterface;
 
     public function getBatchEmailData(InvoiceBatchId $batchId): InvoiceBatchEmailData;
 

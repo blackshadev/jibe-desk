@@ -28,6 +28,13 @@ final class InvoiceBatchForm
                             ->format('d-m-Y')
                             ->default(now()->format('d-m-Y'))
                             ->required(),
+                        DatePicker::make('sepa_transfer_date')
+                            ->label(__('labels.sepa_transfer_date'))
+                            ->native(false)
+                            ->format('d-m-Y')
+                            ->default(now()->addDays(14)->format('d-m-Y'))
+                            ->afterOrEqual('invoice_date')
+                            ->required(),
                         Checkbox::make('attach_invoices')
                             ->label(__('labels.attach_invoices'))
                             ->columnSpanFull()

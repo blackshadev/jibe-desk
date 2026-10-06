@@ -40,11 +40,12 @@ final class InvoiceBatchServiceImplTest extends UnitTestCase
     public function test_create_batch(): void
     {
         $invoiceDate = CarbonImmutable::parse('2026-05-15');
+        $sepaTransferDate = CarbonImmutable::parse('2026-05-29');
         $expectedId = InvoiceBatchId::create(1);
 
-        $this->repo->expectsCreate($invoiceDate, InvoiceBatchStatus::Open, $expectedId);
+        $this->repo->expectsCreate($invoiceDate, $sepaTransferDate, InvoiceBatchStatus::Open, $expectedId);
 
-        $result = $this->service->createBatch($invoiceDate);
+        $result = $this->service->createBatch($invoiceDate, $sepaTransferDate);
 
         static::assertSame($expectedId, $result);
     }

@@ -44,11 +44,12 @@ final class InvoiceBatchGeneratorImplTest extends UnitTestCase
     public function test_it_generates_one_invoice_per_billable_member(): void
     {
         $invoiceDate = new DateTimeImmutable('2026-05-25');
-        $batch = new InvoiceBatch($invoiceDate);
+        $sepaTransferDate = new DateTimeImmutable('2026-06-08');
+        $batch = new InvoiceBatch($invoiceDate, $sepaTransferDate);
         $memberIds = new MemberIdList([MemberId::create(1), MemberId::create(2)]);
         $batchId = InvoiceBatchId::create(9);
 
-        $this->batchService->expectsCreateBatch($invoiceDate, $batchId);
+        $this->batchService->expectsCreateBatch($invoiceDate, $sepaTransferDate, $batchId);
         $this->billableItemsViewRepository->expectsListBillableMembers($invoiceDate, $memberIds);
         $this->batchService->expectsAttachBatchMonth($batchId);
         $this->jobDispatcher->expectsDispatch(
@@ -71,10 +72,11 @@ final class InvoiceBatchGeneratorImplTest extends UnitTestCase
     public function test_it_does_not_generate_invoices_when_no_billable_members_exist(): void
     {
         $invoiceDate = new DateTimeImmutable('2026-05-25');
-        $batch = new InvoiceBatch($invoiceDate);
+        $sepaTransferDate = new DateTimeImmutable('2026-06-08');
+        $batch = new InvoiceBatch($invoiceDate, $sepaTransferDate);
         $batchId = InvoiceBatchId::create(9);
 
-        $this->batchService->expectsCreateBatch($invoiceDate, $batchId);
+        $this->batchService->expectsCreateBatch($invoiceDate, $sepaTransferDate, $batchId);
         $this->batchService->expectsAttachBatchMonth($batchId);
 
         $this->billableItemsViewRepository->expectsListBillableMembers($invoiceDate, new MemberIdList([]));

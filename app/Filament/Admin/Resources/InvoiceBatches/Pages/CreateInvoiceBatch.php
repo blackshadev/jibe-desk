@@ -27,6 +27,7 @@ final class CreateInvoiceBatch extends CreateRecord
 
         $batchId = $batchService->createBatch(
             invoiceDate: CarbonImmutable::parse($data['invoice_date']),
+            sepaTransferDate: CarbonImmutable::parse($data['sepa_transfer_date']),
         );
 
         if ($attachInvoices) {
