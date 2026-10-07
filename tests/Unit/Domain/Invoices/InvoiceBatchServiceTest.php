@@ -54,9 +54,27 @@ final class InvoiceBatchServiceTest extends UnitTestCase
     {
         $batchId = InvoiceBatchId::create(1);
 
-        $this->repo->expectsAddOpenInvoicesFromBatchMonth($batchId);
+        $this->repo->expectsAddOpenInvoicesFromBatchMonth($batchId, 3);
 
-        $this->service->attachBatchMonth($batchId);
+        static::assertSame(3, $this->service->attachBatchMonth($batchId));
+    }
+
+    public function test_start_generation(): void
+    {
+        $batchId = InvoiceBatchId::create(1);
+
+        $this->repo->expectsMarkGenerationStarted($batchId, 25);
+
+        $this->service->startGeneration($batchId, 25);
+    }
+
+    public function test_finish_generation(): void
+    {
+        $batchId = InvoiceBatchId::create(1);
+
+        $this->repo->expectsMarkGenerationFinished($batchId);
+
+        $this->service->finishGeneration($batchId);
     }
 
     public function test_close_batch(): void

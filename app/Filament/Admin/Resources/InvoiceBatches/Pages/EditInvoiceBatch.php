@@ -13,15 +13,18 @@ use App\Filament\Admin\Resources\InvoiceBatches\Helpers\OnOpenInvoiceBatch;
 use App\Filament\Admin\Resources\InvoiceBatches\InvoiceBatchResource;
 use App\Filament\Admin\Resources\InvoiceBatches\RelationManagers\InvoiceBatchInvoicesRelationManager;
 use App\Filament\Admin\Resources\InvoiceBatches\Widgets\BatchStatsOverview;
+use App\Filament\Admin\Resources\InvoiceBatches\Widgets\InvoiceBatchGenerationProgress;
 use App\Models\Invoice;
 use App\Models\InvoiceBatch;
 use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\EditRecord;
 use Livewire\Attributes\On;
 use Override;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
+use Webmozart\Assert\Assert;
 use ZipArchive;
 
 final class EditInvoiceBatch extends EditRecord
@@ -40,8 +43,13 @@ final class EditInvoiceBatch extends EditRecord
     #[Override]
     protected function getHeaderWidgets(): array
     {
+        $record = $this->getRecord();
+        Assert::isInstanceOf($record, InvoiceBatch::class);
+
         return [
-            BatchStatsOverview::make(['record' => $this->getRecord()]),
+            $record->isGenerating()
+                ? InvoiceBatchGenerationProgress::make(['record' => $record])
+                : BatchStatsOverview::make(['record' => $record]),
         ];
     }
 
@@ -134,6 +142,7 @@ final class EditInvoiceBatch extends EditRecord
                     );
                 })
                 ->visible(static fn (InvoiceBatch $record) => $record->status === InvoiceBatchStatus::Pending),
+            DeleteAction::make(),
         ];
     }
 

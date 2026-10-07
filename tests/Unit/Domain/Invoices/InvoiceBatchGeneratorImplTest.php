@@ -8,6 +8,7 @@ use App\Domain\Invoices\InvoiceBatch;
 use App\Domain\Invoices\InvoiceBatchGeneratorImpl;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceTarget;
+use App\Domain\Invoices\Jobs\FinishInvoiceBatchGeneration;
 use App\Domain\Invoices\Jobs\GenerateInvoice;
 use App\Domain\Invoices\Jobs\SendInvoiceBatchCreatedEmail;
 use App\Domain\Jobs\JobBatch;
@@ -51,7 +52,8 @@ final class InvoiceBatchGeneratorImplTest extends UnitTestCase
 
         $this->batchService->expectsCreateBatch($invoiceDate, $sepaTransferDate, $batchId);
         $this->billableItemsViewRepository->expectsListBillableMembers($invoiceDate, $memberIds);
-        $this->batchService->expectsAttachBatchMonth($batchId);
+        $this->batchService->expectsAttachBatchMonth($batchId, 3);
+        $this->batchService->expectsStartGeneration($batchId, 5);
         $this->jobDispatcher->expectsDispatch(
             new JobBatch(
                 'invoice-batch-2026-05-25-9',
@@ -63,10 +65,12 @@ final class InvoiceBatchGeneratorImplTest extends UnitTestCase
                         new InvoiceTarget(MemberId::create(2), $invoiceDate, $batchId),
                     ),
                 ],
-            )->after(new SendInvoiceBatchCreatedEmail($batchId)),
+            )
+                ->after(new FinishInvoiceBatchGeneration($batchId))
+                ->after(new SendInvoiceBatchCreatedEmail($batchId)),
         );
 
-        $this->subject->generate($batch);
+        static::assertSame($batchId, $this->subject->generate($batch));
     }
 
     public function test_it_does_not_generate_invoices_when_no_billable_members_exist(): void
@@ -77,11 +81,13 @@ final class InvoiceBatchGeneratorImplTest extends UnitTestCase
         $batchId = InvoiceBatchId::create(9);
 
         $this->batchService->expectsCreateBatch($invoiceDate, $sepaTransferDate, $batchId);
-        $this->batchService->expectsAttachBatchMonth($batchId);
+        $this->batchService->expectsAttachBatchMonth($batchId, 3);
+        $this->batchService->expectsStartGeneration($batchId, 3);
+        $this->batchService->expectsFinishGeneration($batchId);
 
         $this->billableItemsViewRepository->expectsListBillableMembers($invoiceDate, new MemberIdList([]));
         $this->jobDispatcher->expectsNoDispatch();
 
-        $this->subject->generate($batch);
+        static::assertSame($batchId, $this->subject->generate($batch));
     }
 }

@@ -39,4 +39,21 @@ final class InvoiceBatchFactory extends Factory
     {
         return $this->state(['status' => InvoiceBatchStatus::Completed]);
     }
+
+    public function generating(int $expectedInvoices = 10): self
+    {
+        return $this->state([
+            'generation_started_at' => Carbon::now(),
+            'generation_expected_invoices' => $expectedInvoices,
+            'generation_finished_at' => null,
+        ]);
+    }
+
+    public function generationFinished(): self
+    {
+        return $this->state([
+            'generation_started_at' => Carbon::now()->subMinute(),
+            'generation_finished_at' => Carbon::now(),
+        ]);
+    }
 }

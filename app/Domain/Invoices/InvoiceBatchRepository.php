@@ -12,7 +12,11 @@ interface InvoiceBatchRepository
 {
     public function create(DateTimeInterface $invoiceDate, DateTimeInterface $sepaTransferDate, InvoiceBatchStatus $status): InvoiceBatchId;
 
-    public function addOpenInvoicesFromBatchMonth(InvoiceBatchId $batchId): void;
+    public function addOpenInvoicesFromBatchMonth(InvoiceBatchId $batchId): int;
+
+    public function markGenerationStarted(InvoiceBatchId $batchId, int $expectedInvoices): void;
+
+    public function markGenerationFinished(InvoiceBatchId $batchId): void;
 
     /** @return list<SepaExportInvoice> */
     public function getInvoicesForExport(InvoiceBatchId $batchId): array;

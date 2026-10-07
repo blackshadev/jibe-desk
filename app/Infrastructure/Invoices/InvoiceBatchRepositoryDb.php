@@ -38,11 +38,11 @@ final class InvoiceBatchRepositoryDb implements InvoiceBatchRepository
     }
 
     #[Override]
-    public function addOpenInvoicesFromBatchMonth(InvoiceBatchId $batchId): void
+    public function addOpenInvoicesFromBatchMonth(InvoiceBatchId $batchId): int
     {
         $month = new CarbonImmutable(InvoiceBatch::findOrFail($batchId->value)->invoice_date);
 
-        Invoice::query()
+        return Invoice::query()
             ->whereNull('invoice_batch_id')
             ->where('status', InvoiceStatus::Open)
             ->whereBetween('date', [
@@ -50,6 +50,25 @@ final class InvoiceBatchRepositoryDb implements InvoiceBatchRepository
                 $month->endOfMonth(),
             ])
             ->update(['invoice_batch_id' => $batchId->value]);
+    }
+
+    #[Override]
+    public function markGenerationStarted(InvoiceBatchId $batchId, int $expectedInvoices): void
+    {
+        InvoiceBatch::query()
+            ->where('id', $batchId->value)
+            ->update([
+                'generation_started_at' => now(),
+                'generation_expected_invoices' => $expectedInvoices,
+            ]);
+    }
+
+    #[Override]
+    public function markGenerationFinished(InvoiceBatchId $batchId): void
+    {
+        InvoiceBatch::query()
+            ->where('id', $batchId->value)
+            ->update(['generation_finished_at' => now()]);
     }
 
     /** @return list<SepaExportInvoice> */

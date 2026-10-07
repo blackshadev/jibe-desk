@@ -86,7 +86,9 @@ final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
                 ],
             ]);
 
-        $this->repository->addOpenInvoicesFromBatchMonth(InvoiceBatchId::create($batch->id));
+        $attachedCount = $this->repository->addOpenInvoicesFromBatchMonth(InvoiceBatchId::create($batch->id));
+
+        static::assertSame(2, $attachedCount);
 
         foreach ($openInvoices as $openInvoice) {
             $this->assertDatabaseHas('invoices', [
@@ -101,6 +103,29 @@ final class InvoiceBatchRepositoryDbTest extends FeatureTestCase
                 'invoice_batch_id' => $batch->id,
             ]);
         }
+    }
+
+    public function test_mark_generation_started(): void
+    {
+        $batch = InvoiceBatch::factory()->create();
+
+        $this->repository->markGenerationStarted(InvoiceBatchId::create($batch->id), 25);
+
+        $this->assertDatabaseHas('invoice_batches', [
+            'id' => $batch->id,
+            'generation_expected_invoices' => 25,
+        ]);
+
+        static::assertNotNull($batch->fresh()->generation_started_at);
+    }
+
+    public function test_mark_generation_finished(): void
+    {
+        $batch = InvoiceBatch::factory()->generating()->create();
+
+        $this->repository->markGenerationFinished(InvoiceBatchId::create($batch->id));
+
+        static::assertNotNull($batch->fresh()->generation_finished_at);
     }
 
     public function test_close_batch(): void

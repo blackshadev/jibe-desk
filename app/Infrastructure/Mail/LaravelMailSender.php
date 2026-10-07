@@ -18,6 +18,6 @@ final readonly class LaravelMailSender implements MailSender
         $mailable = new MailMailable($mail);
 
         Mail::to($recipient->email, $recipient->name)
-            ->send($mailable);
+            ->queue($mailable);
     }
 }

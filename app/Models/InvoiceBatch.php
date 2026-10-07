@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceBatchStatus;
 use App\Domain\Invoices\InvoiceStatus;
+use Carbon\CarbonInterface;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -19,11 +20,26 @@ use Override;
  * @property InvoiceBatchStatus $status
  * @property DateTimeInterface $invoice_date
  * @property DateTimeInterface $sepa_transfer_date
+ * @property CarbonInterface|null $generation_started_at
+ * @property CarbonInterface|null $generation_finished_at
+ * @property int|null $generation_expected_invoices
  */
-#[Fillable(['invoice_date', 'sepa_transfer_date', 'status'])]
+#[Fillable([
+    'invoice_date',
+    'sepa_transfer_date',
+    'status',
+    'generation_started_at',
+    'generation_finished_at',
+    'generation_expected_invoices',
+])]
 final class InvoiceBatch extends Model
 {
     use HasFactory;
+
+    public function isGenerating(): bool
+    {
+        return $this->generation_started_at !== null && $this->generation_finished_at === null;
+    }
 
     /** @return HasMany<Invoice, $this> */
     public function invoices(): HasMany
@@ -38,6 +54,9 @@ final class InvoiceBatch extends Model
             'invoice_date' => 'date',
             'sepa_transfer_date' => 'date',
             'status' => InvoiceBatchStatus::class,
+            'generation_started_at' => 'datetime',
+            'generation_finished_at' => 'datetime',
+            'generation_expected_invoices' => 'integer',
         ];
     }
 

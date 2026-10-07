@@ -21,6 +21,7 @@ return [
     'nothing_to_invoice' => 'Niets om te factureren',
     'storage_spaces_generated' => 'Opslagruimten succesvol aangemaakt.',
     'batch_created' => 'Factuurbatch succesvol aangemaakt',
+    'batch_generated' => 'Facturatieronde succesvol gegenereerd',
     'invoices_added_to_batch' => 'Facturen succesvol toegevoegd aan batch',
     'invoice_removed_from_batch' => 'Factuur succesvol verwijderd uit batch',
     'batch_closed' => 'Factuurbatch succesvol gesloten',

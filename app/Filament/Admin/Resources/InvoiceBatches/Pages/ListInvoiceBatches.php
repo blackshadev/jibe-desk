@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\InvoiceBatches\Pages;
 
 use App\Domain\Invoices\InvoiceBatchStatus;
+use App\Filament\Admin\Resources\InvoiceBatches\Actions\GenerateInvoiceBatchAction;
 use App\Filament\Admin\Resources\InvoiceBatches\InvoiceBatchResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
@@ -42,6 +43,7 @@ final class ListInvoiceBatches extends ListRecords
     {
         return [
             CreateAction::make(),
+            GenerateInvoiceBatchAction::make(),
         ];
     }
 }

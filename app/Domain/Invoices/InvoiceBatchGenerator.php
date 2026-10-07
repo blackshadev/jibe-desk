@@ -9,5 +9,5 @@ use JeroenG\Autowire\Attribute\Autowire;
 #[Autowire]
 interface InvoiceBatchGenerator
 {
-    public function generate(InvoiceBatch $invoiceBatch): void;
+    public function generate(InvoiceBatch $invoiceBatch): InvoiceBatchId;
 }

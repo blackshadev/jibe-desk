@@ -35,10 +35,25 @@ final readonly class InvoiceBatchRepositoryExpectation
             ->andReturn($return);
     }
 
-    public function expectsAddOpenInvoicesFromBatchMonth(InvoiceBatchId $batchId): void
+    public function expectsAddOpenInvoicesFromBatchMonth(InvoiceBatchId $batchId, int $return): void
     {
         $this->mock
             ->expects('addOpenInvoicesFromBatchMonth')
+            ->with(equalTo($batchId))
+            ->andReturn($return);
+    }
+
+    public function expectsMarkGenerationStarted(InvoiceBatchId $batchId, int $expectedInvoices): void
+    {
+        $this->mock
+            ->expects('markGenerationStarted')
+            ->with(equalTo($batchId), equalTo($expectedInvoices));
+    }
+
+    public function expectsMarkGenerationFinished(InvoiceBatchId $batchId): void
+    {
+        $this->mock
+            ->expects('markGenerationFinished')
             ->with(equalTo($batchId));
     }
 

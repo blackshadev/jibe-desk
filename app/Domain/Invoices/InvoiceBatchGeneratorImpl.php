@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Invoices;
 
 use App\Domain\Invoices\Billing\BillableItemsViewRepository;
+use App\Domain\Invoices\Jobs\FinishInvoiceBatchGeneration;
 use App\Domain\Invoices\Jobs\GenerateInvoice;
 use App\Domain\Invoices\Jobs\SendInvoiceBatchCreatedEmail;
 use App\Domain\Jobs\JobBatch;
@@ -22,17 +23,21 @@ final readonly class InvoiceBatchGeneratorImpl implements InvoiceBatchGenerator
     ) {}
 
     #[Override]
-    public function generate(InvoiceBatch $invoiceBatch): void
+    public function generate(InvoiceBatch $invoiceBatch): InvoiceBatchId
     {
         $batchId = $this->batchService->createBatch($invoiceBatch->invoiceDate, $invoiceBatch->sepaTransferDate);
-        $this->batchService->attachBatchMonth($batchId);
+        $attachedCount = $this->batchService->attachBatchMonth($batchId);
 
         $billableMembers = $this->billableItemRepository->listBillableMembers($invoiceBatch->invoiceDate);
+
+        $this->batchService->startGeneration($batchId, $attachedCount + count($billableMembers->ids));
 
         $batchName = sprintf('invoice-batch-%s-%s', $invoiceBatch->invoiceDate->format('Y-m-d'), $batchId->value);
 
         if ($billableMembers->ids === []) {
-            return;
+            $this->batchService->finishGeneration($batchId);
+
+            return $batchId;
         }
 
         $jobs = array_map(
@@ -45,10 +50,14 @@ final readonly class InvoiceBatchGeneratorImpl implements InvoiceBatchGenerator
             ),
             $billableMembers->ids,
         );
+
         Assert::isList($jobs);
         $batch = new JobBatch($batchName, $jobs)
+            ->after(new FinishInvoiceBatchGeneration($batchId))
             ->after(new SendInvoiceBatchCreatedEmail($batchId));
 
         $this->dispatcher->dispatch($batch);
+
+        return $batchId;
     }
 }

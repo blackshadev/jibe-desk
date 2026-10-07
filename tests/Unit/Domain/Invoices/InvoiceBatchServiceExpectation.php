@@ -31,10 +31,25 @@ final readonly class InvoiceBatchServiceExpectation
             ->andReturn($return);
     }
 
-    public function expectsAttachBatchMonth(InvoiceBatchId $id): void
+    public function expectsAttachBatchMonth(InvoiceBatchId $id, int $return): void
     {
         $this->mock
             ->expects('attachBatchMonth')
+            ->with(equalTo($id))
+            ->andReturn($return);
+    }
+
+    public function expectsStartGeneration(InvoiceBatchId $id, int $expectedInvoices): void
+    {
+        $this->mock
+            ->expects('startGeneration')
+            ->with(equalTo($id), equalTo($expectedInvoices));
+    }
+
+    public function expectsFinishGeneration(InvoiceBatchId $id): void
+    {
+        $this->mock
+            ->expects('finishGeneration')
             ->with(equalTo($id));
     }
 }

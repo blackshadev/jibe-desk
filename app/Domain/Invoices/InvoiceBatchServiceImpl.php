@@ -25,9 +25,21 @@ final readonly class InvoiceBatchServiceImpl implements InvoiceBatchService
     }
 
     #[Override]
-    public function attachBatchMonth(InvoiceBatchId $batchId): void
+    public function attachBatchMonth(InvoiceBatchId $batchId): int
     {
-        $this->batchRepository->addOpenInvoicesFromBatchMonth($batchId);
+        return $this->batchRepository->addOpenInvoicesFromBatchMonth($batchId);
+    }
+
+    #[Override]
+    public function startGeneration(InvoiceBatchId $batchId, int $expectedInvoices): void
+    {
+        $this->batchRepository->markGenerationStarted($batchId, $expectedInvoices);
+    }
+
+    #[Override]
+    public function finishGeneration(InvoiceBatchId $batchId): void
+    {
+        $this->batchRepository->markGenerationFinished($batchId);
     }
 
     #[Override]
