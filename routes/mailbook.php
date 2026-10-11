@@ -11,9 +11,10 @@ use App\Domain\Invoices\Mails\InvoiceBatchCreatedMail;
 use App\Domain\Invoices\Mails\InvoiceMail;
 use App\Domain\Invoices\SepaConfiguration;
 use App\Domain\Mail\Recipient;
+use App\Domain\Members\Mails\MemberWelcome;
 use App\Domain\Members\MemberId;
 use App\Domain\Registration\Mails\NewMemberAdminNotification;
-use App\Domain\Registration\Mails\NewMemberWelcome;
+use App\Domain\Registration\Mails\RegistrationReceived;
 use App\Domain\Registration\MembershipData;
 use App\Infrastructure\Mail\MailMailable;
 use Illuminate\Contracts\Mail\Mailable;
@@ -36,12 +37,21 @@ Mailbook::add(NewMemberAdminNotification::class)
         )),
     );
 
-Mailbook::add(NewMemberWelcome::class)
+Mailbook::add(RegistrationReceived::class)
     ->variant(
-        'New member welcome',
-        static fn (): Mailable => new MailMailable(new NewMemberWelcome(
+        'Registration received',
+        static fn (): Mailable => new MailMailable(new RegistrationReceived(
+            new Recipient('Jan de Vries', 'jan@devries.nl'),
+        )),
+    );
+
+Mailbook::add(MemberWelcome::class)
+    ->variant(
+        'Member welcome',
+        static fn (): Mailable => new MailMailable(new MemberWelcome(
             new Recipient('Jan de Vries', 'jan@devries.nl'),
             'https://example.test/reset-password/token?email=jan%40example.com',
+            'https://example.test/admin/login',
         )),
     );
 

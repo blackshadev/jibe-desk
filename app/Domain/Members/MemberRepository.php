@@ -15,4 +15,6 @@ interface MemberRepository
     public function newMember(NewMember $newMember): MemberId;
 
     public function getByEmail(string $email): ?MemberId;
+
+    public function accept(MemberId $memberId): void;
 }

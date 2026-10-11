@@ -8,6 +8,7 @@ use App\Domain\Members\Dto\NewMember;
 use App\Domain\Members\HouseholdId;
 use App\Domain\Members\Member as MemberEntity;
 use App\Domain\Members\MemberId;
+use App\Domain\Members\MemberNameFormatter;
 use App\Domain\Members\MemberRepository;
 use App\Domain\Members\MembershipId;
 use App\Models\Member;
@@ -28,6 +29,13 @@ final class MemberDbRepository implements MemberRepository
             isVolunteer: $model->is_volunteer,
             householdId: $householdId ? HouseholdId::create($householdId) : null,
             age: $model->age,
+            name: MemberNameFormatter::presentationName(
+                $model->first_name,
+                $model->infix_name,
+                $model->last_name,
+            ),
+            email: $model->email,
+            acceptedAt: $model->accepted_at,
         );
     }
 
@@ -50,6 +58,7 @@ final class MemberDbRepository implements MemberRepository
             'is_volunteer' => false,
             'membership_id' => $newMember->membershipInformation->membershipId->value,
             'registration_data' => $newMember->registrationData,
+            'accepted_at' => null,
         ]);
 
         $member
@@ -77,5 +86,18 @@ final class MemberDbRepository implements MemberRepository
         }
 
         return MemberId::create($member->id);
+    }
+
+    #[Override]
+    public function accept(MemberId $memberId): void
+    {
+        $member = Member::query()->findOrFail($memberId->value);
+
+        if ($member->accepted_at !== null) {
+            return;
+        }
+
+        $member->accepted_at = now();
+        $member->save();
     }
 }

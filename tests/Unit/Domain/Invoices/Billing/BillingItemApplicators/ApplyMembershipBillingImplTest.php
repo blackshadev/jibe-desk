@@ -13,6 +13,7 @@ use App\Domain\Members\MemberId;
 use App\Domain\Members\Membership;
 use App\Domain\Members\MembershipId;
 use App\Domain\Members\MembershipList;
+use DateTimeImmutable;
 use Override;
 use Tests\Unit\Domain\Invoices\BillableItemRepositoryExpectation;
 use Tests\Unit\Domain\Members\MemberRepositoryExpectation;
@@ -60,6 +61,9 @@ final class ApplyMembershipBillingImplTest extends UnitTestCase
             isVolunteer: false,
             householdId: null,
             age: 18,
+            name: 'Jan de Vries',
+            email: 'jan@example.com',
+            acceptedAt: new DateTimeImmutable('2024-01-01'),
         );
 
         $membership1 = new Membership(MembershipId::create(1), $adultBillableItemId1, $kidsBillableItemId1);
@@ -93,6 +97,9 @@ final class ApplyMembershipBillingImplTest extends UnitTestCase
             isVolunteer: false,
             householdId: null,
             age: 14,
+            name: 'Jan de Vries',
+            email: 'jan@example.com',
+            acceptedAt: new DateTimeImmutable('2024-01-01'),
         );
 
         $membership1 = new Membership(MembershipId::create(1), $adultBillableItemId1, $kidsBillableItemId1);

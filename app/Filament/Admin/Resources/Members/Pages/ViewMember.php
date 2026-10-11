@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Members\Pages;
 
+use App\Filament\Admin\Resources\Members\Actions\AcceptMemberAction;
 use App\Filament\Admin\Resources\Members\MemberResource;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
@@ -30,6 +31,7 @@ final class ViewMember extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            AcceptMemberAction::make(),
             EditAction::make(),
         ];
     }

@@ -47,4 +47,19 @@ final readonly class MemberRepositoryExpectation
             ->with(equalTo($newMember))
             ->andReturn($result);
     }
+
+    public function expectsAccept(MemberId $memberId): void
+    {
+        $this->mock
+            ->expects('accept')
+            ->with(equalTo($memberId))
+            ->andReturnNull();
+    }
+
+    public function expectsAcceptNever(): void
+    {
+        $this->mock
+            ->expects('accept')
+            ->never();
+    }
 }

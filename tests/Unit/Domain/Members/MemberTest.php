@@ -8,6 +8,7 @@ use App\Domain\Members\HouseholdId;
 use App\Domain\Members\Member;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MembershipId;
+use DateTimeImmutable;
 use Tests\UnitTestCase;
 
 final class MemberTest extends UnitTestCase
@@ -20,6 +21,9 @@ final class MemberTest extends UnitTestCase
             isVolunteer: true,
             householdId: HouseholdId::create(5),
             age: 25,
+            name: 'Jan de Vries',
+            email: 'jan@example.com',
+            acceptedAt: new DateTimeImmutable('2024-01-01'),
         );
 
         static::assertSame(42, $subject->id->value);
@@ -27,6 +31,8 @@ final class MemberTest extends UnitTestCase
         static::assertTrue($subject->isVolunteer);
         static::assertSame(5, $subject->householdId->value);
         static::assertSame(25, $subject->age);
+        static::assertSame('Jan de Vries', $subject->name);
+        static::assertSame('jan@example.com', $subject->email);
     }
 
     public function test_is_in_household_returns_true_when_household_id_set(): void
@@ -37,6 +43,9 @@ final class MemberTest extends UnitTestCase
             isVolunteer: false,
             householdId: HouseholdId::create(5),
             age: 30,
+            name: 'Jan de Vries',
+            email: 'jan@example.com',
+            acceptedAt: new DateTimeImmutable('2024-01-01'),
         );
 
         static::assertTrue($subject->isInHousehold());
@@ -50,6 +59,9 @@ final class MemberTest extends UnitTestCase
             isVolunteer: false,
             householdId: null,
             age: 30,
+            name: 'Jan de Vries',
+            email: 'jan@example.com',
+            acceptedAt: new DateTimeImmutable('2024-01-01'),
         );
 
         static::assertFalse($subject->isInHousehold());
@@ -63,6 +75,9 @@ final class MemberTest extends UnitTestCase
             isVolunteer: false,
             householdId: null,
             age: 15,
+            name: 'Jan de Vries',
+            email: 'jan@example.com',
+            acceptedAt: new DateTimeImmutable('2024-01-01'),
         );
 
         static::assertTrue($subject->isYoungster());
@@ -76,8 +91,43 @@ final class MemberTest extends UnitTestCase
             isVolunteer: false,
             householdId: null,
             age: 18,
+            name: 'Jan de Vries',
+            email: 'jan@example.com',
+            acceptedAt: new DateTimeImmutable('2024-01-01'),
         );
 
         static::assertFalse($subject->isYoungster());
+    }
+
+    public function test_is_pending_returns_true_when_accepted_at_is_null(): void
+    {
+        $subject = new Member(
+            id: MemberId::create(1),
+            membershipId: MembershipId::create(1),
+            isVolunteer: false,
+            householdId: null,
+            age: 30,
+            name: 'Jan de Vries',
+            email: 'jan@example.com',
+            acceptedAt: null,
+        );
+
+        static::assertTrue($subject->isPending());
+    }
+
+    public function test_is_pending_returns_false_when_accepted(): void
+    {
+        $subject = new Member(
+            id: MemberId::create(1),
+            membershipId: MembershipId::create(1),
+            isVolunteer: false,
+            householdId: null,
+            age: 30,
+            name: 'Jan de Vries',
+            email: 'jan@example.com',
+            acceptedAt: new DateTimeImmutable('2024-01-01'),
+        );
+
+        static::assertFalse($subject->isPending());
     }
 }

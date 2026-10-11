@@ -29,8 +29,6 @@ final class NewMemberServiceTest extends UnitTestCase
 
     private MembershipRepositoryExpectation $membershipRepo;
 
-    private MemberUserRepositoryExpectation $memberUserRepo;
-
     private EventDispatcherExpectation $eventDispatcher;
 
     private NewMemberService $subject;
@@ -42,13 +40,11 @@ final class NewMemberServiceTest extends UnitTestCase
 
         $this->memberRepo = MemberRepositoryExpectation::create();
         $this->membershipRepo = MembershipRepositoryExpectation::create();
-        $this->memberUserRepo = MemberUserRepositoryExpectation::create();
         $this->eventDispatcher = EventDispatcherExpectation::create();
 
         $this->subject = new NewMemberService(
             $this->memberRepo->mock,
             $this->membershipRepo->mock,
-            $this->memberUserRepo->mock,
             $this->eventDispatcher->mock,
         );
     }
@@ -64,7 +60,6 @@ final class NewMemberServiceTest extends UnitTestCase
             $this->buildExpectedNewMember($formData, $defaultMembershipId),
             $expectedMemberId,
         );
-        $this->memberUserRepo->expectsProvision($expectedMemberId);
 
         $expectedRegistration = new NewMemberRegistration(
             $expectedMemberId,

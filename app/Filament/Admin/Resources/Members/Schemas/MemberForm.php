@@ -76,6 +76,9 @@ final class MemberForm
                                     ->relationship('membership', 'name')
                                     ->required(),
 
+                                Toggle::make('is_volunteer')
+                                    ->label(__('labels.is_volunteer')),
+
                                 DateTimePicker::make('stopped_at')
                                     ->label(__('labels.stopped_at'))
                                     ->readonly()
@@ -83,8 +86,12 @@ final class MemberForm
                                     ->date()
                                     ->native(false),
 
-                                Toggle::make('is_volunteer')
-                                    ->label(__('labels.is_volunteer')),
+                                DateTimePicker::make('accepted_at')
+                                    ->label(__('labels.accepted_at'))
+                                    ->readonly()
+                                    ->disabled()
+                                    ->date()
+                                    ->native(false),
 
                                 TextInput::make('user.email')
                                     ->label(__('labels.account'))

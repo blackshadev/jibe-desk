@@ -45,6 +45,7 @@ final class MemberPortalScopingTest extends FeatureTestCase
         $other = Member::factory()->createQuietly();
 
         Livewire::test(ListMembers::class)
+            ->set('activeTab', 'active')
             ->assertSee([$own->name, $householdMember->name])
             ->assertDontSee($other->name);
     }

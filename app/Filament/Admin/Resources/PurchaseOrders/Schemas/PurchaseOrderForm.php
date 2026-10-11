@@ -75,6 +75,7 @@ final class PurchaseOrderForm
                             ->visible(static fn (): bool => auth()->user()?->can('update_purchase_orders') ?? false)
                             ->options(
                                 static fn (): array => Member::query()
+                                    ->accepted()
                                     ->get()
                                     ->mapWithKeys(static fn (Member $member): array => [$member->id => $member->name])
                                     ->all(),

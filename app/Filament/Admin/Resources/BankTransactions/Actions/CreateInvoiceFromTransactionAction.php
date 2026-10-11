@@ -40,6 +40,7 @@ final class CreateInvoiceFromTransactionAction
                     Select::make('member_id')
                         ->label(__('labels.member'))
                         ->options(static fn () => Member::query()
+                            ->accepted()
                             ->orderBy('last_name')
                             ->orderBy('first_name')
                             ->get()

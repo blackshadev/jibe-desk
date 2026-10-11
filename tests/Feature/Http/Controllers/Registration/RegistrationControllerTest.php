@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\Controllers\Registration;
 
+use App\Models\Member;
 use Database\Seeders\MembershipSeeder;
 use DateTimeImmutable;
+use Illuminate\Support\Facades\Mail;
 use Override;
 use PHPUnit\Framework\Attributes\TestWith;
 use Tests\FeatureTestCase;
@@ -199,6 +201,8 @@ final class RegistrationControllerTest extends FeatureTestCase
 
     public function test_full_registration_flow_end_to_end(): void
     {
+        Mail::fake();
+
         $this->post(route('register.welcome'))
             ->assertRedirect(route('register.membership'));
 
@@ -226,6 +230,13 @@ final class RegistrationControllerTest extends FeatureTestCase
             'banking_bic' => self::VALID_PAYMENT_INFO['banking_bic'],
             'banking_account_holder_name' => self::VALID_PAYMENT_INFO['banking_account_holder_name'],
         ]);
+
+        $member = Member::query()
+            ->where('email', self::VALID_PERSONAL_INFO['email'])
+            ->firstOrFail();
+
+        static::assertNull($member->user_id);
+        static::assertNull($member->accepted_at);
     }
 
     public function test_confirmation_page_renders_after_payment_info(): void

@@ -32,6 +32,8 @@ final class MemberDbRepositoryTest extends FeatureTestCase
         static::assertSame($model->id, $domain->id->value);
         static::assertSame($model->membership_id, $domain->membershipId->value);
         static::assertTrue($domain->isVolunteer);
+        static::assertSame($model->email, $domain->email);
+        static::assertNotNull($domain->acceptedAt);
     }
 
     public function test_get_by_id_throws_when_member_not_found(): void
@@ -87,6 +89,8 @@ final class MemberDbRepositoryTest extends FeatureTestCase
         static::assertSame(Gender::Male, $member->gender);
         static::assertSame($membership?->id, $member->membership_id);
         static::assertFalse($member->is_volunteer);
+        static::assertNull($member->accepted_at);
+        static::assertNull($member->user_id);
         static::assertSame(['windsurfing_lessons' => true], $member->registration_data);
 
         $paymentInfo = $member->paymentInformation;
@@ -151,5 +155,26 @@ final class MemberDbRepositoryTest extends FeatureTestCase
         $result = $repo->getByEmail('nonexistent@example.com');
 
         static::assertNull($result);
+    }
+
+    public function test_accept_sets_accepted_at_and_is_idempotent(): void
+    {
+        $model = Member::factory()->pending()->createQuietly();
+
+        static::assertNull($model->accepted_at);
+
+        $repo = new MemberDbRepository();
+
+        $repo->accept(MemberId::create($model->id));
+
+        $model->refresh();
+        static::assertNotNull($model->accepted_at);
+
+        $acceptedAt = $model->accepted_at;
+
+        $repo->accept(MemberId::create($model->id));
+
+        $model->refresh();
+        static::assertEquals($acceptedAt, $model->accepted_at);
     }
 }

@@ -19,6 +19,7 @@ final class InvoiceBatchPolicy extends ResourcePolicy
         return 'invoice_batches';
     }
 
+    #[Override]
     public function delete(User $user, Model $batch): bool
     {
         Assert::isInstanceOf($batch, InvoiceBatch::class);

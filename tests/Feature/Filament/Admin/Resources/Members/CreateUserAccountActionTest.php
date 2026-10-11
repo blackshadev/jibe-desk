@@ -34,6 +34,16 @@ final class CreateUserAccountActionTest extends FeatureTestCase
             ->assertActionHidden('createUserAccount');
     }
 
+    public function test_action_is_hidden_for_pending_members(): void
+    {
+        $this->withUserHavingRole(RoleName::MemberAdministration);
+
+        $member = Member::factory()->pending()->createQuietly();
+
+        Livewire::test(EditMember::class, ['record' => $member->getRouteKey()])
+            ->assertActionHidden('createUserAccount');
+    }
+
     public function test_action_provisions_a_user_and_sends_welcome_mail(): void
     {
         Mail::fake();

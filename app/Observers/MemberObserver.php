@@ -23,6 +23,10 @@ final readonly class MemberObserver
 
     public function created(Member $member): void
     {
+        if ($member->accepted_at === null) {
+            return; // pending members are billed on acceptance (ApplyMemberAcceptedBilling)
+        }
+
         $this->applyMembershipBilling->apply(
             MemberId::create($member->id),
             MembershipId::create($member->membership_id),

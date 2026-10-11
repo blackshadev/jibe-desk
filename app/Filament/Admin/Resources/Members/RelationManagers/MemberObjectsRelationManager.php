@@ -46,12 +46,6 @@ final class MemberObjectsRelationManager extends MemberRelationManager
     }
 
     #[Override]
-    public function isReadOnly(): bool
-    {
-        return false;
-    }
-
-    #[Override]
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('labels.member_objects');

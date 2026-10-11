@@ -87,7 +87,12 @@ final class InvoiceForm
                         Select::make('member_id')
                             ->relationship(
                                 'member',
-                                modifyQueryUsing: static fn (Builder $query) => $query->orderBy('last_name')->orderBy('first_name')->orderBy('infix_name'),
+                                modifyQueryUsing: static fn (Builder $query) => $query
+                                    /** @phpstan-ignore-next-line method.notFound */
+                                    ->accepted()
+                                    ->orderBy('last_name')
+                                    ->orderBy('first_name')
+                                    ->orderBy('infix_name'),
                             )
                             ->label(__('labels.member'))
                             ->live(onBlur: true)

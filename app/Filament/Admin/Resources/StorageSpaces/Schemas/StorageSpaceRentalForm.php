@@ -18,6 +18,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 final class StorageSpaceRentalForm
@@ -29,7 +30,8 @@ final class StorageSpaceRentalForm
                 ->default(static fn (RelationManager $livewire): mixed => $livewire->getOwnerRecord()->getKey()),
             Select::make('member_id')
                 ->label(__('labels.member'))
-                ->relationship('member', 'id')
+                /** @phpstan-ignore-next-line method.notFound */
+                ->relationship('member', 'id', modifyQueryUsing: static fn (Builder $query) => $query->accepted())
                 ->getOptionLabelFromRecordUsing(static fn (Member $record) => $record->name)
                 ->searchable(['last_name', 'first_name', 'infix_name'])
                 ->required()

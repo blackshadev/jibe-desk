@@ -9,6 +9,7 @@ use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\RelationManagers\MemberRelationManager;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Filament\Admin\Utils\ResourceRouteHelper;
+use App\Models\Member;
 use App\Models\PurchaseOrder;
 use Filament\Actions\CreateAction;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -57,17 +58,19 @@ final class PurchaseOrdersRelationManager extends MemberRelationManager
             ->filters([])
             ->headerActions([
                 CreateAction::make()
-                    ->visible(static fn (): bool => auth()->user()?->can('create', PurchaseOrder::class) ?? false)
+                    ->visible(static function (RelationManager $livewire): bool {
+                        $owner = $livewire->getOwnerRecord();
+
+                        if (!$owner instanceof Member || !$owner->isPending()) {
+                            return false;
+                        }
+
+                        return auth()->user()?->can('create', PurchaseOrder::class) ?? false;
+                    })
                     ->url(static fn (RelationManager $livewire): string => PurchaseOrderResource::getUrl('create', [
                         'member_id' => $livewire->getOwnerRecord()->getKey(),
                     ])),
             ]);
-    }
-
-    #[Override]
-    public function isReadOnly(): bool
-    {
-        return false;
     }
 
     #[Override]

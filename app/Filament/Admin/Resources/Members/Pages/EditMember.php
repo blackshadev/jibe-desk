@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Members\Pages;
 
+use App\Filament\Admin\Resources\Members\Actions\AcceptMemberAction;
 use App\Filament\Admin\Resources\Members\Actions\CreateUserAccountAction;
 use App\Filament\Admin\Resources\Members\Actions\StopAction;
 use App\Filament\Admin\Resources\Members\MemberResource;
+use App\Models\Member;
 use Filament\Actions\ActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Override;
@@ -36,6 +39,8 @@ final class EditMember extends EditRecord
             ActionGroup::make([
                 CreateUserAccountAction::make(),
                 StopAction::make(),
+                AcceptMemberAction::make(),
+                DeleteAction::make()->visible(static fn (Member $record): bool => $record->isPending()),
             ])
                 ->button()
                 ->color('gray'),

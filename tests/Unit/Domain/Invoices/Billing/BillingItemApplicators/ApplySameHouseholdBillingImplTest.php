@@ -13,6 +13,7 @@ use App\Domain\Members\HouseholdId;
 use App\Domain\Members\Member;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MembershipId;
+use DateTimeImmutable;
 use Override;
 use Tests\Unit\Domain\Invoices\BillableItemRepositoryExpectation;
 use Tests\Unit\Domain\Members\ExtraMembershipBillingItemRepositoryExpectation;
@@ -53,7 +54,7 @@ final class ApplySameHouseholdBillingImplTest extends UnitTestCase
 
         $this->memberRepository->expectsGetById(
             $memberId,
-            new Member($memberId, MembershipId::create(2), false, HouseholdId::create(5), 15),
+            new Member($memberId, MembershipId::create(2), false, HouseholdId::create(5), 15, 'Jan de Vries', 'jan@example.com', new DateTimeImmutable('2024-01-01')),
         );
 
         $this->extraRepo->expectsGetByCode(ExtraMembershipItemCode::SameHouseholdDiscountYoungster, $youngsterId);
@@ -72,7 +73,7 @@ final class ApplySameHouseholdBillingImplTest extends UnitTestCase
 
         $this->memberRepository->expectsGetById(
             $memberId,
-            new Member($memberId, MembershipId::create(3), false, HouseholdId::create(6), 30),
+            new Member($memberId, MembershipId::create(3), false, HouseholdId::create(6), 30, 'Jan de Vries', 'jan@example.com', new DateTimeImmutable('2024-01-01')),
         );
 
         $this->extraRepo->expectsGetByCode(ExtraMembershipItemCode::SameHouseholdDiscountYoungster, $youngsterId);
@@ -91,7 +92,7 @@ final class ApplySameHouseholdBillingImplTest extends UnitTestCase
 
         $this->memberRepository->expectsGetById(
             $memberId,
-            new Member($memberId, MembershipId::create(4), false, null, 25),
+            new Member($memberId, MembershipId::create(4), false, null, 25, 'Jan de Vries', 'jan@example.com', new DateTimeImmutable('2024-01-01')),
         );
 
         $this->extraRepo->expectsGetByCode(ExtraMembershipItemCode::SameHouseholdDiscountYoungster, $youngsterId);

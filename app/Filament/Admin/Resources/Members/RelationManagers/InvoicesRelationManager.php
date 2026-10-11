@@ -56,7 +56,14 @@ final class InvoicesRelationManager extends MemberRelationManager
                     ])),
                 Action::make('generate')
                     ->label(__('labels.generate_invoice'))
-                    ->visible(static fn (): bool => auth()->user()?->can('create', Invoice::class) ?? false)
+                    ->visible(static function (RelationManager $livewire): bool {
+                        $owner = $livewire->getOwnerRecord();
+                        if (!$owner instanceof Member || $owner->isPending()) {
+                            return false;
+                        }
+
+                        return auth()->user()?->can('create', Invoice::class) ?? false;
+                    })
                     ->action(static function (RelationManager $livewire, InvoiceGenerator $generator, Action $action): bool {
                         /** @var Member $member */
                         $member = $livewire->getOwnerRecord();

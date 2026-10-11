@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+exec ./Taskfile fix
+exec ./Taskfilt lint
+git add .

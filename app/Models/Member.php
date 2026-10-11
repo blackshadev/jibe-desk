@@ -29,6 +29,7 @@ use RuntimeException;
  * @phpstan-import-type FormDataArray from FormData
  *
  * @property null|DateTimeInterface $stopped_at
+ * @property null|DateTimeInterface $accepted_at
  * @property FormDataArray|null $registration_data
  */
 #[Guarded('id', 'updated_at', 'created_at')]
@@ -153,6 +154,11 @@ final class Member extends Model
         $this->save();
     }
 
+    public function isActive(): bool
+    {
+        return $this->stopped_at === null && $this->accepted_at !== null;
+    }
+
     /** @return array<string, string> */
     #[Override]
     protected function casts(): array
@@ -162,14 +168,38 @@ final class Member extends Model
             'is_volunteer' => 'boolean',
             'gender' => Gender::class,
             'registration_data' => 'array',
-            'stopped_at' => 'timestamp',
+            'stopped_at' => 'datetime',
+            'accepted_at' => 'datetime',
         ];
     }
 
     #[Scope]
     protected function active(Builder $query): Builder
     {
-        return $query->whereNull('stopped_at');
+        return $query->whereNull('stopped_at')->whereNotNull('accepted_at');
+    }
+
+    #[Scope]
+    protected function stopped(Builder $query): Builder
+    {
+        return $query->whereNotNull('stopped_at');
+    }
+
+    #[Scope]
+    protected function pending(Builder $query): Builder
+    {
+        return $query->whereNull('accepted_at');
+    }
+
+    #[Scope]
+    protected function accepted(Builder $query): Builder
+    {
+        return $query->whereNotNull('accepted_at');
+    }
+
+    public function isPending(): bool
+    {
+        return $this->accepted_at === null;
     }
 
     /** @return Attribute<non-falsy-string, never> */

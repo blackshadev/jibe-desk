@@ -19,7 +19,6 @@ final readonly class NewMemberService
     public function __construct(
         private MemberRepository $memberRepository,
         private MembershipRepository $membershipRepository,
-        private MemberUserRepository $memberUserRepository,
         private Dispatcher $eventDispatcher,
     ) {}
 
@@ -29,8 +28,6 @@ final readonly class NewMemberService
         $newMember = $this->toNewMember($formData);
 
         $memberId = $this->memberRepository->newMember($newMember);
-
-        $this->memberUserRepository->provision($memberId);
 
         $event = $this->toNewMemberRegistrationEvent($memberId, $formData);
         $this->eventDispatcher->dispatch($event);

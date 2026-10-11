@@ -13,6 +13,7 @@ use Filament\Actions\DetachBulkAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Override;
 
@@ -42,7 +43,11 @@ final class ActivityMembersRelationManager extends RelationManager
                         'last_name',
                         'first_name',
                         'infix_name',
-                    ]),
+                    ])
+                    ->recordSelectOptionsQuery(
+                        /** @phpstan-ignore-next-line method.notFound */
+                        static fn (Builder $query) => $query->active(),
+                    ),
             ])
             ->recordUrl(static fn (Member $record): string => MemberResource::getUrl('edit', ['record' => $record]))
             ->recordActions([

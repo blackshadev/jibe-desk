@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Scenarios;
 
+use App\Domain\Members\AcceptMemberService;
 use App\Domain\Members\ExtraMembershipItemCode;
+use App\Domain\Members\MemberId;
 use App\Models\ExtraMembershipItem;
 use App\Models\Invoice;
 use Override;
@@ -26,6 +28,10 @@ final class WindsurferLifetimeScenarioTest extends MemberLifecycleScenario
     {
         // Step 1 — the member registers through the public wizard (default Windsurfer membership, not a volunteer).
         $member = $this->registerMember();
+
+        // Step 1b — the administration accepts the member: account is provisioned and billing applied.
+        app(AcceptMemberService::class)->accept(MemberId::create($member->id));
+        $member->refresh();
 
         $this->assertDatabaseHas('payment_information', [
             'member_id' => $member->id,

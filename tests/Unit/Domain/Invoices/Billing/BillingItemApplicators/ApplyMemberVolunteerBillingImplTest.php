@@ -12,6 +12,7 @@ use App\Domain\Members\ExtraMembershipItemCode;
 use App\Domain\Members\Member;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MembershipId;
+use DateTimeImmutable;
 use Override;
 use Tests\Unit\Domain\Invoices\BillableItemRepositoryExpectation;
 use Tests\Unit\Domain\Members\ExtraMembershipBillingItemRepositoryExpectation;
@@ -51,7 +52,7 @@ final class ApplyMemberVolunteerBillingImplTest extends UnitTestCase
 
         $this->memberRepository->expectsGetById(
             $memberId,
-            new Member($memberId, MembershipId::create(2), true, null, 22),
+            new Member($memberId, MembershipId::create(2), true, null, 22, 'Jan de Vries', 'jan@example.com', new DateTimeImmutable('2024-01-01')),
         );
         $this->extraMembershipBillingItemRepository->expectsGetByCode(ExtraMembershipItemCode::VolunteerContribution, $contributionId);
         $this->extraMembershipBillingItemRepository->expectsGetByCode(ExtraMembershipItemCode::VolunteerRestitution, $restitutionId);
@@ -69,7 +70,7 @@ final class ApplyMemberVolunteerBillingImplTest extends UnitTestCase
 
         $this->memberRepository->expectsGetById(
             $memberId,
-            new Member($memberId, MembershipId::create(2), false, null, 22),
+            new Member($memberId, MembershipId::create(2), false, null, 22, 'Jan de Vries', 'jan@example.com', new DateTimeImmutable('2024-01-01')),
         );
         $this->extraMembershipBillingItemRepository->expectsGetByCode(ExtraMembershipItemCode::VolunteerContribution, $contributionId);
         $this->extraMembershipBillingItemRepository->expectsGetByCode(ExtraMembershipItemCode::VolunteerRestitution, $restitutionId);

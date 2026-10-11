@@ -42,4 +42,6 @@ return [
     'invoice_email_resent' => 'Factuurmail opnieuw verzonden',
     'chain_status_updated' => 'Aansluiting controle bijgewerkt',
     'user_account_created' => 'Account aangemaakt; het lid ontvangt een e-mail om een wachtwoord in te stellen',
+    'member_accepted' => 'Lid geaccepteerd; account aangemaakt en welkomstmail verstuurd.',
+    'members_accepted' => 'Geselecteerde leden geaccepteerd.',
 ];

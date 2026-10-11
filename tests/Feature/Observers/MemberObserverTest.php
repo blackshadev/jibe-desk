@@ -61,6 +61,17 @@ final class MemberObserverTest extends FeatureTestCase
         $this->subject->created($member);
     }
 
+    public function test_it_does_not_apply_billing_on_created_pending_members(): void
+    {
+        $member = Member::factory()->pending()->createQuietly();
+
+        $this->applyVolunteer->expectsApplyNever();
+        $this->applyMembership->expectsApplyNever();
+        $this->applySameHousehold->expectsApplyNever();
+
+        $this->subject->created($member);
+    }
+
     public function test_it_applies_membership_billing_on_membership_change(): void
     {
         $newMembership = Membership::factory()->create();

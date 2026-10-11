@@ -14,7 +14,7 @@ final class StopAction
         return Action::make('stop')
             ->label(__('labels.stop_member'))
             ->requiresConfirmation()
-            ->visible(static fn (Member $record) => $record->stopped_at === null)
+            ->visible(static fn (Member $record) => $record->isActive())
             ->action(static fn (Member $record) => $record->stop())
             ->successNotificationTitle(__('labels.member_stopped'));
     }

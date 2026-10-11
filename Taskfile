@@ -23,7 +23,7 @@ function task:init { ## Initialise the project for local development
     app:ensure mago
     title "Ensuring required files are present"
     task:update:env
-#	project:git-config
+	project:git-config
 	task:build
 	task:start
     title "Installing project dependencies"

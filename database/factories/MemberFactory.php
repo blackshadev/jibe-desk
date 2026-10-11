@@ -36,6 +36,7 @@ final class MemberFactory extends Factory
             'gender' => fake()->randomElement(Gender::cases()),
             'membership_id' => Membership::factory(),
             'is_volunteer' => fake()->boolean(),
+            'accepted_at' => fake()->dateTimeBetween('-1 years', 'now'),
             'created_at' => fake()->dateTimeBetween('-1 years', 'now'),
         ];
     }
@@ -45,6 +46,14 @@ final class MemberFactory extends Factory
         // @mago-expect lint:prefer-static-closure
         return $this->state(fn (array $attributes) => [
             'stopped_at' => fake()->dateTimeBetween($attributes['created_at'], 'now'),
+        ]);
+    }
+
+    public function pending(): self
+    {
+        // @mago-expect lint:prefer-static-closure
+        return $this->state(fn (array $_attributes) => [
+            'accepted_at' => null,
         ]);
     }
 

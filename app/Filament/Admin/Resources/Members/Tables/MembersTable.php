@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Members\Tables;
 
+use App\Domain\Members\AcceptMemberService;
+use App\Domain\Members\MemberId;
 use App\Filament\Admin\Resources\Members\MemberResource;
 use App\Filament\Admin\Utils\ResourceRouteHelper;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Collection;
 
 final class MembersTable
 {
@@ -49,6 +54,18 @@ final class MembersTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    BulkAction::make('acceptMembers')
+                        ->label(__('labels.accept_members'))
+                        ->icon(Heroicon::CheckCircle)
+                        ->requiresConfirmation()
+                        ->modalDescription(__('labels.accept_members_description'))
+                        ->deselectRecordsAfterCompletion()
+                        ->action(static function (Collection $records, AcceptMemberService $service): void {
+                            foreach ($records as $record) {
+                                $service->accept(MemberId::create($record->id));
+                            }
+                        })
+                        ->successNotificationTitle(__('notifications.members_accepted')),
                     DeleteBulkAction::make(),
                 ]),
             ])

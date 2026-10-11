@@ -27,6 +27,7 @@ final class HouseholdMemberActions
                         ->options(
                             static fn (): array => Member::query()
                                 ->whereNull('household_id')
+                                ->accepted()
                                 ->get()
                                 ->mapWithKeys(static fn (Member $m) => [$m->id => $m->name])
                                 ->toArray(),
@@ -142,6 +143,7 @@ final class HouseholdMemberActions
                         ->options(
                             static fn (): array => Member::query()
                                 ->whereNull('household_id')
+                                ->accepted()
                                 ->get()
                                 ->mapWithKeys(static fn (Member $m) => [$m->id => $m->name])
                                 ->toArray(),

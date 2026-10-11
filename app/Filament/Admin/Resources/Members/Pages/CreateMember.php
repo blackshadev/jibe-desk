@@ -19,6 +19,8 @@ final class CreateMember extends CreateRecord
             $data['infix_name'] = '';
         }
 
+        $data['accepted_at'] = now();
+
         return $data;
     }
 
