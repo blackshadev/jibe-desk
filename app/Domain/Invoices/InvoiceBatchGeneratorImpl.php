@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Invoices;
 
-use App\Domain\Invoices\Billing\BillableItemsViewRepository;
+use App\Domain\Billing\BillableItemsViewRepository;
 use App\Domain\Invoices\Jobs\FinishInvoiceBatchGeneration;
 use App\Domain\Invoices\Jobs\GenerateInvoice;
 use App\Domain\Invoices\Jobs\SendInvoiceBatchCreatedEmail;

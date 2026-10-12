@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Infrastructure\Invoices;
 
-use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\MandateId;
@@ -12,6 +11,7 @@ use App\Domain\Invoices\PaymentInformationId;
 use App\Domain\Invoices\SepaConfiguration;
 use App\Domain\Invoices\SepaExportInvoice;
 use App\Domain\Members\MemberId;
+use App\Domain\SharedKernel\CompoundPrice;
 use App\Infrastructure\Invoices\SepaExportServiceImpl;
 use Carbon\CarbonImmutable;
 use DOMDocument;

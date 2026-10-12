@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Infrastructure\Invoices;
 
-use App\Domain\Invoices\Billing\BillableItem as BillableItemEntity;
+use App\Domain\Billing\BillableItem as BillableItemEntity;
 use App\Domain\Members\MemberId;
-use App\Infrastructure\Invoices\Billing\BillableItemsViewDbRepository;
+use App\Infrastructure\Billing\BillableItemsViewDbRepository;
 use App\Models\BillableItem;
 use App\Models\BillableItemInstance;
 use App\Models\Invoice;

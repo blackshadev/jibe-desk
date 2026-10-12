@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Invoices\Jobs;
 
-use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceBatchEmailData;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\Jobs\SendInvoiceBatchCreatedEmail;
 use App\Domain\Invoices\Mails\InvoiceBatchCreatedMail;
 use App\Domain\Mail\FinancialAdministrationRecipient;
 use App\Domain\Mail\Recipient;
+use App\Domain\SharedKernel\CompoundPrice;
 use Carbon\CarbonImmutable;
 use Override;
 use Tests\Unit\Domain\Invoices\InvoiceBatchRepositoryExpectation;

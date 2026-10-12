@@ -6,7 +6,7 @@ namespace App\Filament\Admin\Resources\BankTransactions\Actions;
 
 use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\BankTransactions\BankTransactionRepository;
-use App\Domain\Invoices\Formatters\PriceFormatter;
+use App\Domain\SharedKernel\PriceFormatter;
 use App\Filament\Admin\Resources\BankTransactions\Helpers\GetTransaction;
 use App\Filament\Admin\Resources\BankTransactions\Helpers\IsOpen;
 use App\Models\BankStatement;

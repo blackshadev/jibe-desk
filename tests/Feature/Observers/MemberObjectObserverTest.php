@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Observers;
 
+use App\Domain\Billing\BillableItemList;
 use App\Domain\Invoices\AppliedInvoiceWithLineIds;
 use App\Domain\Invoices\ApplyInvoiceLines;
-use App\Domain\Invoices\Billing\BillableItemList;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceLineId;
 use App\Domain\Members\MemberId;

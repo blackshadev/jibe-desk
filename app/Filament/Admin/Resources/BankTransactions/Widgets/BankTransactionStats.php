@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BankTransactions\Widgets;
 
-use App\Domain\Invoices\Formatters\PriceFormatter;
+use App\Domain\SharedKernel\PriceFormatter;
 use App\Filament\Admin\Resources\BankTransactions\BankTransactionResource;
 use App\Models\BankTransaction;
 use Filament\Widgets\StatsOverviewWidget;

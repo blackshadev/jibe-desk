@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Members;
 
-use App\Domain\Invoices\Billing\BillableItemIdList;
+use App\Domain\Billing\BillableItemIdList;
 
 final readonly class MembershipList
 {

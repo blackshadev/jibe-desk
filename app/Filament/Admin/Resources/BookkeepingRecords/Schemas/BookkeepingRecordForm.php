@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BookkeepingRecords\Schemas;
 
-use App\Domain\Invoices\CompoundPrice;
-use App\Domain\Invoices\Formatters\PriceFormatter;
+use App\Domain\SharedKernel\CompoundPrice;
+use App\Domain\SharedKernel\PriceFormatter;
 use App\Models\BookkeepingRecord;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;

@@ -11,9 +11,9 @@ use App\Domain\Members\MemberId;
 use App\Domain\Members\MembershipId;
 use DateTimeImmutable;
 use Override;
-use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplyMembershipBillingExpectation;
-use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplyMemberVolunteerBillingExpectation;
-use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplySameHouseholdBillingExpectation;
+use Tests\Unit\Domain\Billing\BillingItemApplicators\ApplyMembershipBillingExpectation;
+use Tests\Unit\Domain\Billing\BillingItemApplicators\ApplyMemberVolunteerBillingExpectation;
+use Tests\Unit\Domain\Billing\BillingItemApplicators\ApplySameHouseholdBillingExpectation;
 use Tests\Unit\Domain\Members\MemberRepositoryExpectation;
 use Tests\UnitTestCase;
 

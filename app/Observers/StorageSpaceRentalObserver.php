@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Observers;
 
-use App\Domain\Invoices\Billing\BillableItemInstanceId;
-use App\Domain\Invoices\Billing\BillingItemApplicators\ApplyStorageSpaceRentalBilling;
+use App\Domain\Billing\BillableItemInstanceId;
+use App\Domain\Billing\BillingItemApplicators\ApplyStorageSpaceRentalBilling;
 use App\Domain\StorageSpaceRentals\StorageSpaceRentalId;
 use App\Models\StorageSpaceRental;
 

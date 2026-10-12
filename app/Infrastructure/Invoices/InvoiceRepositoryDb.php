@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Invoices;
 
+use App\Domain\Billing\BillableItem;
 use App\Domain\Invoices\AppliedInvoiceWithLineIds;
 use App\Domain\Invoices\ApplyInvoiceLines;
-use App\Domain\Invoices\Billing\BillableItem;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\Invoices\InvoiceLineId;

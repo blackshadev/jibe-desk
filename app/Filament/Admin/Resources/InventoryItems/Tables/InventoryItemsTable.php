@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\InventoryItems\Tables;
 
-use App\Domain\Invoices\Formatters\PriceFormatter;
+use App\Domain\SharedKernel\PriceFormatter;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;

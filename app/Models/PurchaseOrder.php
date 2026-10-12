@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Domain\Invoices\CompoundPrice;
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Domain\SharedKernel\CompoundPrice;
 use App\Observers\PurchaseOrderObserver;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\Guarded;

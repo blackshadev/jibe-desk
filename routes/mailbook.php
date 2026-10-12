@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Domain\Invoices\CompoundPrice;
+use App\Domain\SharedKernel\CompoundPrice;
 use App\Domain\Invoices\InvoiceBatchEmailData;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceMailData;

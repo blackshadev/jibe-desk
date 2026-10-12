@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\StorageSpaceRentals;
 
-use App\Domain\Invoices\Billing\BillableItemInstanceId;
+use App\Domain\Billing\BillableItemInstanceId;
 use JeroenG\Autowire\Attribute\Autowire;
 
 #[Autowire]

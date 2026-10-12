@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domain\Members\Listeners;
 
-use App\Domain\Invoices\Billing\BillingItemApplicators\ApplyMembershipBilling;
-use App\Domain\Invoices\Billing\BillingItemApplicators\ApplyMemberVolunteerBilling;
-use App\Domain\Invoices\Billing\BillingItemApplicators\ApplySameHouseholdBilling;
+use App\Domain\Billing\BillingItemApplicators\ApplyMembershipBilling;
+use App\Domain\Billing\BillingItemApplicators\ApplyMemberVolunteerBilling;
+use App\Domain\Billing\BillingItemApplicators\ApplySameHouseholdBilling;
 use App\Domain\Members\Events\MemberAccepted;
 use App\Domain\Members\MemberRepository;
 

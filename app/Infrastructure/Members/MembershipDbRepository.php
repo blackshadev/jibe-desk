@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Members;
 
-use App\Domain\Invoices\Billing\BillableItemId;
+use App\Domain\Billing\BillableItemId;
 use App\Domain\Members\Membership;
 use App\Domain\Members\MembershipId;
 use App\Domain\Members\MembershipList;

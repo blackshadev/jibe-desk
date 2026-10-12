@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Invoices;
 
-use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\MandateId;
 use App\Domain\Invoices\PaymentInformationId;
 use App\Domain\Invoices\SepaExportInvoice;
 use App\Domain\Members\MemberId;
+use App\Domain\SharedKernel\CompoundPrice;
 use Carbon\CarbonImmutable;
 use Tests\UnitTestCase;
 

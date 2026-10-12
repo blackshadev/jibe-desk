@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Invoices;
 
+use App\Domain\SharedKernel\CompoundPrice;
+
 final readonly class InvoiceMailLine
 {
     public function __construct(

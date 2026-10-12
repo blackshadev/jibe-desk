@@ -1,0 +1,67 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Unit\Domain\Billing;
+
+use App\Domain\Billing\BillableItemId;
+use App\Domain\Billing\BillableItemInstanceId;
+use App\Domain\Billing\BillableItemInstanceRepository;
+use App\Domain\Members\MemberId;
+use DateTimeInterface;
+use Mockery;
+use Mockery\MockInterface;
+
+use function PHPUnit\Framework\equalTo;
+use function PHPUnit\Framework\isNull;
+
+final readonly class BillableItemInstanceRepositoryExpectation
+{
+    private function __construct(
+        public MockInterface&BillableItemInstanceRepository $mock,
+    ) {}
+
+    public static function create(): self
+    {
+        return new self(Mockery::mock(BillableItemInstanceRepository::class));
+    }
+
+    public function expectsAdd(
+        MemberId $memberId,
+        int $billableItemId,
+        ?DateTimeInterface $endDate,
+        ?DateTimeInterface $startDate,
+        BillableItemInstanceId $return,
+    ): void {
+        $this->mock
+            ->expects('add')
+            ->with(
+                equalTo($memberId),
+                equalTo(BillableItemId::create($billableItemId)),
+                $endDate ? equalTo($endDate) : isNull(),
+                $startDate ? equalTo($startDate) : isNull(),
+            )
+            ->andReturn($return);
+    }
+
+    public function expectsStop(BillableItemInstanceId $instanceId, DateTimeInterface $endDate): void
+    {
+        $this->mock
+            ->expects('stop')
+            ->with(equalTo($instanceId), equalTo($endDate));
+    }
+
+    public function expectsStopAll(MemberId $memberId, DateTimeInterface $endDate): void
+    {
+        $this->mock
+            ->expects('stopAll')
+            ->with(equalTo($memberId), equalTo($endDate));
+    }
+
+    public function expectsUpdateEndDate(BillableItemInstanceId $instanceId, ?DateTimeInterface $endDate): void
+    {
+        $this->mock
+            ->expects('updateEndDate')
+            ->with(equalTo($instanceId), equalTo($endDate));
+    }
+}

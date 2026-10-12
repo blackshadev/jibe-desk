@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Invoices\Mails;
 
-use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceBatchEmailData;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\Mails\InvoiceBatchCreatedMail;
 use App\Domain\Mail\Recipient;
+use App\Domain\SharedKernel\CompoundPrice;
 use App\Models\InvoiceBatch;
 use Carbon\CarbonImmutable;
 use Tests\FeatureTestCase;

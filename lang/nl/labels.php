@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Domain\Invoices\Billing\BillPeriod;
+use App\Domain\Billing\BillPeriod;
 use App\Domain\Mail\OutgoingEmailStatus;
 use App\Domain\Members\Gender;
 

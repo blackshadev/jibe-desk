@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Domain\Jobs\MatchBankTransactionsJob;
+use App\Domain\BankTransactions\Jobs\MatchBankTransactionsJob;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;

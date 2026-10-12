@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Invoices\Tables;
 
-use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceIdList;
 use App\Domain\Invoices\InvoiceService;
 use App\Domain\Invoices\InvoiceStatus;
+use App\Domain\SharedKernel\CompoundPrice;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Filament\Admin\Utils\ResourceRouteHelper;
 use App\Models\Invoice;

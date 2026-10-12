@@ -12,10 +12,10 @@ use App\Models\Membership;
 use App\Observers\MemberObserver;
 use Override;
 use Tests\FeatureTestCase;
-use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplyMembershipBillingExpectation;
-use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplyMemberVolunteerBillingExpectation;
-use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplySameHouseholdBillingExpectation;
-use Tests\Unit\Domain\Invoices\Billing\BillingItemApplicators\ApplyStoppedMembershipExpectation;
+use Tests\Unit\Domain\Billing\BillingItemApplicators\ApplyMembershipBillingExpectation;
+use Tests\Unit\Domain\Billing\BillingItemApplicators\ApplyMemberVolunteerBillingExpectation;
+use Tests\Unit\Domain\Billing\BillingItemApplicators\ApplySameHouseholdBillingExpectation;
+use Tests\Unit\Domain\Billing\BillingItemApplicators\ApplyStoppedMembershipExpectation;
 
 final class MemberObserverTest extends FeatureTestCase
 {

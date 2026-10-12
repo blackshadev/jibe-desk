@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Invoices;
 
-use App\Domain\Invoices\Billing\BillableItem;
-use App\Domain\Invoices\Billing\BillableItemId;
-use App\Domain\Invoices\Billing\BillableItemList;
-use App\Domain\Invoices\Billing\CostCenterId;
-use App\Domain\Invoices\CompoundPrice;
+use App\Domain\Billing\BillableItem;
+use App\Domain\Billing\BillableItemId;
+use App\Domain\Billing\BillableItemList;
+use App\Domain\Bookkeeping\CostCenterId;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\NewInvoice;
 use App\Domain\Members\MemberId;
+use App\Domain\SharedKernel\CompoundPrice;
 use Carbon\CarbonImmutable;
 use Tests\UnitTestCase;
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Invoices\Schemas;
 
-use App\Domain\Invoices\Formatters\PriceFormatter;
+use App\Domain\SharedKernel\PriceFormatter;
 use App\Filament\Admin\Labels\InvoiceStatusLabels;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Models\CostCenter;

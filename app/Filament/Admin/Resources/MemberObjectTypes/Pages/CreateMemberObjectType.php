@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\MemberObjectTypes\Pages;
 
-use App\Domain\Invoices\Billing\BillPeriod;
+use App\Domain\Billing\BillPeriod;
 use App\Filament\Admin\Resources\MemberObjectTypes\MemberObjectTypeResource;
 use App\Models\BillableItem;
 use Filament\Resources\Pages\CreateRecord;

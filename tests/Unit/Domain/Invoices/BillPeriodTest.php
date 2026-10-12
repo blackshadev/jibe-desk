@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Invoices;
 
-use App\Domain\Invoices\Billing\BillPeriod;
+use App\Domain\Billing\BillPeriod;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\UnitTestCase;

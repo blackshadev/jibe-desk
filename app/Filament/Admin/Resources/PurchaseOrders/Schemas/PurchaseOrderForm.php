@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\PurchaseOrders\Schemas;
 
-use App\Domain\Invoices\Formatters\PriceFormatter;
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Domain\SharedKernel\PriceFormatter;
 use App\Filament\Admin\Labels\PurchaseOrderStatusLabels;
 use App\Filament\Admin\Resources\PurchaseOrders\Helpers\MemberCreditorPrefill;
 use App\Models\CostCenter;

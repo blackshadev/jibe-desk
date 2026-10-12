@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Invoices\Jobs;
 
-use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceMailData;
 use App\Domain\Invoices\Jobs\SendInvoiceEmail;
@@ -12,6 +11,7 @@ use App\Domain\Invoices\Mails\InvoiceMail;
 use App\Domain\Invoices\SendInvoiceEmailData;
 use App\Domain\Invoices\SepaConfiguration;
 use App\Domain\Mail\Recipient;
+use App\Domain\SharedKernel\CompoundPrice;
 use Carbon\CarbonImmutable;
 use DateTimeInterface;
 use Override;

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Invoices\Mails;
 
-use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceMailData;
 use App\Domain\Invoices\InvoiceMailLine;
 use App\Domain\Invoices\Mails\InvoiceMail;
 use App\Domain\Invoices\SepaConfiguration;
 use App\Domain\Mail\Recipient;
 use App\Domain\Mail\Related;
+use App\Domain\SharedKernel\CompoundPrice;
 use App\Models\Invoice;
 use Carbon\CarbonImmutable;
 use Illuminate\Mail\Mailables\Content;

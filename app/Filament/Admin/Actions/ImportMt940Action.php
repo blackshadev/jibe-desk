@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Actions;
 
 use App\Domain\BankTransactions\BankTransactionImportService;
+use App\Domain\BankTransactions\Jobs\MatchBankTransactionsJob;
 use App\Domain\BankTransactions\UnknownBankAccountException;
-use App\Domain\Jobs\MatchBankTransactionsJob;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;

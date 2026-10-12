@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BookkeepingRecords\Schemas;
 
-use App\Domain\Invoices\Formatters\PriceFormatter;
+use App\Domain\SharedKernel\PriceFormatter;
 use App\Filament\Admin\Resources\BankTransactions\BankTransactionResource;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;

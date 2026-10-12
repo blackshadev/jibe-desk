@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Bookkeeping;
 
+use App\Domain\Bookkeeping\CostCenterId;
 use App\Domain\Bookkeeping\CostCenterYearResult;
-use App\Domain\Invoices\Billing\CostCenterId;
-use App\Domain\Invoices\CompoundPrice;
+use App\Domain\SharedKernel\CompoundPrice;
 use Tests\UnitTestCase;
 
 final class CostCenterYearResultTest extends UnitTestCase

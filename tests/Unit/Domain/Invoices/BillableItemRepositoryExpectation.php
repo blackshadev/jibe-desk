@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Invoices;
 
-use App\Domain\Invoices\Billing\BillableItemId;
-use App\Domain\Invoices\Billing\BillableItemIdList;
-use App\Domain\Invoices\Billing\BillableItemInstanceId;
-use App\Domain\Invoices\Billing\BillableItemInstanceRepository;
+use App\Domain\Billing\BillableItemId;
+use App\Domain\Billing\BillableItemIdList;
+use App\Domain\Billing\BillableItemInstanceId;
+use App\Domain\Billing\BillableItemInstanceRepository;
 use App\Domain\Members\MemberId;
 use DateTimeInterface;
 use Mockery;

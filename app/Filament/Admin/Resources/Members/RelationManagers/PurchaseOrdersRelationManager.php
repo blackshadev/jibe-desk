@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Members\RelationManagers;
 
-use App\Domain\Invoices\CompoundPrice;
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Domain\SharedKernel\CompoundPrice;
 use App\Filament\Admin\RelationManagers\MemberRelationManager;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Filament\Admin\Utils\ResourceRouteHelper;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\StorageSpaceRentals;
 
-use App\Domain\Invoices\Billing\BillableItemInstanceId;
+use App\Domain\Billing\BillableItemInstanceId;
 use App\Domain\StorageSpaceRentals\StorageSpaceRental;
 use App\Domain\StorageSpaceRentals\StorageSpaceRentalId;
 use App\Domain\StorageSpaceRentals\StorageSpaceRentalRepository;

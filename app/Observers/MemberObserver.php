@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Observers;
 
-use App\Domain\Invoices\Billing\BillingItemApplicators\ApplyMembershipBilling;
-use App\Domain\Invoices\Billing\BillingItemApplicators\ApplyMemberVolunteerBilling;
-use App\Domain\Invoices\Billing\BillingItemApplicators\ApplySameHouseholdBilling;
-use App\Domain\Invoices\Billing\BillingItemApplicators\ApplyStoppedMembership;
+use App\Domain\Billing\BillingItemApplicators\ApplyMembershipBilling;
+use App\Domain\Billing\BillingItemApplicators\ApplyMemberVolunteerBilling;
+use App\Domain\Billing\BillingItemApplicators\ApplySameHouseholdBilling;
+use App\Domain\Billing\BillingItemApplicators\ApplyStoppedMembership;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MembershipId;
 use App\Models\Member;

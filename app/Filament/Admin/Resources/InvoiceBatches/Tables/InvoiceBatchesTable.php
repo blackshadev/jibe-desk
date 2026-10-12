@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\InvoiceBatches\Tables;
 
-use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceBatchStatus;
+use App\Domain\SharedKernel\CompoundPrice;
 use App\Filament\Admin\Labels\InvoiceBatchStatusLabels;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;

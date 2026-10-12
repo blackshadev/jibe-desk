@@ -6,9 +6,8 @@ namespace App\Infrastructure\Bookkeeping;
 
 use App\Domain\BankTransactions\BankTransactionId;
 use App\Domain\Bookkeeping\BookkeepingRecordRepository;
+use App\Domain\Bookkeeping\CostCenterId;
 use App\Domain\Bookkeeping\CostCenterYearResult;
-use App\Domain\Invoices\Billing\CostCenterId;
-use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceIdList;
@@ -16,6 +15,7 @@ use App\Domain\Invoices\InvoiceStatus;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Domain\SharedKernel\CompoundPrice;
 use App\Models\BookkeepingRecord;
 use App\Models\Invoice;
 use App\Models\PurchaseOrder;

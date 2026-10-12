@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Infrastructure\Invoices;
 
+use App\Domain\Billing\BillableItem;
+use App\Domain\Billing\BillableItemId;
+use App\Domain\Billing\BillableItemList;
+use App\Domain\Bookkeeping\CostCenterId;
 use App\Domain\Invoices\ApplyInvoiceLines;
-use App\Domain\Invoices\Billing\BillableItem;
-use App\Domain\Invoices\Billing\BillableItemId;
-use App\Domain\Invoices\Billing\BillableItemList;
-use App\Domain\Invoices\Billing\CostCenterId;
-use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceStatus;
 use App\Domain\Invoices\NewInvoice;
 use App\Domain\Members\MemberId;
+use App\Domain\SharedKernel\CompoundPrice;
 use App\Infrastructure\Invoices\InvoiceRepositoryDb;
 use App\Models\BillableItem as BillableItemModel;
 use App\Models\Invoice;

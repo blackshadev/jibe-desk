@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Invoices;
 
-use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceBatchEmailData;
 use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceBatchRepository;
@@ -15,6 +14,7 @@ use App\Domain\Invoices\MandateId;
 use App\Domain\Invoices\PaymentInformationId;
 use App\Domain\Invoices\SepaExportInvoice;
 use App\Domain\Members\MemberId;
+use App\Domain\SharedKernel\CompoundPrice;
 use App\Models\Invoice;
 use App\Models\InvoiceBatch;
 use Carbon\CarbonImmutable;

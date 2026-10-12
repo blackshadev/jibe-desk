@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Invoices;
 
-use App\Domain\Invoices\Billing\BillableItemList;
-use App\Domain\Invoices\Billing\BillableItemsViewRepository;
+use App\Domain\Billing\BillableItemList;
+use App\Domain\Billing\BillableItemsViewRepository;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MemberIdList;
 use DateTimeInterface;

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Invoices;
 
-use App\Domain\Invoices\CompoundPrice;
 use App\Domain\Invoices\InvoiceMailLine;
+use App\Domain\SharedKernel\CompoundPrice;
 use Tests\UnitTestCase;
 
 final class InvoiceMailLineTest extends UnitTestCase

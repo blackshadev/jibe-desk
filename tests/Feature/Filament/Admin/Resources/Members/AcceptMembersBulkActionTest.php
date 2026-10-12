@@ -35,7 +35,9 @@ final class AcceptMembersBulkActionTest extends FeatureTestCase
 
         $members = Member::factory()->count(2)->pending()->createQuietly();
 
-        Livewire::test(ListMembers::class)
+        Livewire::test(ListMembers::class, [
+            'activeTab' => 'new',
+        ])
             ->callTableBulkAction('acceptMembers', $members);
 
         foreach ($members as $member) {

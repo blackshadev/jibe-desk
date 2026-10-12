@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Labels;
 
-use App\Domain\Invoices\Billing\BillPeriod;
+use App\Domain\Billing\BillPeriod;
 
 final class BillPeriodLabels
 {

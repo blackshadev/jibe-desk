@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Domain\Invoices\Billing\BillPeriod;
+use App\Domain\Billing\BillPeriod;
 use App\Models\BillableItem;
 use App\Models\Membership;
 use Illuminate\Database\Eloquent\Factories\Factory;

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Domain\Invoices\Billing\BillableItem as InvoiceBillableItem;
-use App\Domain\Invoices\Billing\BillableItemId;
-use App\Domain\Invoices\Billing\BillPeriod;
-use App\Domain\Invoices\Billing\CostCenterId;
-use App\Domain\Invoices\CompoundPrice;
+use App\Domain\Billing\BillableItem as InvoiceBillableItem;
+use App\Domain\Billing\BillableItemId;
+use App\Domain\Billing\BillPeriod;
+use App\Domain\Bookkeeping\CostCenterId;
+use App\Domain\SharedKernel\CompoundPrice;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

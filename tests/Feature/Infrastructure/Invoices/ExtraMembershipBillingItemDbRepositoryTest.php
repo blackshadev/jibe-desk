@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Infrastructure\Invoices;
 
 use App\Domain\Members\ExtraMembershipItemCode;
-use App\Infrastructure\Invoices\Billing\ExtraMembershipBillingItemDbRepository;
+use App\Infrastructure\Billing\ExtraMembershipBillingItemDbRepository;
 use App\Models\BillableItem;
 use App\Models\ExtraMembershipItem;
 use Illuminate\Database\Eloquent\ModelNotFoundException;

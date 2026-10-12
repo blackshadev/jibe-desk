@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Infrastructure\Invoices;
 
-use App\Domain\Invoices\Billing\BillableItemId;
-use App\Domain\Invoices\Billing\BillableItemIdList;
-use App\Domain\Invoices\Billing\BillableItemInstanceId;
+use App\Domain\Billing\BillableItemId;
+use App\Domain\Billing\BillableItemIdList;
+use App\Domain\Billing\BillableItemInstanceId;
 use App\Domain\Members\MemberId;
-use App\Infrastructure\Invoices\Billing\BillableItemDbInstanceRepository;
+use App\Infrastructure\Billing\BillableItemDbInstanceRepository;
 use App\Models\BillableItem;
 use App\Models\BillableItemInstance;
 use App\Models\Member;

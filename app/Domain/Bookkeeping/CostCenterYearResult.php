@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Bookkeeping;
 
-use App\Domain\Invoices\Billing\CostCenterId;
-use App\Domain\Invoices\CompoundPrice;
+use App\Domain\SharedKernel\CompoundPrice;
 
 final readonly class CostCenterYearResult
 {
