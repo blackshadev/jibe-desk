@@ -2,7 +2,8 @@
 
 Reviewed at merge time. This file records the judgement calls and conventions a
 reviewer enforces that no automated check can. Deterministic checks live in
-`mago.toml`, `phpstan*.neon`, and CI — do not restate those here.
+`mago.toml` and `phpstan*.neon`, run by `./Taskfile lint` (wired into the
+pre-commit hook) — do not restate those here.
 
 ## Constructor signature changes ripple into call sites
 

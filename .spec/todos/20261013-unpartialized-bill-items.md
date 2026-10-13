@@ -1,0 +1,1 @@
+Ensure some of the bill items are not automatically partialized. For instance the vrijwilligers_bijdragen en vrijwilligers_restitutie should not be partialized and while generating should have a amount of 1.00.
