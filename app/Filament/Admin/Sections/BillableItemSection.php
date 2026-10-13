@@ -9,6 +9,7 @@ use App\Filament\Admin\Labels\BillPeriodLabels;
 use App\Models\CostCenter;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 
 final class BillableItemSection
@@ -37,6 +38,10 @@ final class BillableItemSection
                     ->options(BillMonthLabels::options())
                     ->default(1)
                     ->required(),
+                Toggle::make('prorate')
+                    ->label(__('labels.prorate'))
+                    ->helperText(__('labels.prorate_hint'))
+                    ->default(true),
                 Select::make('cost_center_id')
                     ->label(__('labels.cost_center'))
                     ->options(static fn () => CostCenter::query()->orderBy('number')->pluck('title', 'id'))

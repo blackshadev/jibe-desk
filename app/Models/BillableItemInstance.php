@@ -53,14 +53,17 @@ final class BillableItemInstance extends Model
 
     public function quantityFor(DateTimeInterface $when): float
     {
-        $cycle = (int) $this->bill_cycle_in_months;
+        if ($this->start_date->startOfMonth()->gt($when)) {
+            return 0.0;
+        }
 
+        $cycle = (int) $this->bill_cycle_in_months;
         if ($cycle <= 1) {
             return 1.0;
         }
 
-        if ($this->start_date->startOfMonth()->gt($when)) {
-            return 0.0;
+        if ($this->billableItem->prorate === false) {
+            return 1.0;
         }
 
         $invoiceMonth = CarbonImmutable::create($when)->firstOfMonth();

@@ -60,6 +60,7 @@ final class MembershipSeeder extends Seeder
                         'price' => 20,
                         'vat' => 4.2,
                         'bill_period' => BillPeriod::Annually,
+                        'prorate' => false,
                         'description' => 'Vrijwilligersbijdrage',
                     ])
                     ->for($costCenter),
@@ -75,6 +76,7 @@ final class MembershipSeeder extends Seeder
                         'price' => -22,
                         'vat' => -4.62,
                         'bill_period' => BillPeriod::Annually,
+                        'prorate' => false,
                         'description' => 'Vrijwilligersbijdrage restitutie',
                     ])
                     ->for($costCenter),

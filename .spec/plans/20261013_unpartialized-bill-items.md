@@ -125,20 +125,20 @@ File `app/Models/BillableItemInstance.php`.
 
 ```php
 public function quantityFor(DateTimeInterface $when): float
-{
+{ 
+    if ($this->start_date->startOfMonth()->gt($when)) {
+        return 0.0;
+    }
+    
     $cycle = (int) $this->bill_cycle_in_months;
-
     if ($cycle <= 1) {
         return 1.0;
     }
 
-    if ($this->start_date->startOfMonth()->gt($when)) {
-        return 0.0;
-    }
-
-    if (! ($this->billableItem?->prorate ?? true)) {
+    if ($this->billableItem->prorate === false) {
         return 1.0;
     }
+
 
     $invoiceMonth = CarbonImmutable::create($when)->firstOfMonth();
 
@@ -156,7 +156,7 @@ public function quantityFor(DateTimeInterface $when): float
 }
 ```
 
-Placement matters: the `prorate` check sits after the `start_date` guard, so a non-prorated item still returns `0.0` before its start date, then `1.0` for every subsequent invoice it appears on (appearance is unchanged — still anchored annually by `bill_month`).
+Placement matters: the `prorate` check sits after the `start_date` guard, so a non-prorated item still returns `0.0` before its start date, then `1.0` for every subsequent invoice it appears on (appearance is unchanged — still anchored annually by `bill_month`). The start_date check should occure first to ensure that all billable items, prorated or not, return `0.0` before their start date.
 
 ---
 

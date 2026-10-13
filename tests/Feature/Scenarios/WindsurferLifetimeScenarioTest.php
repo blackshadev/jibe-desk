@@ -54,14 +54,14 @@ final class WindsurferLifetimeScenarioTest extends MemberLifecycleScenario
             'end_date' => '2026-10-30 00:00:00',
         ]);
 
-        // Step 3 — first invoice: membership + contribution are pro-rated (5/12 ≈ 0.42), activity is monthly.
+        // Step 3 — first invoice: membership is pro-rated (5/12 ≈ 0.42); the contribution is full-quantity (1.0); activity is monthly.
         // Note: InvoiceLine.quantity is cast to decimal:2, so 5/12 (0.416667) becomes 0.42.
         $this->generateInvoiceFor($member);
 
         $firstInvoice = $this->invoiceFor($member, '2026-08-15');
         static::assertSame(3, $firstInvoice->lines()->count());
         $this->assertInvoiceLine($firstInvoice, 'Lidmaatschap Windsurfer (volwassenen)', 68.00, 0.42);
-        $this->assertInvoiceLine($firstInvoice, 'Vrijwilligersbijdrage', 20.00, 0.42);
+        $this->assertInvoiceLine($firstInvoice, 'Vrijwilligersbijdrage', 20.00, 1.0);
         $this->assertInvoiceLine($firstInvoice, 'Activiteit: Reguliere les volwassenen', 37.00, 1.0);
 
         // Step 4 — a little over a month later: only the monthly activity re-bills.
@@ -87,14 +87,14 @@ final class WindsurferLifetimeScenarioTest extends MemberLifecycleScenario
             'start_date' => '2026-09-27 00:00:00',
         ]);
 
-        // Step 6 — third invoice (next month): activity again + pro-rated restitution (4/12 ≈ 0.33).
+        // Step 6 — third invoice (next month): activity again + full-quantity restitution (1.0).
         $this->travelToDate('2026-10-15');
         $this->generateInvoiceFor($member);
 
         $thirdInvoice = $this->invoiceFor($member, '2026-10-15');
         static::assertSame(2, $thirdInvoice->lines()->count());
         $this->assertInvoiceLine($thirdInvoice, 'Activiteit: Reguliere les volwassenen', 37.00, 1.0);
-        $this->assertInvoiceLine($thirdInvoice, 'Vrijwilligersbijdrage restitutie', -22.00, 0.33);
+        $this->assertInvoiceLine($thirdInvoice, 'Vrijwilligersbijdrage restitutie', -22.00, 1.0);
 
         // Step 7 — fourth invoice in January: annual items re-bill at full quantity, activity has ended.
         $this->travelToDate('2027-01-10');

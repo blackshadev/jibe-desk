@@ -97,6 +97,8 @@ return [
     'title' => 'Titel',
     'bill_period' => 'Factuurperiode',
     'bill_month' => 'Start maand factuurperiode',
+    'prorate' => 'Naar rato factureren',
+    'prorate_hint' => 'Uitzetten om altijd de volledige periode (hoeveelheid 1.00) te factureren',
     'months' => [
         1 => 'Januari',
         2 => 'Februari',
