@@ -13,6 +13,7 @@ use DateTimeImmutable;
 use Override;
 use Tests\Unit\Domain\Billing\BillingItemApplicators\ApplyMembershipBillingExpectation;
 use Tests\Unit\Domain\Billing\BillingItemApplicators\ApplyMemberVolunteerBillingExpectation;
+use Tests\Unit\Domain\Billing\BillingItemApplicators\ApplyRegistrationFeeBillingExpectation;
 use Tests\Unit\Domain\Billing\BillingItemApplicators\ApplySameHouseholdBillingExpectation;
 use Tests\Unit\Domain\Members\MemberRepositoryExpectation;
 use Tests\UnitTestCase;
@@ -27,6 +28,8 @@ final class ApplyMemberAcceptedBillingTest extends UnitTestCase
 
     private ApplySameHouseholdBillingExpectation $householdBilling;
 
+    private ApplyRegistrationFeeBillingExpectation $registrationFeeBilling;
+
     private ApplyMemberAcceptedBilling $subject;
 
     #[Override]
@@ -38,12 +41,14 @@ final class ApplyMemberAcceptedBillingTest extends UnitTestCase
         $this->membershipBilling = ApplyMembershipBillingExpectation::create();
         $this->volunteerBilling = ApplyMemberVolunteerBillingExpectation::create();
         $this->householdBilling = ApplySameHouseholdBillingExpectation::create();
+        $this->registrationFeeBilling = ApplyRegistrationFeeBillingExpectation::create();
 
         $this->subject = new ApplyMemberAcceptedBilling(
             $this->memberRepo->mock,
             $this->membershipBilling->mock,
             $this->volunteerBilling->mock,
             $this->householdBilling->mock,
+            $this->registrationFeeBilling->mock,
         );
     }
 
@@ -70,6 +75,7 @@ final class ApplyMemberAcceptedBillingTest extends UnitTestCase
         $this->membershipBilling->expectsApply($memberId, $membershipId);
         $this->volunteerBilling->expectsApply($memberId);
         $this->householdBilling->expectsApply($memberId);
+        $this->registrationFeeBilling->expectsApply($memberId);
 
         $this->subject->handle(new MemberAccepted($memberId));
     }

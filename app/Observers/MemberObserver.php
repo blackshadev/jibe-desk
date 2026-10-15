@@ -6,6 +6,7 @@ namespace App\Observers;
 
 use App\Domain\Billing\BillingItemApplicators\ApplyMembershipBilling;
 use App\Domain\Billing\BillingItemApplicators\ApplyMemberVolunteerBilling;
+use App\Domain\Billing\BillingItemApplicators\ApplyRegistrationFeeBilling;
 use App\Domain\Billing\BillingItemApplicators\ApplySameHouseholdBilling;
 use App\Domain\Billing\BillingItemApplicators\ApplyStoppedMembership;
 use App\Domain\Members\MemberId;
@@ -19,6 +20,7 @@ final readonly class MemberObserver
         private ApplyMembershipBilling $applyMembershipBilling,
         private ApplySameHouseholdBilling $applySameHouseholdBilling,
         private ApplyStoppedMembership $applyStoppedMembership,
+        private ApplyRegistrationFeeBilling $applyRegistrationFeeBilling,
     ) {}
 
     public function created(Member $member): void
@@ -34,6 +36,7 @@ final readonly class MemberObserver
 
         $this->applyMemberVolunteerBilling->apply(MemberId::create($member->id));
         $this->applySameHouseholdBilling->apply(MemberId::create($member->id));
+        $this->applyRegistrationFeeBilling->apply(MemberId::create($member->id));
     }
 
     public function updated(Member $member): void

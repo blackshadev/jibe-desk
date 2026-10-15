@@ -6,6 +6,7 @@ namespace App\Domain\Members\Listeners;
 
 use App\Domain\Billing\BillingItemApplicators\ApplyMembershipBilling;
 use App\Domain\Billing\BillingItemApplicators\ApplyMemberVolunteerBilling;
+use App\Domain\Billing\BillingItemApplicators\ApplyRegistrationFeeBilling;
 use App\Domain\Billing\BillingItemApplicators\ApplySameHouseholdBilling;
 use App\Domain\Members\Events\MemberAccepted;
 use App\Domain\Members\MemberRepository;
@@ -17,6 +18,7 @@ final readonly class ApplyMemberAcceptedBilling
         private ApplyMembershipBilling $applyMembershipBilling,
         private ApplyMemberVolunteerBilling $applyMemberVolunteerBilling,
         private ApplySameHouseholdBilling $applySameHouseholdBilling,
+        private ApplyRegistrationFeeBilling $applyRegistrationFeeBilling,
     ) {}
 
     public function handle(MemberAccepted $event): void
@@ -26,5 +28,6 @@ final readonly class ApplyMemberAcceptedBilling
         $this->applyMembershipBilling->apply($event->memberId, $member->membershipId);
         $this->applyMemberVolunteerBilling->apply($event->memberId);
         $this->applySameHouseholdBilling->apply($event->memberId);
+        $this->applyRegistrationFeeBilling->apply($event->memberId);
     }
 }

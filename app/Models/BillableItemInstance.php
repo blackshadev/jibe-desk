@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Domain\Billing\BillPeriod;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use DateTimeInterface;
@@ -55,6 +56,10 @@ final class BillableItemInstance extends Model
     {
         if ($this->start_date->startOfMonth()->gt($when)) {
             return 0.0;
+        }
+
+        if ($this->billableItem->bill_period === BillPeriod::Once) {
+            return 1.0;
         }
 
         $cycle = (int) $this->bill_cycle_in_months;

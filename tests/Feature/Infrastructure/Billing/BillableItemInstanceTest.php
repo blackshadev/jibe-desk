@@ -8,7 +8,6 @@ use App\Domain\Billing\BillPeriod;
 use App\Models\BillableItem;
 use App\Models\BillableItemInstance;
 use App\Models\Member;
-use Carbon\CarbonImmutable;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\FeatureTestCase;
@@ -38,7 +37,8 @@ final class BillableItemInstanceTest extends FeatureTestCase
             ->for(BillableItem::factory()->state([
                 'bill_period' => BillPeriod::Annually,
                 'prorate' => true,
-            ]))->create([
+            ]))
+            ->create([
                 'bill_cycle_in_months' => $billCycleInMonths,
                 'bill_month' => $billMonth,
                 'start_date' => $startDate,
@@ -51,21 +51,59 @@ final class BillableItemInstanceTest extends FeatureTestCase
 
     public function test_quantity_for_returns_full_quantity_when_item_is_not_prorated(): void
     {
-
         $instance = BillableItemInstance::factory()
             ->for(Member::factory()->createQuietly())
             ->for(BillableItem::factory()->state([
                 'bill_period' => BillPeriod::Annually,
                 'prorate' => false,
-            ]))->create([
-            'bill_cycle_in_months' => 12,
-            'bill_month' => 1,
-            'start_date' => '2026-08-15',
-        ]);
+            ]))
+            ->create([
+                'bill_cycle_in_months' => 12,
+                'bill_month' => 1,
+                'start_date' => '2026-08-15',
+            ]);
 
         $quantity = $instance->quantityFor(new DateTimeImmutable('2026-08-15'));
 
         static::assertSame(1.0, $quantity);
+    }
+
+    public function test_quantity_for_returns_full_quantity_for_once_items(): void
+    {
+        $instance = BillableItemInstance::factory()
+            ->for(Member::factory()->createQuietly())
+            ->for(BillableItem::factory()->state([
+                'bill_period' => BillPeriod::Once,
+                'prorate' => true,
+            ]))
+            ->create([
+                'bill_cycle_in_months' => BillPeriod::Once->toBillPeriodInMonths(),
+                'bill_month' => 1,
+                'start_date' => '2026-08-15',
+            ]);
+
+        $quantity = $instance->load('billableItem')->quantityFor(new DateTimeImmutable('2026-08-15'));
+
+        static::assertSame(1.0, $quantity);
+    }
+
+    public function test_quantity_for_returns_zero_before_start_for_once_items(): void
+    {
+        $instance = BillableItemInstance::factory()
+            ->for(Member::factory()->createQuietly())
+            ->for(BillableItem::factory()->state([
+                'bill_period' => BillPeriod::Once,
+                'prorate' => false,
+            ]))
+            ->create([
+                'bill_cycle_in_months' => BillPeriod::Once->toBillPeriodInMonths(),
+                'bill_month' => 1,
+                'start_date' => '2027-01-01',
+            ]);
+
+        $quantity = $instance->load('billableItem')->quantityFor(new DateTimeImmutable('2026-08-01'));
+
+        static::assertSame(0.0, $quantity);
     }
 
     public function test_quantity_for_returns_zero_before_start_even_when_not_prorated(): void
@@ -77,10 +115,10 @@ final class BillableItemInstanceTest extends FeatureTestCase
                 'prorate' => false,
             ]))
             ->create([
-            'bill_cycle_in_months' => 12,
-            'bill_month' => 1,
-            'start_date' => '2027-01-01',
-        ]);
+                'bill_cycle_in_months' => 12,
+                'bill_month' => 1,
+                'start_date' => '2027-01-01',
+            ]);
 
         $quantity = $instance->load('billableItem')->quantityFor(new DateTimeImmutable('2026-08-01'));
 

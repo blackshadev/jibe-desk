@@ -114,5 +114,27 @@ final class MembershipSeeder extends Seeder
             ->create([
                 'code' => 'zelfde_huishouden_korting_volwassen',
             ]);
+
+        $registrationFeeCostCenter = CostCenter::query()
+            ->firstOrCreate([
+                'title' => 'Inschrijf geld',
+                'number' => CostCenterNumber::RegistrationFee,
+            ]);
+
+        ExtraMembershipItem::factory()
+            ->for(
+                BillableItem::factory()
+                    ->state([
+                        'price' => 10,
+                        'vat' => 2.10,
+                        'bill_period' => BillPeriod::Once,
+                        'prorate' => false,
+                        'description' => 'Inschrijfgeld',
+                    ])
+                    ->for($registrationFeeCostCenter),
+            )
+            ->create([
+                'code' => ExtraMembershipItemCode::Inschrijfgeld,
+            ]);
     }
 }

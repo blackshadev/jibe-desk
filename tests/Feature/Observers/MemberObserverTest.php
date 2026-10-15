@@ -14,6 +14,7 @@ use Override;
 use Tests\FeatureTestCase;
 use Tests\Unit\Domain\Billing\BillingItemApplicators\ApplyMembershipBillingExpectation;
 use Tests\Unit\Domain\Billing\BillingItemApplicators\ApplyMemberVolunteerBillingExpectation;
+use Tests\Unit\Domain\Billing\BillingItemApplicators\ApplyRegistrationFeeBillingExpectation;
 use Tests\Unit\Domain\Billing\BillingItemApplicators\ApplySameHouseholdBillingExpectation;
 use Tests\Unit\Domain\Billing\BillingItemApplicators\ApplyStoppedMembershipExpectation;
 
@@ -27,6 +28,8 @@ final class MemberObserverTest extends FeatureTestCase
 
     private ApplyStoppedMembershipExpectation $applyStoppedMembership;
 
+    private ApplyRegistrationFeeBillingExpectation $applyRegistrationFee;
+
     private MemberObserver $subject;
 
     #[Override]
@@ -39,12 +42,14 @@ final class MemberObserverTest extends FeatureTestCase
         $this->applyVolunteer = ApplyMemberVolunteerBillingExpectation::create();
         $this->applySameHousehold = ApplySameHouseholdBillingExpectation::create();
         $this->applyStoppedMembership = ApplyStoppedMembershipExpectation::create();
+        $this->applyRegistrationFee = ApplyRegistrationFeeBillingExpectation::create();
 
         $this->subject = new MemberObserver(
             $this->applyVolunteer->mock,
             $this->applyMembership->mock,
             $this->applySameHousehold->mock,
             $this->applyStoppedMembership->mock,
+            $this->applyRegistrationFee->mock,
         );
     }
 
@@ -57,6 +62,7 @@ final class MemberObserverTest extends FeatureTestCase
         $this->applyVolunteer->expectsApply($memberId);
         $this->applyMembership->expectsApply($memberId, $membershipId);
         $this->applySameHousehold->expectsApply($memberId);
+        $this->applyRegistrationFee->expectsApply($memberId);
 
         $this->subject->created($member);
     }
@@ -68,6 +74,7 @@ final class MemberObserverTest extends FeatureTestCase
         $this->applyVolunteer->expectsApplyNever();
         $this->applyMembership->expectsApplyNever();
         $this->applySameHousehold->expectsApplyNever();
+        $this->applyRegistrationFee->expectsApplyNever();
 
         $this->subject->created($member);
     }

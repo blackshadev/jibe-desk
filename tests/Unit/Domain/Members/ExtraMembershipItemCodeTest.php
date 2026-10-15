@@ -15,6 +15,7 @@ final class ExtraMembershipItemCodeTest extends UnitTestCase
     {
         yield 'restitution' => [ExtraMembershipItemCode::VolunteerRestitution, 'vrijwilliger_restitutie'];
         yield 'contribution' => [ExtraMembershipItemCode::VolunteerContribution, 'vrijwilligers_bijdrage'];
+        yield 'registration fee' => [ExtraMembershipItemCode::Inschrijfgeld, 'inschrijfgeld'];
     }
 
     #[DataProvider('codeProvider')]

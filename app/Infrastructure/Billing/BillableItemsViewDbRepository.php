@@ -79,13 +79,13 @@ final class BillableItemsViewDbRepository implements BillableItemsViewRepository
                         DB::connection()->getDriverName() === 'sqlite',
                         static function (Builder $query) use ($date, $month): void {
                             $query->whereRaw(
-                                "strftime('%Y-%m-01', invoices.date) >= date(?, '-' || (((? - billable_item_instances.bill_month + 12) % 12) % billable_item_instances.bill_cycle_in_months) || ' months')",
+                                "(billable_items.bill_period = 'once' OR strftime('%Y-%m-01', invoices.date) >= date(?, '-' || (((? - billable_item_instances.bill_month + 12) % 12) % billable_item_instances.bill_cycle_in_months) || ' months'))",
                                 [$date, $month],
                             );
                         },
                         static function (Builder $query) use ($date, $month): void {
                             $query->whereRaw(
-                                "DATE_TRUNC('month', invoices.date) >= '{$date}'::date - MAKE_INTERVAL(0, ((({$month} - billable_item_instances.bill_month + 12) % 12) % billable_item_instances.bill_cycle_in_months))",
+                                "(billable_items.bill_period = 'once' OR DATE_TRUNC('month', invoices.date) >= '{$date}'::date - MAKE_INTERVAL(0, ((({$month} - billable_item_instances.bill_month + 12) % 12) % billable_item_instances.bill_cycle_in_months)))",
                             );
                         },
                     ),

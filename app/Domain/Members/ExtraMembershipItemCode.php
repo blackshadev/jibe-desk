@@ -8,6 +8,7 @@ enum ExtraMembershipItemCode: string
 {
     case VolunteerRestitution = 'vrijwilliger_restitutie';
     case VolunteerContribution = 'vrijwilligers_bijdrage';
+    case Inschrijfgeld = 'inschrijfgeld';
     case SameHouseholdDiscountYoungster = 'zelfde_huishouden_korting_jeugd';
     case SameHouseholdDiscountAdult = 'zelfde_huishouden_korting_volwassen';
 }

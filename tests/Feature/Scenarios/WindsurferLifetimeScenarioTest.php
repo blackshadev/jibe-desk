@@ -54,23 +54,30 @@ final class WindsurferLifetimeScenarioTest extends MemberLifecycleScenario
             'end_date' => '2026-10-30 00:00:00',
         ]);
 
-        // Step 3 — first invoice: membership is pro-rated (5/12 ≈ 0.42); the contribution is full-quantity (1.0); activity is monthly.
+        // Step 3 — first invoice: registration fee (flat, non-prorated), membership pro-rated (5/12 ≈ 0.42); the contribution is full-quantity (1.0); activity is monthly.
         // Note: InvoiceLine.quantity is cast to decimal:2, so 5/12 (0.416667) becomes 0.42.
         $this->generateInvoiceFor($member);
 
         $firstInvoice = $this->invoiceFor($member, '2026-08-15');
-        static::assertSame(3, $firstInvoice->lines()->count());
+        static::assertSame(4, $firstInvoice->lines()->count());
+
         $this->assertInvoiceLine($firstInvoice, 'Lidmaatschap Windsurfer (volwassenen)', 68.00, 0.42);
         $this->assertInvoiceLine($firstInvoice, 'Vrijwilligersbijdrage', 20.00, 1.0);
+        $this->assertInvoiceLine($firstInvoice, 'Inschrijfgeld', 10.00, 1.0);
         $this->assertInvoiceLine($firstInvoice, 'Activiteit: Reguliere les volwassenen', 37.00, 1.0);
 
-        // Step 4 — a little over a month later: only the monthly activity re-bills.
+        // Step 4 — a little over a month later: only the monthly activity re-bills (the one-time fee never re-bills).
         $this->travelToDate('2026-09-20');
         $this->generateInvoiceFor($member);
 
         $secondInvoice = $this->invoiceFor($member, '2026-09-20');
         static::assertSame(1, $secondInvoice->lines()->count());
         $this->assertInvoiceLine($secondInvoice, 'Activiteit: Reguliere les volwassenen', 37.00, 1.0);
+
+        $this->assertDatabaseMissing('invoice_lines', [
+            'invoice_id' => $secondInvoice->id,
+            'description' => 'Inschrijfgeld',
+        ]);
 
         // Step 5 — a week later the member becomes a volunteer (adds a restitution credit).
         $this->travelToDate('2026-09-27');
