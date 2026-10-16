@@ -85,7 +85,7 @@ final class BillableItemsViewDbRepository implements BillableItemsViewRepository
                         },
                         static function (Builder $query) use ($date, $month): void {
                             $query->whereRaw(
-                                "(billable_items.bill_period = 'once' OR DATE_TRUNC('month', invoices.date) >= '{$date}'::date - MAKE_INTERVAL(0, ((({$month} - billable_item_instances.bill_month + 12) % 12) % billable_item_instances.bill_cycle_in_months)))",
+                                "(billable_items.bill_period = 'once' OR DATE_TRUNC('month', invoices.date) >= '{$date}'::date - MAKE_INTERVAL(0, ((({$month} - billable_item_instances.bill_month + 12) % 12) % billable_item_instances.bill_cycle_in_months)::int))",
                             );
                         },
                     ),

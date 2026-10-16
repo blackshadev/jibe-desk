@@ -17,11 +17,14 @@ final class MemberOverview extends StatsOverviewWidget
     #[Override]
     protected function getStats(): array
     {
+        $pendingMembers = Member::query()->pending()->count();
         return [
             Stat::make(
                 label: __('labels.members'),
                 value: Member::query()->active()->count(),
             )
+                ->description(trans_choice('labels.new_member_count', $pendingMembers, ['count' => $pendingMembers]))
+                ->descriptionColor('success')
                 ->chart(
                     $this->getMembersByCreatedByMonth(),
                 )

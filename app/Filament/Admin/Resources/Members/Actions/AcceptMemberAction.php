@@ -6,6 +6,8 @@ namespace App\Filament\Admin\Resources\Members\Actions;
 
 use App\Domain\Members\AcceptMemberService;
 use App\Domain\Members\MemberId;
+use App\Filament\Admin\Resources\Members\MemberResource;
+use App\Filament\Admin\Utils\ResourceRouteHelper;
 use App\Models\Member;
 use Filament\Actions\Action;
 use Filament\Support\Icons\Heroicon;
@@ -24,6 +26,7 @@ final class AcceptMemberAction
             ->action(static function (Member $record, AcceptMemberService $service): void {
                 $service->accept(MemberId::create($record->id));
             })
-            ->successNotificationTitle(__('notifications.member_accepted'));
+            ->successNotificationTitle(__('notifications.member_accepted'))
+            ->successRedirectUrl(ResourceRouteHelper::viewOrEdit(MemberResource::class));
     }
 }

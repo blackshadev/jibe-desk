@@ -386,4 +386,6 @@ return [
     'create_user_account' => 'Account aanmaken',
     'create_user_account_description' => 'Hiermee wordt een login voor dit lid aangemaakt en ontvangt het lid een e-mail om een wachtwoord in te stellen.',
     'my_membership' => 'Mijn lidmaatschap',
+    'new_member_count' => '{1} :count nieuw lid|[2,*] :count nieuwe leden',
+
 ];

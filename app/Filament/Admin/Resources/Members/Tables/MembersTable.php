@@ -57,6 +57,7 @@ final class MembersTable
                     BulkAction::make('acceptMembers')
                         ->label(__('labels.accept_members'))
                         ->icon(Heroicon::CheckCircle)
+                        ->color('success')
                         ->requiresConfirmation()
                         ->modalDescription(__('labels.accept_members_description'))
                         ->deselectRecordsAfterCompletion()
