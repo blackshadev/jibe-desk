@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Concerns;
 
-use App\Domain\Invoices\InvoiceStatus;
+use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Filament\Admin\Resources\BankTransactions\Pages\ViewBankTransaction;
 use App\Filament\Admin\Resources\Invoices\Pages\ViewInvoice;
 use App\Filament\Admin\Resources\PurchaseOrders\Pages\CreatePurchaseOrder;

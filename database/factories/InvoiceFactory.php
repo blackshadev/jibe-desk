@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Domain\Invoices\InvoiceStatus;
+use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;
 use App\Models\Member;

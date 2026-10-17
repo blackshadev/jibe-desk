@@ -1,0 +1,16 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domain\Bookkeeping\Banking\BankTransactions;
+
+use JeroenG\Autowire\Attribute\Autowire;
+
+#[Autowire]
+interface BankTransactionImportService
+{
+    /**
+     * @return array{imported: int, skipped: int, integrity_warnings: int}
+     */
+    public function importFromFile(string $filePath): array;
+}

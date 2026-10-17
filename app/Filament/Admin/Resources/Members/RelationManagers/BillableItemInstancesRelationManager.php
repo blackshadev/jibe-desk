@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Members\RelationManagers;
 
-use App\Domain\Billing\BillPeriod;
+use App\Domain\Billing\BillableItems\BillPeriod;
 use App\Domain\SharedKernel\PriceFormatter;
 use App\Filament\Admin\RelationManagers\MemberRelationManager;
 use App\Models\BillableItemInstance;

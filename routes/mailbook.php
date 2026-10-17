@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 use App\Domain\SharedKernel\CompoundPrice;
-use App\Domain\Invoices\SepaBatchEmailData;
-use App\Domain\Invoices\SepaBatchId;
-use App\Domain\Invoices\InvoiceMailData;
-use App\Domain\Invoices\InvoiceMailLine;
-use App\Domain\Invoices\Mails\SepaBatchCreatedMail;
-use App\Domain\Invoices\Mails\InvoiceMail;
-use App\Domain\Invoices\SepaConfiguration;
+use App\Domain\Billing\Payment\SepaBatchEmailData;
+use App\Domain\Billing\Payment\SepaBatchId;
+use App\Domain\Billing\Invoices\InvoiceMailData;
+use App\Domain\Billing\Invoices\InvoiceMailLine;
+use App\Domain\Billing\Payment\Mails\SepaBatchCreatedMail;
+use App\Domain\Billing\Invoices\Mails\InvoiceMail;
+use App\Domain\Billing\Payment\SepaConfiguration;
 use App\Domain\Mail\Recipient;
 use App\Domain\Members\Mails\MemberWelcome;
 use App\Domain\Members\MemberId;

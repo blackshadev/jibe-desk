@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Invoices\Actions;
 
-use App\Domain\Invoices\InvoiceId;
-use App\Domain\Invoices\InvoiceService;
+use App\Domain\Billing\Invoices\InvoiceId;
+use App\Domain\Billing\Invoices\InvoiceService;
 use App\Models\Invoice;
 use Filament\Actions\Action;
 use Livewire\Component;

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\SepaBatches\Actions;
 
-use App\Domain\Invoices\SepaBatch;
-use App\Domain\Invoices\SepaBatchGenerator;
+use App\Domain\Billing\Payment\SepaBatch;
+use App\Domain\Billing\Payment\SepaBatchGenerator;
 use App\Filament\Admin\Resources\SepaBatches\SepaBatchResource;
 use App\Models\SepaBatch as SepaBatchModel;
 use Carbon\CarbonImmutable;

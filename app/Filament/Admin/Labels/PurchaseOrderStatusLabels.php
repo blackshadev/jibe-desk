@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Labels;
 
-use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 
 final class PurchaseOrderStatusLabels
 {

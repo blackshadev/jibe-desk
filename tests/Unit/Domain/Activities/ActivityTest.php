@@ -6,7 +6,7 @@ namespace Tests\Unit\Domain\Activities;
 
 use App\Domain\Activities\Activity;
 use App\Domain\Activities\ActivityId;
-use App\Domain\Billing\BillableItemId;
+use App\Domain\Billing\BillableItems\BillableItemId;
 use Carbon\CarbonImmutable;
 use Tests\UnitTestCase;
 

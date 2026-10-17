@@ -40,7 +40,7 @@ Dependencies only point downward: Filament and Laravel depend on the domain, the
 
 The domain layer holds the business model. It is pure PHP: no Eloquent, no HTTP, no facades.
 
-- Organised by bounded context: `Activities`, `Invoices`, `Members`, plus shared primitives like `NumericId`.
+- Organised by bounded context: `Activities`, `Billing`, `Bookkeeping`, `Members`, plus shared primitives like `NumericId`.
 - Contains:
     - **Repository interfaces** (e.g. `InvoiceRepository`, `MemberRepository`) marked with `#[Autowire]` so they are autowired by interface.
     - **Value objects** (e.g. `InvoiceId`, `MemberId`, `CompoundPrice`, `InvoiceNumber`, `BillableItemList`).
@@ -53,8 +53,8 @@ The domain layer holds the business model. It is pure PHP: no Eloquent, no HTTP,
 
 The infrastructure layer contains the concrete implementations of the domain's repository interfaces, using Eloquent models and the database.
 
-- One folder per bounded context (`Invoices`, `Members`, `Activities`, …).
-- Example: `App\Infrastructure\Invoices\InvoiceRepositoryDb` implements `App\Domain\Invoices\InvoiceRepository`. It owns the Eloquent queries, transactions, and casts; the domain only sees the interface.
+- One folder per bounded context (`Billing`, `Members`, `Activities`, …).
+- Example: `App\Infrastructure\Billing\Invoices\InvoiceRepositoryDb` implements `App\Domain\Billing\Invoices\InvoiceRepository`. It owns the Eloquent queries, transactions, and casts; the domain only sees the interface.
 - This is the only place where Eloquent should be used to satisfy a domain contract. Domain code must not import `App\Models\*`.
 
 ## Laravel layer — `app/Http`, `app/Models`, `app/Observers`, `app/Policies`, `app/Rules`, `app/Console`, `app/Actions`, `app/Providers`, `app/Formatters`

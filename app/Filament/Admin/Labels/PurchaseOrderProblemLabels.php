@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Labels;
 
-use App\Domain\PurchaseOrders\PurchaseOrderProblem;
-use App\Domain\PurchaseOrders\PurchaseOrderProblemType;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderProblem;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderProblemType;
 
 final class PurchaseOrderProblemLabels
 {

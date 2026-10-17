@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BankTransactions\Pages;
 
-use App\Domain\BankTransactions\BankTransactionId;
-use App\Domain\BankTransactions\BankTransactionIdList;
-use App\Domain\BankTransactions\BankTransactionService;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionIdList;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionService;
 use App\Filament\Admin\Resources\BankTransactions\BankTransactionResource;
 use App\Models\BankTransaction;
 use Filament\Resources\Pages\CreateRecord;

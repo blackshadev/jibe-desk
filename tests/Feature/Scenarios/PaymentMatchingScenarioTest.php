@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Scenarios;
 
-use App\Domain\BankTransactions\BankTransactionStatus;
-use App\Domain\BankTransactions\ResolveStatus;
-use App\Domain\Invoices\InvoiceStatus;
-use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionStatus;
+use App\Domain\Bookkeeping\Banking\BankTransactions\ResolveStatus;
+use App\Domain\Billing\Invoices\InvoiceStatus;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Models\BankAccount;
 use App\Models\BankTransaction;
 use App\Models\Invoice;

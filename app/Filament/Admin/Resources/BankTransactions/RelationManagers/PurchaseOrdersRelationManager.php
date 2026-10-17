@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BankTransactions\RelationManagers;
 
-use App\Domain\BankTransactions\BankTransactionId;
-use App\Domain\BankTransactions\BankTransactionRepository;
-use App\Domain\PurchaseOrders\PurchaseOrderId;
-use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionRepository;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Resources\BankTransactions\Actions\AttachPurchaseOrderAction;
 use App\Filament\Admin\Resources\BankTransactions\Actions\CreatePurchaseOrderFromTransactionAction;
 use App\Filament\Admin\Resources\BankTransactions\Helpers\IsOpen;

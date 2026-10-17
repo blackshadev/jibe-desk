@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Domain\SharedKernel\CompoundPrice;
 use App\Observers\PurchaseOrderObserver;
 use DateTimeInterface;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Domain\Billing\BillPeriod;
+use App\Domain\Billing\BillableItems\BillPeriod;
 use App\Domain\Members\ExtraMembershipItemCode;
 use App\Models\BillableItem;
 use App\Models\CostCenter;

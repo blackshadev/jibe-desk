@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Models\PurchaseOrder;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;

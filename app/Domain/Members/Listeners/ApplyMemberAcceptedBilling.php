@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Domain\Members\Listeners;
 
-use App\Domain\Billing\BillingItemApplicators\ApplyMembershipBilling;
-use App\Domain\Billing\BillingItemApplicators\ApplyMemberVolunteerBilling;
-use App\Domain\Billing\BillingItemApplicators\ApplyRegistrationFeeBilling;
-use App\Domain\Billing\BillingItemApplicators\ApplySameHouseholdBilling;
+use App\Domain\Billing\Subscriptions\BillingItemApplicators\ApplyMembershipBilling;
+use App\Domain\Billing\Subscriptions\BillingItemApplicators\ApplyMemberVolunteerBilling;
+use App\Domain\Billing\Subscriptions\BillingItemApplicators\ApplyRegistrationFeeBilling;
+use App\Domain\Billing\Subscriptions\BillingItemApplicators\ApplySameHouseholdBilling;
 use App\Domain\Members\Events\MemberAccepted;
 use App\Domain\Members\MemberRepository;
 

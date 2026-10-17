@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\SepaBatches\Pages;
 
-use App\Domain\Invoices\SepaBatchStatus;
+use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Filament\Admin\Resources\SepaBatches\Actions\GenerateSepaBatchAction;
 use App\Filament\Admin\Resources\SepaBatches\SepaBatchResource;
 use Filament\Actions\CreateAction;

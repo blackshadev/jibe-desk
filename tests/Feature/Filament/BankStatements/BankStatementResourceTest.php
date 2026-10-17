@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament\BankStatements;
 
-use App\Domain\BankStatements\StatementChainStatus;
+use App\Domain\Bookkeeping\Banking\BankStatements\StatementChainStatus;
 use App\Filament\Admin\Resources\BankStatements\Pages\ListBankStatements;
 use App\Filament\Admin\Resources\BankStatements\Pages\ViewBankStatement;
 use App\Filament\Admin\Resources\BankStatements\RelationManagers\BankStatementTransactionsRelationManager;

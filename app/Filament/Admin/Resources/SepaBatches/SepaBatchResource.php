@@ -28,7 +28,7 @@ final class SepaBatchResource extends Resource
     protected static ?string $model = SepaBatch::class;
 
     #[Override]
-    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Invoicing;
+    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Billing;
 
     #[Override]
     protected static ?string $cluster = InvoicingCluster::class;

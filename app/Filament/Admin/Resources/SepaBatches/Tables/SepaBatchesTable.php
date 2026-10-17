@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\SepaBatches\Tables;
 
-use App\Domain\Invoices\SepaBatchStatus;
+use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Domain\SharedKernel\CompoundPrice;
 use App\Filament\Admin\Labels\SepaBatchStatusLabels;
 use Filament\Tables\Columns\TextColumn;

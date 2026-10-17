@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Invoices\Pages;
 
-use App\Domain\Invoices\InvoiceNumberGenerator;
-use App\Domain\Invoices\InvoiceStatus;
+use App\Domain\Billing\Invoices\InvoiceNumberGenerator;
+use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Models\Member;
 use Carbon\CarbonImmutable;

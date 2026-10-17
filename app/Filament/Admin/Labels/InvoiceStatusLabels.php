@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Labels;
 
-use App\Domain\Invoices\InvoiceStatus;
+use App\Domain\Billing\Invoices\InvoiceStatus;
 
 final class InvoiceStatusLabels
 {

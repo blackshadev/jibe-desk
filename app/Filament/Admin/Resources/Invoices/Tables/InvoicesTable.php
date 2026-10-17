@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Invoices\Tables;
 
-use App\Domain\Invoices\InvoiceId;
-use App\Domain\Invoices\InvoiceIdList;
-use App\Domain\Invoices\InvoiceService;
-use App\Domain\Invoices\InvoiceStatus;
+use App\Domain\Billing\Invoices\InvoiceId;
+use App\Domain\Billing\Invoices\InvoiceIdList;
+use App\Domain\Billing\Invoices\InvoiceService;
+use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Domain\SharedKernel\CompoundPrice;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Filament\Admin\Utils\ResourceRouteHelper;

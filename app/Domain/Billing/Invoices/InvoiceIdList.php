@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domain\Billing\Invoices;
+
+use Webmozart\Assert\Assert;
+
+final class InvoiceIdList
+{
+    /** @param InvoiceId[] $ids */
+    public function __construct(
+        public array $ids,
+    ) {
+        /** @phpstan-ignore-next-line staticMethod.alreadyNarrowedType */
+        Assert::allIsInstanceOf($ids, InvoiceId::class);
+    }
+
+    /** @param int[] $array */
+    public static function fromArray(array $array): self
+    {
+        return new self(
+            array_map(
+                InvoiceId::create(...),
+                $array,
+            ),
+        );
+    }
+
+    /** @return int[] */
+    public function values(): array
+    {
+        return array_map(
+            static fn (InvoiceId $id): int => $id->value,
+            $this->ids,
+        );
+    }
+}

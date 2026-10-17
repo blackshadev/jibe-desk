@@ -1,0 +1,49 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domain\Billing\Invoices;
+
+use App\Domain\Bookkeeping\BookkeepingRecords\BookkeepingRecordRepository;
+use App\Domain\Billing\Invoices\Jobs\SendInvoiceEmail;
+use App\Domain\Jobs\JobDispatcher;
+use Override;
+
+final readonly class InvoiceServiceImpl implements InvoiceService
+{
+    public function __construct(
+        private InvoiceRepository $invoiceRepository,
+        private BookkeepingRecordRepository $bookkeepingRepository,
+        private JobDispatcher $jobDispatcher,
+    ) {}
+
+    #[Override]
+    public function createCredit(InvoiceId $originalInvoiceId): InvoiceId
+    {
+        return $this->invoiceRepository->createCredit($originalInvoiceId);
+    }
+
+    #[Override]
+    public function markAsPaid(InvoiceIdList $ids): void
+    {
+        $this->invoiceRepository->markAsPaid($ids);
+        $this->bookkeepingRepository->createForInvoice($ids);
+    }
+
+    #[Override]
+    public function markAsDeclined(InvoiceIdList $ids): void
+    {
+        $this->invoiceRepository->markAsDeclined($ids);
+    }
+
+    #[Override]
+    public function markAsPending(InvoiceIdList $ids): void
+    {
+        $this->invoiceRepository->markAsPending($ids);
+        $this->bookkeepingRepository->createForInvoice($ids);
+
+        foreach ($ids->ids as $id) {
+            $this->jobDispatcher->dispatch(new SendInvoiceEmail(new SendInvoiceEmailData($id)));
+        }
+    }
+}

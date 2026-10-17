@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Members\RelationManagers;
 
-use App\Domain\Invoices\InvoiceGenerator;
-use App\Domain\Invoices\InvoiceStatus;
-use App\Domain\Invoices\InvoiceTarget;
+use App\Domain\Billing\Invoices\InvoiceGenerator;
+use App\Domain\Billing\Invoices\InvoiceStatus;
+use App\Domain\Billing\Invoices\InvoiceTarget;
 use App\Domain\Members\MemberId;
 use App\Filament\Admin\RelationManagers\MemberRelationManager;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;

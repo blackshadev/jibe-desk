@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Observers;
 
 use App\Domain\Activities\ActivityId;
-use App\Domain\Billing\BillableItemInstanceId;
-use App\Domain\Billing\BillingItemApplicators\ApplyActivityBilling;
+use App\Domain\Billing\Subscriptions\BillableItemInstanceId;
+use App\Domain\Billing\Subscriptions\BillingItemApplicators\ApplyActivityBilling;
 use App\Domain\Members\MemberId;
 use App\Models\Pivots\ActivityMember;
 

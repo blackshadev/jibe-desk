@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament\Admin\Labels;
 
-use App\Domain\PurchaseOrders\PurchaseOrderId;
-use App\Domain\PurchaseOrders\PurchaseOrderProblem;
-use App\Domain\PurchaseOrders\PurchaseOrderProblemType;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderProblem;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderProblemType;
 use App\Filament\Admin\Labels\PurchaseOrderProblemLabels;
 use Tests\FeatureTestCase;
 

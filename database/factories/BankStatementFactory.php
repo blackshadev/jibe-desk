@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Domain\BankStatements\StatementChainStatus;
-use App\Domain\BankStatements\StatementIntegrityStatus;
+use App\Domain\Bookkeeping\Banking\BankStatements\StatementChainStatus;
+use App\Domain\Bookkeeping\Banking\BankStatements\StatementIntegrityStatus;
 use App\Models\BankAccount;
 use App\Models\BankStatement;
 use Illuminate\Database\Eloquent\Factories\Factory;

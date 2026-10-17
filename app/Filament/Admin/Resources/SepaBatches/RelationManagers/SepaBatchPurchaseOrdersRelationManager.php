@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\SepaBatches\RelationManagers;
 
-use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Labels\PurchaseOrderStatusLabels;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;

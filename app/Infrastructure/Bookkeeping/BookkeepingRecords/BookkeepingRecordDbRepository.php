@@ -1,0 +1,195 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\Bookkeeping\BookkeepingRecords;
+
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
+use App\Domain\Bookkeeping\BookkeepingRecords\BookkeepingRecordRepository;
+use App\Domain\Bookkeeping\CostCenters\CostCenterId;
+use App\Domain\Bookkeeping\CostCenters\CostCenterYearResult;
+use App\Domain\Billing\Invoices\InvoiceId;
+use App\Domain\Billing\Invoices\InvoiceIdList;
+use App\Domain\Billing\Invoices\InvoiceStatus;
+use App\Domain\Billing\Payment\SepaBatchId;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderIdList;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
+use App\Domain\SharedKernel\CompoundPrice;
+use App\Models\BookkeepingRecord;
+use App\Models\Invoice;
+use App\Models\PurchaseOrder;
+use Illuminate\Support\Facades\DB;
+use Override;
+
+final class BookkeepingRecordDbRepository implements BookkeepingRecordRepository
+{
+    #[Override]
+    public function createForBatch(SepaBatchId $batchId): void
+    {
+        $now = now();
+        BookkeepingRecord::query()->insertUsing(
+            ['year', 'cost_center_id', 'amount_price', 'amount_vat', 'description', 'reference_type', 'reference_id', 'created_at', 'updated_at'],
+            Invoice::query()
+                ->where('invoices.sepa_batch_id', $batchId->value)
+                ->where('invoices.status', InvoiceStatus::Pending)
+                ->whereNotExists(static function ($query): void {
+                    $query
+                        ->from('bookkeeping_records')
+                        ->whereColumn('bookkeeping_records.reference_id', 'invoices.id')
+                        ->where('bookkeeping_records.reference_type', Invoice::class);
+                })
+                ->joinRelationship('lines')
+                ->joinRelationship('sepaBatch')
+                ->groupBy(
+                    'invoices.id',
+                    'invoices.invoice_number',
+                    'invoice_lines.cost_center_id',
+                    'sepa_batches.invoice_date',
+                )
+                ->select(
+                    DB::connection()->getConfig()['driver'] === 'pgsql'
+                        ? DB::raw('EXTRACT(YEAR FROM sepa_batches.invoice_date) AS year')
+                        : DB::raw('STRFTIME(\'%Y\', sepa_batches.invoice_date)'),
+                    'invoice_lines.cost_center_id',
+                    DB::raw('SUM(invoice_lines.price * invoice_lines.quantity)'),
+                    DB::raw('SUM(invoice_lines.vat * invoice_lines.quantity)'),
+                    DB::raw("CONCAT('Invoice ', invoices.invoice_number)"),
+                    DB::raw(DB::escape(Invoice::class)),
+                    'invoices.id',
+                    DB::raw(DB::escape($now->format('c'))),
+                    DB::raw(DB::escape($now->format('c'))),
+                ),
+        );
+    }
+
+    #[Override]
+    public function createForPurchaseOrder(PurchaseOrderIdList $ids): void
+    {
+        $idValues = array_map(static fn (PurchaseOrderId $id) => $id->value, $ids->ids);
+
+        $now = now();
+        BookkeepingRecord::query()->insertUsing(
+            ['year', 'cost_center_id', 'amount_price', 'amount_vat', 'description', 'reference_type', 'reference_id', 'created_at', 'updated_at'],
+            PurchaseOrder::query()
+                ->whereIn('purchase_orders.id', $idValues)
+                ->whereIn('purchase_orders.status', [PurchaseOrderStatus::Pending, PurchaseOrderStatus::Paid])
+                ->whereNotExists(static function ($query): void {
+                    $query
+                        ->from('bookkeeping_records')
+                        ->whereColumn('bookkeeping_records.reference_id', 'purchase_orders.id')
+                        ->where('bookkeeping_records.reference_type', PurchaseOrder::class);
+                })
+                ->joinRelationship('lines')
+                ->groupBy(
+                    'purchase_orders.id',
+                    'purchase_orders.description',
+                    'purchase_orders.date',
+                    'purchase_order_lines.cost_center_id',
+                )
+                ->select(
+                    DB::connection()->getConfig()['driver'] === 'pgsql'
+                        ? DB::raw('EXTRACT(YEAR FROM purchase_orders.date) AS year')
+                        : DB::raw('STRFTIME(\'%Y\', purchase_orders.date)'),
+                    'purchase_order_lines.cost_center_id',
+                    DB::raw('SUM(-purchase_order_lines.price)'),
+                    DB::raw('SUM(-purchase_order_lines.price_vat)'),
+                    DB::raw("CONCAT('Purchase order ', purchase_orders.description)"),
+                    DB::raw(DB::escape(PurchaseOrder::class)),
+                    'purchase_orders.id',
+                    DB::raw(DB::escape($now->format('c'))),
+                    DB::raw(DB::escape($now->format('c'))),
+                ),
+        );
+    }
+
+    #[Override]
+    public function createForInvoice(InvoiceIdList $ids): void
+    {
+        $idValues = array_map(static fn (InvoiceId $id) => $id->value, $ids->ids);
+
+        $now = now();
+        BookkeepingRecord::query()->insertUsing(
+            ['year', 'cost_center_id', 'amount_price', 'amount_vat', 'description', 'reference_type', 'reference_id', 'created_at', 'updated_at'],
+            Invoice::query()
+                ->whereIn('invoices.id', $idValues)
+                ->whereNotExists(static function ($query): void {
+                    $query
+                        ->from('bookkeeping_records')
+                        ->whereColumn('bookkeeping_records.reference_id', 'invoices.id')
+                        ->where('bookkeeping_records.reference_type', Invoice::class);
+                })
+                ->joinRelationship('lines')
+                ->groupBy(
+                    'invoices.id',
+                    'invoices.invoice_number',
+                    'invoice_lines.cost_center_id',
+                    'invoices.date',
+                )
+                ->select(
+                    DB::connection()->getConfig()['driver'] === 'pgsql'
+                        ? DB::raw('EXTRACT(YEAR FROM invoices.date) AS year')
+                        : DB::raw("STRFTIME('%Y', invoices.date)"),
+                    'invoice_lines.cost_center_id',
+                    DB::raw('SUM(invoice_lines.price * invoice_lines.quantity)'),
+                    DB::raw('SUM(invoice_lines.vat * invoice_lines.quantity)'),
+                    DB::raw("CONCAT('Invoice ', invoices.invoice_number)"),
+                    DB::raw(DB::escape(Invoice::class)),
+                    'invoices.id',
+                    DB::raw(DB::escape($now->format('c'))),
+                    DB::raw(DB::escape($now->format('c'))),
+                ),
+        );
+    }
+
+    #[Override]
+    public function linkToBankTransaction(
+        BankTransactionId $bankTransactionId,
+        InvoiceIdList $invoiceIds,
+        PurchaseOrderIdList $purchaseOrderIds,
+    ): void {
+        BookkeepingRecord::query()
+            ->where('reference_type', Invoice::class)
+            ->whereIn('reference_id', $invoiceIds->values())
+            ->update(['bank_transaction_id' => $bankTransactionId->value]);
+
+        BookkeepingRecord::query()
+            ->where('reference_type', PurchaseOrder::class)
+            ->whereIn('reference_id', $purchaseOrderIds->values())
+            ->update(['bank_transaction_id' => $bankTransactionId->value]);
+    }
+
+    /** @return list<CostCenterYearResult> */
+    #[Override]
+    public function getResultsForYear(int $year): array
+    {
+        $rows = DB::table('cost_centers as cc')
+            ->leftJoin('cost_center_budgets as cb', static function ($join) use ($year): void {
+                $join->on('cb.cost_center_id', '=', 'cc.id')
+                    ->where('cb.year', '=', $year);
+            })
+            ->leftJoin('bookkeeping_records as br', static function ($join) use ($year): void {
+                $join->on('br.cost_center_id', '=', 'cc.id')
+                    ->where('br.year', '=', $year);
+            })
+            ->groupBy('cc.id', 'cc.number', 'cc.title', 'cb.starting_amount')
+            ->orderBy('cc.number')
+            ->select(
+                'cc.id',
+                'cc.number',
+                'cc.title',
+                DB::raw('COALESCE(cb.starting_amount, 0) as starting_amount'),
+                DB::raw('COALESCE(SUM(br.amount_price), 0) as total_price'),
+                DB::raw('COALESCE(SUM(br.amount_vat), 0) as total_vat'),
+            )
+            ->get();
+
+        return $rows->map(static fn (object $row) => new CostCenterYearResult(
+            costCenterId: CostCenterId::create((int) $row->id),
+            number: $row->number,
+            title: $row->title,
+            startingAmount: (float) $row->starting_amount,
+            totalBookkeeping: new CompoundPrice((float) $row->total_price, (float) $row->total_vat),
+        ))->all();
+    }
+}

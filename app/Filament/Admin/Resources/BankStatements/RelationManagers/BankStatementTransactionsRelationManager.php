@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BankStatements\RelationManagers;
 
-use App\Domain\BankTransactions\BankTransactionStatus;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionStatus;
 use App\Filament\Admin\Resources\BankStatements\Actions\CompleteAllMatchedAction;
 use App\Filament\Admin\Resources\BankTransactions\Actions\AttachBookkeepingRecordAction;
 use App\Filament\Admin\Resources\BankTransactions\Actions\AttachInvoiceAction;

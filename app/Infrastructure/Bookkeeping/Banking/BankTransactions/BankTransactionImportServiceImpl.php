@@ -1,0 +1,198 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\Bookkeeping\Banking\BankTransactions;
+
+use App\Domain\Bookkeeping\Banking\BankAccounts\BankAccountRepository;
+use App\Domain\Bookkeeping\Banking\BankStatements\BankStatementRepository;
+use App\Domain\Bookkeeping\Banking\BankStatements\CreateBankStatement;
+use App\Domain\Bookkeeping\Banking\BankStatements\DetermineBankStatementChainStatus;
+use App\Domain\Bookkeeping\Banking\BankStatements\DetermineBankStatementChainStatusInput;
+use App\Domain\Bookkeeping\Banking\BankStatements\StatementChainStatus;
+use App\Domain\Bookkeeping\Banking\BankStatements\StatementIntegrityStatus;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionImportService;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionRepository;
+use App\Domain\Bookkeeping\Banking\BankTransactions\CreateBankTransaction;
+use App\Domain\Bookkeeping\Banking\BankTransactions\UnknownBankAccountException;
+use DateTimeImmutable;
+use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
+use Kingsquare\Banking\Statement;
+use Kingsquare\Banking\Transaction;
+use Kingsquare\Parser\Banking\Mt940;
+use Override;
+
+/** @mago-expect lint:cyclomatic-complexity */
+final readonly class BankTransactionImportServiceImpl implements BankTransactionImportService
+{
+    public function __construct(
+        private BankTransactionRepository $repository,
+        private BankAccountRepository $bankAccountRepository,
+        private BankStatementRepository $bankStatementRepository,
+        private DetermineBankStatementChainStatus $chainStatusService,
+    ) {}
+
+    #[Override]
+    public function importFromFile(string $filePath): array
+    {
+        if (!file_exists($filePath)) {
+            throw new InvalidArgumentException("File not found: {$filePath}");
+        }
+
+        Mt940::$removeIBAN = false;
+        $content = file_get_contents($filePath);
+        $parser = new Mt940();
+        $statements = $parser->parse($content);
+
+        $statements = $this->prepareStatements($statements);
+
+        $this->assertKnownAccounts($statements);
+
+        return DB::transaction(function () use ($statements, $filePath): array {
+            $imported = 0;
+            $skipped = 0;
+            $integrityWarnings = 0;
+
+            foreach ($statements as $statement) {
+                $accountId = $this->bankAccountRepository->getByIban($statement->getAccount());
+                $startDate = $this->toDateTime($statement->getStartTimestamp('Y-m-d'));
+                $endDate = $this->toDateTime($statement->getEndTimestamp('Y-m-d'));
+
+                if ($startDate === null || $endDate === null) {
+                    continue;
+                }
+
+                $statementId = $this->bankStatementRepository->upsert(new CreateBankStatement(
+                    bankAccountId: $accountId->value,
+                    statementNumber: $statement->getNumber(),
+                    startDate: $startDate,
+                    endDate: $endDate,
+                    openingBalance: $statement->getStartPrice(),
+                    closingBalance: $statement->getEndPrice(),
+                    currency: $statement->getCurrency(),
+                    filePath: $filePath,
+                ));
+
+                if ($this->hasIntegrityMismatch($statement)) {
+                    $integrityWarnings++;
+                    $this->bankStatementRepository->updateIntegrity(
+                        $statementId,
+                        StatementIntegrityStatus::Mismatch,
+                        $this->balanceDifference($statement),
+                    );
+                }
+
+                $chainStatus = $this->chainStatusService->determine(new DetermineBankStatementChainStatusInput(
+                    id: $statementId,
+                    accountId: $accountId,
+                    startDate: $startDate,
+                    openingBalance: $statement->getStartPrice(),
+                ));
+
+                if ($chainStatus === StatementChainStatus::Broken) {
+                    $integrityWarnings++;
+                }
+
+                foreach ($statement->getTransactions() as $transaction) {
+                    $hash = $this->computeHash($transaction, $statement);
+
+                    if ($this->repository->existsByHash($hash)) {
+                        $skipped++;
+                        continue;
+                    }
+
+                    $this->repository->create(new CreateBankTransaction(
+                        date: $this->formatDate($transaction->getValueTimestamp('Y-m-d')) ?? '',
+                        amount: $transaction->getRelativePrice(),
+                        description: $this->normalizeDescription($transaction->getDescription()),
+                        bankingAccountNumber: $transaction->getAccount(),
+                        bankAccountId: $accountId->value,
+                        bankStatementId: $statementId->value,
+                        importHash: $hash,
+                    ));
+
+                    $imported++;
+                }
+            }
+
+            return ['imported' => $imported, 'skipped' => $skipped, 'integrity_warnings' => $integrityWarnings];
+        });
+    }
+
+    /**
+     * @param array<int, Statement> $statements
+     * @return array<int, Statement>
+     */
+    private function prepareStatements(array $statements): array
+    {
+        $nonEmpty = array_filter($statements, static fn (Statement $statement): bool => count($statement->getTransactions()) > 0);
+        usort($nonEmpty, static fn (Statement $a, Statement $b): int => $a->getStartTimestamp('U') <=> $b->getStartTimestamp('U'));
+
+        return $nonEmpty;
+    }
+
+    /**
+     * @param array<int, Statement> $statements
+     * @throws UnknownBankAccountException
+     */
+    private function assertKnownAccounts(array $statements): void
+    {
+        foreach ($statements as $statement) {
+            $this->bankAccountRepository->getByIban($statement->getAccount());
+        }
+    }
+
+    private function hasIntegrityMismatch(Statement $statement): bool
+    {
+        return abs($this->balanceDifference($statement)) >= 0.01;
+    }
+
+    private function balanceDifference(Statement $statement): float
+    {
+        $transactionSum = 0.0;
+        foreach ($statement->getTransactions() as $transaction) {
+            $transactionSum += $transaction->getRelativePrice();
+        }
+
+        return $statement->getStartPrice() + $transactionSum - $statement->getEndPrice();
+    }
+
+    private function computeHash(Transaction $transaction, Statement $statement): string
+    {
+        $data = implode('|', [
+            $transaction->getValueTimestamp('Y-m-d'),
+            number_format($transaction->getPrice(), 2, '.', ''),
+            $this->normalizeDescription($transaction->getDescription()),
+            $transaction->getAccount(),
+            $statement->getAccount(),
+        ]);
+
+        return hash('sha256', $data);
+    }
+
+    private function normalizeDescription(string $description): string
+    {
+        return trim((string) preg_replace('/\s+/', ' ', $description));
+    }
+
+    private function formatDate(string|bool $date): ?string
+    {
+        if ($date === '' || $date === '1970-01-01' || $date === false) {
+            return null;
+        }
+
+        return $date;
+    }
+
+    private function toDateTime(string|bool $date): ?DateTimeImmutable
+    {
+        if ($date === '' || $date === '1970-01-01' || $date === false) {
+            return null;
+        }
+
+        $result = DateTimeImmutable::createFromFormat('!Y-m-d', (string) $date);
+
+        return $result === false ? null : $result;
+    }
+}

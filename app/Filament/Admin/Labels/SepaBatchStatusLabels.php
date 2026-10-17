@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Labels;
 
-use App\Domain\Invoices\SepaBatchStatus;
+use App\Domain\Billing\Payment\SepaBatchStatus;
 
 final class SepaBatchStatusLabels
 {

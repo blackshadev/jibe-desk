@@ -1,0 +1,17 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domain\Billing\PurchaseOrders;
+
+use JeroenG\Autowire\Attribute\Autowire;
+
+#[Autowire]
+interface PurchaseOrderService
+{
+    public function markAsApproved(PurchaseOrderIdList $id): void;
+
+    public function markAsPaid(PurchaseOrderIdList $ids): void;
+
+    public function markAsDeclined(PurchaseOrderIdList $ids, ?string $reason = null): void;
+}

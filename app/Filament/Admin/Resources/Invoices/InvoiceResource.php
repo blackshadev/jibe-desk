@@ -27,7 +27,7 @@ final class InvoiceResource extends Resource
     protected static ?string $model = Invoice::class;
 
     #[Override]
-    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Invoicing;
+    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Billing;
 
     #[Override]
     protected static ?string $cluster = InvoicingCluster::class;

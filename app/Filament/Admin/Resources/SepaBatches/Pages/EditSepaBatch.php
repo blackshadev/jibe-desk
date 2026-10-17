@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\SepaBatches\Pages;
 
-use App\Domain\Invoices\InvoiceStatus;
-use App\Domain\Invoices\SepaBatchId;
-use App\Domain\Invoices\SepaBatchService;
-use App\Domain\Invoices\SepaBatchStatus;
-use App\Domain\Invoices\SepaExportService;
-use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Domain\Billing\Invoices\InvoiceStatus;
+use App\Domain\Billing\Payment\SepaBatchId;
+use App\Domain\Billing\Payment\SepaBatchService;
+use App\Domain\Billing\Payment\SepaBatchStatus;
+use App\Domain\Billing\Payment\SepaExportService;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Resources\SepaBatches\Helpers\OnOpenSepaBatch;
 use App\Filament\Admin\Resources\SepaBatches\RelationManagers\SepaBatchInvoicesRelationManager;
 use App\Filament\Admin\Resources\SepaBatches\RelationManagers\SepaBatchPurchaseOrdersRelationManager;

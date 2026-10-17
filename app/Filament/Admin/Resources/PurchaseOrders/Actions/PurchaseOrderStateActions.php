@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\PurchaseOrders\Actions;
 
-use App\Domain\PurchaseOrders\PurchaseOrderHasNoCompletedTransactionsException;
-use App\Domain\PurchaseOrders\PurchaseOrderIdList;
-use App\Domain\PurchaseOrders\PurchaseOrderIncompleteException;
-use App\Domain\PurchaseOrders\PurchaseOrderService;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderHasNoCompletedTransactionsException;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderIdList;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderIncompleteException;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderService;
 use App\Filament\Admin\Labels\PurchaseOrderProblemLabels;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Models\PurchaseOrder;

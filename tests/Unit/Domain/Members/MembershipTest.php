@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Members;
 
-use App\Domain\Billing\BillableItemId;
+use App\Domain\Billing\BillableItems\BillableItemId;
 use App\Domain\Members\Membership;
 use App\Domain\Members\MembershipId;
 use Tests\UnitTestCase;

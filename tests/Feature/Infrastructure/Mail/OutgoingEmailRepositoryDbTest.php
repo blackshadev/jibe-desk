@@ -35,7 +35,7 @@ final class OutgoingEmailRepositoryDbTest extends FeatureTestCase
 
         $email = new OutgoingEmail(
             trackingId: $trackingId,
-            mailClass: 'App\Domain\Invoices\Mails\InvoiceMail',
+            mailClass: 'App\Domain\Billing\Invoices\Mails\InvoiceMail',
             recipient: new Recipient('Jan de Vries', 'jan@example.com'),
             subject: 'Factuur I-20260001',
             memberId: null,
@@ -46,7 +46,7 @@ final class OutgoingEmailRepositoryDbTest extends FeatureTestCase
 
         $this->assertDatabaseHas('outgoing_emails', [
             'tracking_id' => $trackingId->value,
-            'mailable_class' => 'App\Domain\Invoices\Mails\InvoiceMail',
+            'mailable_class' => 'App\Domain\Billing\Invoices\Mails\InvoiceMail',
             'recipient_email' => 'jan@example.com',
             'recipient_name' => 'Jan de Vries',
             'subject' => 'Factuur I-20260001',
@@ -61,7 +61,7 @@ final class OutgoingEmailRepositoryDbTest extends FeatureTestCase
 
         $email = new OutgoingEmail(
             trackingId: $trackingId,
-            mailClass: 'App\Domain\Invoices\Mails\InvoiceMail',
+            mailClass: 'App\Domain\Billing\Invoices\Mails\InvoiceMail',
             recipient: new Recipient('Test', 'test@example.com'),
             subject: 'Test',
             memberId: MemberId::create($member->id),
@@ -82,7 +82,7 @@ final class OutgoingEmailRepositoryDbTest extends FeatureTestCase
 
         OutgoingEmailModel::query()->create([
             'tracking_id' => $trackingId->value,
-            'mailable_class' => 'App\Domain\Invoices\Mails\InvoiceMail',
+            'mailable_class' => 'App\Domain\Billing\Invoices\Mails\InvoiceMail',
             'recipient_email' => 'jan@example.com',
             'subject' => 'Test',
             'status' => OutgoingEmailStatus::Queued,
@@ -109,7 +109,7 @@ final class OutgoingEmailRepositoryDbTest extends FeatureTestCase
 
         OutgoingEmailModel::query()->create([
             'tracking_id' => $trackingId->value,
-            'mailable_class' => 'App\Domain\Invoices\Mails\InvoiceMail',
+            'mailable_class' => 'App\Domain\Billing\Invoices\Mails\InvoiceMail',
             'recipient_email' => 'jan@example.com',
             'subject' => 'Test',
             'status' => OutgoingEmailStatus::Sent,

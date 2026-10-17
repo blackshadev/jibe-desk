@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Domain\Invoices\SepaBatchStatus;
+use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Models\SepaBatch;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;

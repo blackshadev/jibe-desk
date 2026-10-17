@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Activities\Tables;
 
-use App\Domain\Billing\BillPeriod;
+use App\Domain\Billing\BillableItems\BillPeriod;
 use App\Domain\SharedKernel\PriceFormatter;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;

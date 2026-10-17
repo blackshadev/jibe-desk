@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\PurchaseOrders\Tables;
 
-use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Domain\SharedKernel\CompoundPrice;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Filament\Admin\Utils\ResourceRouteHelper;

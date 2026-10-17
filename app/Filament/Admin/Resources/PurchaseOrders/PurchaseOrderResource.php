@@ -30,7 +30,7 @@ final class PurchaseOrderResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ShoppingCart;
 
     #[Override]
-    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Invoicing;
+    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Billing;
 
     #[Override]
     protected static ?string $cluster = InvoicingCluster::class;

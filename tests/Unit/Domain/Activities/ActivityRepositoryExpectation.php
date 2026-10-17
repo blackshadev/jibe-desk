@@ -7,7 +7,7 @@ namespace Tests\Unit\Domain\Activities;
 use App\Domain\Activities\Activity;
 use App\Domain\Activities\ActivityId;
 use App\Domain\Activities\ActivityRepository;
-use App\Domain\Billing\BillableItemInstanceId;
+use App\Domain\Billing\Subscriptions\BillableItemInstanceId;
 use App\Domain\Members\MemberId;
 use Mockery;
 use Mockery\MockInterface;

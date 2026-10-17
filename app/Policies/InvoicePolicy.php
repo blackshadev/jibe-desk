@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Domain\Invoices\InvoiceStatus;
+use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Models\Invoice;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;

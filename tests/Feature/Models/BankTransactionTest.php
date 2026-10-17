@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Models;
 
-use App\Domain\BankTransactions\BankTransactionStatus;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionStatus;
 use App\Models\BankTransaction;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;

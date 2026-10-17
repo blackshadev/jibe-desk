@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Domain\Invoices\SepaBatchStatus;
+use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Models\SepaBatch;
 use DateInterval;
 use DateTimeImmutable;

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BankStatements\Actions;
 
-use App\Domain\BankAccounts\BankAccountId;
-use App\Domain\BankStatements\BankStatementId;
-use App\Domain\BankStatements\DetermineBankStatementChainStatus;
-use App\Domain\BankStatements\DetermineBankStatementChainStatusInput;
+use App\Domain\Bookkeeping\Banking\BankAccounts\BankAccountId;
+use App\Domain\Bookkeeping\Banking\BankStatements\BankStatementId;
+use App\Domain\Bookkeeping\Banking\BankStatements\DetermineBankStatementChainStatus;
+use App\Domain\Bookkeeping\Banking\BankStatements\DetermineBankStatementChainStatusInput;
 use App\Models\BankStatement;
 use Filament\Actions\Action;
 use Livewire\Component;

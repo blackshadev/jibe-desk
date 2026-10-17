@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Domain\Invoices\SepaConfiguration;
+use App\Domain\Billing\Payment\SepaConfiguration;
 use App\Domain\Mail\FinancialAdministrationRecipient;
 use App\Domain\Mail\MemberAdministrationRecipient;
 use App\Domain\Mail\Recipient;

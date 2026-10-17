@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\SepaBatches\Pages;
 
-use App\Domain\Invoices\SepaBatchService;
+use App\Domain\Billing\Payment\SepaBatchService;
 use App\Filament\Admin\Resources\SepaBatches\SepaBatchResource;
 use App\Models\SepaBatch;
 use Carbon\CarbonImmutable;

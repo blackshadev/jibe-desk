@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Observers;
 
-use App\Domain\Billing\BillableItemList;
-use App\Domain\Invoices\AppliedInvoiceWithLineIds;
-use App\Domain\Invoices\ApplyInvoiceLines;
-use App\Domain\Invoices\InvoiceId;
-use App\Domain\Invoices\InvoiceLineId;
+use App\Domain\Billing\BillableItems\BillableItemList;
+use App\Domain\Billing\Invoices\AppliedInvoiceWithLineIds;
+use App\Domain\Billing\Invoices\ApplyInvoiceLines;
+use App\Domain\Billing\Invoices\InvoiceId;
+use App\Domain\Billing\Invoices\InvoiceLineId;
 use App\Domain\Members\MemberId;
 use App\Models\BillableItem;
 use App\Models\Invoice;
@@ -20,7 +20,7 @@ use App\Observers\MemberObjectObserver;
 use Carbon\CarbonImmutable;
 use Override;
 use Tests\FeatureTestCase;
-use Tests\Unit\Domain\Invoices\CreateInvoiceExpectation;
+use Tests\Unit\Domain\Billing\Invoices\CreateInvoiceExpectation;
 
 final class MemberObjectObserverTest extends FeatureTestCase
 {

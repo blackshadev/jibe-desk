@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\PurchaseOrders\Pages;
 
-use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Resources\PurchaseOrders\Helpers\MemberCreditorPrefill;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Models\Member;

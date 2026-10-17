@@ -1,0 +1,15 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domain\Billing\Invoices;
+
+use JeroenG\Autowire\Attribute\Autowire;
+
+#[Autowire]
+interface InvoiceMailRepository
+{
+    public function getInvoiceMailData(InvoiceId $id): InvoiceMailData;
+
+    public function markInvoiceAsSent(InvoiceId $id): void;
+}

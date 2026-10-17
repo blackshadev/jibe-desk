@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Domain\Billing\BillPeriod;
+use App\Domain\Billing\BillableItems\BillPeriod;
 use App\Domain\Mail\OutgoingEmailStatus;
 use App\Domain\Members\Gender;
 
@@ -59,7 +59,7 @@ return [
     'navigation_groups' => [
         'activities' => 'Activiteiten',
         'member_administration' => 'Ledenbeheer',
-        'invoicing' => 'Facturatie',
+        'billing' => 'Facturatie',
         'rental' => 'Verhuur',
         'technical' => 'Technisch',
         'bookkeeping' => 'Boekhouding',

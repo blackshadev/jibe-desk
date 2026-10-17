@@ -25,13 +25,13 @@ final class InvoicingCluster extends Cluster
     #[Override]
     public static function getNavigationLabel(): string
     {
-        return __('labels.navigation_groups.invoicing');
+        return __('labels.navigation_groups.billing');
     }
 
     #[Override]
     public static function getClusterBreadcrumb(): string
     {
-        return __('labels.navigation_groups.invoicing');
+        return __('labels.navigation_groups.billing');
     }
 
     #[Override]

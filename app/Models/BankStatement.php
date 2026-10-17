@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Domain\BankStatements\StatementChainStatus;
-use App\Domain\BankStatements\StatementIntegrityStatus;
+use App\Domain\Bookkeeping\Banking\BankStatements\StatementChainStatus;
+use App\Domain\Bookkeeping\Banking\BankStatements\StatementIntegrityStatus;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Casts\Attribute;

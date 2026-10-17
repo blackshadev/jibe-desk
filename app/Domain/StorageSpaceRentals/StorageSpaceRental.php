@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\StorageSpaceRentals;
 
-use App\Domain\Billing\BillableItemId;
+use App\Domain\Billing\BillableItems\BillableItemId;
 use App\Domain\Members\MemberId;
 use DateTimeInterface;
 

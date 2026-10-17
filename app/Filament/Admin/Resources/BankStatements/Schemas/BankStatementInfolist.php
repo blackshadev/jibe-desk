@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BankStatements\Schemas;
 
-use App\Domain\BankStatements\StatementChainStatus;
-use App\Domain\BankStatements\StatementIntegrityStatus;
+use App\Domain\Bookkeeping\Banking\BankStatements\StatementChainStatus;
+use App\Domain\Bookkeeping\Banking\BankStatements\StatementIntegrityStatus;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;

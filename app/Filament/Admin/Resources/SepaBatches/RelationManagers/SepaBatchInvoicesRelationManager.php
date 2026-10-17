@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\SepaBatches\RelationManagers;
 
-use App\Domain\Invoices\InvoiceId;
-use App\Domain\Invoices\InvoiceIdList;
-use App\Domain\Invoices\InvoiceService;
-use App\Domain\Invoices\InvoiceStatus;
-use App\Domain\Invoices\SepaBatchStatus;
+use App\Domain\Billing\Invoices\InvoiceId;
+use App\Domain\Billing\Invoices\InvoiceIdList;
+use App\Domain\Billing\Invoices\InvoiceService;
+use App\Domain\Billing\Invoices\InvoiceStatus;
+use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Filament\Admin\Labels\InvoiceStatusLabels;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Filament\Admin\Resources\SepaBatches\Helpers\OnPendingInvoice;

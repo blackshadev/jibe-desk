@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BankTransactions\Actions;
 
-use App\Domain\BankTransactions\BankTransactionId;
-use App\Domain\BankTransactions\BankTransactionService;
-use App\Domain\Invoices\InvoiceId;
-use App\Domain\PurchaseOrders\PurchaseOrderId;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionService;
+use App\Domain\Billing\Invoices\InvoiceId;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
 use App\Models\BankTransaction;
 use App\Models\Invoice;
 use App\Models\PurchaseOrder;

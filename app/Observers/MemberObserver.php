@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Observers;
 
-use App\Domain\Billing\BillingItemApplicators\ApplyMembershipBilling;
-use App\Domain\Billing\BillingItemApplicators\ApplyMemberVolunteerBilling;
-use App\Domain\Billing\BillingItemApplicators\ApplyRegistrationFeeBilling;
-use App\Domain\Billing\BillingItemApplicators\ApplySameHouseholdBilling;
-use App\Domain\Billing\BillingItemApplicators\ApplyStoppedMembership;
+use App\Domain\Billing\Subscriptions\BillingItemApplicators\ApplyMembershipBilling;
+use App\Domain\Billing\Subscriptions\BillingItemApplicators\ApplyMemberVolunteerBilling;
+use App\Domain\Billing\Subscriptions\BillingItemApplicators\ApplyRegistrationFeeBilling;
+use App\Domain\Billing\Subscriptions\BillingItemApplicators\ApplySameHouseholdBilling;
+use App\Domain\Billing\Subscriptions\BillingItemApplicators\ApplyStoppedMembership;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MembershipId;
 use App\Models\Member;

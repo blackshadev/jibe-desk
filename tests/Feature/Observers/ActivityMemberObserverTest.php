@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Tests\Feature\Observers;
 
 use App\Domain\Activities\ActivityId;
-use App\Domain\Billing\BillableItemInstanceId;
+use App\Domain\Billing\Subscriptions\BillableItemInstanceId;
 use App\Domain\Members\MemberId;
 use App\Models\Pivots\ActivityMember;
 use App\Observers\ActivityMemberObserver;
 use Override;
 use Tests\FeatureTestCase;
-use Tests\Unit\Domain\Billing\BillingItemApplicators\ApplyActivityBillingExpectation;
+use Tests\Unit\Domain\Billing\Subscriptions\BillingItemApplicators\ApplyActivityBillingExpectation;
 
 final class ActivityMemberObserverTest extends FeatureTestCase
 {

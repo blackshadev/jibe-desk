@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Tests\Feature\Filament\SepaBatches;
 
 use App\Domain\Authorization\ResourcePermission;
-use App\Domain\Invoices\InvoiceStatus;
-use App\Domain\Invoices\SepaBatchStatus;
-use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Domain\Billing\Invoices\InvoiceStatus;
+use App\Domain\Billing\Payment\SepaBatchStatus;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Resources\SepaBatches\Pages\EditSepaBatch;
 use App\Filament\Admin\Resources\SepaBatches\Pages\ListSepaBatches;
 use App\Filament\Admin\Resources\SepaBatches\SepaBatchResource;

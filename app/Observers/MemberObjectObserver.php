@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Observers;
 
-use App\Domain\Billing\BillableItem;
-use App\Domain\Billing\BillableItemList;
-use App\Domain\Invoices\ApplyInvoiceLines;
-use App\Domain\Invoices\InvoiceRepository;
+use App\Domain\Billing\BillableItems\BillableItem;
+use App\Domain\Billing\BillableItems\BillableItemList;
+use App\Domain\Billing\Invoices\ApplyInvoiceLines;
+use App\Domain\Billing\Invoices\InvoiceRepository;
 use App\Domain\Members\MemberId;
 use App\Models\MemberObject;
 use Carbon\CarbonImmutable;

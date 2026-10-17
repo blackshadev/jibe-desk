@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Observers;
 
-use App\Domain\Billing\BillableItemInstanceId;
+use App\Domain\Billing\Subscriptions\BillableItemInstanceId;
 use App\Domain\StorageSpaceRentals\StorageSpaceRentalId;
 use App\Models\BillableItem;
 use App\Models\BillableItemInstance;
@@ -15,7 +15,7 @@ use Carbon\CarbonImmutable;
 use DateTimeInterface;
 use Override;
 use Tests\FeatureTestCase;
-use Tests\Unit\Domain\Billing\BillingItemApplicators\ApplyStorageSpaceRentalBillingExpectation;
+use Tests\Unit\Domain\Billing\Subscriptions\BillingItemApplicators\ApplyStorageSpaceRentalBillingExpectation;
 
 final class StorageSpaceRentalObserverTest extends FeatureTestCase
 {

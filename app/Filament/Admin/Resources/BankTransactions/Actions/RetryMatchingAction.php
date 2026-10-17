@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BankTransactions\Actions;
 
-use App\Domain\BankTransactions\BankTransactionId;
-use App\Domain\BankTransactions\BankTransactionIdList;
-use App\Domain\BankTransactions\BankTransactionService;
-use App\Domain\BankTransactions\BankTransactionStatus;
-use App\Domain\BankTransactions\ResolveStatus;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionIdList;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionService;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionStatus;
+use App\Domain\Bookkeeping\Banking\BankTransactions\ResolveStatus;
 use App\Models\BankTransaction;
 use Filament\Actions\Action;
 use Livewire\Component;

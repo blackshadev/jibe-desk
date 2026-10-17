@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Actions;
 
-use App\Domain\Bookkeeping\CostCenterBudgetRepository;
+use App\Domain\Bookkeeping\CostCenters\CostCenterBudgetRepository;
 use App\Models\CostCenterBudget;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;

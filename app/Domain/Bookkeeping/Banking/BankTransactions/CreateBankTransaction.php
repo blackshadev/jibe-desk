@@ -1,0 +1,18 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domain\Bookkeeping\Banking\BankTransactions;
+
+final readonly class CreateBankTransaction
+{
+    public function __construct(
+        public string $date,
+        public float $amount,
+        public string $description,
+        public string $bankingAccountNumber,
+        public int $bankAccountId,
+        public ?int $bankStatementId,
+        public string $importHash,
+    ) {}
+}

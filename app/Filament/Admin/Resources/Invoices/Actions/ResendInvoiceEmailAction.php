@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Invoices\Actions;
 
-use App\Domain\Invoices\InvoiceId;
-use App\Domain\Invoices\Jobs\SendInvoiceEmail;
-use App\Domain\Invoices\SendInvoiceEmailData;
+use App\Domain\Billing\Invoices\InvoiceId;
+use App\Domain\Billing\Invoices\Jobs\SendInvoiceEmail;
+use App\Domain\Billing\Invoices\SendInvoiceEmailData;
 use App\Domain\Jobs\JobDispatcher;
 use App\Models\Invoice;
 use Filament\Actions\Action;

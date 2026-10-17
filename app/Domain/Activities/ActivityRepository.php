@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Activities;
 
-use App\Domain\Billing\BillableItemInstanceId;
+use App\Domain\Billing\Subscriptions\BillableItemInstanceId;
 use App\Domain\Members\MemberId;
 use JeroenG\Autowire\Attribute\Autowire;
 

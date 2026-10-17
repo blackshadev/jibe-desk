@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BankTransactions\Tables;
 
-use App\Domain\BankTransactions\BankTransactionReversalState;
-use App\Domain\BankTransactions\BankTransactionStatus;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionReversalState;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionStatus;
 use App\Filament\Admin\Resources\BankTransactions\BankTransactionResource;
 use App\Models\BankTransaction;
 use Filament\Actions\BulkActionGroup;

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Domain\Invoices\SepaBatch;
-use App\Domain\Invoices\SepaBatchGenerator;
+use App\Domain\Billing\Payment\SepaBatch;
+use App\Domain\Billing\Payment\SepaBatchGenerator;
 use Carbon\CarbonImmutable;
 use DateTimeInterface;
 use Illuminate\Console\Attributes\Description;

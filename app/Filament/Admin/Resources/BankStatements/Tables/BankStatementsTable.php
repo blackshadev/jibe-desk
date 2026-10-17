@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BankStatements\Tables;
 
-use App\Domain\BankStatements\StatementChainStatus;
-use App\Domain\BankStatements\StatementIntegrityStatus;
+use App\Domain\Bookkeeping\Banking\BankStatements\StatementChainStatus;
+use App\Domain\Bookkeeping\Banking\BankStatements\StatementIntegrityStatus;
 use App\Filament\Admin\Resources\BankStatements\Actions\DetermineChainStatusAction;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;

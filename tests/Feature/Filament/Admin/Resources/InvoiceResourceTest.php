@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament\Admin\Resources;
 
-use App\Domain\Invoices\InvoiceId;
-use App\Domain\Invoices\InvoiceIdList;
-use App\Domain\Invoices\InvoiceService;
-use App\Domain\Invoices\InvoiceStatus;
-use App\Domain\Invoices\Jobs\SendInvoiceEmail;
+use App\Domain\Billing\Invoices\InvoiceId;
+use App\Domain\Billing\Invoices\InvoiceIdList;
+use App\Domain\Billing\Invoices\InvoiceService;
+use App\Domain\Billing\Invoices\InvoiceStatus;
+use App\Domain\Billing\Invoices\Jobs\SendInvoiceEmail;
 use App\Filament\Admin\Resources\Invoices\Pages\EditInvoice;
 use App\Filament\Admin\Resources\Invoices\Pages\ListInvoices;
 use App\Filament\Admin\Resources\Invoices\Pages\ViewInvoice;

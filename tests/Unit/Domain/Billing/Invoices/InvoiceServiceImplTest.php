@@ -1,0 +1,97 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Unit\Domain\Billing\Invoices;
+
+use App\Domain\Billing\Invoices\InvoiceId;
+use App\Domain\Billing\Invoices\InvoiceIdList;
+use App\Domain\Billing\Invoices\InvoiceServiceImpl;
+use App\Domain\Billing\Invoices\Jobs\SendInvoiceEmail;
+use App\Domain\Billing\Invoices\SendInvoiceEmailData;
+use Override;
+use Tests\Unit\Domain\Bookkeeping\BookkeepingRecords\BookkeepingRecordRepositoryExpectation;
+use Tests\Unit\Domain\Jobs\JobDispatcherExpectation;
+use Tests\UnitTestCase;
+
+final class InvoiceServiceImplTest extends UnitTestCase
+{
+    private CreateInvoiceExpectation $repo;
+    private BookkeepingRecordRepositoryExpectation $bookkeepingRepo;
+    private JobDispatcherExpectation $jobDispatcher;
+    private InvoiceServiceImpl $service;
+
+    #[Override]
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->repo = CreateInvoiceExpectation::create();
+        $this->bookkeepingRepo = BookkeepingRecordRepositoryExpectation::create();
+        $this->jobDispatcher = JobDispatcherExpectation::create();
+
+        $this->service = new InvoiceServiceImpl(
+            $this->repo->mock,
+            $this->bookkeepingRepo->mock,
+            $this->jobDispatcher->mock,
+        );
+    }
+
+    public function test_create_credit_delegates_to_repository(): void
+    {
+        $originalId = InvoiceId::create(1);
+        $creditId = InvoiceId::create(2);
+
+        $this->repo->expectsCreateCredit($originalId, $creditId);
+
+        $result = $this->service->createCredit($originalId);
+
+        static::assertSame($creditId, $result);
+    }
+
+    public function test_mark_as_paid_updates_status_and_creates_bookkeeping_records(): void
+    {
+        $id = InvoiceId::create(1);
+        $ids = new InvoiceIdList([$id]);
+
+        $this->repo->expectsMarkAsPaid($ids);
+        $this->bookkeepingRepo->expectsCreateForInvoice($ids);
+
+        $this->service->markAsPaid($ids);
+    }
+
+    public function test_mark_as_declined_updates_status(): void
+    {
+        $id = InvoiceId::create(1);
+        $ids = new InvoiceIdList([$id]);
+
+        $this->repo->expectsMarkAsDeclined($ids);
+
+        $this->service->markAsDeclined($ids);
+    }
+
+    public function test_mark_as_declined_does_not_create_bookkeeping_records(): void
+    {
+        $id = InvoiceId::create(1);
+        $ids = new InvoiceIdList([$id]);
+
+        $this->repo->expectsMarkAsDeclined($ids);
+        $this->bookkeepingRepo->mock->shouldNotHaveReceived('createForInvoice');
+
+        $this->service->markAsDeclined($ids);
+    }
+
+    public function test_mark_as_pending_delegates_to_repository_and_dispatches_job(): void
+    {
+        $id1 = InvoiceId::create(1);
+        $id2 = InvoiceId::create(2);
+        $ids = new InvoiceIdList([$id1, $id2]);
+
+        $this->repo->expectsMarkAsPending($ids);
+        $this->bookkeepingRepo->expectsCreateForInvoice($ids);
+        $this->jobDispatcher->expectsDispatch(new SendInvoiceEmail(new SendInvoiceEmailData($id1)));
+        $this->jobDispatcher->expectsDispatch(new SendInvoiceEmail(new SendInvoiceEmailData($id2)));
+
+        $this->service->markAsPending($ids);
+    }
+}

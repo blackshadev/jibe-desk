@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Domain\Invoices\InvoiceGenerator;
-use App\Domain\Invoices\InvoiceTarget;
+use App\Domain\Billing\Invoices\InvoiceGenerator;
+use App\Domain\Billing\Invoices\InvoiceTarget;
 use App\Domain\Members\MemberId;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Attributes\Description;

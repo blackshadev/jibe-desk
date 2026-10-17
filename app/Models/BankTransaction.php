@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Domain\BankTransactions\BankTransactionReversalState;
-use App\Domain\BankTransactions\BankTransactionStatus;
-use App\Domain\BankTransactions\ResolveStatus;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionReversalState;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionStatus;
+use App\Domain\Bookkeeping\Banking\BankTransactions\ResolveStatus;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\Scope;
