@@ -48,7 +48,22 @@ final class SepaBatchRepositoryDb implements SepaBatchRepository
 
         return Invoice::query()
             ->whereNull('sepa_batch_id')
-            ->where('status', InvoiceStatus::Open)
+            ->whereIn('status', [InvoiceStatus::Open, InvoiceStatus::Pending])
+            ->whereBetween('date', [
+                $month->subMonth()->startOfMonth(),
+                $month->endOfMonth(),
+            ])
+            ->update(['sepa_batch_id' => $batchId->value]);
+    }
+
+    #[Override]
+    public function addOpenPurchaseOrdersFromBatchMonth(SepaBatchId $batchId): int
+    {
+        $month = new CarbonImmutable(SepaBatch::findOrFail($batchId->value)->invoice_date);
+
+        return PurchaseOrder::query()
+            ->whereNull('sepa_batch_id')
+            ->where('status', PurchaseOrderStatus::Pending)
             ->whereBetween('date', [
                 $month->subMonth()->startOfMonth(),
                 $month->endOfMonth(),

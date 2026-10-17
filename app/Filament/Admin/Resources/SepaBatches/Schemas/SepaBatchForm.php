@@ -40,6 +40,11 @@ final class SepaBatchForm
                             ->columnSpanFull()
                             ->visibleOn(Operation::Create)
                             ->default(true),
+                        Checkbox::make('attach_purchase_orders')
+                            ->label(__('labels.attach_purchase_orders'))
+                            ->columnSpanFull()
+                            ->visibleOn(Operation::Create)
+                            ->default(true),
                     ]),
             ])
             ->disabled(static fn (?SepaBatch $record) => $record !== null && $record->status !== SepaBatchStatus::Open);

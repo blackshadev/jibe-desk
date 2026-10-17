@@ -12,7 +12,9 @@ interface SepaBatchService
 {
     public function createBatch(DateTimeInterface $invoiceDate, DateTimeInterface $sepaTransferDate): SepaBatchId;
 
-    public function attachBatchMonth(SepaBatchId $batchId): int;
+    public function attachBatchMonthInvoices(SepaBatchId $batchId): int;
+
+    public function attachBatchMonthPurchaseOrders(SepaBatchId $batchId): int;
 
     public function startGeneration(SepaBatchId $batchId, int $expectedInvoices): void;
 

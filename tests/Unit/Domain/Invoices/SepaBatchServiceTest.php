@@ -56,7 +56,7 @@ final class SepaBatchServiceTest extends UnitTestCase
 
         $this->repo->expectsAddOpenInvoicesFromBatchMonth($batchId, 3);
 
-        static::assertSame(3, $this->service->attachBatchMonth($batchId));
+        static::assertSame(3, $this->service->attachBatchMonthInvoices($batchId));
     }
 
     public function test_start_generation(): void

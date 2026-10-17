@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Domain\Invoices\InvoiceStatus;
 use App\Domain\Invoices\SepaBatchStatus;
+use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Domain\SharedKernel\CompoundPrice;
 use Carbon\CarbonInterface;
 use DateTimeInterface;
@@ -73,7 +74,10 @@ final class SepaBatch extends Model
             fn () => $this->invoices->reduce(
                 static fn (CompoundPrice $total, Invoice $invoice): CompoundPrice => $total->add($invoice->total),
                 CompoundPrice::empty(),
-            ),
+            )->sub($this->purchaseOrders->reduce(
+                static fn (CompoundPrice $total, PurchaseOrder $purchaseOrder): CompoundPrice => $total->add($purchaseOrder->total),
+                CompoundPrice::empty(),
+            )),
         );
     }
 
@@ -86,6 +90,41 @@ final class SepaBatch extends Model
                 ->reduce(
                     static fn (CompoundPrice $total, Invoice $invoice): CompoundPrice => $total->add($invoice->total),
                     CompoundPrice::empty(),
+                )
+                ->add(
+                    $this->purchaseOrders
+                        ->filter(static fn (PurchaseOrder $purchaseOrder) => $purchaseOrder->status === PurchaseOrderStatus::Pending)
+                        ->reduce(
+                            static fn (CompoundPrice $total, PurchaseOrder $purchaseOrder): CompoundPrice => $total->add($purchaseOrder->total),
+                            CompoundPrice::empty(),
+                        )
+                        ->abs(),
+                ),
+        );
+    }
+
+    /** @return Attribute<CompoundPrice, never> */
+    protected function openInvoiceTotal(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->invoices
+                ->filter(static fn (Invoice $invoice) => $invoice->status === InvoiceStatus::Open || $invoice->status === InvoiceStatus::Pending)
+                ->reduce(
+                    static fn (CompoundPrice $total, Invoice $invoice): CompoundPrice => $total->add($invoice->total),
+                    CompoundPrice::empty(),
+                ),
+        );
+    }
+
+    /** @return Attribute<CompoundPrice, never> */
+    protected function openPurchaseOrderTotal(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->purchaseOrders
+                ->filter(static fn (PurchaseOrder $purchaseOrder) => $purchaseOrder->status === PurchaseOrderStatus::Pending)
+                ->reduce(
+                    static fn (CompoundPrice $total, PurchaseOrder $purchaseOrder): CompoundPrice => $total->add($purchaseOrder->total),
+                    CompoundPrice::empty(),
                 ),
         );
     }
@@ -94,6 +133,12 @@ final class SepaBatch extends Model
     protected function invoiceCount(): Attribute
     {
         return Attribute::get(fn () => $this->invoices()->count());
+    }
+
+    /** @return Attribute<int<0, max>, never> */
+    protected function purchaseOrderCount(): Attribute
+    {
+        return Attribute::get(fn () => $this->purchaseOrders()->count());
     }
 
     /** @return Attribute<int<0, max>, never> */

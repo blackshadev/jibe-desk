@@ -34,7 +34,7 @@ final readonly class SepaBatchServiceExpectation
     public function expectsAttachBatchMonth(SepaBatchId $id, int $return): void
     {
         $this->mock
-            ->expects('attachBatchMonth')
+            ->expects('attachBatchMonthInvoices')
             ->with(equalTo($id))
             ->andReturn($return);
     }

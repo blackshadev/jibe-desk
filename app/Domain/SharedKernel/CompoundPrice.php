@@ -34,4 +34,14 @@ final readonly class CompoundPrice implements Stringable
     {
         return new self($this->price + $second->price, $this->vat + $second->vat);
     }
+
+    public function sub(self $second): self
+    {
+        return new self($this->price - $second->price, $this->vat - $second->vat);
+    }
+
+    public function abs(): self
+    {
+        return new self(abs($this->price), abs($this->vat));
+    }
 }

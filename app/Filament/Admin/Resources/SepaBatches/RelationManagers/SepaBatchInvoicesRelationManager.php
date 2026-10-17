@@ -19,6 +19,7 @@ use Filament\Actions\Action;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\On;
 use Override;
 
@@ -105,6 +106,12 @@ final class SepaBatchInvoicesRelationManager extends RelationManager
     public static function getPluralModelLabel(): string
     {
         return mb_strtolower(__('labels.invoices'));
+    }
+
+    #[Override]
+    public static function getBadge(Model $ownerRecord, string $pageClass): string
+    {
+        return (string) $ownerRecord->{static::$relationship}->count();
     }
 
     #[On('refreshInvoicesTable')]

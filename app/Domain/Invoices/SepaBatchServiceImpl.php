@@ -25,9 +25,15 @@ final readonly class SepaBatchServiceImpl implements SepaBatchService
     }
 
     #[Override]
-    public function attachBatchMonth(SepaBatchId $batchId): int
+    public function attachBatchMonthInvoices(SepaBatchId $batchId): int
     {
         return $this->batchRepository->addOpenInvoicesFromBatchMonth($batchId);
+    }
+
+    #[Override]
+    public function attachBatchMonthPurchaseOrders(SepaBatchId $batchId): int
+    {
+        return $this->batchRepository->addOpenPurchaseOrdersFromBatchMonth($batchId);
     }
 
     #[Override]

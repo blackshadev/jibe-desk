@@ -24,12 +24,20 @@ final class BatchStatsOverview extends StatsOverviewWidget
                 value: $this->record->invoice_count ?? 0,
             ),
             Stat::make(
-                label: __('labels.open_total'),
-                value: (string) ($this->record->openTotal ?? 0),
+                label: __('labels.purchase_order_count'),
+                value: $this->record->purchase_order_count ?? 0,
             ),
             Stat::make(
                 label: __('labels.total'),
                 value: (string) ($this->record->total ?? 0),
+            ),
+            Stat::make(
+                label: __('labels.open_invoice_total'),
+                value: (string) ($this->record->openInvoiceTotal ?? 0),
+            ),
+            Stat::make(
+                label: __('labels.open_purchase_order_total'),
+                value: (string) ($this->record->openPurchaseOrderTotal ?? 0),
             ),
         ];
     }

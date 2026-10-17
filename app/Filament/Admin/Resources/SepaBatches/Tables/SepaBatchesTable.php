@@ -28,8 +28,9 @@ final class SepaBatchesTable
                     ->label(__('labels.status'))
                     ->formatStateUsing(static fn (SepaBatchStatus $state) => SepaBatchStatusLabels::options()[$state->value]),
                 TextColumn::make('invoice_count')
-                    ->label(__('labels.invoice_count'))
-                    ->sortable(),
+                    ->label(__('labels.invoice_count')),
+                TextColumn::make('purchase_order_count')
+                    ->label(__('labels.purchase_order_count')),
                 TextColumn::make('open_total')
                     ->label(__('labels.open_total'))
                     ->formatStateUsing(static fn (CompoundPrice $state) => (string) $state)

@@ -21,7 +21,8 @@ final class CreateSepaBatch extends CreateRecord
     protected function handleRecordCreation(array $data): Model
     {
         $attachInvoices = $data['attach_invoices'] ?? false;
-        unset($data['attach_invoices']);
+        $attachPurchaseOrders = $data['attach_purchase_orders'] ?? false;
+        unset($data['attach_invoices'], $data['attach_purchase_orders']);
 
         $batchService = app(SepaBatchService::class);
 
@@ -31,7 +32,11 @@ final class CreateSepaBatch extends CreateRecord
         );
 
         if ($attachInvoices) {
-            $batchService->attachBatchMonth($batchId);
+            $batchService->attachBatchMonthInvoices($batchId);
+        }
+
+        if ($attachPurchaseOrders) {
+            $batchService->attachBatchMonthPurchaseOrders($batchId);
         }
 
         return SepaBatch::findOrFail($batchId->value);

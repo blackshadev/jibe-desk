@@ -15,6 +15,8 @@ interface SepaBatchRepository
 
     public function addOpenInvoicesFromBatchMonth(SepaBatchId $batchId): int;
 
+    public function addOpenPurchaseOrdersFromBatchMonth(SepaBatchId $batchId): int;
+
     public function markGenerationStarted(SepaBatchId $batchId, int $expectedInvoices): void;
 
     public function markGenerationFinished(SepaBatchId $batchId): void;
