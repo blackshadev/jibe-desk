@@ -1,0 +1,59 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Database\Factories;
+
+use App\Domain\Invoices\SepaBatchStatus;
+use App\Models\SepaBatch;
+use DateInterval;
+use DateTimeImmutable;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Carbon;
+use Override;
+
+/** @extends Factory<SepaBatch> */
+final class SepaBatchFactory extends Factory
+{
+    #[Override]
+    public function definition(): array
+    {
+        $invoiceDate = DateTimeImmutable::createFromInterface(fake()->dateTime('+14 days'));
+        $sepaTransferDate = $invoiceDate->add(new DateInterval('P14D'));
+
+        return [
+            'invoice_date' => $invoiceDate,
+            'sepa_transfer_date' => $sepaTransferDate->format('Y-m-d'),
+            'status' => SepaBatchStatus::Open,
+            'created_at' => fake()->dateTime(),
+            'updated_at' => Carbon::now(),
+        ];
+    }
+
+    public function pending(): self
+    {
+        return $this->state(['status' => SepaBatchStatus::Pending]);
+    }
+
+    public function completed(): self
+    {
+        return $this->state(['status' => SepaBatchStatus::Completed]);
+    }
+
+    public function generating(int $expectedInvoices = 10): self
+    {
+        return $this->state([
+            'generation_started_at' => Carbon::now(),
+            'generation_expected_invoices' => $expectedInvoices,
+            'generation_finished_at' => null,
+        ]);
+    }
+
+    public function generationFinished(): self
+    {
+        return $this->state([
+            'generation_started_at' => Carbon::now()->subMinute(),
+            'generation_finished_at' => Carbon::now(),
+        ]);
+    }
+}

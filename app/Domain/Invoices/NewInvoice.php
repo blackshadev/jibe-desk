@@ -14,6 +14,6 @@ final readonly class NewInvoice
         public MemberId $memberId,
         public DateTimeInterface $invoiceDate,
         public BillableItemList $items,
-        public ?InvoiceBatchId $batchId = null,
+        public ?SepaBatchId $batchId = null,
     ) {}
 }

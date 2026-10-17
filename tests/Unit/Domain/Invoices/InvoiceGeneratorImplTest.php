@@ -10,11 +10,11 @@ use App\Domain\Billing\BillableItemList;
 use App\Domain\Bookkeeping\CostCenterId;
 use App\Domain\Invoices\AppliedInvoiceWithLineIds;
 use App\Domain\Invoices\ApplyInvoiceLines;
-use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceGeneratorImpl;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceLineId;
 use App\Domain\Invoices\InvoiceTarget;
+use App\Domain\Invoices\SepaBatchId;
 use App\Domain\Members\MemberId;
 use App\Domain\SharedKernel\CompoundPrice;
 use DateTimeImmutable;
@@ -25,7 +25,7 @@ final class InvoiceGeneratorImplTest extends UnitTestCase
 {
     private BillableItemsViewRepositoryExpectation $billableItemsViewRepository;
     private CreateInvoiceExpectation $invoiceRepository;
-    private InvoiceBatchRepositoryExpectation $invoiceBatchRepository;
+    private SepaBatchRepositoryExpectation $sepaBatchRepository;
     private InvoiceGeneratorImpl $subject;
 
     #[Override]
@@ -35,9 +35,9 @@ final class InvoiceGeneratorImplTest extends UnitTestCase
 
         $this->billableItemsViewRepository = BillableItemsViewRepositoryExpectation::create();
         $this->invoiceRepository = CreateInvoiceExpectation::create();
-        $this->invoiceBatchRepository = InvoiceBatchRepositoryExpectation::create();
+        $this->sepaBatchRepository = SepaBatchRepositoryExpectation::create();
 
-        $this->subject = new InvoiceGeneratorImpl($this->billableItemsViewRepository->mock, $this->invoiceRepository->mock, $this->invoiceBatchRepository->mock);
+        $this->subject = new InvoiceGeneratorImpl($this->billableItemsViewRepository->mock, $this->invoiceRepository->mock, $this->sepaBatchRepository->mock);
     }
 
     public function test_it_skips_creation_when_no_billable_items_exist(): void
@@ -73,7 +73,7 @@ final class InvoiceGeneratorImplTest extends UnitTestCase
 
     public function test_it_attaches_to_batch(): void
     {
-        $batchId = InvoiceBatchId::create(10);
+        $batchId = SepaBatchId::create(10);
         $memberId = MemberId::create(1);
         $invoiceId = InvoiceId::create(9);
         $invoiceDate = new DateTimeImmutable('2026-05-25');
@@ -86,7 +86,7 @@ final class InvoiceGeneratorImplTest extends UnitTestCase
 
         $this->billableItemsViewRepository->expectsListBillableItemsForMember($invoiceDate, $memberId, $items);
         $this->invoiceRepository->expectsApplyLines($expectedInvoice, $return);
-        $this->invoiceBatchRepository->expectsAttachInvoice($invoiceId, $batchId);
+        $this->sepaBatchRepository->expectsAttachInvoice($invoiceId, $batchId);
 
         $this->subject->generate(new InvoiceTarget($memberId, $invoiceDate, $batchId));
     }

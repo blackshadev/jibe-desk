@@ -7,11 +7,11 @@ namespace Tests\Feature\Authorization;
 use App\Domain\Authorization\RoleName;
 use App\Filament\Admin\Resources\Activities\Pages\ListActivities;
 use App\Filament\Admin\Resources\BankStatements\Pages\ListBankStatements;
-use App\Filament\Admin\Resources\InvoiceBatches\Pages\ListInvoiceBatches;
 use App\Filament\Admin\Resources\Invoices\Pages\ListInvoices;
 use App\Filament\Admin\Resources\Members\Pages\ListMembers;
 use App\Filament\Admin\Resources\OutgoingEmails\Pages\ListOutgoingEmails;
 use App\Filament\Admin\Resources\PurchaseOrders\Pages\ListPurchaseOrders;
+use App\Filament\Admin\Resources\SepaBatches\Pages\ListSepaBatches;
 use App\Filament\Admin\Resources\StorageSpaces\Pages\ListStorageSpaces;
 use App\Models\User;
 use Livewire\Livewire;
@@ -38,11 +38,11 @@ final class AuthorizationTest extends FeatureTestCase
             ->assertSuccessful();
     }
 
-    public function test_invoicing_can_view_invoice_batches(): void
+    public function test_invoicing_can_view_sepa_batches(): void
     {
         $this->withUserHavingRole(RoleName::FinancialAdministration);
 
-        Livewire::test(ListInvoiceBatches::class)
+        Livewire::test(ListSepaBatches::class)
             ->assertSuccessful();
     }
 

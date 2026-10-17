@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace App\Domain\Bookkeeping;
 
 use App\Domain\BankTransactions\BankTransactionId;
-use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceIdList;
+use App\Domain\Invoices\SepaBatchId;
 use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use JeroenG\Autowire\Attribute\Autowire;
 
 #[Autowire]
 interface BookkeepingRecordRepository
 {
-    public function createForBatch(InvoiceBatchId $batchId): void;
+    public function createForBatch(SepaBatchId $batchId): void;
 
     public function createForPurchaseOrder(PurchaseOrderIdList $ids): void;
 

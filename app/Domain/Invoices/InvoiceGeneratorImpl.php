@@ -12,7 +12,7 @@ final readonly class InvoiceGeneratorImpl implements InvoiceGenerator
     public function __construct(
         private BillableItemsViewRepository $billableViewRepository,
         private InvoiceRepository $invoiceRepository,
-        private InvoiceBatchRepository $invoiceBatchRepository,
+        private SepaBatchRepository $sepaBatchRepository,
     ) {}
 
     #[Override]
@@ -36,7 +36,7 @@ final readonly class InvoiceGeneratorImpl implements InvoiceGenerator
         $id = $this->invoiceRepository->applyLines($command)->invoiceId;
 
         if ($createInvoice->batchId) {
-            $this->invoiceBatchRepository->attachInvoice($createInvoice->batchId, $id);
+            $this->sepaBatchRepository->attachInvoice($createInvoice->batchId, $id);
         }
 
         return $id;

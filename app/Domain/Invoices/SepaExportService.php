@@ -9,5 +9,5 @@ use JeroenG\Autowire\Attribute\Autowire;
 #[Autowire]
 interface SepaExportService
 {
-    public function export(InvoiceBatchId $batchId): SepaExport;
+    public function export(SepaBatchId $batchId): SepaExport;
 }

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit\Domain\Bookkeeping;
 
 use App\Domain\Bookkeeping\BookkeepingRecordRepository;
-use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceIdList;
+use App\Domain\Invoices\SepaBatchId;
 use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use Mockery;
 use Mockery\MockInterface;
@@ -24,7 +24,7 @@ final readonly class BookkeepingRecordRepositoryExpectation
         return new self(Mockery::mock(BookkeepingRecordRepository::class));
     }
 
-    public function expectsCreateForBatch(InvoiceBatchId $batchId): void
+    public function expectsCreateForBatch(SepaBatchId $batchId): void
     {
         $this->mock
             ->expects('createForBatch')

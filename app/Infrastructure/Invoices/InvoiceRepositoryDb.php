@@ -41,7 +41,7 @@ final class InvoiceRepositoryDb implements InvoiceRepository
         $member = Member::findOrFail($invoice->memberId->value);
 
         $model = Invoice::query()->create([
-            'invoice_batch_id' => $invoice->batchId?->value,
+            'sepa_batch_id' => $invoice->batchId?->value,
             'recipient_email' => $member->email,
             'recipient_name' => $member->name,
             'recipient_address' => $member->address,

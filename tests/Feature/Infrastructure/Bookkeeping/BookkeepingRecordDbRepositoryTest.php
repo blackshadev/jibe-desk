@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Tests\Feature\Infrastructure\Bookkeeping;
 
 use App\Domain\BankTransactions\BankTransactionId;
-use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceIdList;
+use App\Domain\Invoices\SepaBatchId;
 use App\Domain\PurchaseOrders\PurchaseOrderId;
 use App\Domain\PurchaseOrders\PurchaseOrderIdList;
 use App\Infrastructure\Bookkeeping\BookkeepingRecordDbRepository;
@@ -16,10 +16,10 @@ use App\Models\BookkeepingRecord;
 use App\Models\CostCenter;
 use App\Models\CostCenterBudget;
 use App\Models\Invoice;
-use App\Models\InvoiceBatch;
 use App\Models\InvoiceLine;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
+use App\Models\SepaBatch;
 use Override;
 use Tests\FeatureTestCase;
 
@@ -99,17 +99,17 @@ final class BookkeepingRecordDbRepositoryTest extends FeatureTestCase
     {
         $costCenterA = CostCenter::factory()->create();
         $costCenterB = CostCenter::factory()->create();
-        $batch = InvoiceBatch::factory()->create(['invoice_date' => '2026-06-15']);
+        $batch = SepaBatch::factory()->create(['invoice_date' => '2026-06-15']);
 
         Invoice::factory()
             ->has(InvoiceLine::factory()->state(['cost_center_id' => $costCenterA->id, 'price' => 100, 'vat' => 21, 'quantity' => 2]), 'lines')
             ->has(InvoiceLine::factory()->state(['cost_center_id' => $costCenterB->id, 'price' => 50, 'vat' => 10.5, 'quantity' => 1]), 'lines')
             ->create([
-                'invoice_batch_id' => $batch->id,
+                'sepa_batch_id' => $batch->id,
                 'status' => 'pending',
             ]);
 
-        $this->repository->createForBatch(InvoiceBatchId::create($batch->id));
+        $this->repository->createForBatch(SepaBatchId::create($batch->id));
 
         $this->assertDatabaseHas('bookkeeping_records', [
             'reference_type' => Invoice::class,
@@ -128,12 +128,12 @@ final class BookkeepingRecordDbRepositoryTest extends FeatureTestCase
     public function test_create_for_batch_skips_invoices_already_in_bookkeeping_records(): void
     {
         $costCenter = CostCenter::factory()->create();
-        $batch = InvoiceBatch::factory()->create(['invoice_date' => '2026-06-15']);
+        $batch = SepaBatch::factory()->create(['invoice_date' => '2026-06-15']);
 
         $invoice = Invoice::factory()
             ->has(InvoiceLine::factory()->state(['cost_center_id' => $costCenter->id, 'price' => 100, 'vat' => 21, 'quantity' => 1]), 'lines')
             ->create([
-                'invoice_batch_id' => $batch->id,
+                'sepa_batch_id' => $batch->id,
                 'status' => 'pending',
             ]);
 
@@ -146,7 +146,7 @@ final class BookkeepingRecordDbRepositoryTest extends FeatureTestCase
             'amount_vat' => 21,
         ]);
 
-        $this->repository->createForBatch(InvoiceBatchId::create($batch->id));
+        $this->repository->createForBatch(SepaBatchId::create($batch->id));
 
         $this->assertDatabaseHas('bookkeeping_records', [
             'reference_type' => Invoice::class,
@@ -160,9 +160,9 @@ final class BookkeepingRecordDbRepositoryTest extends FeatureTestCase
 
     public function test_create_for_batch_no_pending_invoices_creates_nothing(): void
     {
-        $batch = InvoiceBatch::factory()->create();
+        $batch = SepaBatch::factory()->create();
 
-        $this->repository->createForBatch(InvoiceBatchId::create($batch->id));
+        $this->repository->createForBatch(SepaBatchId::create($batch->id));
 
         static::assertSame(0, BookkeepingRecord::query()->count());
     }

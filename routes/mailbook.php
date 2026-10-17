@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use App\Domain\SharedKernel\CompoundPrice;
-use App\Domain\Invoices\InvoiceBatchEmailData;
-use App\Domain\Invoices\InvoiceBatchId;
+use App\Domain\Invoices\SepaBatchEmailData;
+use App\Domain\Invoices\SepaBatchId;
 use App\Domain\Invoices\InvoiceMailData;
 use App\Domain\Invoices\InvoiceMailLine;
-use App\Domain\Invoices\Mails\InvoiceBatchCreatedMail;
+use App\Domain\Invoices\Mails\SepaBatchCreatedMail;
 use App\Domain\Invoices\Mails\InvoiceMail;
 use App\Domain\Invoices\SepaConfiguration;
 use App\Domain\Mail\Recipient;
@@ -147,11 +147,11 @@ Mailbook::add(InvoiceMail::class)
         return new MailMailable(new InvoiceMail($data, $config));
     });
 
-Mailbook::add(InvoiceBatchCreatedMail::class)
+Mailbook::add(SepaBatchCreatedMail::class)
     ->variant('Invoice batch created', static function (): Mailable {
-        return new MailMailable(new InvoiceBatchCreatedMail(
-            new InvoiceBatchEmailData(
-                id: InvoiceBatchId::create(1),
+        return new MailMailable(new SepaBatchCreatedMail(
+            new SepaBatchEmailData(
+                id: SepaBatchId::create(1),
                 invoiceDate: new DateTimeImmutable('2026-06-15'),
                 invoiceCount: 12,
                 total: new CompoundPrice(1500.00, 315.00),

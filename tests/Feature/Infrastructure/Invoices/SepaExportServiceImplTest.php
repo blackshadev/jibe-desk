@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Infrastructure\Invoices;
 
-use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\MandateId;
 use App\Domain\Invoices\PaymentInformationId;
+use App\Domain\Invoices\SepaBatchId;
 use App\Domain\Invoices\SepaConfiguration;
 use App\Domain\Invoices\SepaExportInvoice;
 use App\Domain\Members\MemberId;
@@ -22,7 +22,7 @@ use Tests\FeatureTestCase;
 final class SepaExportServiceImplTest extends FeatureTestCase
 {
     private SepaConfiguration $config;
-    private InvoiceBatchRepositoryExpectation $repo;
+    private SepaBatchRepositoryExpectation $repo;
 
     #[Override]
     protected function setUp(): void
@@ -36,12 +36,12 @@ final class SepaExportServiceImplTest extends FeatureTestCase
             creditorBic: 'ABNANL2A',
         );
 
-        $this->repo = InvoiceBatchRepositoryExpectation::create();
+        $this->repo = SepaBatchRepositoryExpectation::create();
     }
 
     public function test_export_generates_valid_xml_for_direct_debit(): void
     {
-        $batchId = InvoiceBatchId::create(1);
+        $batchId = SepaBatchId::create(1);
 
         $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [
@@ -63,7 +63,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
 
     public function test_export_generates_valid_xml_for_credit_transfer(): void
     {
-        $batchId = InvoiceBatchId::create(1);
+        $batchId = SepaBatchId::create(1);
 
         $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [
@@ -85,7 +85,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
 
     public function test_export_generates_both_direct_debit_and_credit_transfer(): void
     {
-        $batchId = InvoiceBatchId::create(1);
+        $batchId = SepaBatchId::create(1);
 
         $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [
@@ -111,7 +111,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
 
     public function test_export_is_empty_with_no_invoices(): void
     {
-        $batchId = InvoiceBatchId::create(1);
+        $batchId = SepaBatchId::create(1);
 
         $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, []);
@@ -125,7 +125,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
 
     public function test_export_skips_zero_amount_invoices(): void
     {
-        $batchId = InvoiceBatchId::create(1);
+        $batchId = SepaBatchId::create(1);
 
         $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [
@@ -141,7 +141,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
 
     public function test_direct_debit_contains_creditor_information(): void
     {
-        $batchId = InvoiceBatchId::create(1);
+        $batchId = SepaBatchId::create(1);
 
         $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [
@@ -159,7 +159,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
 
     public function test_credit_transfer_contains_creditor_information(): void
     {
-        $batchId = InvoiceBatchId::create(1);
+        $batchId = SepaBatchId::create(1);
 
         $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [
@@ -176,7 +176,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
 
     public function test_direct_debit_contains_invoice_information(): void
     {
-        $batchId = InvoiceBatchId::create(1);
+        $batchId = SepaBatchId::create(1);
 
         $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [
@@ -222,7 +222,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
 
     public function test_credit_transfer_contains_invoice_information(): void
     {
-        $batchId = InvoiceBatchId::create(1);
+        $batchId = SepaBatchId::create(1);
 
         $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [
@@ -267,7 +267,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
 
     public function test_direct_debit_multiple_invoices(): void
     {
-        $batchId = InvoiceBatchId::create(1);
+        $batchId = SepaBatchId::create(1);
 
         $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [
@@ -293,7 +293,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
 
     public function test_credit_transfer_multiple_invoices(): void
     {
-        $batchId = InvoiceBatchId::create(1);
+        $batchId = SepaBatchId::create(1);
 
         $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [
@@ -319,7 +319,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
 
     public function test_mixed_debit_and_credit_invoices(): void
     {
-        $batchId = InvoiceBatchId::create(1);
+        $batchId = SepaBatchId::create(1);
 
         $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, [

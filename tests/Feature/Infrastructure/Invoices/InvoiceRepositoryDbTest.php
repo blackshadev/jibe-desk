@@ -9,16 +9,16 @@ use App\Domain\Billing\BillableItemId;
 use App\Domain\Billing\BillableItemList;
 use App\Domain\Bookkeeping\CostCenterId;
 use App\Domain\Invoices\ApplyInvoiceLines;
-use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceStatus;
 use App\Domain\Invoices\NewInvoice;
+use App\Domain\Invoices\SepaBatchId;
 use App\Domain\Members\MemberId;
 use App\Domain\SharedKernel\CompoundPrice;
 use App\Infrastructure\Invoices\InvoiceRepositoryDb;
 use App\Models\BillableItem as BillableItemModel;
 use App\Models\Invoice;
-use App\Models\InvoiceBatch;
 use App\Models\Member;
+use App\Models\SepaBatch;
 use DateTimeImmutable;
 use Tests\FeatureTestCase;
 
@@ -77,7 +77,7 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
         static::assertSame("Main Street 12B\n1234 AB, Amsterdam", $member->address);
     }
 
-    public function test_create_persists_invoice_batch_id_when_provided(): void
+    public function test_create_persists_sepa_batch_id_when_provided(): void
     {
         $member = Member::factory()->createQuietly();
         Invoice::factory()
@@ -86,9 +86,9 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
                 'invoice_number' => 'I-2026000000',
             ]);
         $billableItem = BillableItemModel::factory()->createQuietly();
-        /** @var InvoiceBatch $batch */
-        $batch = InvoiceBatch::factory()->createQuietly();
-        $batchId = InvoiceBatchId::create($batch->id);
+        /** @var SepaBatch $batch */
+        $batch = SepaBatch::factory()->createQuietly();
+        $batchId = SepaBatchId::create($batch->id);
 
         $subject = app(InvoiceRepositoryDb::class);
 
@@ -103,11 +103,11 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
 
         $this->assertDatabaseHas('invoices', [
             'invoice_number' => 'I-2026000001',
-            'invoice_batch_id' => $batchId->value,
+            'sepa_batch_id' => $batchId->value,
         ]);
     }
 
-    public function test_create_leaves_invoice_batch_id_null_when_not_provided(): void
+    public function test_create_leaves_sepa_batch_id_null_when_not_provided(): void
     {
         $member = Member::factory()->createQuietly();
         Invoice::factory()
@@ -129,7 +129,7 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
 
         $this->assertDatabaseHas('invoices', [
             'invoice_number' => 'I-2026000001',
-            'invoice_batch_id' => null,
+            'sepa_batch_id' => null,
         ]);
     }
 

@@ -7,10 +7,10 @@ namespace Tests\Feature\Infrastructure\Invoices;
 use App\Domain\Invoices\InvoiceId;
 use App\Infrastructure\Invoices\InvoiceMailRepositoryDb;
 use App\Models\Invoice;
-use App\Models\InvoiceBatch;
 use App\Models\InvoiceLine;
 use App\Models\Member;
 use App\Models\PaymentInformation;
+use App\Models\SepaBatch;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Override;
 use Tests\FeatureTestCase;
@@ -34,7 +34,7 @@ final class InvoiceMailRepositoryDbTest extends FeatureTestCase
             'mandate_accepted_date' => '2025-01-15',
         ]);
 
-        $batch = InvoiceBatch::factory()->createQuietly([
+        $batch = SepaBatch::factory()->createQuietly([
             'invoice_date' => '2026-06-30',
             'sepa_transfer_date' => '2026-07-15',
         ]);
@@ -113,7 +113,7 @@ final class InvoiceMailRepositoryDbTest extends FeatureTestCase
             'mandate_accepted_date' => '2025-01-15',
         ]);
 
-        $batch = InvoiceBatch::factory()->createQuietly([
+        $batch = SepaBatch::factory()->createQuietly([
             'invoice_date' => '2026-06-30',
             'sepa_transfer_date' => '2026-07-15',
         ]);
@@ -133,7 +133,7 @@ final class InvoiceMailRepositoryDbTest extends FeatureTestCase
     {
         $member = Member::factory()->createQuietly();
 
-        $batch = InvoiceBatch::factory()->createQuietly([
+        $batch = SepaBatch::factory()->createQuietly([
             'invoice_date' => '2026-07-01',
             'sepa_transfer_date' => '2026-07-15',
         ]);
@@ -148,7 +148,7 @@ final class InvoiceMailRepositoryDbTest extends FeatureTestCase
         static::assertNull($result->sepaTransferDate);
     }
 
-    public function test_get_invoice_mail_data_sepa_transfer_date_null_when_no_invoice_batch(): void
+    public function test_get_invoice_mail_data_sepa_transfer_date_null_when_no_sepa_batch(): void
     {
         $member = Member::factory()->createQuietly();
         PaymentInformation::factory()->for($member)->createQuietly([
@@ -158,7 +158,7 @@ final class InvoiceMailRepositoryDbTest extends FeatureTestCase
         $invoice = Invoice::factory()
             ->forMember($member)
             ->createQuietly([
-                'invoice_batch_id' => null,
+                'sepa_batch_id' => null,
             ]);
 
         $result = $this->repository->getInvoiceMailData(InvoiceId::create($invoice->id));

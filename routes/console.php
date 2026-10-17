@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Console\Commands\GenerateInvoiceBatchCommand;
+use App\Console\Commands\GenerateSepaBatchCommand;
 use App\Console\Commands\MatchBankTransactionsCommand;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -11,5 +11,5 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command(GenerateInvoiceBatchCommand::class)->monthlyOn(1, '04:00');
+Schedule::command(GenerateSepaBatchCommand::class)->monthlyOn(1, '04:00');
 Schedule::command(MatchBankTransactionsCommand::class)->hourly();

@@ -12,6 +12,6 @@ final readonly class InvoiceTarget
     public function __construct(
         public MemberId $memberId,
         public DateTimeInterface $invoiceDate,
-        public ?InvoiceBatchId $batchId = null,
+        public ?SepaBatchId $batchId = null,
     ) {}
 }

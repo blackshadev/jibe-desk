@@ -56,12 +56,12 @@ enum ResourcePermission: string
     case DeleteAnyInvoices = 'delete_any_invoices';
 
     // Invoice Batches
-    case ViewAnyInvoiceBatches = 'view_any_invoice_batches';
-    case ViewInvoiceBatches = 'view_invoice_batches';
-    case CreateInvoiceBatches = 'create_invoice_batches';
-    case UpdateInvoiceBatches = 'update_invoice_batches';
-    case DeleteInvoiceBatches = 'delete_invoice_batches';
-    case DeleteAnyInvoiceBatches = 'delete_any_invoice_batches';
+    case ViewAnySepaBatches = 'view_any_sepa_batches';
+    case ViewSepaBatches = 'view_sepa_batches';
+    case CreateSepaBatches = 'create_sepa_batches';
+    case UpdateSepaBatches = 'update_sepa_batches';
+    case DeleteSepaBatches = 'delete_sepa_batches';
+    case DeleteAnySepaBatches = 'delete_any_sepa_batches';
 
     // Activities
     case ViewAnyActivities = 'view_any_activities';

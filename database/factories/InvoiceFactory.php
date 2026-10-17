@@ -6,9 +6,9 @@ namespace Database\Factories;
 
 use App\Domain\Invoices\InvoiceStatus;
 use App\Models\Invoice;
-use App\Models\InvoiceBatch;
 use App\Models\InvoiceLine;
 use App\Models\Member;
+use App\Models\SepaBatch;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Override;
 
@@ -55,8 +55,8 @@ final class InvoiceFactory extends Factory
         return $this->has(InvoiceLine::factory()->count($count), 'lines');
     }
 
-    public function forBatch(InvoiceBatch $batch): self
+    public function forBatch(SepaBatch $batch): self
     {
-        return $this->state(['invoice_batch_id' => $batch->id]);
+        return $this->state(['sepa_batch_id' => $batch->id]);
     }
 }

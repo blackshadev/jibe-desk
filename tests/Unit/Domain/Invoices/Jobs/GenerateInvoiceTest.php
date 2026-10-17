@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Invoices\Jobs;
 
-use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\InvoiceTarget;
 use App\Domain\Invoices\Jobs\GenerateInvoice;
+use App\Domain\Invoices\SepaBatchId;
 use App\Domain\Members\MemberId;
 use Carbon\CarbonImmutable;
 use Override;
@@ -30,7 +30,7 @@ final class GenerateInvoiceTest extends UnitTestCase
         $target = new InvoiceTarget(
             memberId: MemberId::create(1),
             invoiceDate: CarbonImmutable::parse('2026-05-25'),
-            batchId: InvoiceBatchId::create(10),
+            batchId: SepaBatchId::create(10),
         );
         $this->generator->expectsGenerate($target);
 

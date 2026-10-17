@@ -8,8 +8,8 @@ use App\Domain\Billing\BillableItem;
 use App\Domain\Billing\BillableItemId;
 use App\Domain\Billing\BillableItemList;
 use App\Domain\Bookkeeping\CostCenterId;
-use App\Domain\Invoices\InvoiceBatchId;
 use App\Domain\Invoices\NewInvoice;
+use App\Domain\Invoices\SepaBatchId;
 use App\Domain\Members\MemberId;
 use App\Domain\SharedKernel\CompoundPrice;
 use Carbon\CarbonImmutable;
@@ -24,7 +24,7 @@ final class NewInvoiceTest extends UnitTestCase
         $items = new BillableItemList([
             new BillableItem(BillableItemId::create(1), new CompoundPrice(10.0, 2.1), 1.0, 'Test', CostCenterId::create(1)),
         ]);
-        $batchId = InvoiceBatchId::create(9);
+        $batchId = SepaBatchId::create(9);
 
         $subject = new NewInvoice(
             memberId: $memberId,

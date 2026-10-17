@@ -44,7 +44,7 @@ The domain layer holds the business model. It is pure PHP: no Eloquent, no HTTP,
 - Contains:
     - **Repository interfaces** (e.g. `InvoiceRepository`, `MemberRepository`) marked with `#[Autowire]` so they are autowired by interface.
     - **Value objects** (e.g. `InvoiceId`, `MemberId`, `CompoundPrice`, `InvoiceNumber`, `BillableItemList`).
-    - **Domain services / generators** (e.g. `InvoiceGeneratorImpl`, `InvoiceNumberGeneratorImpl`, `InvoiceBatchGeneratorImpl`).
+    - **Domain services / generators** (e.g. `InvoiceGeneratorImpl`, `InvoiceNumberGeneratorImpl`, `SepaBatchGeneratorImpl`).
     - **Enums** (e.g. `Gender`, `InvoiceStatus`).
 - Depends on small libraries only (`psr/clock`, `webmozart/assert`, `jeroen-g/autowire`).
 - Collaborators are injected as interfaces so the domain never knows about Eloquent or the database.

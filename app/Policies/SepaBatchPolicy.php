@@ -1,0 +1,33 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Policies;
+
+use App\Domain\Invoices\SepaBatchStatus;
+use App\Models\SepaBatch;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
+use Override;
+use Webmozart\Assert\Assert;
+
+final class SepaBatchPolicy extends ResourcePolicy
+{
+    #[Override]
+    protected static function permissionPrefix(): string
+    {
+        return 'sepa_batches';
+    }
+
+    #[Override]
+    public function delete(User $user, Model $batch): bool
+    {
+        Assert::isInstanceOf($batch, SepaBatch::class);
+
+        if ($batch->status !== SepaBatchStatus::Open) {
+            return false;
+        }
+
+        return parent::delete($user, $batch);
+    }
+}

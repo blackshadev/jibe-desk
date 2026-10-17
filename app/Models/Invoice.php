@@ -36,10 +36,10 @@ final class Invoice extends Model
         return $this->belongsTo(Member::class);
     }
 
-    /** @return BelongsTo<InvoiceBatch, $this> */
-    public function invoiceBatch(): BelongsTo
+    /** @return BelongsTo<SepaBatch, $this> */
+    public function sepaBatch(): BelongsTo
     {
-        return $this->belongsTo(InvoiceBatch::class);
+        return $this->belongsTo(SepaBatch::class);
     }
 
     /** @return BelongsTo<Invoice, $this> */
