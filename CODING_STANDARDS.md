@@ -33,3 +33,12 @@ first time instead of discovering the message.
 - Eloquent scope calls from Filament closures (`->pending()`, `->active()`,
   `->accepted()`, `modifyQueryUsing`) resolve on `Builder` and need
   `@phpstan-ignore-next-line method.notFound`.
+
+## SEPA export: `digitick/sepa-xml` never omits `<CdtrAgt>`
+
+When a credit-transfer entry is added without a `creditorBic`, the library does
+**not** omit the `<CdtrAgt>` element — it emits
+`<CdtrAgt><FinInstnId><Othr><Id>NOTPROVIDED</Id></Othr></FinInstnId></CdtrAgt>`.
+Purchase orders have no BIC, so tests asserting "no BIC" must assert the absence
+of `//pain:CdtrAgt//pain:BICFI` (optionally the presence of `NOTPROVIDED`), not
+the absence of `CdtrAgt`. See `SepaExportServiceImplTest`.

@@ -7,6 +7,7 @@ namespace Tests\Feature\Infrastructure\Invoices;
 use App\Domain\Invoices\SepaBatchId;
 use App\Domain\Invoices\SepaBatchRepository;
 use App\Domain\Invoices\SepaExportInvoice;
+use App\Domain\PurchaseOrders\SepaExportPurchaseOrder;
 use DateTimeInterface;
 use Mockery;
 use Mockery\MockInterface;
@@ -37,6 +38,15 @@ final readonly class SepaBatchRepositoryExpectation
     {
         $this->mock
             ->expects('getInvoicesForExport')
+            ->with(equalTo($batchId))
+            ->andReturn($return);
+    }
+
+    /** @param list<SepaExportPurchaseOrder> $return */
+    public function expectsGetPurchaseOrdersForExport(SepaBatchId $batchId, array $return): void
+    {
+        $this->mock
+            ->expects('getPurchaseOrdersForExport')
             ->with(equalTo($batchId))
             ->andReturn($return);
     }

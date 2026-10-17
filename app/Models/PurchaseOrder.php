@@ -27,6 +27,7 @@ use Override;
  * @property ?string $notes
  * @property ?string $declined_reason
  * @property ?int $member_id
+ * @property ?int $sepa_batch_id
  */
 #[Guarded(['id', 'created_at', 'updated_at'])]
 #[ObservedBy([PurchaseOrderObserver::class])]
@@ -38,6 +39,12 @@ final class PurchaseOrder extends Model
     public function member(): BelongsTo
     {
         return $this->belongsTo(Member::class);
+    }
+
+    /** @return BelongsTo<SepaBatch, $this> */
+    public function sepaBatch(): BelongsTo
+    {
+        return $this->belongsTo(SepaBatch::class);
     }
 
     /** @return HasMany<PurchaseOrderLine, $this> */

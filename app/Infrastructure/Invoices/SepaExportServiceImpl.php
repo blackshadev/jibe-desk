@@ -10,8 +10,11 @@ use App\Domain\Invoices\SepaConfiguration;
 use App\Domain\Invoices\SepaExport;
 use App\Domain\Invoices\SepaExportInvoice;
 use App\Domain\Invoices\SepaExportService;
+use App\Domain\PurchaseOrders\SepaExportPurchaseOrder;
+use Digitick\Sepa\Exception\InvalidArgumentException;
 use Digitick\Sepa\PaymentInformation;
 use Digitick\Sepa\TransferFile\Factory\TransferFileFacadeFactory;
+use DOMException;
 use Override;
 
 final readonly class SepaExportServiceImpl implements SepaExportService
@@ -21,6 +24,10 @@ final readonly class SepaExportServiceImpl implements SepaExportService
         private SepaConfiguration $configuration,
     ) {}
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws DOMException
+     */
     #[Override]
     public function export(SepaBatchId $batchId): SepaExport
     {
@@ -28,6 +35,9 @@ final readonly class SepaExportServiceImpl implements SepaExportService
 
         /** @var list<SepaExportInvoice> $invoices */
         $invoices = $this->batchRepository->getInvoicesForExport($batchId);
+
+        /** @var list<SepaExportPurchaseOrder> $purchaseOrders */
+        $purchaseOrders = $this->batchRepository->getPurchaseOrdersForExport($batchId);
 
         $paymentInfoId = 'payment-batch-' . $batchId->value;
         $uniqueMessageId = 'BATCH-' . $batchId->value;
@@ -94,6 +104,21 @@ final readonly class SepaExportServiceImpl implements SepaExportService
                     'remittanceInformation' => $invoice->invoiceNumber,
                 ]);
             }
+        }
+
+        foreach ($purchaseOrders as $purchaseOrder) {
+            if ($purchaseOrder->amountInCents() === 0) {
+                continue;
+            }
+
+            $hasCreditTransfer = true;
+            $credit->addTransfer($paymentInfoId, [
+                'amount' => $purchaseOrder->amountInCents(),
+                'creditorIban' => $purchaseOrder->creditorIban,
+                'creditorName' => $purchaseOrder->creditorName,
+                'endToEndId' => $purchaseOrder->reference(),
+                'remittanceInformation' => $purchaseOrder->reference(),
+            ]);
         }
 
         return new SepaExport(

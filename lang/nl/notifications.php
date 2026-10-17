@@ -23,6 +23,7 @@ return [
     'batch_created' => 'Factuurbatch succesvol aangemaakt',
     'batch_generated' => 'SEPA ronde succesvol gegenereerd',
     'invoices_added_to_batch' => 'Facturen succesvol toegevoegd aan batch',
+    'purchase_orders_added_to_batch' => 'Inkooporders toegevoegd aan batch',
     'invoice_removed_from_batch' => 'Factuur succesvol verwijderd uit batch',
     'batch_closed' => 'Factuurbatch succesvol gesloten',
     'batch_completed' => 'Factuurbatch succesvol afgerond',

@@ -47,6 +47,12 @@ final class SepaBatch extends Model
         return $this->hasMany(Invoice::class);
     }
 
+    /** @return HasMany<PurchaseOrder, $this> */
+    public function purchaseOrders(): HasMany
+    {
+        return $this->hasMany(PurchaseOrder::class);
+    }
+
     #[Override]
     protected function casts(): array
     {

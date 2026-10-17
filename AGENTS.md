@@ -159,7 +159,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 ## Domain Design
 
-Before working in a domain, read the context map and relevant context docs in `/.agents/docs/` — start with [CONTEXT-MAP.md](./.agents/docs/CONTEXT-MAP.md).
+Before working in a domain, read [docs/architecture.md](./docs/architecture.md) for the layering and bounded-context conventions.
 
 ## Coding standards
 
@@ -168,5 +168,7 @@ Review-enforced conventions live in [CODING_STANDARDS.md](./CODING_STANDARDS.md)
 ## Running commands
 
 All commands should be run through the `./Taskfile` script. For instance to run an Artisan command, use `./Taskfile artisan [command]`. To run a PHPUnit test, use `./Taskfile artisan test --filter=[testName]`. To run composer commands, use `./Taskfile composer [command]`.
+
+Static analysis and linting run inside the container with the correct memory limit — use `./Taskfile stan` (PHPStan across all three configs) and `./Taskfile lint` (`mago lint` + `stan`). Do not invoke `phpstan` or `mago` directly; the bare binaries crash on the default memory limit. `./Taskfile lint` is also the pre-commit hook.
 
 Taskfile ensures the command is run within the correct container.

@@ -14,8 +14,12 @@ use App\Domain\Invoices\SepaBatchRepository;
 use App\Domain\Invoices\SepaBatchStatus;
 use App\Domain\Invoices\SepaExportInvoice;
 use App\Domain\Members\MemberId;
+use App\Domain\PurchaseOrders\PurchaseOrderId;
+use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Domain\PurchaseOrders\SepaExportPurchaseOrder;
 use App\Domain\SharedKernel\CompoundPrice;
 use App\Models\Invoice;
+use App\Models\PurchaseOrder;
 use App\Models\SepaBatch;
 use Carbon\CarbonImmutable;
 use DateTimeInterface;
@@ -116,6 +120,24 @@ final class SepaBatchRepositoryDb implements SepaBatchRepository
             ),
             mandateDate: CarbonImmutable::parse($row->mandate_date),
         ))->all();
+    }
+
+    /** @return list<SepaExportPurchaseOrder> */
+    #[Override]
+    public function getPurchaseOrdersForExport(SepaBatchId $batchId): array
+    {
+        return PurchaseOrder::query()
+            ->where('sepa_batch_id', $batchId->value)
+            ->where('status', PurchaseOrderStatus::Pending)
+            ->with('lines')
+            ->get()
+            ->map(static fn (PurchaseOrder $purchaseOrder): SepaExportPurchaseOrder => new SepaExportPurchaseOrder(
+                purchaseOrderId: PurchaseOrderId::create($purchaseOrder->id),
+                creditorName: $purchaseOrder->creditor_name ?? '',
+                creditorIban: $purchaseOrder->creditor_iban ?? '',
+                total: $purchaseOrder->total,
+            ))
+            ->all();
     }
 
     #[Override]

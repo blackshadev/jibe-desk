@@ -9,12 +9,15 @@ use App\Domain\Invoices\SepaBatchId;
 use App\Domain\Invoices\SepaBatchService;
 use App\Domain\Invoices\SepaBatchStatus;
 use App\Domain\Invoices\SepaExportService;
+use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Resources\SepaBatches\Helpers\OnOpenSepaBatch;
 use App\Filament\Admin\Resources\SepaBatches\RelationManagers\SepaBatchInvoicesRelationManager;
+use App\Filament\Admin\Resources\SepaBatches\RelationManagers\SepaBatchPurchaseOrdersRelationManager;
 use App\Filament\Admin\Resources\SepaBatches\SepaBatchResource;
 use App\Filament\Admin\Resources\SepaBatches\Widgets\BatchStatsOverview;
 use App\Filament\Admin\Resources\SepaBatches\Widgets\SepaBatchGenerationProgress;
 use App\Models\Invoice;
+use App\Models\PurchaseOrder;
 use App\Models\SepaBatch;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -37,6 +40,7 @@ final class EditSepaBatch extends EditRecord
     {
         return [
             SepaBatchInvoicesRelationManager::make(),
+            SepaBatchPurchaseOrdersRelationManager::make(),
         ];
     }
 
@@ -83,6 +87,40 @@ final class EditSepaBatch extends EditRecord
                         ->update(['sepa_batch_id' => $record->id]);
                 })
                 ->successNotificationTitle(__('notifications.invoices_added_to_batch'))
+                ->after(static fn (EditRecord $livewire) => $livewire->dispatch('refreshInvoicesTable'))
+                ->visible(OnOpenSepaBatch::make(...)),
+
+            Action::make('addPurchaseOrders')
+                ->label(__('labels.add_purchase_orders'))
+                ->icon('heroicon-m-plus')
+                ->schema([
+                    Select::make('purchase_order_ids')
+                        ->label(__('labels.purchase_orders'))
+                        ->multiple()
+                        ->searchable()
+                        ->options(
+                            static fn () => PurchaseOrder::query()
+                                ->whereNull('sepa_batch_id')
+                                ->where('status', PurchaseOrderStatus::Pending)
+                                ->orderBy('date')
+                                ->get()
+                                ->mapWithKeys(static fn (PurchaseOrder $purchaseOrder) => [
+                                    $purchaseOrder->id => sprintf(
+                                        '[%s] %s — %s',
+                                        $purchaseOrder->date->format('Y-m-d'),
+                                        $purchaseOrder->description,
+                                        $purchaseOrder->total,
+                                    ),
+                                ]),
+                        ),
+                ])
+                ->requiresConfirmation()
+                ->action(static function (array $data, SepaBatch $record): void {
+                    PurchaseOrder::query()
+                        ->whereIn('id', $data['purchase_order_ids'])
+                        ->update(['sepa_batch_id' => $record->id]);
+                })
+                ->successNotificationTitle(__('notifications.purchase_orders_added_to_batch'))
                 ->after(static fn (EditRecord $livewire) => $livewire->dispatch('refreshInvoicesTable'))
                 ->visible(OnOpenSepaBatch::make(...)),
 

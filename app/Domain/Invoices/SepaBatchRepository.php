@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Invoices;
 
+use App\Domain\PurchaseOrders\SepaExportPurchaseOrder;
 use DateTimeInterface;
 use JeroenG\Autowire\Attribute\Autowire;
 
@@ -20,6 +21,9 @@ interface SepaBatchRepository
 
     /** @return list<SepaExportInvoice> */
     public function getInvoicesForExport(SepaBatchId $batchId): array;
+
+    /** @return list<SepaExportPurchaseOrder> */
+    public function getPurchaseOrdersForExport(SepaBatchId $batchId): array;
 
     public function markInvoicesAsPending(SepaBatchId $batchId): void;
 

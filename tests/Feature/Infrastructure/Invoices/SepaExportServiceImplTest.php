@@ -11,6 +11,8 @@ use App\Domain\Invoices\SepaBatchId;
 use App\Domain\Invoices\SepaConfiguration;
 use App\Domain\Invoices\SepaExportInvoice;
 use App\Domain\Members\MemberId;
+use App\Domain\PurchaseOrders\PurchaseOrderId;
+use App\Domain\PurchaseOrders\SepaExportPurchaseOrder;
 use App\Domain\SharedKernel\CompoundPrice;
 use App\Infrastructure\Invoices\SepaExportServiceImpl;
 use Carbon\CarbonImmutable;
@@ -47,6 +49,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
         $this->repo->expectsGetInvoicesForExport($batchId, [
             $this->createDebitInvoice(invoiceNumber: 'INV-001', amount: 25.00),
         ]);
+        $this->repo->expectsGetPurchaseOrdersForExport($batchId, []);
 
         $exportService = new SepaExportServiceImpl($this->repo->mock, $this->config);
         $sepa = $exportService->export($batchId);
@@ -69,6 +72,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
         $this->repo->expectsGetInvoicesForExport($batchId, [
             $this->createCreditInvoice(invoiceNumber: 'INV-002', amount: 25.00),
         ]);
+        $this->repo->expectsGetPurchaseOrdersForExport($batchId, []);
 
         $exportService = new SepaExportServiceImpl($this->repo->mock, $this->config);
         $sepa = $exportService->export($batchId);
@@ -92,6 +96,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
             $this->createDebitInvoice(invoiceNumber: 'INV-001', amount: 25.00),
             $this->createCreditInvoice(invoiceNumber: 'INV-002', amount: 25.00),
         ]);
+        $this->repo->expectsGetPurchaseOrdersForExport($batchId, []);
 
         $exportService = new SepaExportServiceImpl($this->repo->mock, $this->config);
         $sepa = $exportService->export($batchId);
@@ -115,6 +120,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
 
         $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
         $this->repo->expectsGetInvoicesForExport($batchId, []);
+        $this->repo->expectsGetPurchaseOrdersForExport($batchId, []);
 
         $exportService = new SepaExportServiceImpl($this->repo->mock, $this->config);
         $sepa = $exportService->export($batchId);
@@ -131,6 +137,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
         $this->repo->expectsGetInvoicesForExport($batchId, [
             $this->createDebitInvoice(invoiceNumber: 'INV-001', amount: 0.0),
         ]);
+        $this->repo->expectsGetPurchaseOrdersForExport($batchId, []);
 
         $exportService = new SepaExportServiceImpl($this->repo->mock, $this->config);
         $sepa = $exportService->export($batchId);
@@ -147,6 +154,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
         $this->repo->expectsGetInvoicesForExport($batchId, [
             $this->createDebitInvoice(invoiceNumber: 'INV-001', amount: 25.00),
         ]);
+        $this->repo->expectsGetPurchaseOrdersForExport($batchId, []);
 
         $exportService = new SepaExportServiceImpl($this->repo->mock, $this->config);
         $sepa = $exportService->export($batchId);
@@ -165,6 +173,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
         $this->repo->expectsGetInvoicesForExport($batchId, [
             $this->createCreditInvoice(invoiceNumber: 'INV-001', amount: 25.00),
         ]);
+        $this->repo->expectsGetPurchaseOrdersForExport($batchId, []);
 
         $exportService = new SepaExportServiceImpl($this->repo->mock, $this->config);
         $sepa = $exportService->export($batchId);
@@ -189,6 +198,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
                 mandateDate: '2025-06-01',
             ),
         ]);
+        $this->repo->expectsGetPurchaseOrdersForExport($batchId, []);
 
         $exportService = new SepaExportServiceImpl($this->repo->mock, $this->config);
         $sepa = $exportService->export($batchId);
@@ -234,6 +244,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
                 bic: 'RABONL2U',
             ),
         ]);
+        $this->repo->expectsGetPurchaseOrdersForExport($batchId, []);
 
         $exportService = new SepaExportServiceImpl($this->repo->mock, $this->config);
         $sepa = $exportService->export($batchId);
@@ -274,6 +285,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
             $this->createDebitInvoice(invoiceNumber: 'INV-001', amount: 10.00, recipientName: 'Alice', iban: 'NL91ABNA0417164300', bic: 'ABNANL2A'),
             $this->createDebitInvoice(invoiceNumber: 'INV-002', amount: 20.00, recipientName: 'Bob', iban: 'NL20RABO0123456789', bic: 'RABONL2U'),
         ]);
+        $this->repo->expectsGetPurchaseOrdersForExport($batchId, []);
 
         $exportService = new SepaExportServiceImpl($this->repo->mock, $this->config);
         $sepa = $exportService->export($batchId);
@@ -300,6 +312,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
             $this->createCreditInvoice(invoiceNumber: 'INV-CR-001', amount: 15.00, recipientName: 'Alice', iban: 'NL91ABNA0417164300', bic: 'ABNANL2A'),
             $this->createCreditInvoice(invoiceNumber: 'INV-CR-002', amount: 30.00, recipientName: 'Bob', iban: 'NL20RABO0123456789', bic: 'RABONL2U'),
         ]);
+        $this->repo->expectsGetPurchaseOrdersForExport($batchId, []);
 
         $exportService = new SepaExportServiceImpl($this->repo->mock, $this->config);
         $sepa = $exportService->export($batchId);
@@ -328,6 +341,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
             $this->createDebitInvoice(invoiceNumber: 'INV-002', amount: 50.00, recipientName: 'Another Debtor'),
             $this->createCreditInvoice(invoiceNumber: 'INV-CR-002', amount: 10.00, recipientName: 'Another Creditor'),
         ]);
+        $this->repo->expectsGetPurchaseOrdersForExport($batchId, []);
 
         $exportService = new SepaExportServiceImpl($this->repo->mock, $this->config);
         $sepa = $exportService->export($batchId);
@@ -347,6 +361,100 @@ final class SepaExportServiceImplTest extends FeatureTestCase
         static::assertCount(2, $creditXpath->query('//pain:CdtTrfTxInf'));
         static::assertStringContainsString('Creditor Member', $sepa->creditTransfers);
         static::assertStringContainsString('Another Creditor', $sepa->creditTransfers);
+    }
+
+    public function test_purchase_orders_are_emitted_into_credit_transfers(): void
+    {
+        $batchId = SepaBatchId::create(1);
+
+        $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
+        $this->repo->expectsGetInvoicesForExport($batchId, []);
+        $this->repo->expectsGetPurchaseOrdersForExport($batchId, [
+            new SepaExportPurchaseOrder(
+                purchaseOrderId: PurchaseOrderId::create(42),
+                creditorName: 'Supplier Ltd',
+                creditorIban: 'NL20RABO0123456789',
+                total: new CompoundPrice(90.00, 18.90),
+            ),
+        ]);
+
+        $exportService = new SepaExportServiceImpl($this->repo->mock, $this->config);
+        $sepa = $exportService->export($batchId);
+
+        $dom = new DOMDocument();
+        static::assertTrue($dom->loadXML($sepa->creditTransfers));
+
+        $xpath = new DOMXPath($dom);
+        $xpath->registerNamespace('pain', 'urn:iso:std:iso:20022:tech:xsd:pain.001.001.09');
+
+        static::assertCount(1, $xpath->query('//pain:CdtTrfTxInf'));
+
+        $transfer = $xpath->query('//pain:CdtTrfTxInf')->item(0);
+        static::assertNotNull($transfer);
+        static::assertStringContainsString('Supplier Ltd', $transfer->C14N());
+        static::assertStringContainsString('NL20RABO0123456789', $transfer->C14N());
+
+        $amountNode = $xpath->query('//pain:InstdAmt')->item(0);
+        static::assertNotNull($amountNode);
+        static::assertStringContainsString('90.00', $amountNode->nodeValue);
+
+        $endToEndNode = $xpath->query('//pain:EndToEndId')->item(0);
+        static::assertNotNull($endToEndNode);
+        static::assertSame('PO-42', $endToEndNode->nodeValue);
+
+        static::assertSame('', $sepa->directDebit);
+    }
+
+    public function test_purchase_orders_do_not_add_creditor_agent_element(): void
+    {
+        $batchId = SepaBatchId::create(1);
+
+        $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
+        $this->repo->expectsGetInvoicesForExport($batchId, []);
+        $this->repo->expectsGetPurchaseOrdersForExport($batchId, [
+            new SepaExportPurchaseOrder(
+                purchaseOrderId: PurchaseOrderId::create(7),
+                creditorName: 'Supplier Ltd',
+                creditorIban: 'NL20RABO0123456789',
+                total: new CompoundPrice(10.00, 2.10),
+            ),
+        ]);
+
+        $exportService = new SepaExportServiceImpl($this->repo->mock, $this->config);
+        $sepa = $exportService->export($batchId);
+
+        $dom = new DOMDocument();
+        static::assertTrue($dom->loadXML($sepa->creditTransfers));
+
+        $xpath = new DOMXPath($dom);
+        $xpath->registerNamespace('pain', 'urn:iso:std:iso:20022:tech:xsd:pain.001.001.09');
+
+        $transfer = $xpath->query('//pain:CdtTrfTxInf')->item(0);
+        static::assertNotNull($transfer);
+        static::assertCount(0, $xpath->query('//pain:CdtTrfTxInf//pain:CdtrAgt//pain:BICFI'));
+        static::assertStringContainsString('NOTPROVIDED', $transfer->C14N());
+    }
+
+    public function test_zero_amount_purchase_orders_are_skipped(): void
+    {
+        $batchId = SepaBatchId::create(1);
+
+        $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
+        $this->repo->expectsGetInvoicesForExport($batchId, []);
+        $this->repo->expectsGetPurchaseOrdersForExport($batchId, [
+            new SepaExportPurchaseOrder(
+                purchaseOrderId: PurchaseOrderId::create(9),
+                creditorName: 'Supplier Ltd',
+                creditorIban: 'NL20RABO0123456789',
+                total: new CompoundPrice(0.0, 0.0),
+            ),
+        ]);
+
+        $exportService = new SepaExportServiceImpl($this->repo->mock, $this->config);
+        $sepa = $exportService->export($batchId);
+
+        static::assertSame('', $sepa->directDebit);
+        static::assertSame('', $sepa->creditTransfers);
     }
 
     private function createDebitInvoice(

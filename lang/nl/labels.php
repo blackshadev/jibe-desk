@@ -173,6 +173,7 @@ return [
     'invoice_count' => 'Aantal facturen',
     'open_total' => 'Openstaand bedrag',
     'add_invoices' => 'Facturen toevoegen',
+    'add_purchase_orders' => 'Inkooporders toevoegen',
     'close_batch' => 'SEPA ronde sluiten',
     'complete_batch' => 'SEPA ronde afronden',
     'generate_sepa_batch' => 'SEPA ronde genereren',

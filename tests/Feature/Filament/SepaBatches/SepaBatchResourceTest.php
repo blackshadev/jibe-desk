@@ -7,11 +7,14 @@ namespace Tests\Feature\Filament\SepaBatches;
 use App\Domain\Authorization\ResourcePermission;
 use App\Domain\Invoices\InvoiceStatus;
 use App\Domain\Invoices\SepaBatchStatus;
+use App\Domain\PurchaseOrders\PurchaseOrderStatus;
+use App\Filament\Admin\Resources\SepaBatches\Pages\EditSepaBatch;
 use App\Filament\Admin\Resources\SepaBatches\Pages\ListSepaBatches;
 use App\Filament\Admin\Resources\SepaBatches\SepaBatchResource;
 use App\Filament\Admin\Resources\SepaBatches\Widgets\BatchStatsOverview;
 use App\Filament\Admin\Resources\SepaBatches\Widgets\SepaBatchGenerationProgress;
 use App\Models\Invoice;
+use App\Models\PurchaseOrder;
 use App\Models\SepaBatch;
 use Livewire\Livewire;
 use Tests\Concerns\WithAuthorizedUser;
@@ -233,5 +236,46 @@ final class SepaBatchResourceTest extends FeatureTestCase
             ->assertOk()
             ->assertSeeLivewire(BatchStatsOverview::class)
             ->assertDontSeeLivewire(SepaBatchGenerationProgress::class);
+    }
+
+    public function test_add_purchase_orders_action_is_visible_on_open_batch(): void
+    {
+        $this->withAuthorizedUser();
+
+        $batch = SepaBatch::factory()->create(['status' => SepaBatchStatus::Open]);
+
+        Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
+            ->assertActionVisible('addPurchaseOrders');
+    }
+
+    public function test_add_purchase_orders_action_is_hidden_on_pending_batch(): void
+    {
+        $this->withAuthorizedUser();
+
+        $batch = SepaBatch::factory()->create(['status' => SepaBatchStatus::Pending]);
+
+        Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
+            ->assertActionHidden('addPurchaseOrders');
+    }
+
+    public function test_add_purchase_orders_action_attaches_purchase_orders_to_batch(): void
+    {
+        $this->withAuthorizedUser();
+
+        $batch = SepaBatch::factory()->create(['status' => SepaBatchStatus::Open]);
+        $purchaseOrder = PurchaseOrder::factory()->create([
+            'status' => PurchaseOrderStatus::Pending,
+            'sepa_batch_id' => null,
+        ]);
+
+        Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
+            ->callAction('addPurchaseOrders', data: [
+                'purchase_order_ids' => [$purchaseOrder->id],
+            ]);
+
+        $this->assertDatabaseHas('purchase_orders', [
+            'id' => $purchaseOrder->id,
+            'sepa_batch_id' => $batch->id,
+        ]);
     }
 }

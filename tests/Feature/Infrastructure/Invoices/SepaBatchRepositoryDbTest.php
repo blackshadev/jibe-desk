@@ -8,11 +8,14 @@ use App\Domain\Invoices\InvoiceId;
 use App\Domain\Invoices\InvoiceStatus;
 use App\Domain\Invoices\SepaBatchId;
 use App\Domain\Invoices\SepaBatchStatus;
+use App\Domain\PurchaseOrders\PurchaseOrderStatus;
 use App\Infrastructure\Invoices\SepaBatchRepositoryDb;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;
 use App\Models\Member;
 use App\Models\PaymentInformation;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderLine;
 use App\Models\SepaBatch;
 use Carbon\CarbonImmutable;
 use DomainException;
@@ -222,6 +225,90 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
             (int) round($result[0]->total->price * 100),
             $result[0]->amountInCents(),
         );
+    }
+
+    public function test_get_purchase_orders_for_export(): void
+    {
+        $batch = SepaBatch::factory()->create();
+        $otherBatch = SepaBatch::factory()->create();
+
+        $purchaseOrder = PurchaseOrder::factory()->create([
+            'creditor_name' => 'Supplier Ltd',
+            'creditor_iban' => 'NL20RABO0123456789',
+            'status' => PurchaseOrderStatus::Pending,
+            'sepa_batch_id' => $batch->id,
+        ]);
+        PurchaseOrderLine::factory()->create([
+            'purchase_order_id' => $purchaseOrder->id,
+            'price' => 100.00,
+            'price_vat' => 21.00,
+        ]);
+
+        PurchaseOrder::factory()->create([
+            'status' => PurchaseOrderStatus::Pending,
+            'sepa_batch_id' => $otherBatch->id,
+        ]);
+
+        PurchaseOrder::factory()->create([
+            'status' => PurchaseOrderStatus::Pending,
+            'sepa_batch_id' => null,
+        ]);
+
+        $result = $this->repository->getPurchaseOrdersForExport(SepaBatchId::create($batch->id));
+
+        static::assertCount(1, $result);
+        static::assertSame($purchaseOrder->id, $result[0]->purchaseOrderId->value);
+        static::assertSame('Supplier Ltd', $result[0]->creditorName);
+        static::assertSame('NL20RABO0123456789', $result[0]->creditorIban);
+        static::assertSame('PO-' . $purchaseOrder->id, $result[0]->reference());
+        static::assertSame(10_000, $result[0]->amountInCents());
+    }
+
+    public function test_get_purchase_orders_for_export_excludes_non_pending_purchase_orders(): void
+    {
+        $batch = SepaBatch::factory()->create();
+
+        foreach ([PurchaseOrderStatus::Declined, PurchaseOrderStatus::Paid, PurchaseOrderStatus::Open] as $status) {
+            $purchaseOrder = PurchaseOrder::factory()->create([
+                'status' => $status,
+                'sepa_batch_id' => $batch->id,
+            ]);
+            PurchaseOrderLine::factory()->create([
+                'purchase_order_id' => $purchaseOrder->id,
+                'price' => 50.00,
+            ]);
+        }
+
+        $result = $this->repository->getPurchaseOrdersForExport(SepaBatchId::create($batch->id));
+
+        static::assertSame([], $result);
+    }
+
+    public function test_get_purchase_orders_for_export_uses_net_total(): void
+    {
+        $batch = SepaBatch::factory()->create();
+
+        $purchaseOrder = PurchaseOrder::factory()->create([
+            'creditor_name' => 'Supplier Ltd',
+            'creditor_iban' => 'NL20RABO0123456789',
+            'status' => PurchaseOrderStatus::Pending,
+            'sepa_batch_id' => $batch->id,
+        ]);
+        PurchaseOrderLine::factory()->create([
+            'purchase_order_id' => $purchaseOrder->id,
+            'price' => 60.00,
+            'price_vat' => 12.60,
+        ]);
+        PurchaseOrderLine::factory()->create([
+            'purchase_order_id' => $purchaseOrder->id,
+            'price' => 30.00,
+            'price_vat' => 6.30,
+        ]);
+
+        $result = $this->repository->getPurchaseOrdersForExport(SepaBatchId::create($batch->id));
+
+        static::assertCount(1, $result);
+        static::assertSame(9000, $result[0]->amountInCents());
     }
 
     public function test_get_pending_invoices_for_batch_returns_pending_invoices(): void
