@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\SepaBatches\RelationManagers;
 
-use App\Domain\Billing\Invoices\InvoiceId;
-use App\Domain\Billing\Invoices\InvoiceIdList;
-use App\Domain\Billing\Invoices\InvoiceService;
 use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Filament\Admin\Labels\InvoiceStatusLabels;
+use App\Filament\Admin\Resources\Invoices\Actions\InvoiceStateActions;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
-use App\Filament\Admin\Resources\SepaBatches\Helpers\OnPendingInvoice;
 use App\Filament\Admin\Utils\ResourceRouteHelper;
 use App\Models\Invoice;
 use App\Models\SepaBatch;
@@ -51,33 +48,7 @@ final class SepaBatchInvoicesRelationManager extends RelationManager
             ])
             ->recordUrl(ResourceRouteHelper::viewOrEdit(InvoiceResource::class))
             ->recordActions([
-                Action::make('markAsPaid')
-                    ->label(__('labels.mark_as_paid'))
-                    ->icon('heroicon-m-banknotes')
-                    ->requiresConfirmation()
-                    ->modalDescription(__('labels.manual_mark_paid_warning'))
-                    ->modalIcon('heroicon-m-exclamation-triangle')
-                    ->modalIconColor('danger')
-                    ->visible(OnPendingInvoice::make(...))
-                    ->action(static function (Invoice $record, InvoiceService $invoiceService): void {
-                        $invoiceService->markAsPaid(new InvoiceIdList([InvoiceId::create($record->id)]));
-                    })
-                    ->after(static fn (RelationManager $livewire) => $livewire->dispatch('refreshInvoicesTable')),
-
-                Action::make('markAsDeclined')
-                    ->label(__('labels.mark_as_declined'))
-                    ->icon('heroicon-m-x-circle')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->modalDescription(__('labels.manual_mark_declined_warning'))
-                    ->modalIcon('heroicon-m-exclamation-triangle')
-                    ->modalIconColor('danger')
-                    ->visible(OnPendingInvoice::make(...))
-                    ->action(static function (Invoice $record, InvoiceService $invoiceService): void {
-                        $invoiceService->markAsDeclined(new InvoiceIdList([InvoiceId::create($record->id)]));
-                    })
-                    ->after(static fn (RelationManager $livewire) => $livewire->dispatch('refreshInvoicesTable')),
-
+                ...InvoiceStateActions::make(),
                 Action::make('removeFromBatch')
                     ->label(__('labels.remove_from_batch'))
                     ->icon('heroicon-m-minus-circle')

@@ -6,6 +6,9 @@ namespace App\Filament\Admin\Resources\SepaBatches\RelationManagers;
 
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Labels\PurchaseOrderStatusLabels;
+use App\Filament\Admin\Resources\PurchaseOrders\Actions\PurchaseOrderStateActions;
+use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
+use App\Filament\Admin\Utils\ResourceRouteHelper;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -40,7 +43,11 @@ final class SepaBatchPurchaseOrdersRelationManager extends RelationManager
                 TextColumn::make('status')
                     ->label(__('labels.status'))
                     ->formatStateUsing(static fn (PurchaseOrderStatus $state) => PurchaseOrderStatusLabels::options()[$state->value]),
-            ]);
+            ])
+            ->recordActions([
+                ...PurchaseOrderStateActions::make()
+            ])
+            ->recordUrl(ResourceRouteHelper::viewOrEdit(PurchaseOrderResource::class));
     }
 
     #[Override]

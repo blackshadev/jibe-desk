@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\Invoices\Pages;
 
 use App\Filament\Admin\Resources\Invoices\Actions\CreateCreditAction;
-use App\Filament\Admin\Resources\Invoices\Actions\MarkAsDeclinedAction;
-use App\Filament\Admin\Resources\Invoices\Actions\MarkAsPaidAction;
-use App\Filament\Admin\Resources\Invoices\Actions\MarkAsPendingAction;
+use App\Filament\Admin\Resources\Invoices\Actions\InvoiceStateActions;
 use App\Filament\Admin\Resources\Invoices\Actions\ResendInvoiceEmailAction;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceBankTransactionsRelationManager;
@@ -38,9 +36,7 @@ final class ViewInvoice extends ViewRecord
     {
         return [
             ActionGroup::make([
-                MarkAsPendingAction::make(),
-                MarkAsPaidAction::make(),
-                MarkAsDeclinedAction::make(),
+                ...InvoiceStateActions::make(),
                 ResendInvoiceEmailAction::make(),
                 CreateCreditAction::make(),
                 DeleteAction::make(),
