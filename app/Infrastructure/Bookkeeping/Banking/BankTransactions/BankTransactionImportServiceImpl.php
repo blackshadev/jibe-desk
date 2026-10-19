@@ -23,7 +23,6 @@ use Kingsquare\Banking\Transaction;
 use Kingsquare\Parser\Banking\Mt940;
 use Override;
 
-/** @mago-expect lint:cyclomatic-complexity */
 final readonly class BankTransactionImportServiceImpl implements BankTransactionImportService
 {
     public function __construct(

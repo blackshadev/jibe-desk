@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Bookkeeping\BookkeepingRecords;
 
-use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
-use App\Domain\Bookkeeping\BookkeepingRecords\BookkeepingRecordRepository;
-use App\Domain\Bookkeeping\CostCenters\CostCenterId;
-use App\Domain\Bookkeeping\CostCenters\CostCenterYearResult;
 use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Invoices\InvoiceStatus;
@@ -15,6 +11,10 @@ use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderIdList;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
+use App\Domain\Bookkeeping\BookkeepingRecords\BookkeepingRecordRepository;
+use App\Domain\Bookkeeping\CostCenters\CostCenterId;
+use App\Domain\Bookkeeping\CostCenters\CostCenterYearResult;
 use App\Domain\SharedKernel\CompoundPrice;
 use App\Models\BookkeepingRecord;
 use App\Models\Invoice;

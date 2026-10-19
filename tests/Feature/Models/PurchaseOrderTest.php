@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Models;
 
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderApprovalStatus;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Models\Member;
 use App\Models\PurchaseOrder;
@@ -83,5 +84,12 @@ final class PurchaseOrderTest extends FeatureTestCase
 
         static::assertTrue($purchaseOrder->member->is($member));
         static::assertTrue($member->purchaseOrders->contains($purchaseOrder));
+    }
+
+    public function test_approval_status_is_cast_to_the_approval_status_enum(): void
+    {
+        $purchaseOrder = PurchaseOrder::factory()->accepted()->createQuietly();
+
+        static::assertSame(PurchaseOrderApprovalStatus::Accepted, $purchaseOrder->approval_status);
     }
 }

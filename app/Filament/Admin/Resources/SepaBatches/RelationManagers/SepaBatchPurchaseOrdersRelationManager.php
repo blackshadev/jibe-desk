@@ -45,7 +45,7 @@ final class SepaBatchPurchaseOrdersRelationManager extends RelationManager
                     ->formatStateUsing(static fn (PurchaseOrderStatus $state) => PurchaseOrderStatusLabels::options()[$state->value]),
             ])
             ->recordActions([
-                ...PurchaseOrderStateActions::make()
+                ...PurchaseOrderStateActions::make(),
             ])
             ->recordUrl(ResourceRouteHelper::viewOrEdit(PurchaseOrderResource::class));
     }

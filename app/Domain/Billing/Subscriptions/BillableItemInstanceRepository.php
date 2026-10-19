@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Domain\Billing\Subscriptions;
 
+use App\Domain\Billing\BillableItems\BillableItemId;
+use App\Domain\Billing\BillableItems\BillableItemIdList;
 use App\Domain\Members\MemberId;
 use DateTimeInterface;
 use JeroenG\Autowire\Attribute\Autowire;
-use App\Domain\Billing\BillableItems\BillableItemId;
-use App\Domain\Billing\BillableItems\BillableItemIdList;
 
 #[Autowire]
 interface BillableItemInstanceRepository

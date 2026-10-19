@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\PurchaseOrders\Pages;
 
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderApprovalStatus;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Models\PurchaseOrder;
@@ -23,6 +24,11 @@ final class ListPurchaseOrders extends ListRecords
     {
         return [
             'all' => Tabs\Tab::make(__('labels.all')),
+            'unapproved' => Tabs\Tab::make(__('labels.purchase_order_status.unapproved'))
+                ->badge(PurchaseOrder::query()->where('approval_status', PurchaseOrderApprovalStatus::Pending)->count())
+                ->modifyQueryUsing(
+                    static fn (Builder $query) => $query->where('approval_status', PurchaseOrderApprovalStatus::Pending),
+                ),
             'open' => Tabs\Tab::make(__('labels.purchase_order_status.open'))
                 ->badge(PurchaseOrder::query()->where('status', PurchaseOrderStatus::Open)->count())
                 ->modifyQueryUsing(
@@ -32,14 +38,6 @@ final class ListPurchaseOrders extends ListRecords
                 ->badge(PurchaseOrder::query()->where('status', PurchaseOrderStatus::Pending)->count())
                 ->modifyQueryUsing(
                     static fn (Builder $query) => $query->where('status', PurchaseOrderStatus::Pending),
-                ),
-            'paid' => Tabs\Tab::make(__('labels.purchase_order_status.paid'))
-                ->modifyQueryUsing(
-                    static fn (Builder $query) => $query->where('status', PurchaseOrderStatus::Paid),
-                ),
-            'declined' => Tabs\Tab::make(__('labels.purchase_order_status.declined'))
-                ->modifyQueryUsing(
-                    static fn (Builder $query) => $query->where('status', PurchaseOrderStatus::Declined),
                 ),
         ];
     }

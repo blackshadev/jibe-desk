@@ -16,11 +16,25 @@ final readonly class PurchaseOrderServiceImpl implements PurchaseOrderService
     ) {}
 
     #[Override]
-    public function markAsApproved(PurchaseOrderIdList $ids): void
+    public function acceptApproval(PurchaseOrderIdList $ids): void
     {
         $this->completenessService->findProblems($ids)->assertComplete();
 
-        $this->repository->markAsApproved($ids);
+        $this->repository->markAsApprovalAccepted($ids);
+    }
+
+    #[Override]
+    public function declineApproval(PurchaseOrderIdList $ids, ?string $reason = null): void
+    {
+        $this->repository->markAsApprovalDeclined($ids, $reason);
+    }
+
+    #[Override]
+    public function markAsPaymentPending(PurchaseOrderIdList $ids): void
+    {
+        $this->completenessService->findProblems($ids)->assertComplete();
+
+        $this->repository->markAsPaymentPending($ids);
         $this->bookkeepingRepository->createForPurchaseOrder($ids);
     }
 
@@ -40,8 +54,8 @@ final readonly class PurchaseOrderServiceImpl implements PurchaseOrderService
     }
 
     #[Override]
-    public function markAsDeclined(PurchaseOrderIdList $ids, ?string $reason = null): void
+    public function markAsPaymentDeclined(PurchaseOrderIdList $ids, ?string $reason = null): void
     {
-        $this->repository->markAsDeclined($ids, $reason);
+        $this->repository->markAsPaymentDeclined($ids, $reason);
     }
 }

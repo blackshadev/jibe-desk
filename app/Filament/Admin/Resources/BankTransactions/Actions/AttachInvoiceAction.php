@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BankTransactions\Actions;
 
+use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionService;
-use App\Domain\Billing\Invoices\InvoiceId;
 use App\Filament\Admin\Resources\BankTransactions\Helpers\GetTransaction;
 use App\Filament\Admin\Resources\BankTransactions\Helpers\IsOpen;
 use App\Models\BankStatement;

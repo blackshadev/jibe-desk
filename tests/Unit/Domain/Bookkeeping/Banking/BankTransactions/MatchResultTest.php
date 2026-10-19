@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Bookkeeping\Banking\BankTransactions;
 
-use App\Domain\Bookkeeping\Banking\BankTransactions\MatchResult;
 use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
+use App\Domain\Bookkeeping\Banking\BankTransactions\MatchResult;
 use Tests\UnitTestCase;
 
 final class MatchResultTest extends UnitTestCase

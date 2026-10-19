@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domain\Billing\Payment;
 
+use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\SharedKernel\CompoundPrice;
 use DateTimeInterface;
-use App\Domain\Billing\Invoices\InvoiceId;
 
 final readonly class SepaExportInvoice
 {

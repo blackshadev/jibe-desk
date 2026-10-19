@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Billing\Payment;
 
-use App\Domain\SharedKernel\CompoundPrice;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
+use App\Domain\SharedKernel\CompoundPrice;
 
 final readonly class SepaExportPurchaseOrder
 {

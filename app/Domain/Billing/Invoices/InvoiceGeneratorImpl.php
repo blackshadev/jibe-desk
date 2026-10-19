@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domain\Billing\Invoices;
 
+use App\Domain\Billing\Payment\SepaBatchRepository;
 use App\Domain\Billing\Subscriptions\BillableItemsViewRepository;
 use Override;
-use App\Domain\Billing\Payment\SepaBatchRepository;
 
 final readonly class InvoiceGeneratorImpl implements InvoiceGenerator
 {

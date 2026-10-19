@@ -13,10 +13,11 @@ use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Billing\Payment\SepaBatchRepository;
 use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Domain\Billing\Payment\SepaExportInvoice;
-use App\Domain\Members\MemberId;
+use App\Domain\Billing\Payment\SepaExportPurchaseOrder;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderApprovalStatus;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
-use App\Domain\Billing\Payment\SepaExportPurchaseOrder;
+use App\Domain\Members\MemberId;
 use App\Domain\SharedKernel\CompoundPrice;
 use App\Models\Invoice;
 use App\Models\PurchaseOrder;
@@ -61,14 +62,25 @@ final class SepaBatchRepositoryDb implements SepaBatchRepository
     {
         $month = new CarbonImmutable(SepaBatch::findOrFail($batchId->value)->invoice_date);
 
-        return PurchaseOrder::query()
+        $ids = PurchaseOrder::query()
             ->whereNull('sepa_batch_id')
-            ->where('status', PurchaseOrderStatus::Pending)
+            ->where('approval_status', PurchaseOrderApprovalStatus::Accepted)
+            ->where('status', PurchaseOrderStatus::Open)
             ->whereBetween('date', [
                 $month->subMonth()->startOfMonth(),
                 $month->endOfMonth(),
             ])
-            ->update(['sepa_batch_id' => $batchId->value]);
+            ->pluck('id')
+            ->all();
+
+        PurchaseOrder::query()
+            ->whereIn('id', $ids)
+            ->update([
+                'sepa_batch_id' => $batchId->value,
+                'status' => PurchaseOrderStatus::Pending,
+            ]);
+
+        return count($ids);
     }
 
     #[Override]

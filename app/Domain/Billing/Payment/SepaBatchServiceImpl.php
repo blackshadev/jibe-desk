@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Billing\Payment;
 
-use App\Domain\Bookkeeping\BookkeepingRecords\BookkeepingRecordRepository;
 use App\Domain\Billing\Payment\Events\SepaBatchClosed;
+use App\Domain\Bookkeeping\BookkeepingRecords\BookkeepingRecordRepository;
 use DateTimeInterface;
 use Illuminate\Contracts\Events\Dispatcher;
 use Override;

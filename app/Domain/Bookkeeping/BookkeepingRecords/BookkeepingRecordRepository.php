@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Domain\Bookkeeping\BookkeepingRecords;
 
-use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
 use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderIdList;
-use JeroenG\Autowire\Attribute\Autowire;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
 use App\Domain\Bookkeeping\CostCenters\CostCenterYearResult;
+use JeroenG\Autowire\Attribute\Autowire;
 
 #[Autowire]
 interface BookkeepingRecordRepository

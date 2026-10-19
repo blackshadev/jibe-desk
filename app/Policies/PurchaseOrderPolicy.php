@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderApprovalStatus;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Models\PurchaseOrder;
 use App\Models\User;
@@ -59,9 +60,38 @@ final class PurchaseOrderPolicy extends ResourcePolicy
         return $user->can('delete_purchase_orders');
     }
 
-    public function markAsApproved(User $user, Model $purchaseOrder): bool
+    public function acceptApproval(User $user, Model $purchaseOrder): bool
     {
         Assert::isInstanceOf($purchaseOrder, PurchaseOrder::class);
+        if ($purchaseOrder->approval_status === PurchaseOrderApprovalStatus::Accepted) {
+            return false;
+        }
+        if (!in_array($purchaseOrder->status, [PurchaseOrderStatus::Open, PurchaseOrderStatus::Cancelled], true)) {
+            return false;
+        }
+
+        return $user->can('update_purchase_orders');
+    }
+
+    public function declineApproval(User $user, Model $purchaseOrder): bool
+    {
+        Assert::isInstanceOf($purchaseOrder, PurchaseOrder::class);
+        if ($purchaseOrder->approval_status === PurchaseOrderApprovalStatus::Declined) {
+            return false;
+        }
+        if (!in_array($purchaseOrder->status, [PurchaseOrderStatus::Open, PurchaseOrderStatus::Cancelled], true)) {
+            return false;
+        }
+
+        return $user->can('update_purchase_orders');
+    }
+
+    public function markAsPaymentPending(User $user, Model $purchaseOrder): bool
+    {
+        Assert::isInstanceOf($purchaseOrder, PurchaseOrder::class);
+        if ($purchaseOrder->approval_status !== PurchaseOrderApprovalStatus::Accepted) {
+            return false;
+        }
         if ($purchaseOrder->status !== PurchaseOrderStatus::Open) {
             return false;
         }
@@ -90,17 +120,27 @@ final class PurchaseOrderPolicy extends ResourcePolicy
     public function attachBankTransaction(User $user, Model $purchaseOrder): bool
     {
         Assert::isInstanceOf($purchaseOrder, PurchaseOrder::class);
-        if ($purchaseOrder->status !== PurchaseOrderStatus::Pending) {
+        if (!in_array($purchaseOrder->status, [PurchaseOrderStatus::Open, PurchaseOrderStatus::Pending], true)) {
             return false;
         }
 
         return $user->can('update_purchase_orders') && $user->can('view_bank_transactions');
     }
 
-    public function markAsDeclined(User $user, Model $purchaseOrder): bool
+    public function markAsPaymentDeclined(User $user, Model $purchaseOrder): bool
     {
         Assert::isInstanceOf($purchaseOrder, PurchaseOrder::class);
-        if ($purchaseOrder->status === PurchaseOrderStatus::Paid || $purchaseOrder->status === PurchaseOrderStatus::Declined) {
+        if (!in_array($purchaseOrder->status, [PurchaseOrderStatus::Pending, PurchaseOrderStatus::Paid], true)) {
+            return false;
+        }
+
+        return $user->can('update_purchase_orders');
+    }
+
+    public function reopenPayment(User $user, Model $purchaseOrder): bool
+    {
+        Assert::isInstanceOf($purchaseOrder, PurchaseOrder::class);
+        if (!in_array($purchaseOrder->status, [PurchaseOrderStatus::Declined, PurchaseOrderStatus::Cancelled], true)) {
             return false;
         }
 

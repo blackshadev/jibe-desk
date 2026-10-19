@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domain\Billing\Payment;
 
+use App\Domain\Billing\Invoices\InvoiceId;
 use DateTimeInterface;
 use JeroenG\Autowire\Attribute\Autowire;
-use App\Domain\Billing\Invoices\InvoiceId;
 
 #[Autowire]
 interface SepaBatchRepository

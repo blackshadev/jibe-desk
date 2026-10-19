@@ -78,7 +78,7 @@ final readonly class BankTransactionServiceImpl implements BankTransactionServic
         $this->invoiceService->markAsDeclined($invoiceIds);
 
         $purchaseOrderIds = $this->repository->getAttachedPurchaseOrderIds($originalId);
-        $this->purchaseOrderService->markAsDeclined($purchaseOrderIds, null);
+        $this->purchaseOrderService->markAsPaymentDeclined($purchaseOrderIds, null);
 
         $this->repository->markAsResolved($reversalId);
         $this->repository->markAsResolved($originalId);
@@ -91,7 +91,7 @@ final readonly class BankTransactionServiceImpl implements BankTransactionServic
         $this->invoiceService->markAsPending($invoiceIds);
 
         $purchaseOrderIds = $this->repository->getAttachedPurchaseOrderIds($reversalId);
-        $this->purchaseOrderService->markAsApproved($purchaseOrderIds);
+        $this->purchaseOrderService->markAsPaid($purchaseOrderIds);
 
         $this->repository->unlinkReversal($reversalId);
     }

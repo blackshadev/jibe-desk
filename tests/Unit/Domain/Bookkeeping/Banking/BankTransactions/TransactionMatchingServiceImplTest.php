@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Bookkeeping\Banking\BankTransactions;
 
+use App\Domain\Billing\Invoices\InvoiceId;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
 use App\Domain\Bookkeeping\Banking\BankTransactions\MatchCriteria;
 use App\Domain\Bookkeeping\Banking\BankTransactions\TransactionMatchingServiceImpl;
-use App\Domain\Billing\Invoices\InvoiceId;
-use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
 use DateTimeImmutable;
 use Override;
-use Tests\Unit\Domain\Bookkeeping\Banking\BankAccounts\BankAccountRepositoryExpectation;
 use Tests\Unit\Domain\Billing\Invoices\InvoiceMatchingRepositoryExpectation;
 use Tests\Unit\Domain\Billing\PurchaseOrders\PurchaseOrderRepositoryExpectation;
+use Tests\Unit\Domain\Bookkeeping\Banking\BankAccounts\BankAccountRepositoryExpectation;
 use Tests\UnitTestCase;
 
 final class TransactionMatchingServiceImplTest extends UnitTestCase

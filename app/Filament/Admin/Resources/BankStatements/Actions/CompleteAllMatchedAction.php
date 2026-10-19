@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\BankStatements\Actions;
 
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderIncompleteException;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionService;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionStatus;
-use App\Domain\Billing\PurchaseOrders\PurchaseOrderIncompleteException;
 use App\Filament\Admin\Labels\PurchaseOrderProblemLabels;
 use App\Models\BankStatement;
 use Filament\Actions\Action;

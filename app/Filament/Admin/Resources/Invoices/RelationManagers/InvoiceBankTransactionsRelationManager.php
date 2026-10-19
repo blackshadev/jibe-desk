@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Invoices\RelationManagers;
 
+use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionRepository;
-use App\Domain\Billing\Invoices\InvoiceId;
 use App\Filament\Admin\Resources\BankTransactions\Actions\AttachBankTransactionAction;
 use App\Filament\Admin\Resources\BankTransactions\BankTransactionResource;
 use App\Filament\Admin\Resources\BankTransactions\Helpers\IsOpen;

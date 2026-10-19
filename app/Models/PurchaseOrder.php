@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderApprovalStatus;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Domain\SharedKernel\CompoundPrice;
 use App\Observers\PurchaseOrderObserver;
@@ -23,6 +24,7 @@ use Override;
 
 /**
  * @property PurchaseOrderStatus $status
+ * @property PurchaseOrderApprovalStatus $approval_status
  * @property DateTimeInterface $date
  * @property ?string $notes
  * @property ?string $declined_reason
@@ -72,6 +74,7 @@ final class PurchaseOrder extends Model
         return [
             'date' => 'datetime',
             'status' => PurchaseOrderStatus::class,
+            'approval_status' => PurchaseOrderApprovalStatus::class,
             'amount' => 'decimal:3',
         ];
     }

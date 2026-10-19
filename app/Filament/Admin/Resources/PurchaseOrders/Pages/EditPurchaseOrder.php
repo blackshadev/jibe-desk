@@ -57,5 +57,7 @@ final class EditPurchaseOrder extends EditRecord
     #[On('refresh')]
     public function refresh(): void
     {
+        $this->record->refresh();
+        $this->fillForm();
     }
 }

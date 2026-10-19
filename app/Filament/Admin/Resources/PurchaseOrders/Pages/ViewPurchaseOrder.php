@@ -45,11 +45,10 @@ final class ViewPurchaseOrder extends ViewRecord
 
     #[Override]
     #[On('refresh')]
-    #[On('markedAsPaid')]
-    #[On('markedAsPending')]
-    #[On('markedAsDeclined')]
     public function refresh(): void
     {
+        $this->record->refresh();
+        $this->fillForm();
     }
 
     #[Override]

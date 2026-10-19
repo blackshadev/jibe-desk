@@ -8,6 +8,7 @@ use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Billing\Payment\SepaBatchStatus;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderApprovalStatus;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Infrastructure\Billing\Payment\SepaBatchRepositoryDb;
 use App\Models\Invoice;
@@ -106,6 +107,55 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
                 'sepa_batch_id' => $batch->id,
             ]);
         }
+    }
+
+    public function test_add_open_purchase_orders_from_batch_month_attaches_accepted_open_orders(): void
+    {
+        $batch = SepaBatch::factory()->create(['invoice_date' => '2026-05-13']);
+
+        $purchaseOrders = PurchaseOrder::factory()
+            ->accepted()
+            ->createManyQuietly([
+                ['date' => '2026-04-10'],
+                ['date' => '2026-05-10'],
+            ]);
+
+        $attachedCount = $this->repository->addOpenPurchaseOrdersFromBatchMonth(SepaBatchId::create($batch->id));
+
+        static::assertSame(2, $attachedCount);
+
+        foreach ($purchaseOrders as $purchaseOrder) {
+            $purchaseOrder->refresh();
+            static::assertSame($batch->id, $purchaseOrder->sepa_batch_id);
+            static::assertSame(PurchaseOrderStatus::Pending, $purchaseOrder->status);
+            static::assertSame(PurchaseOrderApprovalStatus::Accepted, $purchaseOrder->approval_status);
+        }
+    }
+
+    public function test_add_open_purchase_orders_from_batch_month_ignores_ineligible_purchase_orders(): void
+    {
+        $batch = SepaBatch::factory()->create(['invoice_date' => '2026-05-13']);
+        $otherBatch = SepaBatch::factory()->create();
+
+        $notAccepted = PurchaseOrder::factory()->open()->createQuietly(['date' => '2026-04-10']);
+        $alreadyPending = PurchaseOrder::factory()->pending()->createQuietly(['date' => '2026-04-10']);
+        $alreadyAttached = PurchaseOrder::factory()
+            ->accepted()
+            ->createQuietly([
+                'date' => '2026-04-10',
+                'sepa_batch_id' => $otherBatch->id,
+            ]);
+        $outsideBatchMonth = PurchaseOrder::factory()->accepted()->createQuietly(['date' => '2026-06-01']);
+
+        $attachedCount = $this->repository->addOpenPurchaseOrdersFromBatchMonth(SepaBatchId::create($batch->id));
+
+        static::assertSame(0, $attachedCount);
+
+        static::assertSame(PurchaseOrderApprovalStatus::Pending, $notAccepted->refresh()->approval_status);
+        static::assertNull($notAccepted->sepa_batch_id);
+        static::assertNull($alreadyPending->refresh()->sepa_batch_id);
+        static::assertSame($otherBatch->id, $alreadyAttached->refresh()->sepa_batch_id);
+        static::assertNull($outsideBatchMonth->refresh()->sepa_batch_id);
     }
 
     public function test_mark_generation_started(): void

@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Domain\Billing\Payment;
 
-use App\Domain\Billing\Subscriptions\BillableItemsViewRepository;
-use App\Domain\Billing\Payment\Jobs\FinishSepaBatchGeneration;
+use App\Domain\Billing\Invoices\InvoiceTarget;
 use App\Domain\Billing\Invoices\Jobs\GenerateInvoice;
+use App\Domain\Billing\Payment\Jobs\FinishSepaBatchGeneration;
 use App\Domain\Billing\Payment\Jobs\SendSepaBatchCreatedEmail;
+use App\Domain\Billing\Subscriptions\BillableItemsViewRepository;
 use App\Domain\Jobs\JobBatch;
 use App\Domain\Jobs\JobDispatcher;
 use App\Domain\Members\MemberId;
 use Override;
 use Webmozart\Assert\Assert;
-use App\Domain\Billing\Invoices\InvoiceTarget;
 
 final readonly class SepaBatchGeneratorImpl implements SepaBatchGenerator
 {

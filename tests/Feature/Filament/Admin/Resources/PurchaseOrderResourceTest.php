@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Tests\Feature\Filament\Admin\Resources;
 
 use App\Domain\Authorization\RoleName;
-use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionStatus;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderApprovalStatus;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderHasNoCompletedTransactionsException;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderIdList;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderIncompleteException;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderService;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionStatus;
 use App\Filament\Admin\Resources\PurchaseOrders\Pages\CreatePurchaseOrder;
 use App\Filament\Admin\Resources\PurchaseOrders\Pages\EditPurchaseOrder;
 use App\Filament\Admin\Resources\PurchaseOrders\Pages\ListPurchaseOrders;
@@ -40,6 +41,20 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
 
         Livewire::test(ListPurchaseOrders::class)
             ->assertSuccessful();
+    }
+
+    public function test_purchase_orders_table_shows_the_approval_status(): void
+    {
+        $this->withAuthorizedUser();
+        $pending = PurchaseOrder::factory()->open()->createQuietly(['date' => now()]);
+        $accepted = PurchaseOrder::factory()->accepted()->createQuietly(['date' => now()]);
+        $declined = PurchaseOrder::factory()->cancelled()->createQuietly(['date' => now()]);
+
+        Livewire::test(ListPurchaseOrders::class)
+            ->assertCanSeeTableRecords([$pending, $accepted, $declined])
+            ->assertTableColumnFormattedStateSet('approval_status', 'Wacht op goedkeuring', $pending)
+            ->assertTableColumnFormattedStateSet('approval_status', 'Goedgekeurd', $accepted)
+            ->assertTableColumnFormattedStateSet('approval_status', 'Afgewezen', $declined);
     }
 
     public function test_can_create_purchase_order_with_lines(): void
@@ -108,30 +123,34 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
             ->assertHasFormErrors(['image_path']);
     }
 
-    public function test_mark_as_approved_is_blocked_when_a_line_has_no_cost_center(): void
+    public function test_accept_approval_is_blocked_when_a_line_has_no_cost_center(): void
     {
         $this->withAuthorizedUser();
         $purchaseOrder = PurchaseOrder::factory()->open()->withLines()->create();
         $purchaseOrder->lines()->update(['cost_center_id' => null]);
 
         Livewire::test(EditPurchaseOrder::class, ['record' => $purchaseOrder->getRouteKey()])
-            ->callAction('markAsApproved')
+            ->callAction('acceptApproval')
             ->assertNotified();
 
-        static::assertSame(PurchaseOrderStatus::Open, $purchaseOrder->fresh()->status);
+        $purchaseOrder->refresh();
+        static::assertSame(PurchaseOrderStatus::Open, $purchaseOrder->status);
+        static::assertSame(PurchaseOrderApprovalStatus::Pending, $purchaseOrder->approval_status);
         $this->assertDatabaseMissing('bookkeeping_records', ['reference_id' => $purchaseOrder->id]);
     }
 
-    public function test_mark_as_approved_is_blocked_without_creditor_information(): void
+    public function test_accept_approval_is_blocked_without_creditor_information(): void
     {
         $this->withAuthorizedUser();
         $purchaseOrder = PurchaseOrder::factory()->open()->withoutCreditor()->withLines()->create();
 
         Livewire::test(EditPurchaseOrder::class, ['record' => $purchaseOrder->getRouteKey()])
-            ->callAction('markAsApproved')
+            ->callAction('acceptApproval')
             ->assertNotified();
 
-        static::assertSame(PurchaseOrderStatus::Open, $purchaseOrder->fresh()->status);
+        $purchaseOrder->refresh();
+        static::assertSame(PurchaseOrderStatus::Open, $purchaseOrder->status);
+        static::assertSame(PurchaseOrderApprovalStatus::Pending, $purchaseOrder->approval_status);
     }
 
     public function test_mark_as_paid_is_blocked_when_incomplete(): void
@@ -200,7 +219,7 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
             ->assertActionVisible('markAsPaid');
     }
 
-    public function test_mark_as_approved_creates_bookkeeping_records(): void
+    public function test_accept_approval_does_not_create_bookkeeping_records(): void
     {
         $this->withAuthorizedUser();
         $costCenter = CostCenter::factory()->create();
@@ -210,16 +229,16 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
             ->create(['status' => PurchaseOrderStatus::Open, 'date' => '2026-06-15']);
 
         Livewire::test(EditPurchaseOrder::class, ['record' => $po->getRouteKey()])
-            ->callAction('markAsApproved');
+            ->assertActionHasLabel('acceptApproval', 'Goedkeuren')
+            ->callAction('acceptApproval');
 
         $po->refresh();
-        static::assertSame(PurchaseOrderStatus::Pending, $po->status);
+        static::assertSame(PurchaseOrderApprovalStatus::Accepted, $po->approval_status);
+        static::assertSame(PurchaseOrderStatus::Open, $po->status);
 
-        $this->assertDatabaseHas('bookkeeping_records', [
+        $this->assertDatabaseMissing('bookkeeping_records', [
             'reference_type' => PurchaseOrder::class,
             'reference_id' => $po->id,
-            'cost_center_id' => $costCenter->id,
-            'year' => 2026,
         ]);
     }
 
@@ -313,36 +332,71 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
         ]);
     }
 
-    public function test_declining_purchase_order_stores_reason(): void
+    public function test_decline_approval_stores_reason_and_cancels_purchase_order(): void
     {
         $this->withAuthorizedUser();
         $po = PurchaseOrder::factory()->open()->create();
 
         Livewire::test(ViewPurchaseOrder::class, ['record' => $po->getRouteKey()])
-            ->callAction('markAsDeclined', data: ['declined_reason' => 'Factuur overtrof het budget']);
+            ->assertActionHasLabel('declineApproval', 'Afkeuren')
+            ->callAction('declineApproval', data: ['declined_reason' => 'Niet geautoriseerd door penningmeester']);
+
+        $po->refresh();
+        static::assertSame(PurchaseOrderStatus::Cancelled, $po->status);
+        static::assertSame(PurchaseOrderApprovalStatus::Declined, $po->approval_status);
+        static::assertSame('Niet geautoriseerd door penningmeester', $po->declined_reason);
+    }
+
+    public function test_decline_approval_reason_is_required(): void
+    {
+        $this->withAuthorizedUser();
+        $po = PurchaseOrder::factory()->open()->create();
+
+        Livewire::test(ViewPurchaseOrder::class, ['record' => $po->getRouteKey()])
+            ->callAction('declineApproval', data: ['declined_reason' => ''])
+            ->assertHasFormErrors(['declined_reason']);
+    }
+
+    public function test_decline_approval_is_hidden_when_approval_was_already_declined(): void
+    {
+        $this->withAuthorizedUser();
+        $po = PurchaseOrder::factory()->cancelled()->create();
+
+        Livewire::test(ViewPurchaseOrder::class, ['record' => $po->getRouteKey()])
+            ->assertActionHidden('declineApproval');
+    }
+
+    public function test_mark_as_payment_declined_stores_reason(): void
+    {
+        $this->withAuthorizedUser();
+        $po = PurchaseOrder::factory()->pending()->create();
+
+        Livewire::test(ViewPurchaseOrder::class, ['record' => $po->getRouteKey()])
+            ->assertActionHasLabel('markAsPaymentDeclined', 'Markeer betaling als geweigerd')
+            ->callAction('markAsPaymentDeclined', data: ['declined_reason' => 'Factuur overtrof het budget']);
 
         $po->refresh();
         static::assertSame(PurchaseOrderStatus::Declined, $po->status);
         static::assertSame('Factuur overtrof het budget', $po->declined_reason);
     }
 
-    public function test_decline_reason_is_required(): void
+    public function test_mark_as_payment_declined_reason_is_required(): void
+    {
+        $this->withAuthorizedUser();
+        $po = PurchaseOrder::factory()->pending()->create();
+
+        Livewire::test(ViewPurchaseOrder::class, ['record' => $po->getRouteKey()])
+            ->callAction('markAsPaymentDeclined', data: ['declined_reason' => ''])
+            ->assertHasFormErrors(['declined_reason']);
+    }
+
+    public function test_mark_as_payment_declined_is_hidden_when_not_sent_to_bank(): void
     {
         $this->withAuthorizedUser();
         $po = PurchaseOrder::factory()->open()->create();
 
         Livewire::test(ViewPurchaseOrder::class, ['record' => $po->getRouteKey()])
-            ->callAction('markAsDeclined', data: ['declined_reason' => ''])
-            ->assertHasActionErrors(['declined_reason']);
-    }
-
-    public function test_cannot_decline_purchase_order_is_paid(): void
-    {
-        $this->withAuthorizedUser();
-        $po = PurchaseOrder::factory()->paid()->create();
-
-        Livewire::test(ViewPurchaseOrder::class, ['record' => $po->getRouteKey()])
-            ->assertActionHidden('markAsDeclined');
+            ->assertActionHidden('markAsPaymentDeclined');
     }
 
     public function test_declined_reason_is_shown_on_form(): void
@@ -352,6 +406,58 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
 
         Livewire::test(ViewPurchaseOrder::class, ['record' => $po->getRouteKey()])
             ->assertFormSet(['declined_reason' => 'Te duur']);
+    }
+
+    public function test_edit_form_shows_the_approval_status(): void
+    {
+        $this->withAuthorizedUser();
+        $po = PurchaseOrder::factory()->accepted()->createQuietly();
+
+        Livewire::test(EditPurchaseOrder::class, ['record' => $po->getRouteKey()])
+            ->assertFormSet(['approval_status' => PurchaseOrderApprovalStatus::Accepted->value])
+            ->assertFormFieldDisabled('approval_status');
+    }
+
+    public function test_declined_reason_is_shown_for_an_approval_declined_purchase_order(): void
+    {
+        $this->withAuthorizedUser();
+        $po = PurchaseOrder::factory()->cancelled('Afgewezen door het bestuur')->createQuietly();
+
+        Livewire::test(ViewPurchaseOrder::class, ['record' => $po->getRouteKey()])
+            ->assertFormSet(['declined_reason' => 'Afgewezen door het bestuur'])
+            ->assertFormFieldVisible('declined_reason');
+    }
+
+    public function test_edit_page_refresh_reloads_the_form_state(): void
+    {
+        $this->withAuthorizedUser();
+        $po = PurchaseOrder::factory()->open()->createQuietly();
+
+        $component = Livewire::test(EditPurchaseOrder::class, ['record' => $po->getRouteKey()]);
+        $component->assertFormSet(['approval_status' => PurchaseOrderApprovalStatus::Pending->value]);
+
+        $po->approval_status = PurchaseOrderApprovalStatus::Accepted;
+        $po->saveQuietly();
+
+        $component->call('refresh');
+
+        $component->assertFormSet(['approval_status' => PurchaseOrderApprovalStatus::Accepted->value]);
+    }
+
+    public function test_view_page_refresh_reloads_the_form_state(): void
+    {
+        $this->withAuthorizedUser();
+        $po = PurchaseOrder::factory()->pending()->createQuietly();
+
+        $component = Livewire::test(ViewPurchaseOrder::class, ['record' => $po->getRouteKey()]);
+        $component->assertFormSet(['status' => PurchaseOrderStatus::Pending->value]);
+
+        $po->status = PurchaseOrderStatus::Paid;
+        $po->saveQuietly();
+
+        $component->call('refresh');
+
+        $component->assertFormSet(['status' => PurchaseOrderStatus::Paid->value]);
     }
 
     public function test_can_fill_notes_on_purchase_order(): void

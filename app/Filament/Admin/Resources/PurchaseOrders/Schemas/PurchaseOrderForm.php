@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\PurchaseOrders\Schemas;
 
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderApprovalStatus;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Domain\SharedKernel\PriceFormatter;
+use App\Filament\Admin\Labels\PurchaseOrderApprovalStatusLabels;
 use App\Filament\Admin\Labels\PurchaseOrderStatusLabels;
 use App\Filament\Admin\Resources\PurchaseOrders\Helpers\MemberCreditorPrefill;
 use App\Models\CostCenter;
@@ -45,13 +47,22 @@ final class PurchaseOrderForm
                             ->label(__('labels.status'))
                             ->options(PurchaseOrderStatusLabels::options())
                             ->disabled(),
+                        Select::make('approval_status')
+                            ->label(__('labels.approval_status'))
+                            ->options(PurchaseOrderApprovalStatusLabels::options())
+                            ->disabled(),
                         Textarea::make('declined_reason')
                             ->label(__('labels.declined_reason'))
                             ->rows(4)
                             ->columnSpanFull()
                             ->disabled()
                             ->dehydrated()
-                            ->visible(static fn (Get $get): bool => $get('status') === PurchaseOrderStatus::Declined->value),
+                            ->visible(
+                                static fn (Get $get): bool => (
+                                    $get('status') === PurchaseOrderStatus::Declined->value
+                                    || $get('approval_status') === PurchaseOrderApprovalStatus::Declined->value
+                                ),
+                            ),
                         Textarea::make('notes')
                             ->label(__('labels.notes'))
                             ->rows(5)

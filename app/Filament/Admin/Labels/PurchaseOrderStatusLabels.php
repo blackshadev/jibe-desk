@@ -15,6 +15,7 @@ final class PurchaseOrderStatusLabels
             PurchaseOrderStatus::Pending->value => __('labels.purchase_order_status.pending'),
             PurchaseOrderStatus::Paid->value => __('labels.purchase_order_status.paid'),
             PurchaseOrderStatus::Declined->value => __('labels.purchase_order_status.declined'),
+            PurchaseOrderStatus::Cancelled->value => __('labels.purchase_order_status.cancelled'),
         ];
     }
 }

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Bookkeeping\BookkeepingRecords;
 
-use App\Domain\Bookkeeping\BookkeepingRecords\BookkeepingRecordRepository;
 use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderIdList;
+use App\Domain\Bookkeeping\BookkeepingRecords\BookkeepingRecordRepository;
 use Mockery;
 use Mockery\MockInterface;
 

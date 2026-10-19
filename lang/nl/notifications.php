@@ -32,6 +32,7 @@ return [
     'sepa_exported' => 'SEPA-bestand succesvol geëxporteerd',
     'no_invoices_to_export' => 'Geen facturen om te exporteren',
     'purchase_order_marked_approved' => 'Inkooporder gemarkeerd als goedgekeurd',
+    'purchase_order_approval_declined' => 'Inkooporder afgekeurd',
     'purchase_order_without_completed_transactions' => 'De inkooporder kan niet als betaald worden gemarkeerd: er is geen afgeronde gekoppelde banktransactie.',
     'purchase_order_marked_paid' => 'Inkooporder gemarkeerd als betaald',
     'purchase_order_marked_declined' => 'Inkooporder gemarkeerd als geweigerd',

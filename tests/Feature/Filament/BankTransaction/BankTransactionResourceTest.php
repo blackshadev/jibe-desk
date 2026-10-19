@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament\BankTransaction;
 
-use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionStatus;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionStatus;
 use App\Filament\Admin\Resources\BankTransactions\Pages\CreateBankTransaction;
 use App\Filament\Admin\Resources\BankTransactions\Pages\ListBankTransactions;
 use App\Filament\Admin\Resources\BankTransactions\Pages\ViewBankTransaction;

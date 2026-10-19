@@ -45,4 +45,18 @@ final class PurchaseOrdersRelationManagerTest extends FeatureTestCase
                 PurchaseOrderResource::getUrl('create', ['member_id' => $member->id]),
             );
     }
+
+    public function test_shows_a_cancelled_purchase_order(): void
+    {
+        $this->withAuthorizedUser();
+        $member = Member::factory()->createQuietly();
+        $cancelled = PurchaseOrder::factory()->forMember($member)->cancelled()->createQuietly();
+
+        Livewire::test(PurchaseOrdersRelationManager::class, [
+            'ownerRecord' => $member,
+            'pageClass' => ViewMember::class,
+        ])
+            ->assertCanSeeTableRecords([$cancelled])
+            ->assertTableColumnFormattedStateSet('status', 'Geannuleerd', $cancelled);
+    }
 }

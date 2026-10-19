@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit\Domain\Billing\Payment;
 
 use App\Domain\Billing\Invoices\InvoiceTarget;
-use App\Domain\Billing\Payment\Jobs\FinishSepaBatchGeneration;
 use App\Domain\Billing\Invoices\Jobs\GenerateInvoice;
+use App\Domain\Billing\Payment\Jobs\FinishSepaBatchGeneration;
 use App\Domain\Billing\Payment\Jobs\SendSepaBatchCreatedEmail;
 use App\Domain\Billing\Payment\SepaBatch;
 use App\Domain\Billing\Payment\SepaBatchGeneratorImpl;
@@ -16,8 +16,8 @@ use App\Domain\Members\MemberId;
 use App\Domain\Members\MemberIdList;
 use DateTimeImmutable;
 use Override;
-use Tests\Unit\Domain\Jobs\JobDispatcherExpectation;
 use Tests\Unit\Domain\Billing\Invoices\BillableItemsViewRepositoryExpectation;
+use Tests\Unit\Domain\Jobs\JobDispatcherExpectation;
 use Tests\UnitTestCase;
 
 final class SepaBatchGeneratorImplTest extends UnitTestCase

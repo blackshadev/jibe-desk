@@ -36,7 +36,7 @@ final class PurchaseOrderServiceTest extends UnitTestCase
         );
     }
 
-    public function test_mark_as_approved_updates_status_and_creates_bookkeeping_records(): void
+    public function test_accept_approval_checks_completeness_without_creating_bookkeeping_records(): void
     {
         $id = PurchaseOrderId::create(1);
         $ids = new PurchaseOrderIdList([$id]);
@@ -49,10 +49,29 @@ final class PurchaseOrderServiceTest extends UnitTestCase
                 [new PurchaseOrderLineCompleteness(1)],
             ),
         ]);
-        $this->repo->expectsMarkAsApproved($ids);
+        $this->repo->expectsMarkAsApprovalAccepted($ids);
+        $this->bookkeepingRepo->neverExpectsCreateForPurchaseOrder();
+
+        $this->service->acceptApproval($ids);
+    }
+
+    public function test_mark_as_payment_pending_updates_status_and_creates_bookkeeping_records(): void
+    {
+        $id = PurchaseOrderId::create(1);
+        $ids = new PurchaseOrderIdList([$id]);
+
+        $this->repo->expectsGetCompleteness($ids, [
+            new PurchaseOrderCompleteness(
+                $id,
+                'Creditor Name',
+                'NL91ABNA0417164300',
+                [new PurchaseOrderLineCompleteness(1)],
+            ),
+        ]);
+        $this->repo->expectsMarkAsPaymentPending($ids);
         $this->bookkeepingRepo->expectsCreateForPurchaseOrder($ids);
 
-        $this->service->markAsApproved($ids);
+        $this->service->markAsPaymentPending($ids);
     }
 
     public function test_mark_as_paid_updates_status_and_creates_bookkeeping_records(): void

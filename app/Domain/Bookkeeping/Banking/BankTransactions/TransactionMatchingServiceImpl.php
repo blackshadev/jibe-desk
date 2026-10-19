@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domain\Bookkeeping\Banking\BankTransactions;
 
-use App\Domain\Bookkeeping\Banking\BankAccounts\BankAccountRepository;
 use App\Domain\Billing\Invoices\InvoiceRepository;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderRepository;
+use App\Domain\Bookkeeping\Banking\BankAccounts\BankAccountRepository;
 use Override;
 
 final readonly class TransactionMatchingServiceImpl implements TransactionMatchingService

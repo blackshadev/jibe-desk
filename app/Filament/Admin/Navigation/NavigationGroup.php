@@ -10,7 +10,7 @@ use Override;
 enum NavigationGroup: string implements HasLabel
 {
     case MemberAdministration = 'member_administration';
-    case Billing = 'billing';          // was: Invoicing = 'invoicing'
+    case Billing = 'billing'; // was: Invoicing = 'invoicing'
     case Bookkeeping = 'bookkeeping';
     case Rental = 'rental';
     case Activities = 'activities';

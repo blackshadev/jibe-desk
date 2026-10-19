@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\PurchaseOrders\RelationManagers;
 
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionRepository;
-use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
 use App\Filament\Admin\Resources\BankTransactions\Actions\AttachBankTransactionAction;
 use App\Filament\Admin\Resources\BankTransactions\BankTransactionResource;
 use App\Filament\Admin\Resources\BankTransactions\Helpers\IsOpen;

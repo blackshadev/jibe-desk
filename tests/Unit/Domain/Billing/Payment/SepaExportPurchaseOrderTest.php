@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Billing\Payment;
 
-use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
 use App\Domain\Billing\Payment\SepaExportPurchaseOrder;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
 use App\Domain\SharedKernel\CompoundPrice;
 use Tests\UnitTestCase;
 

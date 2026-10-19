@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Infrastructure\Bookkeeping\Banking\BankTransactions;
 
+use App\Domain\Billing\Invoices\InvoiceId;
+use App\Domain\Billing\Invoices\InvoiceStatus;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionIdList;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionStatus;
 use App\Domain\Bookkeeping\Banking\BankTransactions\CouldNotCompleteTransaction;
 use App\Domain\Bookkeeping\Banking\BankTransactions\CreateBankTransaction;
 use App\Domain\Bookkeeping\Banking\BankTransactions\ResolveStatus;
-use App\Domain\Billing\Invoices\InvoiceId;
-use App\Domain\Billing\Invoices\InvoiceStatus;
-use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
-use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Infrastructure\Bookkeeping\Banking\BankTransactions\BankTransactionDbRepository;
 use App\Models\BankAccount;
 use App\Models\BankTransaction;

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Billing\Invoices;
 
-use App\Domain\Bookkeeping\BookkeepingRecords\BookkeepingRecordRepository;
 use App\Domain\Billing\Invoices\Jobs\SendInvoiceEmail;
+use App\Domain\Bookkeeping\BookkeepingRecords\BookkeepingRecordRepository;
 use App\Domain\Jobs\JobDispatcher;
 use Override;
 

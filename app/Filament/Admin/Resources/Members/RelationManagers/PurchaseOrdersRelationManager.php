@@ -47,6 +47,7 @@ final class PurchaseOrdersRelationManager extends MemberRelationManager
                         PurchaseOrderStatus::Declined => Heroicon::XCircle,
                         PurchaseOrderStatus::Paid => Heroicon::CheckCircle,
                         PurchaseOrderStatus::Open => Heroicon::DocumentText,
+                        PurchaseOrderStatus::Cancelled => Heroicon::NoSymbol,
                     })
                     ->tooltip(static fn (PurchaseOrder $record): ?string => $record->declined_reason),
                 TextColumn::make('total')

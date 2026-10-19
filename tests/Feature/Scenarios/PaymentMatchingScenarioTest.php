@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Scenarios;
 
+use App\Domain\Billing\Invoices\InvoiceStatus;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderApprovalStatus;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionStatus;
 use App\Domain\Bookkeeping\Banking\BankTransactions\ResolveStatus;
-use App\Domain\Billing\Invoices\InvoiceStatus;
-use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Models\BankAccount;
 use App\Models\BankTransaction;
 use App\Models\Invoice;
@@ -64,7 +65,7 @@ final class PaymentMatchingScenarioTest extends MemberLifecycleScenario
             'reference_id' => $invoice->id,
         ]);
 
-        // Step 3 — a purchase order is created and approved (approved == pending).
+        // Step 3 — a purchase order is created and its approval is accepted.
         $purchaseOrder = $this->createPurchaseOrder([
             'creditor_name' => 'Sloepenhandel BV',
             'creditor_iban' => self::CREDITOR_IBAN,
@@ -76,7 +77,8 @@ final class PaymentMatchingScenarioTest extends MemberLifecycleScenario
 
         $this->assertDatabaseHas('purchase_orders', [
             'id' => $purchaseOrder->id,
-            'status' => PurchaseOrderStatus::Pending->value,
+            'status' => PurchaseOrderStatus::Open->value,
+            'approval_status' => PurchaseOrderApprovalStatus::Accepted->value,
         ]);
         static::assertEqualsWithDelta(150.00, $purchaseOrder->total->price, 0.001);
 

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Domain\Billing\Invoices\Listeners;
 
-use App\Domain\Billing\Payment\Events\SepaBatchClosed;
 use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\Jobs\SendInvoiceEmail;
 use App\Domain\Billing\Invoices\SendInvoiceEmailData;
+use App\Domain\Billing\Payment\Events\SepaBatchClosed;
 use App\Domain\Billing\Payment\SepaBatchRepository;
 use App\Domain\Jobs\JobBatch;
 use App\Domain\Jobs\JobDispatcher;

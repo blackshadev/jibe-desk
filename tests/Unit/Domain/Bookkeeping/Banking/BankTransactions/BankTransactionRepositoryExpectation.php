@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Bookkeeping\Banking\BankTransactions;
 
-use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
-use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionIdList;
-use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionRepository;
-use App\Domain\Bookkeeping\Banking\BankTransactions\MatchCriteria;
 use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderIdList;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionIdList;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionRepository;
+use App\Domain\Bookkeeping\Banking\BankTransactions\MatchCriteria;
 use Mockery;
 use Mockery\MockInterface;
 

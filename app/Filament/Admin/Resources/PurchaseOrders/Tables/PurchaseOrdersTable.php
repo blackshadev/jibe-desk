@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\PurchaseOrders\Tables;
 
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderApprovalStatus;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Domain\SharedKernel\CompoundPrice;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
@@ -51,6 +52,10 @@ final class PurchaseOrdersTable
                     ->label(__('labels.status'))
                     ->formatStateUsing(static fn (PurchaseOrderStatus $state) => __('labels.purchase_order_status.' . $state->value))
                     ->sortable(),
+                TextColumn::make('approval_status')
+                    ->label(__('labels.approval_status'))
+                    ->formatStateUsing(static fn (PurchaseOrderApprovalStatus $state) => __('labels.purchase_order_approval_status.' . $state->value))
+                    ->sortable(),
                 TextColumn::make('total')
                     ->label(__('labels.total'))
                     ->formatStateUsing(static fn (CompoundPrice $state) => (string) $state)
@@ -94,6 +99,21 @@ final class PurchaseOrdersTable
                         }
 
                         return $query->whereYear('date', $value);
+                    }),
+                SelectFilter::make(__('labels.status'))
+                    ->options([
+                        PurchaseOrderStatus::Open->value => __('labels.purchase_order_status.open'),
+                        PurchaseOrderStatus::Pending->value => __('labels.purchase_order_status.pending'),
+                        PurchaseOrderStatus::Declined->value => __('labels.purchase_order_status.declined'),
+                        PurchaseOrderStatus::Paid->value => __('labels.purchase_order_status.paid'),
+                    ])
+                    ->query(static function (Builder $query, array $state) {
+                        $value = $state['value'] ?? '';
+                        if ($value === '') {
+                            return $query;
+                        }
+
+                        return $query->where('status', $value);
                     }),
             ])
             ->filtersLayout(FiltersLayout::BeforeContent)

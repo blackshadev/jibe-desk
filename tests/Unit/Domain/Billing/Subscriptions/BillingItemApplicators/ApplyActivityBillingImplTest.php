@@ -14,8 +14,8 @@ use Carbon\CarbonImmutable;
 use DateTimeImmutable;
 use Override;
 use Tests\Unit\Domain\Activities\ActivityRepositoryExpectation;
-use Tests\Unit\Domain\Clock\ClockExpectation;
 use Tests\Unit\Domain\Billing\Subscriptions\BillableItemRepositoryExpectation;
+use Tests\Unit\Domain\Clock\ClockExpectation;
 use Tests\UnitTestCase;
 
 final class ApplyActivityBillingImplTest extends UnitTestCase

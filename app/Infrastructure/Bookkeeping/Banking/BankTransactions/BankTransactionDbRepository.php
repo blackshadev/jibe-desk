@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Bookkeeping\Banking\BankTransactions;
 
+use App\Domain\Billing\Invoices\InvoiceId;
+use App\Domain\Billing\Invoices\InvoiceIdList;
+use App\Domain\Billing\Invoices\InvoiceRepository;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderIdList;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderRepository;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionIdList;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionRepository;
@@ -13,12 +19,6 @@ use App\Domain\Bookkeeping\Banking\BankTransactions\CreateBankTransaction;
 use App\Domain\Bookkeeping\Banking\BankTransactions\MatchCriteria;
 use App\Domain\Bookkeeping\Banking\BankTransactions\ResolveStatus;
 use App\Domain\Bookkeeping\BookkeepingRecords\BookkeepingRecordRepository;
-use App\Domain\Billing\Invoices\InvoiceId;
-use App\Domain\Billing\Invoices\InvoiceIdList;
-use App\Domain\Billing\Invoices\InvoiceRepository;
-use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
-use App\Domain\Billing\PurchaseOrders\PurchaseOrderIdList;
-use App\Domain\Billing\PurchaseOrders\PurchaseOrderRepository;
 use App\Models\BankAccount;
 use App\Models\BankTransaction;
 use App\Models\BookkeepingRecord;

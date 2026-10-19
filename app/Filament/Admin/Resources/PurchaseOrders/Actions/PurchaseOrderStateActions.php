@@ -23,15 +23,15 @@ final class PurchaseOrderStateActions
     public static function make(): array
     {
         return [
-            Action::make('markAsApproved')
-                ->label(__('labels.mark_as_approved'))
+            Action::make('acceptApproval')
+                ->label(__('labels.accept_approval'))
                 ->icon(Heroicon::CheckCircle)
                 ->color('success')
                 ->requiresConfirmation()
-                ->visible(static fn (PurchaseOrder $record): bool => auth()->user()->can('markAsApproved', $record))
+                ->visible(static fn (PurchaseOrder $record): bool => auth()->user()->can('acceptApproval', $record))
                 ->action(static function (PurchaseOrder $record, PurchaseOrderService $service, Action $action): void {
                     try {
-                        $service->markAsApproved(PurchaseOrderIdList::fromArray([$record->id]));
+                        $service->acceptApproval(PurchaseOrderIdList::fromArray([$record->id]));
                     } catch (PurchaseOrderIncompleteException $exception) {
                         Notification::make()
                             ->title(__('notifications.purchase_order_incomplete'))
@@ -44,8 +44,33 @@ final class PurchaseOrderStateActions
                 ->successRedirectUrl(static fn (Page $livewire, PurchaseOrder $record) => (
                     $livewire instanceof EditRecord ? PurchaseOrderResource::getUrl('view', ['record' => $record]) : null
                 ))
-                ->after(static fn (Page $livewire) => $livewire->dispatch('markedAsApproved'))
+                ->after(static fn (Page $livewire) => $livewire->dispatch('refresh'))
                 ->successNotificationTitle(__('notifications.purchase_order_marked_approved')),
+
+            Action::make('declineApproval')
+                ->label(__('labels.decline_approval'))
+                ->icon(Heroicon::XCircle)
+                ->color('danger')
+                ->modalHeading(__('labels.decline_approval'))
+                ->modalDescription(__('labels.manual_decline_purchase_order_approval_warning'))
+                ->schema([
+                    Textarea::make('declined_reason')
+                        ->label(__('labels.declined_reason'))
+                        ->rows(4)
+                        ->required(),
+                ])
+                ->visible(static fn (PurchaseOrder $record): bool => auth()->user()->can('declineApproval', $record))
+                ->action(static function (PurchaseOrder $record, PurchaseOrderService $service, array $data): void {
+                    $service->declineApproval(
+                        PurchaseOrderIdList::fromArray([$record->id]),
+                        (string) $data['declined_reason'],
+                    );
+                })
+                ->successRedirectUrl(static fn (Page $livewire, PurchaseOrder $record) => (
+                    $livewire instanceof EditRecord ? PurchaseOrderResource::getUrl('view', ['record' => $record]) : null
+                ))
+                ->after(static fn (Page $livewire) => $livewire->dispatch('refresh'))
+                ->successNotificationTitle(__('notifications.purchase_order_approval_declined')),
 
             Action::make('markAsPaid')
                 ->label(__('labels.mark_as_paid'))
@@ -69,14 +94,14 @@ final class PurchaseOrderStateActions
                             ->send();
                     }
                 })
-                ->after(static fn (Page $livewire) => $livewire->dispatch('markedAsPaid'))
+                ->after(static fn (Page $livewire) => $livewire->dispatch('refresh'))
                 ->successNotificationTitle(__('notifications.purchase_order_marked_paid')),
 
-            Action::make('markAsDeclined')
-                ->label(__('labels.mark_as_declined'))
+            Action::make('markAsPaymentDeclined')
+                ->label(__('labels.mark_as_payment_declined'))
                 ->icon('heroicon-m-x-circle')
                 ->color('danger')
-                ->modalHeading(__('labels.mark_as_declined'))
+                ->modalHeading(__('labels.mark_as_payment_declined'))
                 ->modalDescription(__('labels.manual_mark_purchase_order_declined_warning'))
                 ->schema([
                     Textarea::make('declined_reason')
@@ -84,9 +109,9 @@ final class PurchaseOrderStateActions
                         ->rows(4)
                         ->required(),
                 ])
-                ->visible(static fn (PurchaseOrder $record): bool => auth()->user()->can('markAsDeclined', $record))
+                ->visible(static fn (PurchaseOrder $record): bool => auth()->user()->can('markAsPaymentDeclined', $record))
                 ->action(static function (PurchaseOrder $record, PurchaseOrderService $service, array $data): void {
-                    $service->markAsDeclined(
+                    $service->markAsPaymentDeclined(
                         PurchaseOrderIdList::fromArray([$record->id]),
                         (string) $data['declined_reason'],
                     );
@@ -94,7 +119,7 @@ final class PurchaseOrderStateActions
                 ->successRedirectUrl(static fn (Page $livewire, PurchaseOrder $record) => (
                     $livewire instanceof EditRecord ? PurchaseOrderResource::getUrl('view', ['record' => $record]) : null
                 ))
-                ->after(static fn (Page $livewire) => $livewire->dispatch('markedAsDeclined'))
+                ->after(static fn (Page $livewire) => $livewire->dispatch('refresh'))
                 ->successNotificationTitle(__('notifications.purchase_order_marked_declined')),
         ];
     }

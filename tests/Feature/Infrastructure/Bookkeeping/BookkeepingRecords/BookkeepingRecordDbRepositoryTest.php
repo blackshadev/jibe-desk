@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Infrastructure\Bookkeeping\BookkeepingRecords;
 
-use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
 use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderIdList;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
 use App\Infrastructure\Bookkeeping\BookkeepingRecords\BookkeepingRecordDbRepository;
 use App\Models\BankTransaction;
 use App\Models\BookkeepingRecord;

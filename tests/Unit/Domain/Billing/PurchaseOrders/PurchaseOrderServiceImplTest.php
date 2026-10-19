@@ -38,14 +38,67 @@ final class PurchaseOrderServiceImplTest extends UnitTestCase
         );
     }
 
-    public function test_mark_as_approved_updates_status_and_creates_bookkeeping_records(): void
+    public function test_accept_approval_updates_approval_without_creating_bookkeeping_records(): void
     {
         $ids = new PurchaseOrderIdList([PurchaseOrderId::create(1)]);
         $this->completenessService->expectsFindProblems($ids, new PurchaseOrderProblems());
-        $this->repo->expectsMarkAsApproved($ids);
+        $this->repo->expectsMarkAsApprovalAccepted($ids);
+        $this->repo->neverExpectsMarkAsPaymentPending();
+        $this->bookkeepingRepo->neverExpectsCreateForPurchaseOrder();
+
+        $this->service->acceptApproval($ids);
+    }
+
+    public function test_accept_approval_applies_assert_completeness(): void
+    {
+        $ids = new PurchaseOrderIdList([PurchaseOrderId::create(1)]);
+        $problem = new PurchaseOrderProblem(PurchaseOrderId::create(1), PurchaseOrderProblemType::MissingCostCenter, 1);
+        $this->completenessService->expectsFindProblems($ids, new PurchaseOrderProblems([$problem]));
+        $this->repo->neverExpectsMarkAsApprovalAccepted();
+        $this->bookkeepingRepo->neverExpectsCreateForPurchaseOrder();
+
+        $this->expectException(PurchaseOrderIncompleteException::class);
+
+        $this->service->acceptApproval($ids);
+    }
+
+    public function test_decline_approval_stores_reason_on_repository(): void
+    {
+        $ids = PurchaseOrderIdList::fromArray([1]);
+        $this->repo->expectsMarkAsApprovalDeclined($ids, 'Niet geautoriseerd door penningmeester');
+
+        $this->service->declineApproval($ids, 'Niet geautoriseerd door penningmeester');
+    }
+
+    public function test_decline_approval_without_reason_passes_null(): void
+    {
+        $ids = PurchaseOrderIdList::fromArray([1]);
+        $this->repo->expectsMarkAsApprovalDeclined($ids, null);
+
+        $this->service->declineApproval($ids);
+    }
+
+    public function test_mark_as_payment_pending_updates_status_and_creates_bookkeeping_records(): void
+    {
+        $ids = new PurchaseOrderIdList([PurchaseOrderId::create(1)]);
+        $this->completenessService->expectsFindProblems($ids, new PurchaseOrderProblems());
+        $this->repo->expectsMarkAsPaymentPending($ids);
         $this->bookkeepingRepo->expectsCreateForPurchaseOrder($ids);
 
-        $this->service->markAsApproved($ids);
+        $this->service->markAsPaymentPending($ids);
+    }
+
+    public function test_mark_as_payment_pending_applies_assert_completeness(): void
+    {
+        $ids = new PurchaseOrderIdList([PurchaseOrderId::create(1)]);
+        $problem = new PurchaseOrderProblem(PurchaseOrderId::create(1), PurchaseOrderProblemType::MissingCostCenter, 1);
+        $this->completenessService->expectsFindProblems($ids, new PurchaseOrderProblems([$problem]));
+        $this->repo->neverExpectsMarkAsPaymentPending();
+        $this->bookkeepingRepo->neverExpectsCreateForPurchaseOrder();
+
+        $this->expectException(PurchaseOrderIncompleteException::class);
+
+        $this->service->markAsPaymentPending($ids);
     }
 
     public function test_mark_as_paid_updates_status_and_creates_bookkeeping_records(): void
@@ -72,19 +125,6 @@ final class PurchaseOrderServiceImplTest extends UnitTestCase
         $this->service->markAsPaid($ids);
     }
 
-    public function test_mark_as_approved_applies_assert_completeness(): void
-    {
-        $ids = new PurchaseOrderIdList([PurchaseOrderId::create(1)]);
-        $problem = new PurchaseOrderProblem(PurchaseOrderId::create(1), PurchaseOrderProblemType::MissingCostCenter, 1);
-        $this->completenessService->expectsFindProblems($ids, new PurchaseOrderProblems([$problem]));
-        $this->repo->neverExpectsMarkAsApproved();
-        $this->bookkeepingRepo->neverExpectsCreateForPurchaseOrder();
-
-        $this->expectException(PurchaseOrderIncompleteException::class);
-
-        $this->service->markAsApproved($ids);
-    }
-
     public function test_mark_as_paid_applies_assert_completeness(): void
     {
         $ids = new PurchaseOrderIdList([PurchaseOrderId::create(1)]);
@@ -99,19 +139,19 @@ final class PurchaseOrderServiceImplTest extends UnitTestCase
         $this->service->markAsPaid($ids);
     }
 
-    public function test_mark_as_declined_stores_reason_on_repository(): void
+    public function test_mark_as_payment_declined_stores_reason_on_repository(): void
     {
         $ids = PurchaseOrderIdList::fromArray([1]);
-        $this->repo->expectsMarkAsDeclined($ids, 'Niet geautoriseerd door penningmeester');
+        $this->repo->expectsMarkAsPaymentDeclined($ids, 'Niet geautoriseerd door penningmeester');
 
-        $this->service->markAsDeclined($ids, 'Niet geautoriseerd door penningmeester');
+        $this->service->markAsPaymentDeclined($ids, 'Niet geautoriseerd door penningmeester');
     }
 
-    public function test_mark_as_declined_without_reason_passes_null(): void
+    public function test_mark_as_payment_declined_without_reason_passes_null(): void
     {
         $ids = PurchaseOrderIdList::fromArray([1]);
-        $this->repo->expectsMarkAsDeclined($ids, null);
+        $this->repo->expectsMarkAsPaymentDeclined($ids, null);
 
-        $this->service->markAsDeclined($ids);
+        $this->service->markAsPaymentDeclined($ids);
     }
 }

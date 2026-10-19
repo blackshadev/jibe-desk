@@ -87,7 +87,7 @@ trait TestsBankingLifecycle
     protected function approvePurchaseOrder(PurchaseOrder $purchaseOrder): void
     {
         Livewire::test(EditPurchaseOrder::class, ['record' => $purchaseOrder->getRouteKey()])
-            ->callAction('markAsApproved');
+            ->callAction('acceptApproval');
     }
 
     protected function markInvoiceAsPending(Invoice $invoice): void

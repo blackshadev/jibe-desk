@@ -36,10 +36,24 @@ final readonly class PurchaseOrderRepositoryExpectation
             ->andReturn($return);
     }
 
-    public function expectsMarkAsApproved(PurchaseOrderIdList $ids): void
+    public function expectsMarkAsApprovalAccepted(PurchaseOrderIdList $ids): void
     {
         $this->mock
-            ->expects('markAsApproved')
+            ->expects('markAsApprovalAccepted')
+            ->with(equalTo($ids));
+    }
+
+    public function expectsMarkAsApprovalDeclined(PurchaseOrderIdList $ids, ?string $reason = null): void
+    {
+        $this->mock
+            ->expects('markAsApprovalDeclined')
+            ->with(equalTo($ids), equalTo($reason));
+    }
+
+    public function expectsMarkAsPaymentPending(PurchaseOrderIdList $ids): void
+    {
+        $this->mock
+            ->expects('markAsPaymentPending')
             ->with(equalTo($ids));
     }
 
@@ -58,11 +72,18 @@ final readonly class PurchaseOrderRepositoryExpectation
             ->andReturn($return);
     }
 
-    public function expectsMarkAsDeclined(PurchaseOrderIdList $ids, ?string $reason = null): void
+    public function expectsMarkAsPaymentDeclined(PurchaseOrderIdList $ids, ?string $reason = null): void
     {
         $this->mock
-            ->expects('markAsDeclined')
+            ->expects('markAsPaymentDeclined')
             ->with(equalTo($ids), equalTo($reason));
+    }
+
+    public function expectsReopenPayment(PurchaseOrderIdList $ids): void
+    {
+        $this->mock
+            ->expects('reopenPayment')
+            ->with(equalTo($ids));
     }
 
     public function expectsFindMatchingDebit(string $creditorIban, float $amount, DateTimeInterface $date, ?PurchaseOrderId $return): void
@@ -73,9 +94,14 @@ final readonly class PurchaseOrderRepositoryExpectation
             ->andReturn($return);
     }
 
-    public function neverExpectsMarkAsApproved(): void
+    public function neverExpectsMarkAsApprovalAccepted(): void
     {
-        $this->mock->expects('markAsApproved')->never();
+        $this->mock->expects('markAsApprovalAccepted')->never();
+    }
+
+    public function neverExpectsMarkAsPaymentPending(): void
+    {
+        $this->mock->expects('markAsPaymentPending')->never();
     }
 
     public function neverExpectsMarkAsPaid(): void

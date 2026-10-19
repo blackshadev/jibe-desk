@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Billing\PurchaseOrders;
 
-use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionStatus;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderApprovalStatus;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderCompleteness;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderIdList;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderLineCompleteness;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderRepository;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionStatus;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use Carbon\CarbonImmutable;
@@ -44,14 +45,34 @@ final class PurchaseOrderRepositoryDb implements PurchaseOrderRepository
     }
 
     #[Override]
-    public function markAsApproved(PurchaseOrderIdList $ids): void
+    public function markAsApprovalAccepted(PurchaseOrderIdList $ids): void
     {
         PurchaseOrder::query()
             ->whereIn('id', array_map(static fn (PurchaseOrderId $id) => $id->value, $ids->ids))
             ->update([
-                'status' => PurchaseOrderStatus::Pending,
+                'approval_status' => PurchaseOrderApprovalStatus::Accepted,
                 'declined_reason' => null,
             ]);
+    }
+
+    #[Override]
+    public function markAsApprovalDeclined(PurchaseOrderIdList $ids, ?string $reason = null): void
+    {
+        PurchaseOrder::query()
+            ->whereIn('id', array_map(static fn (PurchaseOrderId $id) => $id->value, $ids->ids))
+            ->update([
+                'approval_status' => PurchaseOrderApprovalStatus::Declined,
+                'status' => PurchaseOrderStatus::Cancelled,
+                'declined_reason' => $reason,
+            ]);
+    }
+
+    #[Override]
+    public function markAsPaymentPending(PurchaseOrderIdList $ids): void
+    {
+        PurchaseOrder::query()
+            ->whereIn('id', array_map(static fn (PurchaseOrderId $id) => $id->value, $ids->ids))
+            ->update(['status' => PurchaseOrderStatus::Pending]);
     }
 
     #[Override]
@@ -72,7 +93,7 @@ final class PurchaseOrderRepositoryDb implements PurchaseOrderRepository
     }
 
     #[Override]
-    public function markAsDeclined(PurchaseOrderIdList $ids, ?string $reason = null): void
+    public function markAsPaymentDeclined(PurchaseOrderIdList $ids, ?string $reason = null): void
     {
         PurchaseOrder::query()
             ->whereIn('id', array_map(static fn (PurchaseOrderId $id) => $id->value, $ids->ids))
@@ -80,6 +101,14 @@ final class PurchaseOrderRepositoryDb implements PurchaseOrderRepository
                 'status' => PurchaseOrderStatus::Declined,
                 'declined_reason' => $reason,
             ]);
+    }
+
+    #[Override]
+    public function reopenPayment(PurchaseOrderIdList $ids): void
+    {
+        PurchaseOrder::query()
+            ->whereIn('id', array_map(static fn (PurchaseOrderId $id) => $id->value, $ids->ids))
+            ->update(['status' => PurchaseOrderStatus::Open]);
     }
 
     #[Override]

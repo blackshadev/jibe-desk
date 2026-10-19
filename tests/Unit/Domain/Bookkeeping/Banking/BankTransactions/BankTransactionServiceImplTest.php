@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Bookkeeping\Banking\BankTransactions;
 
+use App\Domain\Billing\Invoices\InvoiceId;
+use App\Domain\Billing\Invoices\InvoiceIdList;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
+use App\Domain\Billing\PurchaseOrders\PurchaseOrderIdList;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionIdList;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionServiceImpl;
 use App\Domain\Bookkeeping\Banking\BankTransactions\MatchCriteria;
 use App\Domain\Bookkeeping\Banking\BankTransactions\MatchResult;
-use App\Domain\Billing\Invoices\InvoiceId;
-use App\Domain\Billing\Invoices\InvoiceIdList;
-use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
-use App\Domain\Billing\PurchaseOrders\PurchaseOrderIdList;
 use DateTimeImmutable;
 use Override;
 use Tests\FeatureTestCase;
@@ -203,7 +203,7 @@ final class BankTransactionServiceImplTest extends FeatureTestCase
         $this->repo->expectsGetAttachedInvoiceIds($bankTransactionId, $emptyInvoiceIds);
         $this->invoiceService->expectsMarkAsDeclined($emptyInvoiceIds);
         $this->repo->expectsGetAttachedPurchaseOrderIds($bankTransactionId, $emptyPurchaseOrderIds);
-        $this->purchaseOrderService->expectsMarkAsDeclined($emptyPurchaseOrderIds);
+        $this->purchaseOrderService->expectsMarkAsPaymentDeclined($emptyPurchaseOrderIds);
         $this->repo->expectsMarkAsResolved($originalId);
         $this->repo->expectsMarkAsResolved($bankTransactionId);
         $this->repo->expectsMarkAsResolved($bankTransactionId);
@@ -222,7 +222,7 @@ final class BankTransactionServiceImplTest extends FeatureTestCase
         $this->repo->expectsGetAttachedInvoiceIds($originalId, $invoiceIds);
         $this->invoiceService->expectsMarkAsDeclined($invoiceIds);
         $this->repo->expectsGetAttachedPurchaseOrderIds($originalId, $emptyPurchaseOrderIds);
-        $this->purchaseOrderService->expectsMarkAsDeclined($emptyPurchaseOrderIds);
+        $this->purchaseOrderService->expectsMarkAsPaymentDeclined($emptyPurchaseOrderIds);
         $this->repo->expectsMarkAsResolved($reversalId);
         $this->repo->expectsMarkAsResolved($originalId);
 
@@ -240,7 +240,7 @@ final class BankTransactionServiceImplTest extends FeatureTestCase
         $this->repo->expectsGetAttachedInvoiceIds($originalId, $emptyInvoiceIds);
         $this->invoiceService->expectsMarkAsDeclined($emptyInvoiceIds);
         $this->repo->expectsGetAttachedPurchaseOrderIds($originalId, $purchaseOrderIds);
-        $this->purchaseOrderService->expectsMarkAsDeclined($purchaseOrderIds);
+        $this->purchaseOrderService->expectsMarkAsPaymentDeclined($purchaseOrderIds);
         $this->repo->expectsMarkAsResolved($reversalId);
         $this->repo->expectsMarkAsResolved($originalId);
 
@@ -258,7 +258,7 @@ final class BankTransactionServiceImplTest extends FeatureTestCase
         $this->repo->expectsGetAttachedInvoiceIds($originalId, $emptyInvoiceIds);
         $this->invoiceService->expectsMarkAsDeclined($emptyInvoiceIds);
         $this->repo->expectsGetAttachedPurchaseOrderIds($originalId, $emptyPurchaseOrderIds);
-        $this->purchaseOrderService->expectsMarkAsDeclined($emptyPurchaseOrderIds);
+        $this->purchaseOrderService->expectsMarkAsPaymentDeclined($emptyPurchaseOrderIds);
         $this->repo->expectsMarkAsResolved($reversalId);
         $this->repo->expectsMarkAsResolved($originalId);
 
@@ -274,7 +274,7 @@ final class BankTransactionServiceImplTest extends FeatureTestCase
         $this->repo->expectsGetAttachedInvoiceIds($reversalId, $invoiceIds);
         $this->invoiceService->expectsMarkAsPending($invoiceIds);
         $this->repo->expectsGetAttachedPurchaseOrderIds($reversalId, $purchaseOrderIds);
-        $this->purchaseOrderService->expectsMarkAsApproved($purchaseOrderIds);
+        $this->purchaseOrderService->expectsMarkAsPaid($purchaseOrderIds);
         $this->repo->expectsUnlinkReversal($reversalId);
 
         $this->service->unlinkReversal($reversalId);
