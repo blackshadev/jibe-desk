@@ -13,6 +13,9 @@ use Override;
 final class Dashboard extends BaseDashboard
 {
     #[Override]
+    protected static string $routePath = 'dashboard';
+
+    #[Override]
     protected static ?int $navigationSort = -10;
 
     #[Override]

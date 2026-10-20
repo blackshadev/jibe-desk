@@ -36,7 +36,8 @@ final class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->id('admin')
-            ->path('admin')
+            ->path('/')
+            ->domain(config('app.url'))
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->maxContentWidth('full')
             ->sidebarWidth('15rem')
