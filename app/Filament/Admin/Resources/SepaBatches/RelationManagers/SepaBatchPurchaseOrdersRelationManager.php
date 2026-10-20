@@ -9,6 +9,7 @@ use App\Filament\Admin\Labels\PurchaseOrderStatusLabels;
 use App\Filament\Admin\Resources\PurchaseOrders\Actions\PurchaseOrderStateActions;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Filament\Admin\Utils\ResourceRouteHelper;
+use Filament\Actions\ActionGroup;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -45,7 +46,9 @@ final class SepaBatchPurchaseOrdersRelationManager extends RelationManager
                     ->formatStateUsing(static fn (PurchaseOrderStatus $state) => PurchaseOrderStatusLabels::options()[$state->value]),
             ])
             ->recordActions([
-                ...PurchaseOrderStateActions::make(),
+                ActionGroup::make([
+                    ...PurchaseOrderStateActions::make(),
+                ]),
             ])
             ->recordUrl(ResourceRouteHelper::viewOrEdit(PurchaseOrderResource::class));
     }

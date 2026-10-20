@@ -50,6 +50,7 @@ final class PurchaseOrderRepositoryDb implements PurchaseOrderRepository
         PurchaseOrder::query()
             ->whereIn('id', array_map(static fn (PurchaseOrderId $id) => $id->value, $ids->ids))
             ->update([
+                'status' => PurchaseOrderStatus::Open,
                 'approval_status' => PurchaseOrderApprovalStatus::Accepted,
                 'declined_reason' => null,
             ]);

@@ -98,10 +98,10 @@ final class PurchaseOrderStateActions
                 ->successNotificationTitle(__('notifications.purchase_order_marked_paid')),
 
             Action::make('markAsPaymentDeclined')
-                ->label(__('labels.mark_as_payment_declined'))
+                ->label(__('labels.mark_as_declined'))
                 ->icon('heroicon-m-x-circle')
                 ->color('danger')
-                ->modalHeading(__('labels.mark_as_payment_declined'))
+                ->modalHeading(__('labels.mark_as_declined'))
                 ->modalDescription(__('labels.manual_mark_purchase_order_declined_warning'))
                 ->schema([
                     Textarea::make('declined_reason')

@@ -13,6 +13,7 @@ use App\Filament\Admin\Utils\ResourceRouteHelper;
 use App\Models\Invoice;
 use App\Models\SepaBatch;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -48,22 +49,24 @@ final class SepaBatchInvoicesRelationManager extends RelationManager
             ])
             ->recordUrl(ResourceRouteHelper::viewOrEdit(InvoiceResource::class))
             ->recordActions([
-                ...InvoiceStateActions::make(),
-                Action::make('removeFromBatch')
-                    ->label(__('labels.remove_from_batch'))
-                    ->icon('heroicon-m-minus-circle')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->visible(static function (Invoice $record, RelationManager $livewire): bool {
-                        /** @var SepaBatch $batch */
-                        $batch = $livewire->getOwnerRecord();
+                ActionGroup::make([
+                    ...InvoiceStateActions::make(),
+                    Action::make('removeFromBatch')
+                        ->label(__('labels.remove_from_batch'))
+                        ->icon('heroicon-m-minus-circle')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->visible(static function (Invoice $record, RelationManager $livewire): bool {
+                            /** @var SepaBatch $batch */
+                            $batch = $livewire->getOwnerRecord();
 
-                        return $batch->status === SepaBatchStatus::Open;
-                    })
-                    ->action(static function (Invoice $record): void {
-                        $record->update(['sepa_batch_id' => null]);
-                    })
-                    ->after(static fn (RelationManager $livewire) => $livewire->dispatch('refreshInvoicesTable')),
+                            return $batch->status === SepaBatchStatus::Open;
+                        })
+                        ->action(static function (Invoice $record): void {
+                            $record->update(['sepa_batch_id' => null]);
+                        })
+                        ->after(static fn (RelationManager $livewire) => $livewire->dispatch('refreshInvoicesTable')),
+                ]),
             ]);
     }
 
