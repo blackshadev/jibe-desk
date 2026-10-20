@@ -80,8 +80,10 @@ final class PurchaseOrdersTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make(__('labels.book_year'))
-                    ->options(
+                SelectFilter::make('book_year')
+                    ->label(__('labels.book_year'))
+                    ->options(array_merge(
+                        ['all' => __('labels.all_years')],
                         PurchaseOrder::query()
                             ->select(
                                 DB::connection()->getConfig()['driver'] === 'pgsql'
@@ -90,30 +92,35 @@ final class PurchaseOrdersTable
                             )
                             ->pluck('year', 'year')
                             ->all(),
-                    )
+                    ))
                     ->default(now()->year)
                     ->query(static function (Builder $query, array $state) {
                         $value = $state['value'] ?? '';
-                        if ($value === '') {
+
+                        if ($value === '' || $value === 'all') {
                             return $query;
                         }
 
                         return $query->whereYear('date', $value);
                     }),
-                SelectFilter::make(__('labels.status'))
+                SelectFilter::make('status')
+                    ->label(__('labels.status'))
                     ->options([
+                        'outstanding' => __('labels.outstanding'),
                         PurchaseOrderStatus::Open->value => __('labels.purchase_order_status.open'),
                         PurchaseOrderStatus::Pending->value => __('labels.purchase_order_status.pending'),
                         PurchaseOrderStatus::Declined->value => __('labels.purchase_order_status.declined'),
                         PurchaseOrderStatus::Paid->value => __('labels.purchase_order_status.paid'),
+                        PurchaseOrderStatus::Cancelled->value => __('labels.purchase_order_status.cancelled'),
                     ])
                     ->query(static function (Builder $query, array $state) {
                         $value = $state['value'] ?? '';
-                        if ($value === '') {
-                            return $query;
-                        }
 
-                        return $query->where('status', $value);
+                        return match ($value) {
+                            'outstanding' => $query->whereIn('status', [PurchaseOrderStatus::Open, PurchaseOrderStatus::Pending]),
+                            '' => $query,
+                            default => $query->where('status', $value),
+                        };
                     }),
             ])
             ->filtersLayout(FiltersLayout::BeforeContent)

@@ -20,23 +20,31 @@ final class MemberPortalTest extends FeatureTestCase
 {
     use WithAuthorizedUser;
 
-    public function test_member_dashboard_shows_only_the_household_members_widget(): void
+    public function test_member_dashboard_shows_member_overview_and_household_members(): void
     {
         $user = User::factory()->memberUser()->createQuietly();
         $this->actingAs($user);
 
         $widgets = new Dashboard()->getWidgets();
 
-        static::assertSame([MemberOverview::class, HouseholdMembersWidget::class], $widgets);
+        $visibleWidgets = array_filter($widgets, static fn ($widget) => $widget::canView());
+
+        static::assertSame([MemberOverview::class, HouseholdMembersWidget::class], $visibleWidgets);
+        static::assertTrue(MemberOverview::canView());
+        static::assertTrue(HouseholdMembersWidget::canView());
     }
 
-    public function test_admin_dashboard_shows_only_the_member_overview_widget(): void
+    public function test_admin_dashboard_hides_household_members_widget(): void
     {
         $this->withUserHavingRole(RoleName::MemberAdministration);
 
         $widgets = new Dashboard()->getWidgets();
 
-        static::assertSame([MemberOverview::class], $widgets);
+        $visibleWidgets = array_filter($widgets, static fn ($widget) => $widget::canView());
+
+        static::assertSame([MemberOverview::class], $visibleWidgets);
+        static::assertTrue(MemberOverview::canView());
+        static::assertFalse(HouseholdMembersWidget::canView());
     }
 
     public function test_household_members_widget_shows_self_and_household_members(): void

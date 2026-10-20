@@ -59,8 +59,10 @@ final class InvoicesTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make(__('labels.book_year'))
-                    ->options(
+                SelectFilter::make('book_year')
+                    ->label(__('labels.book_year'))
+                    ->options(array_merge(
+                        ['all' => __('labels.all_years')],
                         Invoice::query()
                             ->distinct()
                             ->select(
@@ -70,15 +72,34 @@ final class InvoicesTable
                             )
                             ->pluck('year', 'year')
                             ->all(),
-                    )
+                    ))
                     ->default(now()->year)
                     ->query(static function (Builder $query, array $state) {
                         $value = $state['value'] ?? '';
-                        if ($value === '') {
+
+                        if ($value === '' || $value === 'all') {
                             return $query;
                         }
 
                         return $query->whereYear('date', $value);
+                    }),
+                SelectFilter::make('status')
+                    ->label(__('labels.status'))
+                    ->options([
+                        'outstanding' => __('labels.outstanding'),
+                        InvoiceStatus::Open->value => __('labels.invoice_status.open'),
+                        InvoiceStatus::Pending->value => __('labels.invoice_status.pending'),
+                        InvoiceStatus::Paid->value => __('labels.invoice_status.paid'),
+                        InvoiceStatus::Declined->value => __('labels.invoice_status.declined'),
+                    ])
+                    ->query(static function (Builder $query, array $state) {
+                        $value = $state['value'] ?? '';
+
+                        return match ($value) {
+                            'outstanding' => $query->whereIn('status', [InvoiceStatus::Open, InvoiceStatus::Pending]),
+                            '' => $query,
+                            default => $query->where('status', $value),
+                        };
                     }),
             ])
             ->filtersLayout(FiltersLayout::BeforeContent)

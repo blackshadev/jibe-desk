@@ -15,6 +15,15 @@ use Override;
 final class HouseholdMembersWidget extends TableWidget
 {
     #[Override]
+    protected int|string|array $columnSpan = 'full';
+
+    #[Override]
+    public static function canView(): bool
+    {
+        return auth()->user()?->isMember() ?? false;
+    }
+
+    #[Override]
     public function table(Table $table): Table
     {
         return $table
