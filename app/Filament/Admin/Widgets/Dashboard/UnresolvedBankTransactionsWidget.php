@@ -29,8 +29,8 @@ final class UnresolvedBankTransactionsWidget extends StatsOverviewWidget
      */
     #[Override]
     protected int|string|array $columnSpan = [
-        'default' => 3,
-        'lg' => 1,
+        'default' => 12,
+        'lg' => 4,
     ];
 
     /**
@@ -52,7 +52,7 @@ final class UnresolvedBankTransactionsWidget extends StatsOverviewWidget
         return [
             Stat::make(__('labels.unresolved_bank_transactions'), (string) (clone $query)->count())
                 ->description(PriceFormatter::format((float) (clone $query)->sum('amount')))
-                ->color('warning'),
+                ->color('primary'),
         ];
     }
 }

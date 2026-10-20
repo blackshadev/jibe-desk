@@ -14,8 +14,14 @@ use Override;
 
 final class HouseholdMembersWidget extends TableWidget
 {
+    /**
+     * @var array<string, int>
+     */
     #[Override]
-    protected int|string|array $columnSpan = 'full';
+    protected int|string|array $columnSpan = [
+        'default' => 12,
+        'lg' => 4,
+    ];
 
     #[Override]
     public static function canView(): bool

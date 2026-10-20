@@ -12,6 +12,7 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationBuilder;
 use Filament\Navigation\NavigationItem;
+use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Facades\FilamentTimezone;
@@ -74,7 +75,7 @@ final class AdminPanelProvider extends PanelProvider
                     ->items([
                         NavigationItem::make(__('labels.dashboard'))
                             ->icon(Heroicon::Home)
-                            ->url(Filament::getUrl())
+                            ->url(Dashboard::getUrl())
                             ->sort(-10),
                         NavigationItem::make(__('labels.my_membership'))
                             ->icon(Heroicon::User)

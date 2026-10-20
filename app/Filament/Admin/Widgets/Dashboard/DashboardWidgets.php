@@ -15,10 +15,17 @@ final class DashboardWidgets
     {
         return [
             MemberOverview::class,
+            MembershipCardWidget::class,
             HouseholdMembersWidget::class,
+            MyOpenInvoicesWidget::class,
+            MyUpcomingActivitiesWidget::class,
+            MyStorageRentalsWidget::class,
             OpenInvoicesWidget::class,
             OpenPurchaseOrdersWidget::class,
             UnresolvedBankTransactionsWidget::class,
+            UpcomingActivitiesOverviewWidget::class,
+            VacantStorageSpacesWidget::class,
+            FailedOutgoingEmailsWidget::class,
         ];
     }
 }

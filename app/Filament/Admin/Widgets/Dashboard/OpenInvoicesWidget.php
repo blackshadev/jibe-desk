@@ -32,8 +32,8 @@ final class OpenInvoicesWidget extends StatsOverviewWidget
      */
     #[Override]
     protected int|string|array $columnSpan = [
-        'default' => 3,
-        'lg' => 1,
+        'default' => 12,
+        'lg' => 4,
     ];
 
     /**

@@ -25,6 +25,6 @@ final class Dashboard extends BaseDashboard
     #[Override]
     public function getColumns(): int
     {
-        return 3;
+        return 12;
     }
 }

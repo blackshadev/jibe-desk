@@ -14,6 +14,15 @@ use Override;
 
 final class MemberOverview extends StatsOverviewWidget
 {
+    /**
+     * @var array<string, int>
+     */
+    #[Override]
+    protected int|string|array $columnSpan = [
+        'default' => 12,
+        'lg' => 4,
+    ];
+
     #[Override]
     protected function getStats(): array
     {

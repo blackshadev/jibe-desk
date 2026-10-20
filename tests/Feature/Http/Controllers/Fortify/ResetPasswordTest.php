@@ -39,7 +39,7 @@ final class ResetPasswordTest extends FeatureTestCase
             'password_confirmation' => 'new-strong-password',
         ]);
 
-        $response->assertRedirect('/admin');
+        $response->assertRedirect('/dashboard');
 
         static::assertTrue(Hash::check('new-strong-password', $user->fresh()->password));
     }

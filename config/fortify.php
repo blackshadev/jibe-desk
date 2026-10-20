@@ -75,7 +75,7 @@ return [
     |
     */
 
-    'home' => '/admin',
+    'home' => '/dashboard',
 
     /*
     |--------------------------------------------------------------------------
@@ -89,7 +89,8 @@ return [
     */
 
     'redirects' => [
-        'password-reset' => '/admin',
+        'password-reset' => '/dashboard',
+        ''
     ],
 
     /*

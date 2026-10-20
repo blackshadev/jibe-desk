@@ -8,6 +8,10 @@ use App\Domain\Authorization\RoleName;
 use App\Filament\Admin\Pages\Dashboard;
 use App\Filament\Admin\Widgets\Dashboard\HouseholdMembersWidget;
 use App\Filament\Admin\Widgets\Dashboard\MemberOverview;
+use App\Filament\Admin\Widgets\Dashboard\MembershipCardWidget;
+use App\Filament\Admin\Widgets\Dashboard\MyOpenInvoicesWidget;
+use App\Filament\Admin\Widgets\Dashboard\MyStorageRentalsWidget;
+use App\Filament\Admin\Widgets\Dashboard\MyUpcomingActivitiesWidget;
 use App\Models\Household;
 use App\Models\Member;
 use App\Models\User;
@@ -29,7 +33,17 @@ final class MemberPortalTest extends FeatureTestCase
 
         $visibleWidgets = array_filter($widgets, static fn ($widget) => $widget::canView());
 
-        static::assertSame([MemberOverview::class, HouseholdMembersWidget::class], $visibleWidgets);
+        static::assertSame(
+            [
+                MemberOverview::class,
+                MembershipCardWidget::class,
+                HouseholdMembersWidget::class,
+                MyOpenInvoicesWidget::class,
+                MyUpcomingActivitiesWidget::class,
+                MyStorageRentalsWidget::class,
+            ],
+            $visibleWidgets,
+        );
         static::assertTrue(MemberOverview::canView());
         static::assertTrue(HouseholdMembersWidget::canView());
     }
@@ -42,7 +56,7 @@ final class MemberPortalTest extends FeatureTestCase
 
         $visibleWidgets = array_filter($widgets, static fn ($widget) => $widget::canView());
 
-        static::assertSame([MemberOverview::class], $visibleWidgets);
+        static::assertSame([MemberOverview::class, MembershipCardWidget::class], $visibleWidgets);
         static::assertTrue(MemberOverview::canView());
         static::assertFalse(HouseholdMembersWidget::canView());
     }
@@ -66,7 +80,7 @@ final class MemberPortalTest extends FeatureTestCase
 
     public function test_fortify_redirects_back_to_the_admin_panel(): void
     {
-        static::assertSame('/admin', Fortify::redirects('password-reset'));
-        static::assertSame('/admin', Fortify::redirects('login'));
+        static::assertSame('/dashboard', Fortify::redirects('password-reset'));
+        static::assertSame('/dashboard', Fortify::redirects('login'));
     }
 }
