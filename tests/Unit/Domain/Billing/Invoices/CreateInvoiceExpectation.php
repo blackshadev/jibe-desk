@@ -10,6 +10,7 @@ use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Invoices\InvoiceRepository;
 use App\Domain\Billing\Invoices\NewInvoice;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
 use Mockery;
 use Mockery\MockInterface;
 
@@ -57,10 +58,29 @@ final readonly class CreateInvoiceExpectation
             ->with(equalTo($ids));
     }
 
-    public function expectsMarkAsDeclined(InvoiceIdList $ids): void
-    {
+    public function expectsMarkAsDeclined(
+        InvoiceIdList $ids,
+        ?BankTransactionId $reversalTransactionId,
+        ?string $note,
+        InvoiceIdList $return,
+    ): void {
         $this->mock
             ->expects('markAsDeclined')
+            ->with(equalTo($ids), equalTo($reversalTransactionId), equalTo($note))
+            ->andReturn($return);
+    }
+
+    public function expectsReopen(InvoiceIdList $ids): void
+    {
+        $this->mock
+            ->expects('reopen')
+            ->with(equalTo($ids));
+    }
+
+    public function expectsMarkAsPendingIfDeclined(InvoiceIdList $ids): void
+    {
+        $this->mock
+            ->expects('markAsPendingIfDeclined')
             ->with(equalTo($ids));
     }
 

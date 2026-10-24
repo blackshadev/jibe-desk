@@ -10,6 +10,7 @@ use App\Filament\Admin\Resources\Invoices\Actions\ResendInvoiceEmailAction;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceBankTransactionsRelationManager;
 use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceBookkeepingRecordsRelationManager;
+use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceDeclinesRelationManager;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
@@ -42,6 +43,7 @@ final class EditInvoice extends EditRecord
         return [
             InvoiceBankTransactionsRelationManager::class,
             InvoiceBookkeepingRecordsRelationManager::class,
+            InvoiceDeclinesRelationManager::class,
         ];
     }
 

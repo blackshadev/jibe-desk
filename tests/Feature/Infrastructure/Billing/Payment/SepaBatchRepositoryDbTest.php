@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Infrastructure\Billing\Payment;
 
 use App\Domain\Billing\Invoices\InvoiceId;
+use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Billing\Payment\SepaBatchStatus;
@@ -551,5 +552,69 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
             'id' => $invoice->id,
             'sepa_batch_id' => $batch->id,
         ]);
+    }
+
+    public function test_attach_invoices_attaches_open_unbatched_invoices(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly(['status' => SepaBatchStatus::Open]);
+        $invoices = Invoice::factory()->createManyQuietly([
+            ['status' => InvoiceStatus::Open, 'sepa_batch_id' => null],
+            ['status' => InvoiceStatus::Open, 'sepa_batch_id' => null],
+        ]);
+
+        $count = $this->repository->attachInvoices(
+            SepaBatchId::create($batch->id),
+            new InvoiceIdList($invoices->map(static fn (Invoice $invoice): InvoiceId => InvoiceId::create($invoice->id))->all()),
+        );
+
+        static::assertSame(2, $count);
+
+        foreach ($invoices as $invoice) {
+            $this->assertDatabaseHas('invoices', [
+                'id' => $invoice->id,
+                'sepa_batch_id' => $batch->id,
+            ]);
+        }
+    }
+
+    public function test_attach_invoices_ignores_batched_and_non_open_invoices(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly(['status' => SepaBatchStatus::Open]);
+        $otherBatch = SepaBatch::factory()->createQuietly();
+        $invoices = Invoice::factory()->createManyQuietly([
+            ['status' => InvoiceStatus::Open, 'sepa_batch_id' => $otherBatch->id],
+            ['status' => InvoiceStatus::Pending, 'sepa_batch_id' => null],
+            ['status' => InvoiceStatus::Declined, 'sepa_batch_id' => null],
+        ]);
+
+        $count = $this->repository->attachInvoices(
+            SepaBatchId::create($batch->id),
+            new InvoiceIdList($invoices->map(static fn (Invoice $invoice): InvoiceId => InvoiceId::create($invoice->id))->all()),
+        );
+
+        static::assertSame(0, $count);
+
+        foreach ($invoices as $invoice) {
+            $this->assertDatabaseMissing('invoices', [
+                'id' => $invoice->id,
+                'sepa_batch_id' => $batch->id,
+            ]);
+        }
+    }
+
+    public function test_attach_invoices_throws_for_a_non_open_batch(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly(['status' => SepaBatchStatus::Pending]);
+        $invoice = Invoice::factory()->createQuietly([
+            'status' => InvoiceStatus::Open,
+            'sepa_batch_id' => null,
+        ]);
+
+        $this->expectException(DomainException::class);
+
+        $this->repository->attachInvoices(
+            SepaBatchId::create($batch->id),
+            new InvoiceIdList([InvoiceId::create($invoice->id)]),
+        );
     }
 }

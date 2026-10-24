@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Domain\Billing\Payment;
 
 use App\Domain\Billing\Payment\Events\SepaBatchClosed;
+use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Billing\Payment\SepaBatchServiceImpl;
 use App\Domain\Billing\Payment\SepaBatchStatus;
@@ -97,5 +98,15 @@ final class SepaBatchServiceImplTest extends UnitTestCase
         $this->repo->expectsCompleteBatch($batchId);
 
         $this->service->completeBatch($batchId);
+    }
+
+    public function test_attach_invoices(): void
+    {
+        $batchId = SepaBatchId::create(5);
+        $ids = InvoiceIdList::fromArray([1, 2]);
+
+        $this->repo->expectsAttachInvoices($batchId, $ids, 2);
+
+        static::assertSame(2, $this->service->attachInvoices($batchId, $ids));
     }
 }

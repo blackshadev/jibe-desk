@@ -60,6 +60,12 @@ final class Invoice extends Model
         return $this->hasMany(InvoiceLine::class);
     }
 
+    /** @return HasMany<InvoiceDecline, $this> */
+    public function declines(): HasMany
+    {
+        return $this->hasMany(InvoiceDecline::class)->orderByDesc('declined_at');
+    }
+
     /** @return MorphToMany<BankTransaction, $this> */
     public function bankTransactions(): MorphToMany
     {
@@ -87,6 +93,16 @@ final class Invoice extends Model
     protected function openOrPending(Builder $query): Builder
     {
         return $query->whereIn('status', [InvoiceStatus::Open, InvoiceStatus::Pending]);
+    }
+
+    #[Scope]
+    protected function outstandingOrDeclined(Builder $query): Builder
+    {
+        return $query->whereIn('status', [
+            InvoiceStatus::Open,
+            InvoiceStatus::Pending,
+            InvoiceStatus::Declined,
+        ]);
     }
 
     #[Scope]

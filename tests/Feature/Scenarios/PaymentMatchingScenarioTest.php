@@ -15,6 +15,7 @@ use App\Models\Invoice;
 use App\Models\Member;
 use App\Models\PaymentInformation;
 use App\Models\PurchaseOrder;
+use App\Models\SepaBatch;
 use Override;
 use Tests\Concerns\TestsBankingLifecycle;
 use Tests\Concerns\TestsMT940;
@@ -167,6 +168,65 @@ final class PaymentMatchingScenarioTest extends MemberLifecycleScenario
             'reference_type' => PurchaseOrder::class,
             'reference_id' => $purchaseOrder->id,
             'bank_transaction_id' => $debitTransaction->id,
+        ]);
+    }
+
+    public function test_a_returned_direct_debit_declines_the_invoice_and_records_the_reversal(): void
+    {
+        $this->travelToDate('2026-08-15');
+
+        $member = Member::factory()
+            ->has(PaymentInformation::factory()->state([
+                'banking_account_number' => self::MEMBER_IBAN,
+                'banking_bic' => 'ABNANL2A',
+            ]))
+            ->createOneQuietly();
+
+        $batch = SepaBatch::factory()->createQuietly();
+        $invoice = $this->createInvoice(
+            $member,
+            [['description' => 'Lidmaatschap augustus', 'price' => 88.00, 'quantity' => 1]],
+            ['date' => '2026-08-15', 'sepa_batch_id' => $batch->id],
+        );
+        $this->markInvoiceAsPending($invoice);
+
+        $bankAccount = BankAccount::factory()->create();
+        $this->importMt940Statement($this->mt940Statement($bankAccount, [
+            [
+                'date' => '2026-08-20',
+                'debitCredit' => 'C',
+                'amount' => 88.00,
+                'counterpartyIban' => self::MEMBER_IBAN,
+                'description' => 'Lidmaatschap augustus',
+            ],
+            [
+                'date' => '2026-08-22',
+                'debitCredit' => 'D',
+                'amount' => 88.00,
+                'counterpartyIban' => self::MEMBER_IBAN,
+                'description' => 'Lidmaatschap augustus',
+            ],
+        ]));
+
+        $original = BankTransaction::query()->where('amount', '>', 0)->sole();
+        $reversal = BankTransaction::query()->where('amount', '<', 0)->sole();
+
+        $this->assertDatabaseHas('bank_transactions', [
+            'id' => $reversal->id,
+            'reversed_by_transaction_id' => $original->id,
+        ]);
+        $this->assertDatabaseHas('bank_transactions', [
+            'id' => $original->id,
+            'resolve_status' => ResolveStatus::Resolved->value,
+        ]);
+        $this->assertDatabaseHas('invoices', [
+            'id' => $invoice->id,
+            'status' => InvoiceStatus::Declined->value,
+        ]);
+        $this->assertDatabaseHas('invoice_declines', [
+            'invoice_id' => $invoice->id,
+            'sepa_batch_id' => $batch->id,
+            'bank_transaction_id' => $reversal->id,
         ]);
     }
 }

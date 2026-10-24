@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\SepaBatches\Pages;
 
+use App\Domain\Billing\Invoices\InvoiceId;
+use App\Domain\Billing\Invoices\InvoiceIdList;
+use App\Domain\Billing\Invoices\InvoiceService;
 use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Billing\Payment\SepaBatchService;
 use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Domain\Billing\Payment\SepaExportService;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
+use App\Filament\Admin\Resources\SepaBatches\Actions\RetryDeclined;
 use App\Filament\Admin\Resources\SepaBatches\Helpers\OnOpenSepaBatch;
 use App\Filament\Admin\Resources\SepaBatches\RelationManagers\SepaBatchInvoicesRelationManager;
 use App\Filament\Admin\Resources\SepaBatches\RelationManagers\SepaBatchPurchaseOrdersRelationManager;
@@ -123,6 +127,8 @@ final class EditSepaBatch extends EditRecord
                 ->successNotificationTitle(__('notifications.purchase_orders_added_to_batch'))
                 ->after(static fn (EditRecord $livewire) => $livewire->dispatch('refreshInvoicesTable'))
                 ->visible(OnOpenSepaBatch::make(...)),
+
+            RetryDeclined::make(),
 
             Action::make('closeBatch')
                 ->label(__('labels.close_batch'))

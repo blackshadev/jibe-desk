@@ -29,3 +29,4 @@ coverage
 !.spec
 TODO.md
 .agents
+.spec/maps

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Billing\Invoices;
 
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
 use DateTimeInterface;
 use JeroenG\Autowire\Attribute\Autowire;
 
@@ -18,7 +19,15 @@ interface InvoiceRepository
 
     public function markAsPaid(InvoiceIdList $ids): void;
 
-    public function markAsDeclined(InvoiceIdList $ids): void;
+    public function markAsDeclined(
+        InvoiceIdList $ids,
+        ?BankTransactionId $reversalTransactionId = null,
+        ?string $note = null,
+    ): InvoiceIdList;
+
+    public function reopen(InvoiceIdList $ids): void;
+
+    public function markAsPendingIfDeclined(InvoiceIdList $ids): void;
 
     public function markAsPending(InvoiceIdList $ids): void;
 

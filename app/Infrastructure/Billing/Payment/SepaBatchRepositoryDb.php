@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Billing\Payment;
 
 use App\Domain\Billing\Invoices\InvoiceId;
+use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Domain\Billing\Payment\MandateId;
 use App\Domain\Billing\Payment\PaymentInformationId;
@@ -266,6 +267,22 @@ final class SepaBatchRepositoryDb implements SepaBatchRepository
     {
         Invoice::query()
             ->findOrFail($id->value)
+            ->update(['sepa_batch_id' => $batchId->value]);
+    }
+
+    #[Override]
+    public function attachInvoices(SepaBatchId $batchId, InvoiceIdList $ids): int
+    {
+        $batch = SepaBatch::findOrFail($batchId->value);
+
+        if ($batch->status !== SepaBatchStatus::Open) {
+            throw new DomainException('Only an open batch can receive retried invoices.');
+        }
+
+        return Invoice::query()
+            ->whereIn('id', $ids->values())
+            ->whereNull('sepa_batch_id')
+            ->where('status', InvoiceStatus::Open)
             ->update(['sepa_batch_id' => $batchId->value]);
     }
 }

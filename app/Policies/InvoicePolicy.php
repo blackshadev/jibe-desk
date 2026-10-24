@@ -57,11 +57,20 @@ final class InvoicePolicy extends ResourcePolicy
         return $user->can('update_invoices', $invoice) && $invoice->status === InvoiceStatus::Pending;
     }
 
+    public function reopen(User $user, Model $invoice): bool
+    {
+        Assert::isInstanceOf($invoice, Invoice::class);
+
+        return $user->can('update_invoices', $invoice)
+            && $invoice->status === InvoiceStatus::Declined
+            && $invoice->credit_invoice_id === null;
+    }
+
     public function markPaid(User $user, Model $invoice): bool
     {
         Assert::isInstanceOf($invoice, Invoice::class);
 
-        if ($invoice->status !== InvoiceStatus::Pending) {
+        if (!in_array($invoice->status, [InvoiceStatus::Pending, InvoiceStatus::Declined], true)) {
             return false;
         }
 
@@ -85,7 +94,7 @@ final class InvoicePolicy extends ResourcePolicy
     public function attachBankTransaction(User $user, Model $invoice): bool
     {
         Assert::isInstanceOf($invoice, Invoice::class);
-        if ($invoice->status !== InvoiceStatus::Pending) {
+        if (!in_array($invoice->status, [InvoiceStatus::Pending, InvoiceStatus::Declined], true)) {
             return false;
         }
 

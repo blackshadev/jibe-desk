@@ -58,7 +58,7 @@ final readonly class BankTransactionServiceImpl implements BankTransactionServic
                 $this->repository->attachPurchaseOrder($id, $result->purchaseOrderId);
             }
             if ($result->reversedByTransactionId !== null) {
-                $this->linkReversal($result->reversedByTransactionId, $id);
+                $this->linkReversal($id, $result->reversedByTransactionId);
             }
             if ($result->internalTransferCounterpartId !== null) {
                 $this->linkInternalTransfer($id, $result->internalTransferCounterpartId);
@@ -75,7 +75,7 @@ final readonly class BankTransactionServiceImpl implements BankTransactionServic
         $this->repository->linkReversal($reversalId, $originalId);
 
         $invoiceIds = $this->repository->getAttachedInvoiceIds($originalId);
-        $this->invoiceService->markAsDeclined($invoiceIds);
+        $this->invoiceService->markAsDeclined($invoiceIds, $reversalId, null);
 
         $purchaseOrderIds = $this->repository->getAttachedPurchaseOrderIds($originalId);
         $this->purchaseOrderService->markAsPaymentDeclined($purchaseOrderIds, null);
@@ -88,7 +88,7 @@ final readonly class BankTransactionServiceImpl implements BankTransactionServic
     public function unlinkReversal(BankTransactionId $reversalId): void
     {
         $invoiceIds = $this->repository->getAttachedInvoiceIds($reversalId);
-        $this->invoiceService->markAsPending($invoiceIds);
+        $this->invoiceService->restoreDeclined($invoiceIds);
 
         $purchaseOrderIds = $this->repository->getAttachedPurchaseOrderIds($reversalId);
         $this->purchaseOrderService->markAsPaid($purchaseOrderIds);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Billing\Payment;
 
+use App\Domain\Billing\Invoices\InvoiceIdList;
 use DateTimeInterface;
 use JeroenG\Autowire\Attribute\Autowire;
 
@@ -23,4 +24,6 @@ interface SepaBatchService
     public function closeBatch(SepaBatchId $batchId): void;
 
     public function completeBatch(SepaBatchId $batchId): void;
+
+    public function attachInvoices(SepaBatchId $batchId, InvoiceIdList $ids): int;
 }

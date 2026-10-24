@@ -10,6 +10,7 @@ use App\Domain\Billing\Invoices\InvoiceService;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Models\Invoice;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Textarea;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Resources\RelationManagers\RelationManager;
 use Livewire\Component;
@@ -75,9 +76,18 @@ final class InvoiceStateActions
                 ->modalDescription(__('labels.manual_mark_declined_warning'))
                 ->modalIcon('heroicon-m-exclamation-triangle')
                 ->modalIconColor('danger')
+                ->schema([
+                    Textarea::make('note')
+                        ->label(__('labels.decline_note'))
+                        ->nullable(),
+                ])
                 ->visible(static fn (Invoice $record): bool => auth()->user()?->can('mark-declined', $record) ?? false)
-                ->action(static function (Invoice $record, InvoiceService $invoiceService): void {
-                    $invoiceService->markAsDeclined(new InvoiceIdList([InvoiceId::create($record->id)]));
+                ->action(static function (Invoice $record, array $data, InvoiceService $invoiceService): void {
+                    $invoiceService->markAsDeclined(
+                        new InvoiceIdList([InvoiceId::create($record->id)]),
+                        null,
+                        $data['note'] ?? null,
+                    );
                 })
                 ->successRedirectUrl(static fn (Component $livewire, Invoice $record): ?string => (
                     $livewire instanceof EditRecord ? InvoiceResource::getUrl('view', ['record' => $record]) : null
@@ -90,6 +100,28 @@ final class InvoiceStateActions
                     }
                 })
                 ->successNotificationTitle(__('notifications.invoice_status_updated')),
+
+            Action::make('reopen')
+                ->label(__('labels.reopen_invoice'))
+                ->icon('heroicon-m-arrow-uturn-left')
+                ->color('warning')
+                ->requiresConfirmation()
+                ->modalDescription(__('labels.reopen_invoice_warning'))
+                ->visible(static fn (Invoice $record): bool => auth()->user()?->can('reopen', $record) ?? false)
+                ->action(static function (Invoice $record, InvoiceService $invoiceService): void {
+                    $invoiceService->reopen(new InvoiceIdList([InvoiceId::create($record->id)]));
+                })
+                ->successRedirectUrl(static fn (Component $livewire, Invoice $record): ?string => (
+                    $livewire instanceof EditRecord ? InvoiceResource::getUrl('view', ['record' => $record]) : null
+                ))
+                ->after(static function (Component $livewire): void {
+                    $livewire->dispatch('refresh');
+
+                    if ($livewire instanceof RelationManager) {
+                        $livewire->dispatch('refreshInvoicesTable');
+                    }
+                })
+                ->successNotificationTitle(__('notifications.invoice_reopened')),
         ];
     }
 }

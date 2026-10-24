@@ -372,7 +372,7 @@ final class PurchaseOrderResourceTest extends FeatureTestCase
         $po = PurchaseOrder::factory()->pending()->create();
 
         Livewire::test(ViewPurchaseOrder::class, ['record' => $po->getRouteKey()])
-            ->assertActionHasLabel('markAsPaymentDeclined', 'Markeer betaling als geweigerd')
+            ->assertActionHasLabel('markAsPaymentDeclined', 'Weigeren')
             ->callAction('markAsPaymentDeclined', data: ['declined_reason' => 'Factuur overtrof het budget']);
 
         $po->refresh();

@@ -14,9 +14,11 @@ use App\Filament\Admin\Resources\Invoices\Pages\ListInvoices;
 use App\Filament\Admin\Resources\Invoices\Pages\ViewInvoice;
 use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceBankTransactionsRelationManager;
 use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceBookkeepingRecordsRelationManager;
+use App\Filament\Admin\Resources\Invoices\RelationManagers\InvoiceDeclinesRelationManager;
 use App\Models\BankTransaction;
 use App\Models\BookkeepingRecord;
 use App\Models\Invoice;
+use App\Models\SepaBatch;
 use Illuminate\Support\Facades\Bus;
 use Livewire\Livewire;
 use Tests\Concerns\WithAuthorizedUser;
@@ -141,6 +143,100 @@ final class InvoiceResourceTest extends FeatureTestCase
         $bookkeepingCountAfter = BookkeepingRecord::query()->count();
 
         static::assertSame($bookkeepingCountBefore, $bookkeepingCountAfter);
+    }
+
+    public function test_mark_as_declined_stores_an_optional_note(): void
+    {
+        $this->withAuthorizedUser();
+        $invoice = Invoice::factory()->withLines(1)->createQuietly(['status' => InvoiceStatus::Pending]);
+
+        Livewire::test(ViewInvoice::class, ['record' => $invoice->getRouteKey()])
+            ->assertSuccessful()
+            ->callAction('markAsDeclined', data: ['note' => 'Teruggeboekt door bank']);
+
+        $this->assertDatabaseHas('invoice_declines', [
+            'invoice_id' => $invoice->id,
+            'note' => 'Teruggeboekt door bank',
+        ]);
+    }
+
+    public function test_reopen_action_is_visible_for_a_declined_invoice(): void
+    {
+        $this->withAuthorizedUser();
+        $invoice = Invoice::factory()->withLines(1)->createQuietly(['status' => InvoiceStatus::Declined]);
+
+        Livewire::test(ViewInvoice::class, ['record' => $invoice->getRouteKey()])
+            ->assertSuccessful()
+            ->assertActionVisible('reopen');
+    }
+
+    public function test_reopen_action_is_hidden_for_pending_and_paid_invoices(): void
+    {
+        $this->withAuthorizedUser();
+        $pending = Invoice::factory()->withLines(1)->createQuietly(['status' => InvoiceStatus::Pending]);
+        $paid = Invoice::factory()->withLines(1)->createQuietly(['status' => InvoiceStatus::Paid]);
+
+        Livewire::test(ViewInvoice::class, ['record' => $pending->getRouteKey()])
+            ->assertSuccessful()
+            ->assertActionHidden('reopen');
+
+        Livewire::test(ViewInvoice::class, ['record' => $paid->getRouteKey()])
+            ->assertSuccessful()
+            ->assertActionHidden('reopen');
+    }
+
+    public function test_reopen_action_returns_the_invoice_to_open_and_detaches_it(): void
+    {
+        $this->withAuthorizedUser();
+        $batch = SepaBatch::factory()->createQuietly();
+        $invoice = Invoice::factory()->withLines(1)->createQuietly([
+            'status' => InvoiceStatus::Declined,
+            'sepa_batch_id' => $batch->id,
+            'sent_at' => now(),
+        ]);
+
+        Livewire::test(ViewInvoice::class, ['record' => $invoice->getRouteKey()])
+            ->assertSuccessful()
+            ->callAction('reopen');
+
+        $this->assertDatabaseHas('invoices', [
+            'id' => $invoice->id,
+            'status' => InvoiceStatus::Open->value,
+            'sepa_batch_id' => null,
+            'sent_at' => null,
+        ]);
+    }
+
+    public function test_attach_bank_transaction_action_is_visible_for_a_declined_invoice(): void
+    {
+        $this->withAuthorizedUser();
+        $invoice = Invoice::factory()->withLines(1)->createQuietly(['status' => InvoiceStatus::Declined]);
+
+        Livewire::test(InvoiceBankTransactionsRelationManager::class, [
+            'ownerRecord' => $invoice,
+            'pageClass' => ViewInvoice::class,
+        ])
+            ->assertTableActionVisible('attachBankTransaction');
+    }
+
+    public function test_attach_bank_transaction_action_attaches_to_a_declined_invoice(): void
+    {
+        $this->withAuthorizedUser();
+        $invoice = Invoice::factory()->withLines(1)->createQuietly(['status' => InvoiceStatus::Declined]);
+        $transaction = BankTransaction::factory()->createQuietly();
+
+        Livewire::test(InvoiceBankTransactionsRelationManager::class, [
+            'ownerRecord' => $invoice,
+            'pageClass' => ViewInvoice::class,
+        ])
+            ->callTableAction('attachBankTransaction', data: ['bank_transaction_id' => $transaction->id])
+            ->assertHasNoTableActionErrors();
+
+        $this->assertDatabaseHas('bank_transaction_references', [
+            'bank_transaction_id' => $transaction->id,
+            'reference_type' => Invoice::class,
+            'reference_id' => $invoice->id,
+        ]);
     }
 
     public function test_bulk_mark_as_paid_updates_multiple_invoices(): void
@@ -416,6 +512,7 @@ final class InvoiceResourceTest extends FeatureTestCase
             [
                 InvoiceBankTransactionsRelationManager::class,
                 InvoiceBookkeepingRecordsRelationManager::class,
+                InvoiceDeclinesRelationManager::class,
             ],
             array_values($component->getRelationManagers()),
         );

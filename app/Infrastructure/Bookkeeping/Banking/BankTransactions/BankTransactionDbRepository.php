@@ -217,8 +217,9 @@ final readonly class BankTransactionDbRepository implements BankTransactionRepos
     public function markAsUnresolvable(BankTransactionId $bankTransactionId): void
     {
         BankTransaction::query()
-            ->where('id', $bankTransactionId->value)
-            ->update(['resolve_status' => 'unresolvable']);
+            ->whereKey($bankTransactionId->value)
+            ->where('resolve_status', ResolveStatus::Unresolved)
+            ->update(['resolve_status' => ResolveStatus::Unresolvable]);
     }
 
     #[Override]

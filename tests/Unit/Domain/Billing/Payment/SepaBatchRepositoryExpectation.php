@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Domain\Billing\Payment;
 
 use App\Domain\Billing\Invoices\InvoiceId;
+use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Domain\Billing\Payment\SepaBatchEmailData;
 use App\Domain\Billing\Payment\SepaBatchId;
@@ -99,6 +100,14 @@ final readonly class SepaBatchRepositoryExpectation
         $this->mock
             ->expects('attachInvoice')
             ->with(equalTo($batchId), equalTo($invoiceId));
+    }
+
+    public function expectsAttachInvoices(SepaBatchId $batchId, InvoiceIdList $ids, int $return): void
+    {
+        $this->mock
+            ->expects('attachInvoices')
+            ->with(equalTo($batchId), equalTo($ids))
+            ->andReturn($return);
     }
 
     public function expectsGetBatchEmailData(SepaBatchId $batchId, SepaBatchEmailData $return): void

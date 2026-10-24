@@ -14,7 +14,9 @@ use App\Domain\Billing\Invoices\InvoiceNumberGenerator;
 use App\Domain\Billing\Invoices\InvoiceRepository;
 use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Domain\Billing\Invoices\NewInvoice;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
 use App\Models\Invoice;
+use App\Models\InvoiceDecline;
 use App\Models\InvoiceLine;
 use App\Models\Member;
 use Carbon\CarbonImmutable;
@@ -179,12 +181,62 @@ final class InvoiceRepositoryDb implements InvoiceRepository
     }
 
     #[Override]
-    public function markAsDeclined(InvoiceIdList $ids): void
+    public function markAsDeclined(
+        InvoiceIdList $ids,
+        ?BankTransactionId $reversalTransactionId = null,
+        ?string $note = null,
+    ): InvoiceIdList {
+        return DB::transaction(static function () use ($ids, $reversalTransactionId, $note): InvoiceIdList {
+            $declinable = Invoice::query()
+                ->whereIn('id', $ids->values())
+                ->where('status', InvoiceStatus::Pending)
+                ->get(['id', 'sepa_batch_id']);
+
+            $declinedIds = new InvoiceIdList(
+                $declinable->pluck('id')->map(InvoiceId::create(...))->all(),
+            );
+
+            foreach ($declinable as $invoice) {
+                InvoiceDecline::query()->create([
+                    'invoice_id' => $invoice->id,
+                    'sepa_batch_id' => $invoice->sepa_batch_id,
+                    'bank_transaction_id' => $reversalTransactionId?->value,
+                    'declined_at' => now(),
+                    'note' => $note,
+                ]);
+            }
+
+            if ($declinedIds->ids !== []) {
+                Invoice::query()
+                    ->whereIn('id', $declinedIds->values())
+                    ->update(['status' => InvoiceStatus::Declined]);
+            }
+
+            return $declinedIds;
+        });
+    }
+
+    #[Override]
+    public function reopen(InvoiceIdList $ids): void
     {
         Invoice::query()
-            ->whereIn('id', array_map(static fn (InvoiceId $id) => $id->value, $ids->ids))
-            ->where('status', InvoiceStatus::Pending)
-            ->update(['status' => InvoiceStatus::Declined]);
+            ->whereIn('id', $ids->values())
+            ->where('status', InvoiceStatus::Declined)
+            ->whereNull('credit_invoice_id')
+            ->update([
+                'status' => InvoiceStatus::Open,
+                'sepa_batch_id' => null,
+                'sent_at' => null,
+            ]);
+    }
+
+    #[Override]
+    public function markAsPendingIfDeclined(InvoiceIdList $ids): void
+    {
+        Invoice::query()
+            ->whereIn('id', $ids->values())
+            ->where('status', InvoiceStatus::Declined)
+            ->update(['status' => InvoiceStatus::Pending]);
     }
 
     #[Override]

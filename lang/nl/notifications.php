@@ -29,6 +29,8 @@ return [
     'batch_completed' => 'Factuurbatch succesvol afgerond',
     'batch_not_completable' => 'De batch kan niet worden afgerond: er zijn nog open of in behandeling zijnde facturen',
     'invoice_status_updated' => 'Factuurstatus succesvol bijgewerkt',
+    'invoice_reopened' => 'Factuur heropend',
+    'declined_payments_retried' => 'Geweigerde betalingen opnieuw ingepland',
     'sepa_exported' => 'SEPA-bestand succesvol geëxporteerd',
     'no_invoices_to_export' => 'Geen facturen om te exporteren',
     'purchase_order_marked_approved' => 'Inkooporder gemarkeerd als goedgekeurd',

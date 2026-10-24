@@ -33,7 +33,7 @@ final class AttachInvoiceAction
                         $model = GetTransaction::get($livewire, $record);
 
                         return Invoice::query()
-                            ->openOrPending()
+                            ->outstandingOrDeclined()
                             ->whereDoesntHave('bankTransactions', static function ($query) use ($model): void {
                                 $query->where('bank_transaction_id', $model->id);
                             })

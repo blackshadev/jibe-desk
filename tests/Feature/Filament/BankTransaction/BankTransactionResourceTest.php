@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament\BankTransaction;
 
+use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionStatus;
 use App\Filament\Admin\Resources\BankTransactions\Pages\CreateBankTransaction;
@@ -189,6 +190,63 @@ final class BankTransactionResourceTest extends FeatureTestCase
 
                 return array_keys($options) === [PurchaseOrder::query()->pending()->sole()->id];
             });
+    }
+
+    public function test_attach_invoice_action_offers_a_declined_invoice(): void
+    {
+        $this->withAuthorizedUser();
+
+        $transaction = BankTransaction::factory()->create([
+            'amount' => 150.000,
+            'status' => BankTransactionStatus::Open,
+        ]);
+        $declined = Invoice::factory()->createQuietly([
+            'status' => InvoiceStatus::Declined,
+            'date' => now()->toDateString(),
+        ]);
+        $paid = Invoice::factory()->createQuietly([
+            'status' => InvoiceStatus::Paid,
+            'date' => now()->toDateString(),
+        ]);
+
+        Livewire::test(InvoicesRelationManager::class, [
+            'ownerRecord' => $transaction,
+            'pageClass' => ViewBankTransaction::class,
+        ])
+            ->mountTableAction('attachInvoice')
+            ->assertSchemaComponentExists('invoice_id', 'mountedActionSchema0', static function (Select $select) use ($declined, $paid): bool {
+                /** @var array<int, string> $options */
+                $options = $select->getOptions();
+
+                return array_key_exists($declined->id, $options) && !array_key_exists($paid->id, $options);
+            });
+    }
+
+    public function test_attach_invoice_action_attaches_a_declined_invoice(): void
+    {
+        $this->withAuthorizedUser();
+
+        $transaction = BankTransaction::factory()->create([
+            'amount' => 150.000,
+            'status' => BankTransactionStatus::Open,
+        ]);
+        $declined = Invoice::factory()->createQuietly([
+            'status' => InvoiceStatus::Declined,
+            'date' => now()->toDateString(),
+        ]);
+
+        Livewire::test(InvoicesRelationManager::class, [
+            'ownerRecord' => $transaction,
+            'pageClass' => ViewBankTransaction::class,
+        ])
+            ->callTableAction('attachInvoice', data: ['invoice_id' => $declined->id])
+            ->assertHasNoTableActionErrors();
+
+        $this->assertDatabaseHas('bank_transaction_references', [
+            'bank_transaction_id' => $transaction->id,
+            'reference_type' => Invoice::class,
+            'reference_id' => $declined->id,
+        ]);
     }
 
     public function test_can_create_bookkeeping_record_from_transaction(): void

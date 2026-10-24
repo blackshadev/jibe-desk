@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Billing\Payment;
 
+use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Payment\Events\SepaBatchClosed;
 use App\Domain\Bookkeeping\BookkeepingRecords\BookkeepingRecordRepository;
 use DateTimeInterface;
@@ -65,5 +66,11 @@ final readonly class SepaBatchServiceImpl implements SepaBatchService
     public function completeBatch(SepaBatchId $batchId): void
     {
         $this->batchRepository->completeBatch($batchId);
+    }
+
+    #[Override]
+    public function attachInvoices(SepaBatchId $batchId, InvoiceIdList $ids): int
+    {
+        return $this->batchRepository->attachInvoices($batchId, $ids);
     }
 }

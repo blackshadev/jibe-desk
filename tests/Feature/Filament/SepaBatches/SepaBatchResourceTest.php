@@ -278,4 +278,64 @@ final class SepaBatchResourceTest extends FeatureTestCase
             'sepa_batch_id' => $batch->id,
         ]);
     }
+
+    public function test_retry_declined_action_moves_declined_invoices_into_the_chosen_open_batch(): void
+    {
+        $this->withAuthorizedUser();
+
+        $sourceBatch = SepaBatch::factory()->create(['status' => SepaBatchStatus::Pending]);
+        $targetBatch = SepaBatch::factory()->create(['status' => SepaBatchStatus::Open]);
+        $invoice = Invoice::factory()->createQuietly([
+            'status' => InvoiceStatus::Declined,
+            'sepa_batch_id' => $sourceBatch->id,
+            'sent_at' => now(),
+        ]);
+
+        Livewire::test(EditSepaBatch::class, ['record' => $sourceBatch->getRouteKey()])
+            ->callAction('retryDeclined', data: ['target_batch_id' => $targetBatch->id]);
+
+        $this->assertDatabaseHas('invoices', [
+            'id' => $invoice->id,
+            'status' => InvoiceStatus::Open->value,
+            'sepa_batch_id' => $targetBatch->id,
+            'sent_at' => null,
+        ]);
+    }
+
+    public function test_retry_declined_action_is_hidden_when_the_batch_has_no_declined_invoices(): void
+    {
+        $this->withAuthorizedUser();
+
+        $batch = SepaBatch::factory()->create(['status' => SepaBatchStatus::Pending]);
+        Invoice::factory()->createQuietly([
+            'status' => InvoiceStatus::Open,
+            'sepa_batch_id' => $batch->id,
+        ]);
+
+        Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
+            ->assertActionHidden('retryDeclined');
+    }
+
+    public function test_retry_declined_action_rejects_a_non_open_target_batch(): void
+    {
+        $this->withAuthorizedUser();
+
+        $sourceBatch = SepaBatch::factory()->create(['status' => SepaBatchStatus::Pending]);
+        $targetBatch = SepaBatch::factory()->create(['status' => SepaBatchStatus::Pending]);
+        SepaBatch::factory()->create(['status' => SepaBatchStatus::Open]);
+        $invoice = Invoice::factory()->createQuietly([
+            'status' => InvoiceStatus::Declined,
+            'sepa_batch_id' => $sourceBatch->id,
+        ]);
+
+        Livewire::test(EditSepaBatch::class, ['record' => $sourceBatch->getRouteKey()])
+            ->callAction('retryDeclined', data: ['target_batch_id' => $targetBatch->id])
+            ->assertHasActionErrors(['target_batch_id']);
+
+        $this->assertDatabaseHas('invoices', [
+            'id' => $invoice->id,
+            'status' => InvoiceStatus::Declined->value,
+            'sepa_batch_id' => $sourceBatch->id,
+        ]);
+    }
 }

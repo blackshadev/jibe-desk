@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\Invoices\Tables;
 
 use App\Domain\Billing\Invoices\InvoiceId;
-use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Invoices\InvoiceService;
 use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Domain\SharedKernel\CompoundPrice;
+use App\Filament\Admin\Resources\Invoices\Actions\InvoiceStateActions;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
 use App\Filament\Admin\Utils\ResourceRouteHelper;
 use App\Models\Invoice;
@@ -106,41 +106,7 @@ final class InvoicesTable
             ->recordUrl(ResourceRouteHelper::viewOrEdit(InvoiceResource::class))
             ->recordActions([
                 ActionGroup::make([
-                    Action::make('markAsPending')
-                        ->label(__('labels.mark_as_pending'))
-                        ->icon('heroicon-m-clock')
-                        ->color('gray')
-                        ->requiresConfirmation()
-                        ->modalDescription(__('labels.manual_mark_pending_warning'))
-                        ->visible(static fn (Invoice $record) => auth()->user()?->can('mark-pending', $record) ?? false)
-                        ->action(static function (Invoice $record, InvoiceService $invoiceService): void {
-                            $invoiceService->markAsPending(new InvoiceIdList([InvoiceId::create($record->id)]));
-                        })
-                        ->successNotificationTitle(__('notifications.invoice_status_updated')),
-
-                    Action::make('markAsPaid')
-                        ->label(__('labels.mark_as_paid'))
-                        ->icon('heroicon-m-banknotes')
-                        ->color('success')
-                        ->requiresConfirmation()
-                        ->modalDescription(__('labels.manual_mark_paid_warning'))
-                        ->visible(static fn (Invoice $record) => auth()->user()?->can('mark-paid', $record) ?? false)
-                        ->action(static function (Invoice $record, InvoiceService $invoiceService) {
-                            $invoiceService->markAsPaid(new InvoiceIdList([InvoiceId::create($record->id)]));
-                        })
-                        ->successNotificationTitle(__('notifications.invoice_status_updated')),
-
-                    Action::make('markAsDeclined')
-                        ->label(__('labels.mark_as_declined'))
-                        ->icon('heroicon-m-x-circle')
-                        ->color('danger')
-                        ->requiresConfirmation()
-                        ->modalDescription(__('labels.manual_mark_declined_warning'))
-                        ->visible(static fn (Invoice $record) => auth()->user()?->can('mark-declined', $record) ?? false)
-                        ->action(static function (Invoice $record, InvoiceService $invoiceService) {
-                            $invoiceService->markAsDeclined(new InvoiceIdList([InvoiceId::create($record->id)]));
-                        })
-                        ->successNotificationTitle(__('notifications.invoice_status_updated')),
+                    ...InvoiceStateActions::make(),
 
                     Action::make('createCredit')
                         ->label(__('labels.create_credit_invoice'))

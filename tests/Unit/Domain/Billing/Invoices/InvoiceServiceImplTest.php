@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Billing\Invoices;
 
+use App\Domain\Billing\Invoices\Events\InvoicePaymentDeclined;
 use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Invoices\InvoiceServiceImpl;
@@ -12,6 +13,7 @@ use App\Domain\Billing\Invoices\SendInvoiceEmailData;
 use Override;
 use Tests\Unit\Domain\Bookkeeping\BookkeepingRecords\BookkeepingRecordRepositoryExpectation;
 use Tests\Unit\Domain\Jobs\JobDispatcherExpectation;
+use Tests\Unit\Laravel\EventDispatcherExpectation;
 use Tests\UnitTestCase;
 
 final class InvoiceServiceImplTest extends UnitTestCase
@@ -19,6 +21,7 @@ final class InvoiceServiceImplTest extends UnitTestCase
     private CreateInvoiceExpectation $repo;
     private BookkeepingRecordRepositoryExpectation $bookkeepingRepo;
     private JobDispatcherExpectation $jobDispatcher;
+    private EventDispatcherExpectation $eventDispatcher;
     private InvoiceServiceImpl $service;
 
     #[Override]
@@ -29,11 +32,13 @@ final class InvoiceServiceImplTest extends UnitTestCase
         $this->repo = CreateInvoiceExpectation::create();
         $this->bookkeepingRepo = BookkeepingRecordRepositoryExpectation::create();
         $this->jobDispatcher = JobDispatcherExpectation::create();
+        $this->eventDispatcher = EventDispatcherExpectation::create();
 
         $this->service = new InvoiceServiceImpl(
             $this->repo->mock,
             $this->bookkeepingRepo->mock,
             $this->jobDispatcher->mock,
+            $this->eventDispatcher->mock,
         );
     }
 
@@ -60,12 +65,26 @@ final class InvoiceServiceImplTest extends UnitTestCase
         $this->service->markAsPaid($ids);
     }
 
-    public function test_mark_as_declined_updates_status(): void
+    public function test_mark_as_declined_dispatches_event_for_each_transitioned_invoice(): void
     {
-        $id = InvoiceId::create(1);
-        $ids = new InvoiceIdList([$id]);
+        $id1 = InvoiceId::create(1);
+        $id2 = InvoiceId::create(2);
+        $ids = new InvoiceIdList([$id1, $id2]);
+        $return = new InvoiceIdList([$id1, $id2]);
 
-        $this->repo->expectsMarkAsDeclined($ids);
+        $this->repo->expectsMarkAsDeclined($ids, null, null, $return);
+        $this->eventDispatcher->expectsDispatch(new InvoicePaymentDeclined($id1));
+        $this->eventDispatcher->expectsDispatch(new InvoicePaymentDeclined($id2));
+
+        $this->service->markAsDeclined($ids);
+    }
+
+    public function test_mark_as_declined_does_not_dispatch_when_nothing_transitioned(): void
+    {
+        $ids = InvoiceIdList::fromArray([1, 2]);
+
+        $this->repo->expectsMarkAsDeclined($ids, null, null, InvoiceIdList::fromArray([]));
+        $this->eventDispatcher->expectsNotToDispatch();
 
         $this->service->markAsDeclined($ids);
     }
@@ -75,10 +94,31 @@ final class InvoiceServiceImplTest extends UnitTestCase
         $id = InvoiceId::create(1);
         $ids = new InvoiceIdList([$id]);
 
-        $this->repo->expectsMarkAsDeclined($ids);
+        $this->repo->expectsMarkAsDeclined($ids, null, null, new InvoiceIdList([$id]));
         $this->bookkeepingRepo->mock->shouldNotHaveReceived('createForInvoice');
+        $this->eventDispatcher->expectsDispatch(new InvoicePaymentDeclined($id));
 
         $this->service->markAsDeclined($ids);
+    }
+
+    public function test_reopen_delegates_to_repository(): void
+    {
+        $id = InvoiceId::create(1);
+        $ids = new InvoiceIdList([$id]);
+
+        $this->repo->expectsReopen($ids);
+
+         $this->service->reopen($ids);
+    }
+
+    public function test_restore_declined_updates_only_declined_and_creates_bookkeeping_records(): void
+    {
+        $ids = InvoiceIdList::fromArray([1, 2]);
+
+        $this->repo->expectsMarkAsPendingIfDeclined($ids);
+        $this->bookkeepingRepo->expectsCreateForInvoice($ids);
+
+        $this->service->restoreDeclined($ids);
     }
 
     public function test_mark_as_pending_delegates_to_repository_and_dispatches_job(): void

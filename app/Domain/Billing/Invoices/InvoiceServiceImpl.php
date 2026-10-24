@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Domain\Billing\Invoices;
 
+use App\Domain\Billing\Invoices\Events\InvoicePaymentDeclined;
 use App\Domain\Billing\Invoices\Jobs\SendInvoiceEmail;
+use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
 use App\Domain\Bookkeeping\BookkeepingRecords\BookkeepingRecordRepository;
 use App\Domain\Jobs\JobDispatcher;
+use Illuminate\Contracts\Events\Dispatcher;
 use Override;
 
 final readonly class InvoiceServiceImpl implements InvoiceService
@@ -15,6 +18,7 @@ final readonly class InvoiceServiceImpl implements InvoiceService
         private InvoiceRepository $invoiceRepository,
         private BookkeepingRecordRepository $bookkeepingRepository,
         private JobDispatcher $jobDispatcher,
+        private Dispatcher $eventDispatcher,
     ) {}
 
     #[Override]
@@ -31,9 +35,29 @@ final readonly class InvoiceServiceImpl implements InvoiceService
     }
 
     #[Override]
-    public function markAsDeclined(InvoiceIdList $ids): void
+    public function markAsDeclined(
+        InvoiceIdList $ids,
+        ?BankTransactionId $reversalTransactionId = null,
+        ?string $note = null,
+    ): void {
+        $declinedIds = $this->invoiceRepository->markAsDeclined($ids, $reversalTransactionId, $note);
+
+        foreach ($declinedIds->ids as $invoiceId) {
+            $this->eventDispatcher->dispatch(new InvoicePaymentDeclined($invoiceId));
+        }
+    }
+
+    #[Override]
+    public function reopen(InvoiceIdList $ids): void
     {
-        $this->invoiceRepository->markAsDeclined($ids);
+        $this->invoiceRepository->reopen($ids);
+    }
+
+    #[Override]
+    public function restoreDeclined(InvoiceIdList $ids): void
+    {
+        $this->invoiceRepository->markAsPendingIfDeclined($ids);
+        $this->bookkeepingRepository->createForInvoice($ids);
     }
 
     #[Override]

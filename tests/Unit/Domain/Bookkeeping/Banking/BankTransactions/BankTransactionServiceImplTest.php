@@ -199,10 +199,10 @@ final class BankTransactionServiceImplTest extends FeatureTestCase
 
         $this->repo->expectsGetMatchCriteriaForIds($ids, [1 => $criteria]);
         $this->matchingService->expectsFindMatch($criteria, $result);
-        $this->repo->expectsLinkReversal($originalId, $bankTransactionId);
-        $this->repo->expectsGetAttachedInvoiceIds($bankTransactionId, $emptyInvoiceIds);
-        $this->invoiceService->expectsMarkAsDeclined($emptyInvoiceIds);
-        $this->repo->expectsGetAttachedPurchaseOrderIds($bankTransactionId, $emptyPurchaseOrderIds);
+        $this->repo->expectsLinkReversal($bankTransactionId, $originalId);
+        $this->repo->expectsGetAttachedInvoiceIds($originalId, $emptyInvoiceIds);
+        $this->invoiceService->expectsMarkAsDeclined($emptyInvoiceIds, $bankTransactionId, null);
+        $this->repo->expectsGetAttachedPurchaseOrderIds($originalId, $emptyPurchaseOrderIds);
         $this->purchaseOrderService->expectsMarkAsPaymentDeclined($emptyPurchaseOrderIds);
         $this->repo->expectsMarkAsResolved($originalId);
         $this->repo->expectsMarkAsResolved($bankTransactionId);
@@ -220,7 +220,7 @@ final class BankTransactionServiceImplTest extends FeatureTestCase
 
         $this->repo->expectsLinkReversal($reversalId, $originalId);
         $this->repo->expectsGetAttachedInvoiceIds($originalId, $invoiceIds);
-        $this->invoiceService->expectsMarkAsDeclined($invoiceIds);
+        $this->invoiceService->expectsMarkAsDeclined($invoiceIds, $reversalId, null);
         $this->repo->expectsGetAttachedPurchaseOrderIds($originalId, $emptyPurchaseOrderIds);
         $this->purchaseOrderService->expectsMarkAsPaymentDeclined($emptyPurchaseOrderIds);
         $this->repo->expectsMarkAsResolved($reversalId);
@@ -238,7 +238,7 @@ final class BankTransactionServiceImplTest extends FeatureTestCase
 
         $this->repo->expectsLinkReversal($reversalId, $originalId);
         $this->repo->expectsGetAttachedInvoiceIds($originalId, $emptyInvoiceIds);
-        $this->invoiceService->expectsMarkAsDeclined($emptyInvoiceIds);
+        $this->invoiceService->expectsMarkAsDeclined($emptyInvoiceIds, $reversalId, null);
         $this->repo->expectsGetAttachedPurchaseOrderIds($originalId, $purchaseOrderIds);
         $this->purchaseOrderService->expectsMarkAsPaymentDeclined($purchaseOrderIds);
         $this->repo->expectsMarkAsResolved($reversalId);
@@ -256,7 +256,7 @@ final class BankTransactionServiceImplTest extends FeatureTestCase
 
         $this->repo->expectsLinkReversal($reversalId, $originalId);
         $this->repo->expectsGetAttachedInvoiceIds($originalId, $emptyInvoiceIds);
-        $this->invoiceService->expectsMarkAsDeclined($emptyInvoiceIds);
+        $this->invoiceService->expectsMarkAsDeclined($emptyInvoiceIds, $reversalId, null);
         $this->repo->expectsGetAttachedPurchaseOrderIds($originalId, $emptyPurchaseOrderIds);
         $this->purchaseOrderService->expectsMarkAsPaymentDeclined($emptyPurchaseOrderIds);
         $this->repo->expectsMarkAsResolved($reversalId);
@@ -272,7 +272,7 @@ final class BankTransactionServiceImplTest extends FeatureTestCase
         $purchaseOrderIds = PurchaseOrderIdList::fromArray([30, 40]);
 
         $this->repo->expectsGetAttachedInvoiceIds($reversalId, $invoiceIds);
-        $this->invoiceService->expectsMarkAsPending($invoiceIds);
+        $this->invoiceService->expectsRestoreDeclined($invoiceIds);
         $this->repo->expectsGetAttachedPurchaseOrderIds($reversalId, $purchaseOrderIds);
         $this->purchaseOrderService->expectsMarkAsPaid($purchaseOrderIds);
         $this->repo->expectsUnlinkReversal($reversalId);
