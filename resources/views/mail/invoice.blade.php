@@ -28,9 +28,12 @@ U ontvangt het terug te betalen bedrag op het bij ons bekende rekeningnummer {{ 
 @elseif ($sepaTransferDate)
 Het bedrag wordt automatisch geïncasseerd op {{ $sepaTransferDate->format('d-m-Y') }}.
 @else
-Het bedrag dient u over te maken naar rekeningnummer **{{ $creditorIban }}**
-ten name van **{{ $creditorAccountName }}**
-onder vermelding van **factuurnummer {{ $invoiceNumber }}**.
+@include('mail.partials.transfer-instructions', [
+    'amount' => $total,
+    'creditorIban' => $creditorIban,
+    'creditorAccountName' => $creditorAccountName,
+    'invoiceNumber' => $invoiceNumber,
+])
 @endif
 
 Met vriendelijke groet,<br>

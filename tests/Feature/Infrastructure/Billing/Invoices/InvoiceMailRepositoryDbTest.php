@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Tests\Feature\Infrastructure\Billing\Invoices;
 
 use App\Domain\Billing\Invoices\InvoiceId;
+use App\Domain\Billing\Invoices\InvoicePaymentDeclinedMailUnavailableException;
+use App\Domain\Billing\Invoices\InvoicePaymentDeclinedMailUnavailableReason;
+use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Infrastructure\Billing\Invoices\InvoiceMailRepositoryDb;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;
@@ -195,5 +198,140 @@ final class InvoiceMailRepositoryDbTest extends FeatureTestCase
         $this->repository->markInvoiceAsSent(InvoiceId::create($invoice->id));
 
         static::assertNotNull($invoice->fresh()->sent_at);
+    }
+
+    public function test_get_invoice_payment_declined_mail_data_returns_the_invoice_and_snapshot_recipient(): void
+    {
+        $invoice = Invoice::factory()->createQuietly([
+            'status' => InvoiceStatus::Declined,
+            'date' => '2026-06-01',
+            'invoice_number' => 'I-20260001',
+            'recipient_name' => 'Test Lid',
+            'recipient_email' => 'gezin@example.com',
+        ]);
+
+        InvoiceLine::factory()->for($invoice)->createQuietly([
+            'price' => 50.00,
+            'quantity' => 2,
+            'vat' => 10.50,
+        ]);
+
+        $result = $this->repository->getInvoicePaymentDeclinedMailData(InvoiceId::create($invoice->id));
+
+        static::assertSame($invoice->id, $result->invoiceId->value);
+        static::assertSame('I-20260001', $result->invoiceNumber);
+        static::assertSame('Test Lid', $result->recipient->name);
+        static::assertSame('gezin@example.com', $result->recipient->email);
+        static::assertSame('2026-06-01', $result->invoiceDate->format('Y-m-d'));
+        static::assertSame(100.00, $result->total->price);
+        static::assertFalse($result->mandateNeedsReauthorisation);
+    }
+
+    public function test_get_invoice_payment_declined_mail_data_throws_for_a_non_declined_invoice(): void
+    {
+        $invoice = Invoice::factory()->createQuietly(['status' => InvoiceStatus::Pending]);
+
+        $this->expectInvoicePaymentDeclinedMailUnavailable(
+            InvoiceId::create($invoice->id),
+            InvoicePaymentDeclinedMailUnavailableReason::InvoiceNotDeclined,
+        );
+    }
+
+    public function test_get_invoice_payment_declined_mail_data_throws_for_a_credit_invoice(): void
+    {
+        $original = Invoice::factory()->createQuietly(['status' => InvoiceStatus::Paid]);
+        $credit = Invoice::factory()->createQuietly([
+            'status' => InvoiceStatus::Declined,
+            'credit_invoice_id' => $original->id,
+        ]);
+
+        $this->expectInvoicePaymentDeclinedMailUnavailable(
+            InvoiceId::create($credit->id),
+            InvoicePaymentDeclinedMailUnavailableReason::InvoiceIsCreditInvoice,
+        );
+    }
+
+    public function test_get_invoice_payment_declined_mail_data_throws_for_an_invoice_that_has_a_credit_invoice(): void
+    {
+        $invoice = Invoice::factory()->createQuietly(['status' => InvoiceStatus::Declined]);
+
+        Invoice::factory()->createQuietly([
+            'status' => InvoiceStatus::Open,
+            'credit_invoice_id' => $invoice->id,
+        ]);
+
+        $this->expectInvoicePaymentDeclinedMailUnavailable(
+            InvoiceId::create($invoice->id),
+            InvoicePaymentDeclinedMailUnavailableReason::InvoiceIsCreditInvoice,
+        );
+    }
+
+    public function test_get_invoice_payment_declined_mail_data_throws_when_the_recipient_email_is_blank(): void
+    {
+        $invoice = Invoice::factory()->createQuietly([
+            'status' => InvoiceStatus::Declined,
+            'recipient_email' => '',
+        ]);
+
+        $this->expectInvoicePaymentDeclinedMailUnavailable(
+            InvoiceId::create($invoice->id),
+            InvoicePaymentDeclinedMailUnavailableReason::RecipientEmailMissing,
+        );
+    }
+
+    public function test_get_invoice_payment_declined_mail_data_throws_when_the_invoice_does_not_exist(): void
+    {
+        $this->expectInvoicePaymentDeclinedMailUnavailable(
+            InvoiceId::create(999_999),
+            InvoicePaymentDeclinedMailUnavailableReason::InvoiceNotFound,
+        );
+    }
+
+    public function test_get_invoice_payment_declined_mail_data_defaults_the_reauthorisation_flag_to_false(): void
+    {
+        $member = Member::factory()->createQuietly();
+        PaymentInformation::factory()->for($member)->createQuietly([
+            'mandate_accepted_date' => '2025-01-15',
+        ]);
+
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->createQuietly(['status' => InvoiceStatus::Declined]);
+
+        $result = $this->repository->getInvoicePaymentDeclinedMailData(InvoiceId::create($invoice->id));
+
+        static::assertFalse($result->mandateNeedsReauthorisation);
+    }
+
+    public function test_get_invoice_payment_declined_mail_data_uses_the_invoice_recipient_snapshot(): void
+    {
+        $member = Member::factory()->createQuietly(['email' => 'member@example.com']);
+
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->createQuietly([
+                'status' => InvoiceStatus::Declined,
+                'recipient_email' => 'gezin@example.com',
+            ]);
+
+        $member->update(['email' => 'new-address@example.com']);
+
+        $result = $this->repository->getInvoicePaymentDeclinedMailData(InvoiceId::create($invoice->id));
+
+        static::assertSame('gezin@example.com', $result->recipient->email);
+    }
+
+    private function expectInvoicePaymentDeclinedMailUnavailable(
+        InvoiceId $invoiceId,
+        InvoicePaymentDeclinedMailUnavailableReason $reason,
+    ): void {
+        try {
+            $this->repository->getInvoicePaymentDeclinedMailData($invoiceId);
+
+            static::fail('Expected an InvoicePaymentDeclinedMailUnavailableException.');
+        } catch (InvoicePaymentDeclinedMailUnavailableException $exception) {
+            static::assertSame($invoiceId, $exception->invoiceId);
+            static::assertSame($reason, $exception->reason);
+        }
     }
 }

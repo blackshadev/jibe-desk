@@ -11,5 +11,8 @@ interface InvoiceMailRepository
 {
     public function getInvoiceMailData(InvoiceId $id): InvoiceMailData;
 
+    /** @throws InvoicePaymentDeclinedMailUnavailableException */
+    public function getInvoicePaymentDeclinedMailData(InvoiceId $id): InvoicePaymentDeclinedMailData;
+
     public function markInvoiceAsSent(InvoiceId $id): void;
 }

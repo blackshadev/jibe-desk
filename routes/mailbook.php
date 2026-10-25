@@ -2,13 +2,16 @@
 
 declare(strict_types=1);
 
+use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\SharedKernel\CompoundPrice;
 use App\Domain\Billing\Payment\SepaBatchEmailData;
 use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Billing\Invoices\InvoiceMailData;
 use App\Domain\Billing\Invoices\InvoiceMailLine;
+use App\Domain\Billing\Invoices\InvoicePaymentDeclinedMailData;
 use App\Domain\Billing\Payment\Mails\SepaBatchCreatedMail;
 use App\Domain\Billing\Invoices\Mails\InvoiceMail;
+use App\Domain\Billing\Invoices\Mails\InvoicePaymentDeclinedMail;
 use App\Domain\Billing\Payment\SepaConfiguration;
 use App\Domain\Mail\Recipient;
 use App\Domain\Members\Mails\MemberWelcome;
@@ -145,6 +148,34 @@ Mailbook::add(InvoiceMail::class)
         );
 
         return new MailMailable(new InvoiceMail($data, $config));
+    });
+
+Mailbook::add(InvoicePaymentDeclinedMail::class)
+    ->variant('Declined payment', static function (SepaConfiguration $config): Mailable {
+        return new MailMailable(new InvoicePaymentDeclinedMail(
+            new InvoicePaymentDeclinedMailData(
+                invoiceId: InvoiceId::create(3),
+                invoiceNumber: '1234',
+                recipient: new Recipient('Jan de Vries', 'jan@devries.nl'),
+                invoiceDate: new DateTimeImmutable('2024-01-01'),
+                total: new CompoundPrice(120, 25.2),
+                mandateNeedsReauthorisation: false,
+            ),
+            $config,
+        ));
+    })
+    ->variant('Declined payment - re-authorise mandate', static function (SepaConfiguration $config): Mailable {
+        return new MailMailable(new InvoicePaymentDeclinedMail(
+            new InvoicePaymentDeclinedMailData(
+                invoiceId: InvoiceId::create(3),
+                invoiceNumber: '1234',
+                recipient: new Recipient('Jan de Vries', 'jan@devries.nl'),
+                invoiceDate: new DateTimeImmutable('2024-01-01'),
+                total: new CompoundPrice(120, 25.2),
+                mandateNeedsReauthorisation: true,
+            ),
+            $config,
+        ));
     });
 
 Mailbook::add(SepaBatchCreatedMail::class)

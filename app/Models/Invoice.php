@@ -24,6 +24,7 @@ use Override;
  * @property InvoiceStatus $status
  * @property DateTimeInterface $date
  * @property DateTimeInterface|null $sent_at
+ * @property-read bool $is_credit
  */
 #[Guarded(['id', 'created_at', 'updated_at'])]
 final class Invoice extends Model
@@ -130,6 +131,14 @@ final class Invoice extends Model
                 static fn (CompoundPrice $total, InvoiceLine $line): CompoundPrice => $total->add($line->subTotal),
                 CompoundPrice::empty(),
             ),
+        );
+    }
+
+    /** @return Attribute<bool, never> */
+    protected function isCredit(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->credit_invoice_id !== null || $this->creditInvoice()->exists(),
         );
     }
 }
