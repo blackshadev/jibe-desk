@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Members\Tables;
 
+use App\Domain\Billing\Payment\MandateExpiry;
+use App\Domain\Billing\Payment\MandateState;
 use App\Domain\Members\AcceptMemberService;
 use App\Domain\Members\MemberId;
 use App\Filament\Admin\Resources\Members\MemberResource;
 use App\Filament\Admin\Utils\ResourceRouteHelper;
+use App\Models\Member;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -27,6 +30,18 @@ final class MembersTable
                     ->label(__('labels.name')),
                 TextColumn::make('membership.name')
                     ->label(__('labels.membership')),
+                TextColumn::make('mandate_state')
+                    ->label(__('labels.mandate_state'))
+                    ->badge()
+                    ->state(static fn (Member $record): ?MandateState => $record->paymentInformation?->state(app(MandateExpiry::class)))
+                    ->formatStateUsing(static fn (?MandateState $state): string => $state === null
+                        ? __('labels.no_active_mandate')
+                        : __('labels.mandate_states.' . $state->value))
+                    ->color(static fn (?MandateState $state): string => match ($state) {
+                        MandateState::Active => 'success',
+                        MandateState::Expired => 'warning',
+                        MandateState::Revoked, null => 'gray',
+                    }),
                 TextColumn::make('user.email')
                     ->label(__('labels.account'))
                     ->placeholder(__('labels.no_account'))

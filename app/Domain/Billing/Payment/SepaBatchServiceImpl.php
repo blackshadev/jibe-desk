@@ -25,6 +25,7 @@ final readonly class SepaBatchServiceImpl implements SepaBatchService
         private SepaExportService $exportService,
         private ExportReadinessService $readinessService,
         private ClockInterface $clock,
+        private MandateRepository $mandateRepository,
     ) {}
 
     #[Override]
@@ -109,6 +110,13 @@ final readonly class SepaBatchServiceImpl implements SepaBatchService
     #[Override]
     public function markSubmitted(SepaBatchId $batchId, int $submittedByUserId): void
     {
-        $this->batchRepository->markSubmitted($batchId, $submittedByUserId, $this->clock->now());
+        $submittedAt = $this->clock->now();
+
+        $this->batchRepository->markSubmitted($batchId, $submittedByUserId, $submittedAt);
+
+        $this->mandateRepository->stampCollections(
+            new PaymentInformationIdList($this->batchRepository->getCollectedMandateIds($batchId)),
+            $submittedAt,
+        );
     }
 }

@@ -14,6 +14,7 @@ use App\Filament\Admin\Resources\Members\RelationManagers\ActivitiesRelationMana
 use App\Filament\Admin\Resources\Members\RelationManagers\BillableItemInstancesRelationManager;
 use App\Filament\Admin\Resources\Members\RelationManagers\HouseholdMembersRelationManager;
 use App\Filament\Admin\Resources\Members\RelationManagers\InvoicesRelationManager;
+use App\Filament\Admin\Resources\Members\RelationManagers\MandatesRelationManager;
 use App\Filament\Admin\Resources\Members\RelationManagers\MemberObjectsRelationManager;
 use App\Filament\Admin\Resources\Members\RelationManagers\OutgoingEmailsRelationManager;
 use App\Filament\Admin\Resources\Members\RelationManagers\PurchaseOrdersRelationManager;
@@ -66,7 +67,7 @@ final class MemberResource extends Resource
     #[Override]
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery();
+        $query = parent::getEloquentQuery()->with('paymentInformation');
 
         $user = auth()->user();
 
@@ -82,6 +83,7 @@ final class MemberResource extends Resource
     {
         return [
             HouseholdMembersRelationManager::make(),
+            MandatesRelationManager::make(),
             InvoicesRelationManager::make(),
             PurchaseOrdersRelationManager::make(),
             BillableItemInstancesRelationManager::make(),

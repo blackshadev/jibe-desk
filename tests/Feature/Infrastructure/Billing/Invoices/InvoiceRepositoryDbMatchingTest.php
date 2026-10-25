@@ -177,8 +177,7 @@ final class InvoiceRepositoryDbMatchingTest extends FeatureTestCase
         static::assertNull($result);
     }
 
-    public function test_it_picks_closest_amount_when_multiple_candidates(): void
-    {
+    public function test_it_picks_closest_amount_when_multiple_candidates(): void    {
         $iban = 'NL91ABNA0417164300';
         $member = Member::factory()->createQuietly();
         PaymentInformation::factory()->create([
@@ -212,5 +211,60 @@ final class InvoiceRepositoryDbMatchingTest extends FeatureTestCase
 
         static::assertInstanceOf(InvoiceId::class, $result);
         static::assertEquals($invoice2->id, $result->value);
+    }
+
+    public function test_find_matching_credit_matches_the_iban_of_a_revoked_mandate(): void
+    {
+        $iban = 'NL91ABNA0417164300';
+        $member = Member::factory()->createQuietly();
+        PaymentInformation::factory()
+            ->revoked(new DateTimeImmutable('2026-01-01'))
+            ->create([
+                'member_id' => $member->id,
+                'banking_account_number' => $iban,
+            ]);
+
+        $invoice = Invoice::factory()->create([
+            'member_id' => $member->id,
+            'status' => InvoiceStatus::Pending,
+            'date' => '2026-01-15',
+        ]);
+        InvoiceLine::factory()->create([
+            'invoice_id' => $invoice->id,
+            'price' => 100.00,
+            'quantity' => 1,
+        ]);
+
+        $result = $this->repository->findMatchingCredit($iban, 100.00, new DateTimeImmutable('2026-01-15'));
+
+        static::assertInstanceOf(InvoiceId::class, $result);
+        static::assertEquals($invoice->id, $result->value);
+    }
+
+    public function test_find_matching_credit_still_prefers_the_amount_within_tolerance(): void
+    {
+        $iban = 'NL91ABNA0417164300';
+        $member = Member::factory()->createQuietly();
+        PaymentInformation::factory()
+            ->revoked(new DateTimeImmutable('2026-01-01'))
+            ->create([
+                'member_id' => $member->id,
+                'banking_account_number' => $iban,
+            ]);
+
+        $invoice = Invoice::factory()->create([
+            'member_id' => $member->id,
+            'status' => InvoiceStatus::Pending,
+            'date' => '2026-01-15',
+        ]);
+        InvoiceLine::factory()->create([
+            'invoice_id' => $invoice->id,
+            'price' => 100.00,
+            'quantity' => 1,
+        ]);
+
+        static::assertNull(
+            $this->repository->findMatchingCredit($iban, 100.50, new DateTimeImmutable('2026-01-15')),
+        );
     }
 }

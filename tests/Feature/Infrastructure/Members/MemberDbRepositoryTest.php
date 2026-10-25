@@ -99,6 +99,9 @@ final class MemberDbRepositoryTest extends FeatureTestCase
         static::assertSame('ABNANL2A', $paymentInfo->banking_bic);
         static::assertSame('J. de Vries', $paymentInfo->banking_account_holder_name);
         static::assertSame('2024-02-01', $paymentInfo->mandate_accepted_date->format('Y-m-d'));
+        static::assertNull($paymentInfo->revoked_at);
+        static::assertNull($paymentInfo->last_collected_at);
+        static::assertCount(1, $member->paymentInformations);
     }
 
     public function test_new_member_returns_valid_member_id(): void

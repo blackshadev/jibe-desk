@@ -61,4 +61,11 @@ interface SepaBatchRepository
     ): void;
 
     public function markSubmitted(SepaBatchId $batchId, int $submittedByUserId, DateTimeInterface $submittedAt): void;
+
+    /**
+     * Mandates with a positive, non-credit invoice in the batch.
+     *
+     * @return list<PaymentInformationId>
+     */
+    public function getCollectedMandateIds(SepaBatchId $batchId): array;
 }

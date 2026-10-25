@@ -30,7 +30,9 @@ final class SepaExportInvoiceTest extends UnitTestCase
             iban: 'NL91ABNA0417164300',
             bic: 'ABNANL2A',
             mandateId: $mandateId,
+            paymentInformationId: PaymentInformationId::create(2),
             mandateDate: $mandateDate,
+            lastCollectedAt: CarbonImmutable::parse('2026-02-15'),
         );
 
         static::assertSame($invoiceId, $subject->invoiceId);
@@ -40,7 +42,9 @@ final class SepaExportInvoiceTest extends UnitTestCase
         static::assertSame('NL91ABNA0417164300', $subject->iban);
         static::assertSame('ABNANL2A', $subject->bic);
         static::assertSame($mandateId, $subject->mandateId);
+        static::assertSame(2, $subject->paymentInformationId->value);
         static::assertSame($mandateDate, $subject->mandateDate);
+        static::assertSame('2026-02-15', $subject->lastCollectedAt?->format('Y-m-d'));
     }
 
     public function test_amount_in_cents(): void
@@ -53,7 +57,9 @@ final class SepaExportInvoiceTest extends UnitTestCase
             iban: 'NL91ABNA0417164300',
             bic: 'ABNANL2A',
             mandateId: new MandateId(MemberId::create(1), PaymentInformationId::create(1)),
+            paymentInformationId: PaymentInformationId::create(1),
             mandateDate: CarbonImmutable::parse('2026-01-01'),
+            lastCollectedAt: null,
         );
 
         static::assertSame(9995, $subject->amountInCents());

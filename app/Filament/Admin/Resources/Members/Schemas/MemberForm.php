@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Members\Schemas;
 
+use App\Domain\Billing\Payment\MandateExpiry;
+use App\Domain\Billing\Payment\MandateState;
 use App\Domain\Members\Gender;
 use App\Models\Member;
 use Filament\Forms\Components\DatePicker;
@@ -12,8 +14,9 @@ use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Grid;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Operation;
 
@@ -133,41 +136,7 @@ final class MemberForm
                             ])
                             ->visible(static fn (Member $record): bool => auth()->user()?->can('view-address-information', $record) ?? false),
 
-                        Tabs\Tab::make(__('labels.payment_information'))
-                            ->schema([
-                                Grid::make()
-                                    ->relationship('paymentInformation')
-                                    ->columns(2)
-                                    ->columnSpanFull()
-                                    ->disabled(static fn (Member $record): bool => !auth()->user()?->can('update-payment-information', $record))
-                                    ->schema([
-                                        TextInput::make('banking_account_number')
-                                            ->label(__('labels.banking_account_number'))
-                                            ->maxLength(34),
-
-                                        TextInput::make('banking_bic')
-                                            ->label(__('labels.banking_bic'))
-                                            ->maxLength(11),
-
-                                        TextInput::make('banking_account_holder_name')
-                                            ->label(__('labels.banking_account_holder_name'))
-                                            ->columnSpanFull()
-                                            ->maxLength(255),
-
-                                        DatePicker::make('mandate_accepted_date')
-                                            ->format('d-m-Y')
-                                            ->native(false)
-                                            ->disabled()
-                                            ->dehydrated(false)
-                                            ->label(__('labels.mandate_date')),
-
-                                        TextInput::make('uuid')
-                                            ->label(__('labels.reference'))
-                                            ->disabled()
-                                            ->dehydrated(false),
-                                    ]),
-                            ])
-                            ->visible(static fn (Member $record): bool => auth()->user()?->can('view-payment-information', $record) ?? false),
+                        self::paymentTab(),
 
                         Tabs\Tab::make(__('labels.registration_details'))
                             ->schema([
@@ -206,5 +175,58 @@ final class MemberForm
                             ->visible(static fn (Member $record): bool => auth()->user()?->can('view-registration-data', $record) ?? false),
                     ]),
             ]);
+    }
+
+    private static function paymentTab(): Tab
+    {
+        return Tabs\Tab::make(__('labels.payment_information'))
+            ->schema([
+                TextEntry::make('mandate_reference')
+                    ->label(__('labels.mandate_reference'))
+                    ->state(static fn (?Member $record): string => $record?->paymentInformation->mandate_reference ?? __('labels.no_active_mandate')),
+
+                TextEntry::make('mandate_state')
+                    ->label(__('labels.mandate_state'))
+                    ->state(static fn (?Member $record): string => $record?->paymentInformation === null
+                        ? __('labels.no_active_mandate')
+                        : __('labels.mandate_states.' . $record->paymentInformation->state(app(MandateExpiry::class))->value)),
+
+                TextEntry::make('active_mandate_iban')
+                    ->label(__('labels.banking_account_number'))
+                    ->state(static fn (?Member $record): string => $record?->paymentInformation->banking_account_number ?? '—'),
+
+                TextEntry::make('active_mandate_bic')
+                    ->label(__('labels.banking_bic'))
+                    ->state(static fn (?Member $record): string => $record?->paymentInformation->banking_bic ?? '—'),
+
+                TextEntry::make('active_mandate_holder')
+                    ->label(__('labels.banking_account_holder_name'))
+                    ->columnSpanFull()
+                    ->state(static fn (?Member $record): string => $record?->paymentInformation->banking_account_holder_name ?? '—'),
+
+                TextEntry::make('active_mandate_signed_at')
+                    ->label(__('labels.mandate_date'))
+                    ->state(static fn (?Member $record): ?string => $record?->paymentInformation?->mandate_accepted_date?->format('d-m-Y')),
+
+                TextEntry::make('active_mandate_last_collected_at')
+                    ->label(__('labels.last_collected_at'))
+                    ->state(static fn (?Member $record): string => $record?->paymentInformation?->last_collected_at?->format('d-m-Y') ?? '—'),
+
+                TextEntry::make('active_mandate_expires_at')
+                    ->label(__('labels.mandate_expires_at'))
+                    ->state(static fn (?Member $record): string => $record?->paymentInformation === null
+                        ? '—'
+                        : app(MandateExpiry::class)
+                            ->expiresAt($record->paymentInformation->mandate_accepted_date, $record->paymentInformation->last_collected_at)
+                            ->format('d-m-Y')),
+
+                TextEntry::make('mandate_expired_notice')
+                    ->hiddenLabel()
+                    ->columnSpanFull()
+                    ->visible(static fn (?Member $record): bool => $record?->paymentInformation !== null
+                        && $record->paymentInformation->state(app(MandateExpiry::class)) === MandateState::Expired)
+                    ->state(__('labels.mandate_expired_notice')),
+            ])
+            ->visible(static fn (Member $record): bool => auth()->user()?->can('view-payment-information', $record) ?? false);
     }
 }

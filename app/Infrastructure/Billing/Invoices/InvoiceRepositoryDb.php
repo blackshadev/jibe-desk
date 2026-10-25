@@ -259,7 +259,7 @@ final class InvoiceRepositoryDb implements InvoiceRepository
         $invoice = Invoice::query()
             ->where('status', InvoiceStatus::Pending)
             ->whereBetween('date', [$startDate, $endDate])
-            ->whereHas('member.paymentInformation', static function ($query) use ($bankingAccountNumber): void {
+            ->whereHas('member.paymentInformations', static function ($query) use ($bankingAccountNumber): void {
                 $query->where('banking_account_number', $bankingAccountNumber);
             })
             ->orderByAmountProximity($amount)

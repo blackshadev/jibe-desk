@@ -111,7 +111,13 @@ final class Member extends Model
     /** @return HasOne<PaymentInformation, $this> */
     public function paymentInformation(): HasOne
     {
-        return $this->hasOne(PaymentInformation::class);
+        return $this->hasOne(PaymentInformation::class)->whereNull('revoked_at');
+    }
+
+    /** @return HasMany<PaymentInformation, $this> */
+    public function paymentInformations(): HasMany
+    {
+        return $this->hasMany(PaymentInformation::class)->orderByDesc('id');
     }
 
     /** @return BelongsTo<Household, $this> */

@@ -6,6 +6,8 @@ namespace Tests\Unit\Domain\Billing\Payment;
 
 use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Payment\Events\SepaBatchClosed;
+use App\Domain\Billing\Payment\PaymentInformationId;
+use App\Domain\Billing\Payment\PaymentInformationIdList;
 use App\Domain\Billing\Payment\Readiness\ExportConfirmation;
 use App\Domain\Billing\Payment\Readiness\ExportNotReadyException;
 use App\Domain\Billing\Payment\Readiness\ExportReadinessIssue;
@@ -32,6 +34,7 @@ final class SepaBatchServiceTest extends UnitTestCase
     private SepaExportServiceExpectation $exportService;
     private ExportReadinessServiceExpectation $readinessService;
     private ClockExpectation $clock;
+    private MandateRepositoryExpectation $mandateRepo;
     private SepaBatchServiceImpl $service;
 
     #[Override]
@@ -45,6 +48,7 @@ final class SepaBatchServiceTest extends UnitTestCase
         $this->exportService = SepaExportServiceExpectation::create();
         $this->readinessService = ExportReadinessServiceExpectation::create();
         $this->clock = ClockExpectation::create();
+        $this->mandateRepo = MandateRepositoryExpectation::create();
 
         $this->service = new SepaBatchServiceImpl(
             $this->repo->mock,
@@ -53,6 +57,7 @@ final class SepaBatchServiceTest extends UnitTestCase
             $this->exportService->mock,
             $this->readinessService->mock,
             $this->clock->mock,
+            $this->mandateRepo->mock,
         );
     }
 
@@ -196,9 +201,25 @@ final class SepaBatchServiceTest extends UnitTestCase
     {
         $batchId = SepaBatchId::create(5);
         $now = CarbonImmutable::parse('2026-10-23 09:30:00');
+        $mandateIds = [PaymentInformationId::create(7), PaymentInformationId::create(8)];
 
         $this->clock->expectsNow($now);
         $this->repo->expectsMarkSubmitted($batchId, 7, $now);
+        $this->repo->expectsGetCollectedMandateIds($batchId, $mandateIds);
+        $this->mandateRepo->expectsStampCollections(new PaymentInformationIdList($mandateIds), $now);
+
+        $this->service->markSubmitted($batchId, 7);
+    }
+
+    public function test_mark_submitted_stamps_an_empty_list_when_the_batch_collected_nothing(): void
+    {
+        $batchId = SepaBatchId::create(5);
+        $now = CarbonImmutable::parse('2026-10-23 09:30:00');
+
+        $this->clock->expectsNow($now);
+        $this->repo->expectsMarkSubmitted($batchId, 7, $now);
+        $this->repo->expectsGetCollectedMandateIds($batchId, []);
+        $this->mandateRepo->expectsStampCollections(new PaymentInformationIdList([]), $now);
 
         $this->service->markSubmitted($batchId, 7);
     }

@@ -474,7 +474,9 @@ final class SepaExportServiceImplTest extends FeatureTestCase
             iban: $iban,
             bic: $bic,
             mandateId: new MandateId(new MemberId(1), new PaymentInformationId(1)),
+            paymentInformationId: new PaymentInformationId(1),
             mandateDate: CarbonImmutable::parse($mandateDate),
+            lastCollectedAt: null,
         );
     }
 
@@ -493,7 +495,9 @@ final class SepaExportServiceImplTest extends FeatureTestCase
             iban: $iban,
             bic: $bic,
             mandateId: new MandateId(new MemberId(2), new PaymentInformationId(2)),
+            paymentInformationId: new PaymentInformationId(2),
             mandateDate: CarbonImmutable::now(),
+            lastCollectedAt: null,
         );
     }
 }

@@ -7,6 +7,7 @@ namespace Tests\Feature\Infrastructure\Billing\Payment;
 use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Invoices\InvoiceStatus;
+use App\Domain\Billing\Payment\PaymentInformationId;
 use App\Domain\Billing\Payment\Readiness\ExportConfirmation;
 use App\Domain\Billing\Payment\Readiness\ExportOverride;
 use App\Domain\Billing\Payment\Readiness\ExportReadinessReason;
@@ -275,6 +276,8 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
         static::assertSame('NL91ABNA0417164300', $result[0]->iban);
         static::assertSame('ABNANL2A', $result[0]->bic);
         static::assertSame('C000001-000001', $result[0]->mandateId->value);
+        static::assertSame(1, $result[0]->paymentInformationId->value);
+        static::assertNull($result[0]->lastCollectedAt);
         static::assertGreaterThan(0.0, $result[0]->total->price);
         static::assertGreaterThan(0.0, $result[0]->total->vat);
         static::assertSame(
@@ -898,5 +901,262 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
             'submitted_at' => '2026-10-23 09:30:00',
             'submitted_by' => $firstUser->id,
         ]);
+    }
+
+    public function test_get_invoices_for_export_uses_only_the_active_mandate_for_a_collection(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly();
+        $member = Member::factory()->createQuietly();
+
+        PaymentInformation::factory()
+            ->revoked(CarbonImmutable::parse('2025-01-01'))
+            ->createQuietly([
+                'member_id' => $member->id,
+                'banking_account_number' => 'NL91ABNA0417164300',
+            ]);
+        $active = PaymentInformation::factory()->createQuietly([
+            'member_id' => $member->id,
+            'banking_account_number' => 'NL20RABO0123456789',
+        ]);
+
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Pending]);
+        InvoiceLine::factory()->createQuietly([
+            'invoice_id' => $invoice->id,
+            'price' => 10.00,
+            'quantity' => 1,
+        ]);
+
+        $result = $this->repository->getInvoicesForExport(SepaBatchId::create($batch->id));
+
+        static::assertCount(1, $result);
+        static::assertSame('NL20RABO0123456789', $result[0]->iban);
+        static::assertSame($active->id, $result[0]->paymentInformationId->value);
+    }
+
+    public function test_get_invoices_for_export_does_not_duplicate_a_member_with_mandate_history(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly();
+        $member = Member::factory()->createQuietly();
+
+        PaymentInformation::factory()
+            ->revoked(CarbonImmutable::parse('2025-01-01'))
+            ->createQuietly(['member_id' => $member->id]);
+        PaymentInformation::factory()->createQuietly(['member_id' => $member->id]);
+
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Pending]);
+        InvoiceLine::factory()->createQuietly([
+            'invoice_id' => $invoice->id,
+            'price' => 10.00,
+            'quantity' => 1,
+        ]);
+
+        $result = $this->repository->getInvoicesForExport(SepaBatchId::create($batch->id));
+
+        static::assertCount(1, $result);
+    }
+
+    public function test_get_invoices_for_export_excludes_a_collection_without_an_active_mandate(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly();
+        $member = Member::factory()->createQuietly();
+
+        PaymentInformation::factory()
+            ->revoked(CarbonImmutable::parse('2025-01-01'))
+            ->createQuietly(['member_id' => $member->id]);
+
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Pending]);
+        InvoiceLine::factory()->createQuietly([
+            'invoice_id' => $invoice->id,
+            'price' => 10.00,
+            'quantity' => 1,
+        ]);
+
+        $result = $this->repository->getInvoicesForExport(SepaBatchId::create($batch->id));
+
+        static::assertSame([], $result);
+    }
+
+    public function test_get_invoices_for_export_uses_the_latest_mandate_for_a_refund_after_revocation(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly();
+        $member = Member::factory()->createQuietly();
+
+        PaymentInformation::factory()
+            ->revoked(CarbonImmutable::parse('2025-01-01'))
+            ->createQuietly([
+                'member_id' => $member->id,
+                'banking_account_number' => 'NL91ABNA0417164300',
+            ]);
+        $latest = PaymentInformation::factory()
+            ->revoked(CarbonImmutable::parse('2026-01-01'))
+            ->createQuietly([
+                'member_id' => $member->id,
+                'banking_account_number' => 'NL20RABO0123456789',
+            ]);
+
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Pending]);
+        InvoiceLine::factory()->createQuietly([
+            'invoice_id' => $invoice->id,
+            'price' => -10.00,
+            'quantity' => 1,
+        ]);
+
+        $result = $this->repository->getInvoicesForExport(SepaBatchId::create($batch->id));
+
+        static::assertCount(1, $result);
+        static::assertSame('NL20RABO0123456789', $result[0]->iban);
+        static::assertSame($latest->id, $result[0]->paymentInformationId->value);
+    }
+
+    public function test_get_invoices_for_export_exposes_the_mandate_id_and_last_collected_at(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly();
+        $member = Member::factory()->createQuietly();
+        $collectedAt = CarbonImmutable::parse('2026-09-30 00:00:00');
+
+        $mandate = PaymentInformation::factory()
+            ->collectedAt($collectedAt)
+            ->createQuietly(['member_id' => $member->id]);
+
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Pending]);
+        InvoiceLine::factory()->createQuietly([
+            'invoice_id' => $invoice->id,
+            'price' => 10.00,
+            'quantity' => 1,
+        ]);
+
+        $result = $this->repository->getInvoicesForExport(SepaBatchId::create($batch->id));
+
+        static::assertCount(1, $result);
+        static::assertSame($mandate->id, $result[0]->paymentInformationId->value);
+        static::assertSame('2026-09-30', $result[0]->lastCollectedAt?->format('Y-m-d'));
+    }
+
+    public function test_get_collected_mandate_ids_returns_the_active_mandate_of_a_positive_invoice(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly();
+        $member = Member::factory()->createQuietly();
+        $mandate = PaymentInformation::factory()->createQuietly(['member_id' => $member->id]);
+
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->forBatch($batch)
+            ->createQuietly();
+        InvoiceLine::factory()->createQuietly([
+            'invoice_id' => $invoice->id,
+            'price' => 10.00,
+            'quantity' => 1,
+        ]);
+
+        $result = $this->repository->getCollectedMandateIds(SepaBatchId::create($batch->id));
+
+        static::assertCount(1, $result);
+        static::assertSame($mandate->id, $result[0]->value);
+    }
+
+    public function test_get_collected_mandate_ids_ignores_a_credit_invoice(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly();
+        $member = Member::factory()->createQuietly();
+        PaymentInformation::factory()->createQuietly(['member_id' => $member->id]);
+
+        $original = Invoice::factory()->forMember($member)->createQuietly();
+        $credit = Invoice::factory()
+            ->forMember($member)
+            ->forBatch($batch)
+            ->createQuietly(['credit_invoice_id' => $original->id]);
+        InvoiceLine::factory()->createQuietly([
+            'invoice_id' => $credit->id,
+            'price' => -10.00,
+            'quantity' => 1,
+        ]);
+
+        $result = $this->repository->getCollectedMandateIds(SepaBatchId::create($batch->id));
+
+        static::assertSame([], $result);
+    }
+
+    public function test_get_collected_mandate_ids_ignores_a_member_without_an_active_mandate(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly();
+        $member = Member::factory()->createQuietly();
+        PaymentInformation::factory()
+            ->revoked(CarbonImmutable::parse('2025-01-01'))
+            ->createQuietly(['member_id' => $member->id]);
+
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->forBatch($batch)
+            ->createQuietly();
+        InvoiceLine::factory()->createQuietly([
+            'invoice_id' => $invoice->id,
+            'price' => 10.00,
+            'quantity' => 1,
+        ]);
+
+        $result = $this->repository->getCollectedMandateIds(SepaBatchId::create($batch->id));
+
+        static::assertSame([], $result);
+    }
+
+    public function test_get_collected_mandate_ids_counts_a_presented_invoice_even_after_it_is_declined(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly();
+        $member = Member::factory()->createQuietly();
+        $mandate = PaymentInformation::factory()->createQuietly(['member_id' => $member->id]);
+
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Declined]);
+        InvoiceLine::factory()->createQuietly([
+            'invoice_id' => $invoice->id,
+            'price' => 10.00,
+            'quantity' => 1,
+        ]);
+
+        $result = $this->repository->getCollectedMandateIds(SepaBatchId::create($batch->id));
+
+        static::assertCount(1, $result);
+        static::assertSame($mandate->id, $result[0]->value);
+    }
+
+    public function test_get_collected_mandate_ids_returns_each_mandate_once(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly();
+        $member = Member::factory()->createQuietly();
+        $mandate = PaymentInformation::factory()->createQuietly(['member_id' => $member->id]);
+
+        foreach ([1, 2] as $_) {
+            $invoice = Invoice::factory()
+                ->forMember($member)
+                ->forBatch($batch)
+                ->createQuietly();
+            InvoiceLine::factory()->createQuietly([
+                'invoice_id' => $invoice->id,
+                'price' => 10.00,
+                'quantity' => 1,
+            ]);
+        }
+
+        $result = $this->repository->getCollectedMandateIds(SepaBatchId::create($batch->id));
+
+        static::assertCount(1, $result);
+        static::assertSame(PaymentInformationId::create($mandate->id)->value, $result[0]->value);
     }
 }

@@ -7,6 +7,7 @@ namespace Tests\Unit\Domain\Billing\Payment;
 use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Invoices\InvoiceStatus;
+use App\Domain\Billing\Payment\PaymentInformationId;
 use App\Domain\Billing\Payment\Readiness\ExportConfirmation;
 use App\Domain\Billing\Payment\Readiness\SepaBatchExportContext;
 use App\Domain\Billing\Payment\Readiness\SepaCollectionCandidate;
@@ -154,6 +155,15 @@ final readonly class SepaBatchRepositoryExpectation
         $this->mock
             ->expects('markSubmitted')
             ->with(equalTo($batchId), equalTo($submittedByUserId), equalTo($submittedAt));
+    }
+
+    /** @param list<PaymentInformationId> $return */
+    public function expectsGetCollectedMandateIds(SepaBatchId $batchId, array $return): void
+    {
+        $this->mock
+            ->expects('getCollectedMandateIds')
+            ->with(equalTo($batchId))
+            ->andReturn($return);
     }
 
     public function neverExpectsRecordExport(): void
