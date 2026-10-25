@@ -11,5 +11,6 @@ final readonly class SepaConfiguration
         public string $creditorName,
         public string $creditorIban,
         public string $creditorBic,
+        public int $noticePeriodDays,
     ) {}
 }

@@ -6,6 +6,9 @@ namespace App\Domain\Billing\Payment;
 
 use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoiceIdList;
+use App\Domain\Billing\Payment\Readiness\ExportConfirmation;
+use App\Domain\Billing\Payment\Readiness\SepaBatchExportContext;
+use App\Domain\Billing\Payment\Readiness\SepaCollectionCandidate;
 use DateTimeInterface;
 use JeroenG\Autowire\Attribute\Autowire;
 
@@ -44,4 +47,18 @@ interface SepaBatchRepository
     public function attachInvoice(SepaBatchId $batchId, InvoiceId $id): void;
 
     public function attachInvoices(SepaBatchId $batchId, InvoiceIdList $ids): int;
+
+    /** @return list<SepaCollectionCandidate> */
+    public function getCollectionCandidates(SepaBatchId $batchId): array;
+
+    public function getExportContext(SepaBatchId $batchId): SepaBatchExportContext;
+
+    public function recordExport(
+        SepaBatchId $batchId,
+        ExportConfirmation $confirmation,
+        ?int $exportedByUserId,
+        DateTimeInterface $exportedAt,
+    ): void;
+
+    public function markSubmitted(SepaBatchId $batchId, int $submittedByUserId, DateTimeInterface $submittedAt): void;
 }

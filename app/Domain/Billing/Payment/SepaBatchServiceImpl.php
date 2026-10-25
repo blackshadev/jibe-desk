@@ -6,10 +6,15 @@ namespace App\Domain\Billing\Payment;
 
 use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Payment\Events\SepaBatchClosed;
+use App\Domain\Billing\Payment\Readiness\ExportConfirmation;
+use App\Domain\Billing\Payment\Readiness\ExportNotReadyException;
+use App\Domain\Billing\Payment\Readiness\ExportReadinessService;
 use App\Domain\Bookkeeping\BookkeepingRecords\BookkeepingRecordRepository;
 use DateTimeInterface;
+use DomainException;
 use Illuminate\Contracts\Events\Dispatcher;
 use Override;
+use Psr\Clock\ClockInterface;
 
 final readonly class SepaBatchServiceImpl implements SepaBatchService
 {
@@ -17,6 +22,9 @@ final readonly class SepaBatchServiceImpl implements SepaBatchService
         private SepaBatchRepository $batchRepository,
         private BookkeepingRecordRepository $bookkeepingRepository,
         private Dispatcher $eventDispatcher,
+        private SepaExportService $exportService,
+        private ExportReadinessService $readinessService,
+        private ClockInterface $clock,
     ) {}
 
     #[Override]
@@ -72,5 +80,35 @@ final readonly class SepaBatchServiceImpl implements SepaBatchService
     public function attachInvoices(SepaBatchId $batchId, InvoiceIdList $ids): int
     {
         return $this->batchRepository->attachInvoices($batchId, $ids);
+    }
+
+    /**
+     * @throws DomainException
+     * @throws ExportNotReadyException
+     */
+    #[Override]
+    public function export(SepaBatchId $batchId, ExportConfirmation $confirmation, ?int $exportedByUserId): SepaExport
+    {
+        if ($this->batchRepository->getExportContext($batchId)->status !== SepaBatchStatus::Pending) {
+            throw new DomainException('Only a pending batch can be exported.');
+        }
+
+        $report = $this->readinessService->assess($batchId);
+
+        if (!$report->isSatisfiedBy($confirmation)) {
+            throw new ExportNotReadyException($report);
+        }
+
+        $export = $this->exportService->export($batchId);
+
+        $this->batchRepository->recordExport($batchId, $confirmation, $exportedByUserId, $this->clock->now());
+
+        return $export;
+    }
+
+    #[Override]
+    public function markSubmitted(SepaBatchId $batchId, int $submittedByUserId): void
+    {
+        $this->batchRepository->markSubmitted($batchId, $submittedByUserId, $this->clock->now());
     }
 }

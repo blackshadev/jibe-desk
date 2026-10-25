@@ -7,6 +7,9 @@ namespace Tests\Unit\Domain\Billing\Payment;
 use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Invoices\InvoiceStatus;
+use App\Domain\Billing\Payment\Readiness\ExportConfirmation;
+use App\Domain\Billing\Payment\Readiness\SepaBatchExportContext;
+use App\Domain\Billing\Payment\Readiness\SepaCollectionCandidate;
 use App\Domain\Billing\Payment\SepaBatchEmailData;
 use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Billing\Payment\SepaBatchRepository;
@@ -116,5 +119,45 @@ final readonly class SepaBatchRepositoryExpectation
             ->expects('getBatchEmailData')
             ->with(equalTo($batchId))
             ->andReturn($return);
+    }
+
+    /** @param list<SepaCollectionCandidate> $return */
+    public function expectsGetCollectionCandidates(SepaBatchId $batchId, array $return): void
+    {
+        $this->mock
+            ->expects('getCollectionCandidates')
+            ->with(equalTo($batchId))
+            ->andReturn($return);
+    }
+
+    public function expectsGetExportContext(SepaBatchId $batchId, SepaBatchExportContext $return): void
+    {
+        $this->mock
+            ->expects('getExportContext')
+            ->with(equalTo($batchId))
+            ->andReturn($return);
+    }
+
+    public function expectsRecordExport(
+        SepaBatchId $batchId,
+        ExportConfirmation $confirmation,
+        ?int $exportedByUserId,
+        DateTimeInterface $exportedAt,
+    ): void {
+        $this->mock
+            ->expects('recordExport')
+            ->with(equalTo($batchId), equalTo($confirmation), equalTo($exportedByUserId), equalTo($exportedAt));
+    }
+
+    public function expectsMarkSubmitted(SepaBatchId $batchId, int $submittedByUserId, DateTimeInterface $submittedAt): void
+    {
+        $this->mock
+            ->expects('markSubmitted')
+            ->with(equalTo($batchId), equalTo($submittedByUserId), equalTo($submittedAt));
+    }
+
+    public function neverExpectsRecordExport(): void
+    {
+        $this->mock->expects('recordExport')->never();
     }
 }

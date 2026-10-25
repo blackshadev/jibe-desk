@@ -30,6 +30,7 @@ final readonly class DomainDependencyRule implements Rule
         'Psr\\',
         'Ramsey\\Uuid\\',
         'Webmozart\\Assert\\',
+        \Intervention\Validation\Rules\Iban::class,
         \JeroenG\Autowire\Attribute\Autowire::class,
         "Illuminate\\Mail\\Mailable",
         "Illuminate\\Mail\\Events",

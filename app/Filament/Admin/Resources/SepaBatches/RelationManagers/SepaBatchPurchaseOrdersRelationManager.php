@@ -8,6 +8,7 @@ use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Filament\Admin\Labels\PurchaseOrderStatusLabels;
 use App\Filament\Admin\Resources\PurchaseOrders\Actions\PurchaseOrderStateActions;
 use App\Filament\Admin\Resources\PurchaseOrders\PurchaseOrderResource;
+use App\Filament\Admin\Resources\SepaBatches\Actions\AddPurchaseOrdersAction;
 use App\Filament\Admin\Utils\ResourceRouteHelper;
 use Filament\Actions\ActionGroup;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -50,6 +51,9 @@ final class SepaBatchPurchaseOrdersRelationManager extends RelationManager
                     ...PurchaseOrderStateActions::make(),
                 ]),
             ])
+            ->headerActions([
+                AddPurchaseOrdersAction::make(),
+            ])
             ->recordUrl(ResourceRouteHelper::viewOrEdit(PurchaseOrderResource::class));
     }
 
@@ -71,7 +75,7 @@ final class SepaBatchPurchaseOrdersRelationManager extends RelationManager
         return (string) $ownerRecord->{static::$relationship}->count();
     }
 
-    #[On('refreshInvoicesTable')]
+    #[On('refresh')]
     public function refresh(): void
     {
     }

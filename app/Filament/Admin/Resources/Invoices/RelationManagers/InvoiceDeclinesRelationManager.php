@@ -44,9 +44,11 @@ final class InvoiceDeclinesRelationManager extends RelationManager
                 TextColumn::make('bankTransaction.id')
                     ->label(__('labels.reversal_transaction'))
                     ->formatStateUsing(static fn (?int $state): string => $state === null ? '—' : '#' . $state)
-                    ->url(static fn (InvoiceDecline $record): ?string => $record->bank_transaction_id === null
-                        ? null
-                        : BankTransactionResource::getUrl('view', ['record' => $record->bank_transaction_id])),
+                    ->url(static fn (InvoiceDecline $record): ?string => (
+                        $record->bank_transaction_id === null
+                            ? null
+                            : BankTransactionResource::getUrl('view', ['record' => $record->bank_transaction_id])
+                    )),
                 TextColumn::make('note')
                     ->label(__('labels.decline_note'))
                     ->placeholder('—'),

@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Override;
 
@@ -24,6 +25,10 @@ use Override;
  * @property CarbonInterface|null $generation_started_at
  * @property CarbonInterface|null $generation_finished_at
  * @property int|null $generation_expected_invoices
+ * @property CarbonInterface|null $closed_at
+ * @property CarbonInterface|null $exported_at
+ * @property CarbonInterface|null $submitted_at
+ * @property int|null $submitted_by
  */
 #[Fillable([
     'invoice_date',
@@ -32,6 +37,10 @@ use Override;
     'generation_started_at',
     'generation_finished_at',
     'generation_expected_invoices',
+    'closed_at',
+    'exported_at',
+    'submitted_at',
+    'submitted_by',
 ])]
 final class SepaBatch extends Model
 {
@@ -54,6 +63,18 @@ final class SepaBatch extends Model
         return $this->hasMany(PurchaseOrder::class);
     }
 
+    /** @return BelongsTo<User, $this> */
+    public function submittedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'submitted_by');
+    }
+
+    /** @return HasMany<SepaExportOverride, $this> */
+    public function exportOverrides(): HasMany
+    {
+        return $this->hasMany(SepaExportOverride::class);
+    }
+
     #[Override]
     protected function casts(): array
     {
@@ -64,6 +85,9 @@ final class SepaBatch extends Model
             'generation_started_at' => 'datetime',
             'generation_finished_at' => 'datetime',
             'generation_expected_invoices' => 'integer',
+            'closed_at' => 'datetime',
+            'exported_at' => 'datetime',
+            'submitted_at' => 'datetime',
         ];
     }
 

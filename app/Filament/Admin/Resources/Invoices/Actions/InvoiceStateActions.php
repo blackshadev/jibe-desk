@@ -12,7 +12,6 @@ use App\Models\Invoice;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Resources\Pages\EditRecord;
-use Filament\Resources\RelationManagers\RelationManager;
 use Livewire\Component;
 
 final class InvoiceStateActions
@@ -35,13 +34,7 @@ final class InvoiceStateActions
                 ->successRedirectUrl(static fn (Component $livewire, Invoice $record): ?string => (
                     $livewire instanceof EditRecord ? InvoiceResource::getUrl('view', ['record' => $record]) : null
                 ))
-                ->after(static function (Component $livewire): void {
-                    $livewire->dispatch('refresh');
-
-                    if ($livewire instanceof RelationManager) {
-                        $livewire->dispatch('refreshInvoicesTable');
-                    }
-                })
+                ->after(static fn (Component $livewire) => $livewire->dispatch('refresh'))
                 ->successNotificationTitle(__('notifications.invoice_status_updated')),
 
             Action::make('markAsPaid')
@@ -59,13 +52,7 @@ final class InvoiceStateActions
                 ->successRedirectUrl(static fn (Component $livewire, Invoice $record): ?string => (
                     $livewire instanceof EditRecord ? InvoiceResource::getUrl('view', ['record' => $record]) : null
                 ))
-                ->after(static function (Component $livewire): void {
-                    $livewire->dispatch('refresh');
-
-                    if ($livewire instanceof RelationManager) {
-                        $livewire->dispatch('refreshInvoicesTable');
-                    }
-                })
+                ->after(static fn (Component $livewire) => $livewire->dispatch('refresh'))
                 ->successNotificationTitle(__('notifications.invoice_status_updated')),
 
             Action::make('markAsDeclined')
@@ -92,13 +79,7 @@ final class InvoiceStateActions
                 ->successRedirectUrl(static fn (Component $livewire, Invoice $record): ?string => (
                     $livewire instanceof EditRecord ? InvoiceResource::getUrl('view', ['record' => $record]) : null
                 ))
-                ->after(static function (Component $livewire): void {
-                    $livewire->dispatch('refresh');
-
-                    if ($livewire instanceof RelationManager) {
-                        $livewire->dispatch('refreshInvoicesTable');
-                    }
-                })
+                ->after(static fn (Component $livewire) => $livewire->dispatch('refresh'))
                 ->successNotificationTitle(__('notifications.invoice_status_updated')),
 
             Action::make('reopen')
@@ -114,13 +95,7 @@ final class InvoiceStateActions
                 ->successRedirectUrl(static fn (Component $livewire, Invoice $record): ?string => (
                     $livewire instanceof EditRecord ? InvoiceResource::getUrl('view', ['record' => $record]) : null
                 ))
-                ->after(static function (Component $livewire): void {
-                    $livewire->dispatch('refresh');
-
-                    if ($livewire instanceof RelationManager) {
-                        $livewire->dispatch('refreshInvoicesTable');
-                    }
-                })
+                ->after(static fn (Component $livewire) => $livewire->dispatch('refresh'))
                 ->successNotificationTitle(__('notifications.invoice_reopened')),
         ];
     }

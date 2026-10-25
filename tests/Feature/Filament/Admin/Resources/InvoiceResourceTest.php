@@ -189,11 +189,13 @@ final class InvoiceResourceTest extends FeatureTestCase
     {
         $this->withAuthorizedUser();
         $batch = SepaBatch::factory()->createQuietly();
-        $invoice = Invoice::factory()->withLines(1)->createQuietly([
-            'status' => InvoiceStatus::Declined,
-            'sepa_batch_id' => $batch->id,
-            'sent_at' => now(),
-        ]);
+        $invoice = Invoice::factory()
+            ->withLines(1)
+            ->createQuietly([
+                'status' => InvoiceStatus::Declined,
+                'sepa_batch_id' => $batch->id,
+                'sent_at' => now(),
+            ]);
 
         Livewire::test(ViewInvoice::class, ['record' => $invoice->getRouteKey()])
             ->assertSuccessful()

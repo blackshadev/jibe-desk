@@ -39,6 +39,14 @@ final readonly class SepaBatchServiceExpectation
             ->andReturn($return);
     }
 
+    public function expectsAttachBatchMonthPurchaseOrders(SepaBatchId $id, int $return): void
+    {
+        $this->mock
+            ->expects('attachBatchMonthPurchaseOrders')
+            ->with(equalTo($id))
+            ->andReturn($return);
+    }
+
     public function expectsStartGeneration(SepaBatchId $id, int $expectedInvoices): void
     {
         $this->mock

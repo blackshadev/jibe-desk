@@ -61,9 +61,7 @@ final class InvoicePolicy extends ResourcePolicy
     {
         Assert::isInstanceOf($invoice, Invoice::class);
 
-        return $user->can('update_invoices', $invoice)
-            && $invoice->status === InvoiceStatus::Declined
-            && $invoice->credit_invoice_id === null;
+        return $user->can('update_invoices', $invoice) && $invoice->status === InvoiceStatus::Declined && $invoice->credit_invoice_id === null;
     }
 
     public function markPaid(User $user, Model $invoice): bool

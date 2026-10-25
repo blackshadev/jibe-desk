@@ -9,6 +9,7 @@ use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Filament\Admin\Labels\InvoiceStatusLabels;
 use App\Filament\Admin\Resources\Invoices\Actions\InvoiceStateActions;
 use App\Filament\Admin\Resources\Invoices\InvoiceResource;
+use App\Filament\Admin\Resources\SepaBatches\Actions\AddInvoicesAction;
 use App\Filament\Admin\Utils\ResourceRouteHelper;
 use App\Models\Invoice;
 use App\Models\SepaBatch;
@@ -48,6 +49,9 @@ final class SepaBatchInvoicesRelationManager extends RelationManager
                     ->formatStateUsing(static fn (InvoiceStatus $state) => InvoiceStatusLabels::options()[$state->value]),
             ])
             ->recordUrl(ResourceRouteHelper::viewOrEdit(InvoiceResource::class))
+            ->headerActions([
+                AddInvoicesAction::make(),
+            ])
             ->recordActions([
                 ActionGroup::make([
                     ...InvoiceStateActions::make(),
@@ -65,7 +69,7 @@ final class SepaBatchInvoicesRelationManager extends RelationManager
                         ->action(static function (Invoice $record): void {
                             $record->update(['sepa_batch_id' => null]);
                         })
-                        ->after(static fn (RelationManager $livewire) => $livewire->dispatch('refreshInvoicesTable')),
+                        ->after(static fn (RelationManager $livewire) => $livewire->dispatch('refresh')),
                 ]),
             ]);
     }
@@ -88,7 +92,7 @@ final class SepaBatchInvoicesRelationManager extends RelationManager
         return (string) $ownerRecord->{static::$relationship}->count();
     }
 
-    #[On('refreshInvoicesTable')]
+    #[On('refresh')]
     public function refresh(): void
     {
     }

@@ -7,6 +7,9 @@ namespace Tests\Feature\Infrastructure\Billing\Payment;
 use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Invoices\InvoiceStatus;
+use App\Domain\Billing\Payment\Readiness\ExportConfirmation;
+use App\Domain\Billing\Payment\Readiness\ExportOverride;
+use App\Domain\Billing\Payment\Readiness\ExportReadinessReason;
 use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderApprovalStatus;
@@ -19,12 +22,14 @@ use App\Models\PaymentInformation;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use App\Models\SepaBatch;
+use App\Models\User;
 use Carbon\CarbonImmutable;
 use DomainException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Override;
 use Tests\FeatureTestCase;
 
+// @mago-expect lint:kan-defect
 final class SepaBatchRepositoryDbTest extends FeatureTestCase
 {
     private SepaBatchRepositoryDb $repository;
@@ -256,7 +261,7 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
         $invoice = Invoice::factory()
             ->forMember($member)
             ->forBatch($batch)
-            ->createQuietly();
+            ->createQuietly(['status' => InvoiceStatus::Pending]);
 
         InvoiceLine::factory()
             ->state(['invoice_id' => $invoice->id])
@@ -616,5 +621,282 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
             SepaBatchId::create($batch->id),
             new InvoiceIdList([InvoiceId::create($invoice->id)]),
         );
+    }
+
+    public function test_get_invoices_for_export_excludes_open_paid_and_declined_invoices(): void
+    {
+        $batch = SepaBatch::factory()->create();
+        $member = Member::factory()->createQuietly();
+
+        PaymentInformation::factory()->createQuietly([
+            'member_id' => $member->id,
+            'banking_account_number' => 'NL91ABNA0417164300',
+        ]);
+
+        foreach ([InvoiceStatus::Pending, InvoiceStatus::Open, InvoiceStatus::Paid, InvoiceStatus::Declined] as $status) {
+            $invoice = Invoice::factory()
+                ->forMember($member)
+                ->forBatch($batch)
+                ->createQuietly(['status' => $status]);
+
+            InvoiceLine::factory()
+                ->state(['invoice_id' => $invoice->id])
+                ->createQuietly(['price' => 10.00, 'quantity' => 1, 'vat' => 2.10]);
+        }
+
+        $result = $this->repository->getInvoicesForExport(SepaBatchId::create($batch->id));
+
+        static::assertCount(1, $result);
+    }
+
+    public function test_get_collection_candidates_returns_open_and_pending_invoices_with_totals(): void
+    {
+        $batch = SepaBatch::factory()->create();
+
+        $openInvoice = Invoice::factory()
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Open]);
+        InvoiceLine::factory()
+            ->state(['invoice_id' => $openInvoice->id])
+            ->createQuietly(['price' => 10.00, 'quantity' => 2, 'vat' => 2.10]);
+
+        $pendingInvoice = Invoice::factory()
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Pending]);
+        InvoiceLine::factory()
+            ->state(['invoice_id' => $pendingInvoice->id])
+            ->createQuietly(['price' => 5.00, 'quantity' => 3, 'vat' => 1.05]);
+
+        $result = $this->repository->getCollectionCandidates(SepaBatchId::create($batch->id));
+
+        static::assertCount(2, $result);
+
+        $totals = [];
+
+        foreach ($result as $candidate) {
+            $totals[$candidate->invoiceId->value] = [
+                'status' => $candidate->status,
+                'price' => $candidate->total->price,
+                'vat' => $candidate->total->vat,
+            ];
+        }
+
+        static::assertSame(InvoiceStatus::Open, $totals[$openInvoice->id]['status']);
+        static::assertEqualsWithDelta(20.0, $totals[$openInvoice->id]['price'], 0.001);
+        static::assertEqualsWithDelta(4.2, $totals[$openInvoice->id]['vat'], 0.001);
+
+        static::assertSame(InvoiceStatus::Pending, $totals[$pendingInvoice->id]['status']);
+        static::assertEqualsWithDelta(15.0, $totals[$pendingInvoice->id]['price'], 0.001);
+        static::assertEqualsWithDelta(3.15, $totals[$pendingInvoice->id]['vat'], 0.001);
+    }
+
+    public function test_get_collection_candidates_includes_an_invoice_without_payment_information(): void
+    {
+        $batch = SepaBatch::factory()->create();
+        $member = Member::factory()->createQuietly();
+
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Pending]);
+
+        InvoiceLine::factory()
+            ->state(['invoice_id' => $invoice->id])
+            ->createQuietly(['price' => 10.00, 'quantity' => 1, 'vat' => 2.10]);
+
+        $result = $this->repository->getCollectionCandidates(SepaBatchId::create($batch->id));
+
+        static::assertCount(1, $result);
+        static::assertSame($invoice->id, $result[0]->invoiceId->value);
+        static::assertSame($member->id, $result[0]->memberId?->value);
+    }
+
+    public function test_get_collection_candidates_returns_a_zero_total_for_an_invoice_without_lines(): void
+    {
+        $batch = SepaBatch::factory()->create();
+
+        $invoice = Invoice::factory()
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Pending]);
+
+        $result = $this->repository->getCollectionCandidates(SepaBatchId::create($batch->id));
+
+        static::assertCount(1, $result);
+        static::assertSame($invoice->id, $result[0]->invoiceId->value);
+        static::assertSame(0.0, $result[0]->total->price);
+        static::assertSame(0.0, $result[0]->total->vat);
+    }
+
+    public function test_get_collection_candidates_excludes_paid_and_declined_invoices(): void
+    {
+        $batch = SepaBatch::factory()->create();
+
+        Invoice::factory()
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Paid]);
+        Invoice::factory()
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Declined]);
+
+        static::assertSame([], $this->repository->getCollectionCandidates(SepaBatchId::create($batch->id)));
+    }
+
+    public function test_get_export_context_returns_status_transfer_date_and_close_moment(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly([
+            'status' => SepaBatchStatus::Pending,
+            'sepa_transfer_date' => '2026-11-05',
+            'closed_at' => '2026-10-22 12:00:00',
+        ]);
+
+        $result = $this->repository->getExportContext(SepaBatchId::create($batch->id));
+
+        static::assertSame(SepaBatchStatus::Pending, $result->status);
+        static::assertSame('2026-11-05', $result->sepaTransferDate->format('Y-m-d'));
+        static::assertSame('2026-10-22 12:00:00', $result->closedAt?->format('Y-m-d H:i:s'));
+    }
+
+    public function test_close_batch_stamps_closed_at(): void
+    {
+        $batch = SepaBatch::factory()->create(['status' => SepaBatchStatus::Open]);
+
+        $this->repository->closeBatch(SepaBatchId::create($batch->id));
+
+        static::assertNotNull($batch->fresh()->closed_at);
+    }
+
+    public function test_record_export_stamps_exported_at_and_persists_the_override(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly();
+        $invoice = Invoice::factory()->forBatch($batch)->createQuietly();
+        $user = User::factory()->createQuietly();
+        $exportedAt = CarbonImmutable::parse('2026-10-22 12:34:56');
+
+        $this->repository->recordExport(
+            SepaBatchId::create($batch->id),
+            new ExportConfirmation(
+                exclusionsAcknowledged: true,
+                overrides: [
+                    new ExportOverride(
+                        invoiceId: InvoiceId::create($invoice->id),
+                        reason: ExportReadinessReason::ExpiredMandate,
+                        note: 'Written confirmation received.',
+                    ),
+                ],
+            ),
+            $user->id,
+            $exportedAt,
+        );
+
+        $this->assertDatabaseHas('sepa_batches', [
+            'id' => $batch->id,
+            'exported_at' => '2026-10-22 12:34:56',
+        ]);
+
+        $this->assertDatabaseHas('sepa_export_overrides', [
+            'sepa_batch_id' => $batch->id,
+            'invoice_id' => $invoice->id,
+            'reason' => ExportReadinessReason::ExpiredMandate->value,
+            'note' => 'Written confirmation received.',
+            'exported_at' => '2026-10-22 12:34:56',
+            'exported_by' => $user->id,
+        ]);
+    }
+
+    public function test_record_export_appends_a_new_override_on_every_export(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly();
+        $invoice = Invoice::factory()->forBatch($batch)->createQuietly();
+
+        $confirmation = new ExportConfirmation(
+            exclusionsAcknowledged: true,
+            overrides: [
+                new ExportOverride(
+                    invoiceId: InvoiceId::create($invoice->id),
+                    reason: ExportReadinessReason::ExpiredMandate,
+                    note: 'First export.',
+                ),
+            ],
+        );
+
+        $this->repository->recordExport(
+            SepaBatchId::create($batch->id),
+            $confirmation,
+            null,
+            CarbonImmutable::parse('2026-10-22 12:00:00'),
+        );
+        $this->repository->recordExport(
+            SepaBatchId::create($batch->id),
+            $confirmation,
+            null,
+            CarbonImmutable::parse('2026-10-23 12:00:00'),
+        );
+
+        $this->assertDatabaseCount('sepa_export_overrides', 2);
+        $this->assertDatabaseHas('sepa_batches', [
+            'id' => $batch->id,
+            'exported_at' => '2026-10-23 12:00:00',
+        ]);
+    }
+
+    public function test_record_export_without_overrides_only_stamps_the_batch(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly();
+        $exportedAt = CarbonImmutable::parse('2026-10-22 12:00:00');
+
+        $this->repository->recordExport(
+            SepaBatchId::create($batch->id),
+            new ExportConfirmation(exclusionsAcknowledged: true),
+            null,
+            $exportedAt,
+        );
+
+        $this->assertDatabaseHas('sepa_batches', [
+            'id' => $batch->id,
+            'exported_at' => '2026-10-22 12:00:00',
+        ]);
+        $this->assertDatabaseCount('sepa_export_overrides', 0);
+    }
+
+    public function test_mark_submitted_stamps_the_submitting_user_and_time(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly();
+        $user = User::factory()->createQuietly();
+
+        $this->repository->markSubmitted(
+            SepaBatchId::create($batch->id),
+            $user->id,
+            CarbonImmutable::parse('2026-10-23 09:30:00'),
+        );
+
+        $this->assertDatabaseHas('sepa_batches', [
+            'id' => $batch->id,
+            'submitted_at' => '2026-10-23 09:30:00',
+            'submitted_by' => $user->id,
+        ]);
+    }
+
+    public function test_mark_submitted_does_not_overwrite_an_existing_submission(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly();
+        $firstUser = User::factory()->createQuietly();
+        $secondUser = User::factory()->createQuietly();
+
+        $this->repository->markSubmitted(
+            SepaBatchId::create($batch->id),
+            $firstUser->id,
+            CarbonImmutable::parse('2026-10-23 09:30:00'),
+        );
+        $this->repository->markSubmitted(
+            SepaBatchId::create($batch->id),
+            $secondUser->id,
+            CarbonImmutable::parse('2026-10-24 09:30:00'),
+        );
+
+        $this->assertDatabaseHas('sepa_batches', [
+            'id' => $batch->id,
+            'submitted_at' => '2026-10-23 09:30:00',
+            'submitted_by' => $firstUser->id,
+        ]);
     }
 }

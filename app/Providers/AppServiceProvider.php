@@ -29,6 +29,7 @@ final class AppServiceProvider extends ServiceProvider
             creditorName: config('sepa.creditor_name') ?? '',
             creditorIban: config('sepa.creditor_iban') ?? '',
             creditorBic: config('sepa.creditor_bic') ?? '',
+            noticePeriodDays: (int) config('sepa.notice_period_days'),
         ));
 
         $this->app

@@ -193,7 +193,10 @@ final class InvoiceRepositoryDb implements InvoiceRepository
                 ->get(['id', 'sepa_batch_id']);
 
             $declinedIds = new InvoiceIdList(
-                $declinable->pluck('id')->map(InvoiceId::create(...))->all(),
+                $declinable
+                    ->pluck('id')
+                    ->map(InvoiceId::create(...))
+                    ->all(),
             );
 
             foreach ($declinable as $invoice) {

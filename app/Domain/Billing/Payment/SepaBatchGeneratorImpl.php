@@ -28,6 +28,7 @@ final readonly class SepaBatchGeneratorImpl implements SepaBatchGenerator
     {
         $batchId = $this->batchService->createBatch($sepaBatch->invoiceDate, $sepaBatch->sepaTransferDate);
         $attachedCount = $this->batchService->attachBatchMonthInvoices($batchId);
+        $this->batchService->attachBatchMonthPurchaseOrders($batchId);
 
         $billableMembers = $this->billableItemRepository->listBillableMembers($sepaBatch->invoiceDate);
 

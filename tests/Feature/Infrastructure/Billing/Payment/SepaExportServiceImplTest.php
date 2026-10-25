@@ -36,6 +36,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
             creditorName: 'Test Club',
             creditorIban: 'NL91ABNA0417164300',
             creditorBic: 'ABNANL2A',
+            noticePeriodDays: 14,
         );
 
         $this->repo = SepaBatchRepositoryExpectation::create();

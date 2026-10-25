@@ -54,6 +54,7 @@ final class SepaBatchGeneratorImplTest extends UnitTestCase
         $this->batchService->expectsCreateBatch($invoiceDate, $sepaTransferDate, $batchId);
         $this->billableItemsViewRepository->expectsListBillableMembers($invoiceDate, $memberIds);
         $this->batchService->expectsAttachBatchMonth($batchId, 3);
+        $this->batchService->expectsAttachBatchMonthPurchaseOrders($batchId, 2);
         $this->batchService->expectsStartGeneration($batchId, 5);
         $this->jobDispatcher->expectsDispatch(
             new JobBatch(
@@ -83,11 +84,57 @@ final class SepaBatchGeneratorImplTest extends UnitTestCase
 
         $this->batchService->expectsCreateBatch($invoiceDate, $sepaTransferDate, $batchId);
         $this->batchService->expectsAttachBatchMonth($batchId, 3);
+        $this->batchService->expectsAttachBatchMonthPurchaseOrders($batchId, 0);
         $this->batchService->expectsStartGeneration($batchId, 3);
         $this->batchService->expectsFinishGeneration($batchId);
 
         $this->billableItemsViewRepository->expectsListBillableMembers($invoiceDate, new MemberIdList([]));
         $this->jobDispatcher->expectsNoDispatch();
+
+        static::assertSame($batchId, $this->subject->generate($batch));
+    }
+
+    public function test_it_attaches_the_months_purchase_orders_before_starting_generation(): void
+    {
+        $invoiceDate = new DateTimeImmutable('2026-05-25');
+        $sepaTransferDate = new DateTimeImmutable('2026-06-08');
+        $batch = new SepaBatch($invoiceDate, $sepaTransferDate);
+        $batchId = SepaBatchId::create(9);
+
+        $this->batchService
+            ->mock
+            ->shouldReceive('createBatch')
+            ->once()
+            ->ordered()
+            ->andReturn($batchId);
+
+        $this->batchService
+            ->mock
+            ->shouldReceive('attachBatchMonthInvoices')
+            ->once()
+            ->ordered()
+            ->andReturn(3);
+
+        $this->batchService
+            ->mock
+            ->shouldReceive('attachBatchMonthPurchaseOrders')
+            ->once()
+            ->ordered()
+            ->andReturn(1);
+
+        $this->batchService
+            ->mock
+            ->shouldReceive('startGeneration')
+            ->once()
+            ->ordered();
+
+        $this->batchService
+            ->mock
+            ->shouldReceive('finishGeneration')
+            ->once()
+            ->ordered();
+
+        $this->billableItemsViewRepository->expectsListBillableMembers($invoiceDate, new MemberIdList([]));
 
         static::assertSame($batchId, $this->subject->generate($batch));
     }

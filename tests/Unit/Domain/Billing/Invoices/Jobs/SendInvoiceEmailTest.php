@@ -37,6 +37,7 @@ final class SendInvoiceEmailTest extends UnitTestCase
             creditorName: 'Watersportvereniging Almere Centraal',
             creditorIban: 'NL91ABNA0417164300',
             creditorBic: 'ABNANL2A',
+            noticePeriodDays: 14,
         );
     }
 

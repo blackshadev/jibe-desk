@@ -44,6 +44,16 @@ final class SepaBatchesTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('exported_at')
+                    ->label(__('labels.exported_at'))
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('submitted_at')
+                    ->label(__('labels.submitted_at'))
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('updated_at')
                     ->label(__('labels.updated_at'))
                     ->dateTime()

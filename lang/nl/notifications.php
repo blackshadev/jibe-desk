@@ -48,4 +48,6 @@ return [
     'user_account_created' => 'Account aangemaakt; het lid ontvangt een e-mail om een wachtwoord in te stellen',
     'member_accepted' => 'Lid geaccepteerd; account aangemaakt en welkomstmail verstuurd.',
     'members_accepted' => 'Geselecteerde leden geaccepteerd.',
+    'sepa_export_blocked' => 'Export geblokkeerd: los eerst de aandachtspunten op',
+    'batch_submitted' => 'SEPA-bestand gemarkeerd als ingediend',
 ];

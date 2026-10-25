@@ -108,7 +108,7 @@ final class InvoiceServiceImplTest extends UnitTestCase
 
         $this->repo->expectsReopen($ids);
 
-         $this->service->reopen($ids);
+        $this->service->reopen($ids);
     }
 
     public function test_restore_declined_updates_only_declined_and_creates_bookkeeping_records(): void

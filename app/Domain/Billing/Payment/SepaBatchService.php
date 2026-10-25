@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Domain\Billing\Payment;
 
 use App\Domain\Billing\Invoices\InvoiceIdList;
+use App\Domain\Billing\Payment\Readiness\ExportConfirmation;
+use App\Domain\Billing\Payment\Readiness\ExportNotReadyException;
 use DateTimeInterface;
 use JeroenG\Autowire\Attribute\Autowire;
 
@@ -26,4 +28,11 @@ interface SepaBatchService
     public function completeBatch(SepaBatchId $batchId): void;
 
     public function attachInvoices(SepaBatchId $batchId, InvoiceIdList $ids): int;
+
+    /**
+     * @throws ExportNotReadyException
+     */
+    public function export(SepaBatchId $batchId, ExportConfirmation $confirmation, ?int $exportedByUserId): SepaExport;
+
+    public function markSubmitted(SepaBatchId $batchId, int $submittedByUserId): void;
 }

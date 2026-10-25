@@ -1,0 +1,56 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Filament\Admin\Resources\SepaBatches\Actions;
+
+use App\Domain\Billing\Invoices\InvoiceStatus;
+use App\Filament\Admin\Resources\SepaBatches\Helpers\OnOpenSepaBatch;
+use App\Models\Invoice;
+use App\Models\SepaBatch;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
+use Filament\Resources\RelationManagers\RelationManager;
+use Webmozart\Assert\Assert;
+
+final class AddInvoicesAction
+{
+    public static function make(): Action
+    {
+        return Action::make('addInvoices')
+            ->label(__('labels.add_invoices'))
+            ->icon('heroicon-m-plus')
+            ->schema([
+                Select::make('invoice_ids')
+                    ->label(__('labels.invoices'))
+                    ->multiple()
+                    ->searchable()
+                    ->options(
+                        static fn () => Invoice::query()
+                            ->whereNull('sepa_batch_id')
+                            ->where('status', InvoiceStatus::Open)
+                            ->orderBy('invoice_number')
+                            ->get()
+                            ->mapWithKeys(static fn (Invoice $invoice) => [
+                                $invoice->id => $invoice->invoice_number . ' — ' . $invoice->recipient_name,
+                            ]),
+                    ),
+            ])
+            ->requiresConfirmation()
+            ->action(static function (array $data, RelationManager $livewire): void {
+                $batch = $livewire->getOwnerRecord();
+                Assert::isInstanceOf($batch, SepaBatch::class);
+
+                Invoice::query()
+                    ->whereIn('id', $data['invoice_ids'])
+                    ->update(['sepa_batch_id' => $batch->id]);
+            })
+            ->successNotificationTitle(__('notifications.invoices_added_to_batch'))
+            ->after(static fn (RelationManager $livewire) => $livewire->dispatch('refresh'))
+            ->visible(static function (RelationManager $livewire): bool {
+                $batch = $livewire->getOwnerRecord();
+
+                return $batch instanceof SepaBatch && OnOpenSepaBatch::make($batch);
+            });
+    }
+}
