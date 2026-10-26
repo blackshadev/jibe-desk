@@ -61,25 +61,25 @@ final class PaymentInformation extends Model
         )->value);
     }
 
-    /**
-     * The moment the mandate lapses: thirty-six months after the last collection,
-     * or after signing when the mandate was never used.
-     *
-     * @return Attribute<CarbonImmutable, never>
-     */
+    /** @return Attribute<CarbonImmutable, never> */
     protected function expiresAt(): Attribute
     {
-        return Attribute::get(fn (): CarbonImmutable => ($this->last_collected_at === null
-            ? CarbonImmutable::instance($this->mandate_accepted_date)
-            : CarbonImmutable::instance($this->last_collected_at))
-            ->addMonthsNoOverflow(self::MONTHS_WITHOUT_COLLECTION));
+        return Attribute::get(function (): CarbonImmutable {
+            $expiresAt = $this->last_collected_at;
+
+            if ($expiresAt === null) {
+                $expiresAt = $this->mandate_accepted_date;
+            }
+
+            return CarbonImmutable::instance($expiresAt)
+                ->addMonthsNoOverflow(self::MONTHS_WITHOUT_COLLECTION);
+        });
     }
 
     /** @return Attribute<MandateExpirationStatus, never> */
     protected function expirationStatus(): Attribute
     {
-        // @mago-expect lint:prefer-first-class-callable
-        return Attribute::get(fn (): MandateExpirationStatus => $this->determineExpirationStatus());
+        return Attribute::get($this->determineExpirationStatus(...));
     }
 
     private function determineExpirationStatus(): MandateExpirationStatus
