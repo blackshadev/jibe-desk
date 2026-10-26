@@ -29,13 +29,13 @@ final class MembersTable
                     ->label(__('labels.name')),
                 TextColumn::make('membership.name')
                     ->label(__('labels.membership')),
-                TextColumn::make('mandate_state')
-                    ->label(__('labels.mandate_state'))
+                TextColumn::make('expiration_status')
+                    ->label(__('labels.expiration_status'))
                     ->badge()
                     ->state(static fn (Member $record): ?MandateExpirationStatus => $record->paymentInformation?->expiration_status)
                     ->formatStateUsing(static fn (?MandateExpirationStatus $state): string => $state === null
                         ? __('labels.no_active_mandate')
-                        : __('labels.mandate_states.' . $state->value))
+                        : __('labels.expiration_statuses.' . $state->value))
                     ->color(static fn (?MandateExpirationStatus $state): string => match ($state) {
                         MandateExpirationStatus::Active => 'success',
                         MandateExpirationStatus::Expired => 'warning',

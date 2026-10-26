@@ -56,8 +56,8 @@ return [
     'mandate' => 'Machtiging',
     'mandates' => 'Machtigingen',
     'mandate_reference' => 'Machtigingsreferentie',
-    'mandate_state' => 'Status machtiging',
-    'mandate_states' => [
+    'expiration_status' => 'Status machtiging',
+    'expiration_statuses' => [
         'active' => 'Actief',
         'expired' => 'Verlopen',
         'revoked' => 'Ingetrokken',

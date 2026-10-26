@@ -184,11 +184,11 @@ final class MemberForm
                     ->label(__('labels.mandate_reference'))
                     ->state(static fn (?Member $record): string => $record?->paymentInformation->mandate_reference ?? __('labels.no_active_mandate')),
 
-                TextEntry::make('mandate_state')
-                    ->label(__('labels.mandate_state'))
+                TextEntry::make('expiration_status')
+                    ->label(__('labels.expiration_status'))
                     ->state(static fn (?Member $record): string => $record?->paymentInformation === null
                         ? __('labels.no_active_mandate')
-                        : __('labels.mandate_states.' . $record->paymentInformation->expiration_status->value)),
+                        : __('labels.expiration_statuses.' . $record->paymentInformation->expiration_status->value)),
 
                 TextEntry::make('active_mandate_iban')
                     ->label(__('labels.banking_account_number'))

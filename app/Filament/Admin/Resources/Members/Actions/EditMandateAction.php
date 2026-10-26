@@ -10,6 +10,8 @@ use App\Domain\Billing\Payment\PaymentInformationId;
 use App\Filament\Admin\Resources\Members\Schemas\MandateForm;
 use App\Models\PaymentInformation;
 use Filament\Actions\Action;
+use Filament\Schemas\Schema;
+use Filament\Support\Enums\Operation;
 use Filament\Support\Icons\Heroicon;
 
 final class EditMandateAction
@@ -31,7 +33,7 @@ final class EditMandateAction
                 'banking_account_holder_name' => $record->banking_account_holder_name,
                 'mandate_accepted_date' => $record->mandate_accepted_date,
             ])
-            ->schema(MandateForm::configureForEdit(...))
+            ->schema(static fn (Schema $schema): Schema => MandateForm::configure($schema->operation(Operation::Edit->value)))
             ->action(static function (
                 PaymentInformation $record,
                 array $data,

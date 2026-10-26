@@ -9,7 +9,6 @@ use App\Filament\Admin\RelationManagers\MemberRelationManager;
 use App\Filament\Admin\Resources\Members\Actions\CreateMandateAction;
 use App\Filament\Admin\Resources\Members\Actions\EditMandateAction;
 use App\Filament\Admin\Resources\Members\Actions\RevokeMandateAction;
-use App\Models\PaymentInformation;
 use App\Models\User;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -56,11 +55,10 @@ final class MandatesRelationManager extends MemberRelationManager
                     ->label(__('labels.last_collected_at'))
                     ->date()
                     ->placeholder('—'),
-                TextColumn::make('mandate_state')
-                    ->label(__('labels.mandate_state'))
+                TextColumn::make('expiration_status')
+                    ->label(__('labels.expiration_status'))
                     ->badge()
-                    ->state(static fn (PaymentInformation $record): MandateExpirationStatus => $record->expiration_status)
-                    ->formatStateUsing(static fn (MandateExpirationStatus $state): string => __('labels.mandate_states.' . $state->value))
+                    ->formatStateUsing(static fn (MandateExpirationStatus $state): string => __('labels.expiration_statuses.' . $state->value))
                     ->color(static fn (MandateExpirationStatus $state): string => match ($state) {
                         MandateExpirationStatus::Active => 'success',
                         MandateExpirationStatus::Expired => 'warning',

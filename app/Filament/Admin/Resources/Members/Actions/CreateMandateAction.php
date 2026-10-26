@@ -12,6 +12,8 @@ use App\Models\Member;
 use Carbon\CarbonImmutable;
 use Filament\Actions\Action;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
+use Filament\Support\Enums\Operation;
 use Filament\Support\Icons\Heroicon;
 use Livewire\Component;
 
@@ -24,7 +26,7 @@ final class CreateMandateAction
             ->icon(Heroicon::Plus)
             ->visible(static fn (): bool => auth()->user()?->can('update_member_payment_information') ?? false)
             ->modalDescription(__('labels.new_mandate_description'))
-            ->schema(MandateForm::configure(...))
+            ->schema(static fn (Schema $schema): Schema => MandateForm::configure($schema->operation(Operation::Create->value)))
             ->action(static function (
                 RelationManager $livewire,
                 array $data,

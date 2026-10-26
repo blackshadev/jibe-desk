@@ -162,8 +162,8 @@ final class MandateLifecycleTest extends FeatureTestCase
             'pageClass' => ViewMember::class,
         ])
             ->mountTableAction('editMandate', $mandate)
-            ->assertFormFieldDisabled('banking_account_number')
-            ->assertFormFieldDisabled('mandate_accepted_date')
+            ->assertFormFieldReadOnly('banking_account_number')
+            ->assertFormFieldReadOnly('mandate_accepted_date')
             ->assertFormFieldEnabled('banking_bic')
             ->assertFormFieldEnabled('banking_account_holder_name');
     }
@@ -281,7 +281,7 @@ final class MandateLifecycleTest extends FeatureTestCase
         static::assertFalse(MandatesRelationManager::canViewForRecord($member, ViewMember::class));
     }
 
-    public function test_members_list_shows_the_mandate_state(): void
+    public function test_members_list_shows_the_mandate_expiration_status(): void
     {
         $this->withAuthorizedUser();
         $this->travelTo(CarbonImmutable::parse('2026-10-22 12:00:00'));
@@ -292,7 +292,7 @@ final class MandateLifecycleTest extends FeatureTestCase
             ->createQuietly(['member_id' => $member->id]);
 
         Livewire::test(ListMembers::class)
-            ->assertTableColumnStateSet('mandate_state', MandateExpirationStatus::Expired, $member);
+            ->assertTableColumnStateSet('expiration_status', MandateExpirationStatus::Expired, $member);
     }
 
     public function test_payment_tab_shows_the_active_mandate_reference_and_state(): void
