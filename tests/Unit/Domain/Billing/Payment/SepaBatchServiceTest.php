@@ -32,6 +32,7 @@ final class SepaBatchServiceTest extends UnitTestCase
     private SepaExportServiceExpectation $exportService;
     private ExportReadinessServiceExpectation $readinessService;
     private ClockExpectation $clock;
+    private MandateRepositoryExpectation $mandateRepo;
     private SepaBatchServiceImpl $service;
 
     #[Override]
@@ -45,6 +46,7 @@ final class SepaBatchServiceTest extends UnitTestCase
         $this->exportService = SepaExportServiceExpectation::create();
         $this->readinessService = ExportReadinessServiceExpectation::create();
         $this->clock = ClockExpectation::create();
+        $this->mandateRepo = MandateRepositoryExpectation::create();
 
         $this->service = new SepaBatchServiceImpl(
             $this->repo->mock,
@@ -53,6 +55,7 @@ final class SepaBatchServiceTest extends UnitTestCase
             $this->exportService->mock,
             $this->readinessService->mock,
             $this->clock->mock,
+            $this->mandateRepo->mock,
         );
     }
 
@@ -199,6 +202,7 @@ final class SepaBatchServiceTest extends UnitTestCase
 
         $this->clock->expectsNow($now);
         $this->repo->expectsMarkSubmitted($batchId, 7, $now);
+        $this->mandateRepo->expectsStampCollectionsForBatch($batchId, $now);
 
         $this->service->markSubmitted($batchId, 7);
     }

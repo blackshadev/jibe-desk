@@ -32,7 +32,7 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
 
     private SepaBatchRepositoryExpectation $repository;
     private ClockExpectation $clock;
-    private MandateReadinessServiceExpectation $mandateReadiness;
+    private MandateReadinessRepositoryExpectation $mandateReadiness;
     private ExportReadinessServiceImpl $service;
 
     #[Override]
@@ -42,7 +42,7 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
 
         $this->repository = SepaBatchRepositoryExpectation::create();
         $this->clock = ClockExpectation::create();
-        $this->mandateReadiness = MandateReadinessServiceExpectation::create();
+        $this->mandateReadiness = MandateReadinessRepositoryExpectation::create();
 
         $this->service = new ExportReadinessServiceImpl(
             $this->repository->mock,

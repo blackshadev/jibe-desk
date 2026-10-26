@@ -50,4 +50,7 @@ return [
     'members_accepted' => 'Geselecteerde leden geaccepteerd.',
     'sepa_export_blocked' => 'Export geblokkeerd: los eerst de aandachtspunten op',
     'batch_submitted' => 'SEPA-bestand gemarkeerd als ingediend',
+    'mandate_created' => 'Machtiging vastgelegd',
+    'mandate_updated' => 'Machtiging bijgewerkt',
+    'mandate_revoked' => 'Machtiging ingetrokken',
 ];

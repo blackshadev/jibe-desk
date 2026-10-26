@@ -229,6 +229,8 @@ final class RegistrationControllerTest extends FeatureTestCase
             'banking_account_number' => self::VALID_PAYMENT_INFO['banking_account_number'],
             'banking_bic' => self::VALID_PAYMENT_INFO['banking_bic'],
             'banking_account_holder_name' => self::VALID_PAYMENT_INFO['banking_account_holder_name'],
+            'revoked_at' => null,
+            'last_collected_at' => null,
         ]);
 
         $member = Member::query()

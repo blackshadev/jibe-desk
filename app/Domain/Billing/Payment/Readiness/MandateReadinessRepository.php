@@ -8,7 +8,7 @@ use App\Domain\Members\MemberId;
 use JeroenG\Autowire\Attribute\Autowire;
 
 #[Autowire]
-interface MandateReadinessService
+interface MandateReadinessRepository
 {
     /**
      * @param list<MemberId> $memberIds

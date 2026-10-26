@@ -12,7 +12,9 @@ final class MemberCreditorPrefill
     /** @return array{creditor_name: non-falsy-string, creditor_iban: ?string} */
     public static function for(Member $member): array
     {
-        $member->loadMissing('paymentInformation');
+        $member->loadMissing(['paymentInformation', 'paymentInformations']);
+
+        $mandate = $member->paymentInformation ?? $member->paymentInformations->first();
 
         return [
             'creditor_name' => MemberNameFormatter::presentationName(
@@ -20,7 +22,7 @@ final class MemberCreditorPrefill
                 $member->infix_name,
                 $member->last_name,
             ),
-            'creditor_iban' => $member->paymentInformation->banking_account_number,
+            'creditor_iban' => $mandate?->banking_account_number,
         ];
     }
 }

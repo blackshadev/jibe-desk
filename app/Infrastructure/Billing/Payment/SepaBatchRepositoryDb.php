@@ -31,9 +31,26 @@ use App\Models\SepaExportOverride;
 use Carbon\CarbonImmutable;
 use DateTimeInterface;
 use DomainException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Override;
 
+/**
+ * @phpstan-type ExportInvoiceRow object{
+ *     invoice_id: int,
+ *     invoice_number: string,
+ *     member_id: int,
+ *     recipient_name: string,
+ *     payment_information_id: int,
+ *     iban: string,
+ *     bic: string,
+ *     mandate_date: string,
+ *     last_collected_at: null|string,
+ *     revoked_at: null|string,
+ *     total_price: numeric-string,
+ *     total_vat: numeric-string,
+ * }
+ */
 final class SepaBatchRepositoryDb implements SepaBatchRepository
 {
     #[Override]
@@ -112,48 +129,86 @@ final class SepaBatchRepositoryDb implements SepaBatchRepository
     #[Override]
     public function getInvoicesForExport(SepaBatchId $batchId): array
     {
-        $invoices = Invoice::query()
+        /** @var Collection<int, ExportInvoiceRow> $rows */
+        $rows = Invoice::query()
             ->where('invoices.sepa_batch_id', $batchId->value)
             ->where('invoices.status', InvoiceStatus::Pending)
             ->joinRelationship('lines')
-            ->joinRelationship('member.paymentInformation')
+            ->joinRelationship('member.currentPaymentInformation')
             ->select(
                 'invoices.id as invoice_id',
                 'invoices.invoice_number',
-                'members.id as member_id',
-                'payment_information.id as payment_information_id',
+                'invoices.member_id',
                 'invoices.recipient_name',
+                'payment_information.id as payment_information_id',
                 'payment_information.banking_account_number as iban',
                 'payment_information.banking_bic as bic',
                 'payment_information.mandate_accepted_date as mandate_date',
+                'payment_information.last_collected_at',
+                'payment_information.revoked_at',
                 DB::raw('SUM(invoice_lines.price * invoice_lines.quantity) as total_price'),
                 DB::raw('SUM(invoice_lines.vat * invoice_lines.quantity) as total_vat'),
             )
             ->groupBy(
                 'invoices.id',
                 'invoices.invoice_number',
+                'invoices.member_id',
                 'invoices.recipient_name',
-                'members.id',
                 'payment_information.id',
                 'payment_information.banking_account_number',
                 'payment_information.banking_bic',
                 'payment_information.mandate_accepted_date',
+                'payment_information.last_collected_at',
+                'payment_information.revoked_at',
             )
+            ->toBase()
             ->get();
 
-        return $invoices->map(static fn (object $row) => new SepaExportInvoice(
-            invoiceId: InvoiceId::create((int) $row->invoice_id),
+        return $rows
+            ->filter(self::isExportable(...))
+            ->map(self::exportInvoiceFromRow(...))
+            ->values()
+            ->all();
+    }
+
+    /** @param ExportInvoiceRow $row */
+    private static function isExportable(object $row): bool
+    {
+        return (float) $row->total_price < 0 || $row->revoked_at === null;
+    }
+
+    /** @param ExportInvoiceRow $row */
+    private static function exportInvoiceFromRow(object $row): SepaExportInvoice
+    {
+        return new SepaExportInvoice(
+            invoiceId: InvoiceId::create($row->invoice_id),
             invoiceNumber: $row->invoice_number,
             recipientName: $row->recipient_name,
             total: new CompoundPrice((float) $row->total_price, (float) $row->total_vat),
             iban: $row->iban,
             bic: $row->bic,
-            mandateId: new MandateId(
-                new MemberId((int) $row->member_id),
-                new PaymentInformationId((int) $row->payment_information_id),
-            ),
+            mandateId: self::mandateIdFromRow($row),
+            paymentInformationId: PaymentInformationId::create($row->payment_information_id),
             mandateDate: CarbonImmutable::parse($row->mandate_date),
-        ))->all();
+            lastCollectedAt: self::lastCollectedAtFromRow($row),
+        );
+    }
+
+    /** @param ExportInvoiceRow $row */
+    private static function mandateIdFromRow(object $row): MandateId
+    {
+        return new MandateId(
+            MemberId::create($row->member_id),
+            PaymentInformationId::create($row->payment_information_id),
+        );
+    }
+
+    /** @param ExportInvoiceRow $row */
+    private static function lastCollectedAtFromRow(object $row): ?CarbonImmutable
+    {
+        return $row->last_collected_at === null
+            ? null
+            : CarbonImmutable::parse($row->last_collected_at);
     }
 
     /** @return list<SepaExportPurchaseOrder> */

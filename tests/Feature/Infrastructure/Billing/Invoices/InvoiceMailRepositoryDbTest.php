@@ -8,12 +8,16 @@ use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoicePaymentDeclinedMailUnavailableException;
 use App\Domain\Billing\Invoices\InvoicePaymentDeclinedMailUnavailableReason;
 use App\Domain\Billing\Invoices\InvoiceStatus;
+use App\Domain\Billing\Invoices\Mails\InvoiceMail;
+use App\Domain\Billing\Payment\SepaConfiguration;
 use App\Infrastructure\Billing\Invoices\InvoiceMailRepositoryDb;
+use App\Infrastructure\Mail\MailMailable;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;
 use App\Models\Member;
 use App\Models\PaymentInformation;
 use App\Models\SepaBatch;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Override;
 use Tests\FeatureTestCase;
@@ -27,7 +31,15 @@ final class InvoiceMailRepositoryDbTest extends FeatureTestCase
     {
         parent::setUp();
 
-        $this->repository = new InvoiceMailRepositoryDb();
+        $this->repository = app(InvoiceMailRepositoryDb::class);
+    }
+
+    #[Override]
+    protected function tearDown(): void
+    {
+        $this->travelBack();
+
+        parent::tearDown();
     }
 
     public function test_get_invoice_mail_data_returns_full_data(): void
@@ -319,6 +331,131 @@ final class InvoiceMailRepositoryDbTest extends FeatureTestCase
         $result = $this->repository->getInvoicePaymentDeclinedMailData(InvoiceId::create($invoice->id));
 
         static::assertSame('gezin@example.com', $result->recipient->email);
+    }
+
+    public function test_get_invoice_mail_data_has_no_sepa_transfer_date_when_the_mandate_is_revoked(): void
+    {
+        $member = Member::factory()->createQuietly();
+        PaymentInformation::factory()
+            ->revoked(CarbonImmutable::parse('2026-01-01'))
+            ->for($member)
+            ->createQuietly();
+
+        $batch = SepaBatch::factory()->createQuietly([
+            'invoice_date' => '2026-06-30',
+            'sepa_transfer_date' => '2026-07-15',
+        ]);
+
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->forBatch($batch)
+            ->createQuietly();
+
+        $result = $this->repository->getInvoiceMailData(InvoiceId::create($invoice->id));
+
+        static::assertNull($result->sepaTransferDate);
+    }
+
+    public function test_invoice_mail_renders_for_a_member_with_an_active_mandate(): void
+    {
+        $member = Member::factory()->createQuietly();
+        PaymentInformation::factory()->for($member)->createQuietly([
+            'mandate_accepted_date' => '2025-01-15',
+        ]);
+
+        $batch = SepaBatch::factory()->createQuietly([
+            'invoice_date' => '2026-06-30',
+            'sepa_transfer_date' => '2026-07-15',
+        ]);
+
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->forBatch($batch)
+            ->createQuietly();
+
+        InvoiceLine::factory()->for($invoice)->createQuietly([
+            'price' => 10.00,
+            'quantity' => 1,
+            'vat' => 2.10,
+        ]);
+
+        $data = $this->repository->getInvoiceMailData(InvoiceId::create($invoice->id));
+
+        $configuration = new SepaConfiguration(
+            creditorId: 'NL12ZZZ1234567890',
+            creditorName: 'Test Club',
+            creditorIban: 'NL91ABNA0417164300',
+            creditorBic: 'ABNANL2A',
+            noticePeriodDays: 14,
+        );
+
+        $rendered = (new MailMailable(new InvoiceMail($data, $configuration)))->render();
+
+        static::assertStringContainsString('automatisch geïncasseerd op', $rendered);
+        static::assertStringContainsString('15-07-2026', $rendered);
+    }
+
+    public function test_declined_mail_flags_a_revoked_mandate_for_reauthorisation(): void
+    {
+        $member = Member::factory()->createQuietly();
+        PaymentInformation::factory()
+            ->revoked(CarbonImmutable::parse('2026-01-01'))
+            ->for($member)
+            ->createQuietly();
+
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->createQuietly(['status' => InvoiceStatus::Declined]);
+
+        $result = $this->repository->getInvoicePaymentDeclinedMailData(InvoiceId::create($invoice->id));
+
+        static::assertTrue($result->mandateNeedsReauthorisation);
+    }
+
+    public function test_declined_mail_flags_an_expired_mandate_for_reauthorisation(): void
+    {
+        $this->travelTo(CarbonImmutable::parse('2026-10-22 12:00:00'));
+
+        $member = Member::factory()->createQuietly();
+        PaymentInformation::factory()
+            ->signedAt(CarbonImmutable::parse('2023-10-22'))
+            ->for($member)
+            ->createQuietly();
+
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->createQuietly(['status' => InvoiceStatus::Declined]);
+
+        $result = $this->repository->getInvoicePaymentDeclinedMailData(InvoiceId::create($invoice->id));
+
+        static::assertTrue($result->mandateNeedsReauthorisation);
+    }
+
+    public function test_declined_mail_does_not_flag_an_active_mandate(): void
+    {
+        $member = Member::factory()->createQuietly();
+        PaymentInformation::factory()->for($member)->createQuietly();
+
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->createQuietly(['status' => InvoiceStatus::Declined]);
+
+        $result = $this->repository->getInvoicePaymentDeclinedMailData(InvoiceId::create($invoice->id));
+
+        static::assertFalse($result->mandateNeedsReauthorisation);
+    }
+
+    public function test_declined_mail_does_not_flag_a_member_without_a_mandate(): void
+    {
+        $member = Member::factory()->createQuietly();
+
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->createQuietly(['status' => InvoiceStatus::Declined]);
+
+        $result = $this->repository->getInvoicePaymentDeclinedMailData(InvoiceId::create($invoice->id));
+
+        static::assertFalse($result->mandateNeedsReauthorisation);
     }
 
     private function expectInvoicePaymentDeclinedMailUnavailable(
