@@ -6,9 +6,8 @@ namespace App\Filament\Admin\Resources\Members\RelationManagers;
 
 use App\Domain\Billing\Payment\MandateCorrection;
 use App\Domain\Billing\Payment\MandateDetails;
-use App\Domain\Billing\Payment\MandateExpiry;
+use App\Domain\Billing\Payment\MandateExpirationStatus;
 use App\Domain\Billing\Payment\MandateRepository;
-use App\Domain\Billing\Payment\MandateState;
 use App\Domain\Billing\Payment\PaymentInformationId;
 use App\Domain\Members\MemberId;
 use App\Filament\Admin\RelationManagers\MemberRelationManager;
@@ -72,12 +71,12 @@ final class MandatesRelationManager extends MemberRelationManager
                 TextColumn::make('mandate_state')
                     ->label(__('labels.mandate_state'))
                     ->badge()
-                    ->state(static fn (PaymentInformation $record): MandateState => $record->state(app(MandateExpiry::class)))
-                    ->formatStateUsing(static fn (MandateState $state): string => __('labels.mandate_states.' . $state->value))
-                    ->color(static fn (MandateState $state): string => match ($state) {
-                        MandateState::Active => 'success',
-                        MandateState::Expired => 'warning',
-                        MandateState::Revoked => 'gray',
+                    ->state(static fn (PaymentInformation $record): MandateExpirationStatus => $record->expiration_status)
+                    ->formatStateUsing(static fn (MandateExpirationStatus $state): string => __('labels.mandate_states.' . $state->value))
+                    ->color(static fn (MandateExpirationStatus $state): string => match ($state) {
+                        MandateExpirationStatus::Active => 'success',
+                        MandateExpirationStatus::Expired => 'warning',
+                        MandateExpirationStatus::Revoked => 'gray',
                     }),
                 TextColumn::make('revoked_at')
                     ->label(__('labels.revoked_at'))

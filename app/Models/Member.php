@@ -114,6 +114,17 @@ final class Member extends Model
         return $this->hasOne(PaymentInformation::class)->whereNull('revoked_at');
     }
 
+    /**
+     * The mandate to charge or refund: the active mandate when there is one,
+     * otherwise the most recently signed mandate.
+     *
+     * @return HasOne<PaymentInformation, $this>
+     */
+    public function currentPaymentInformation(): HasOne
+    {
+        return $this->hasOne(PaymentInformation::class)->latestOfMany();
+    }
+
     /** @return HasMany<PaymentInformation, $this> */
     public function paymentInformations(): HasMany
     {

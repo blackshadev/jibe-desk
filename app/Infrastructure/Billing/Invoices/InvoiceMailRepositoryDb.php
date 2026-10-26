@@ -11,8 +11,7 @@ use App\Domain\Billing\Invoices\InvoiceMailRepository;
 use App\Domain\Billing\Invoices\InvoicePaymentDeclinedMailData;
 use App\Domain\Billing\Invoices\InvoicePaymentDeclinedMailUnavailableException;
 use App\Domain\Billing\Invoices\InvoiceStatus;
-use App\Domain\Billing\Payment\MandateExpiry;
-use App\Domain\Billing\Payment\MandateState;
+use App\Domain\Billing\Payment\MandateExpirationStatus;
 use App\Domain\Mail\Recipient;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;
@@ -21,10 +20,6 @@ use Override;
 
 final readonly class InvoiceMailRepositoryDb implements InvoiceMailRepository
 {
-    public function __construct(
-        private MandateExpiry $mandateExpiry,
-    ) {}
-
     #[Override]
     public function getInvoiceMailData(InvoiceId $id): InvoiceMailData
     {
@@ -86,7 +81,7 @@ final readonly class InvoiceMailRepositoryDb implements InvoiceMailRepository
         $mandate = $invoice->member?->paymentInformations->first();
 
         $mandateNeedsReauthorisation = $mandate !== null
-            && $mandate->state($this->mandateExpiry) !== MandateState::Active;
+            && $mandate->expiration_status !== MandateExpirationStatus::Active;
 
         return new InvoicePaymentDeclinedMailData(
             invoiceId: InvoiceId::create($invoice->id),

@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Billing\Payment;
 
-use App\Domain\Billing\Payment\MandateExpiry;
+use App\Domain\Billing\Payment\MandateExpirationStatus;
 use App\Domain\Billing\Payment\MandateId;
-use App\Domain\Billing\Payment\MandateState;
 use App\Domain\Billing\Payment\PaymentInformationId;
 use App\Domain\Billing\Payment\Readiness\MandateReadiness;
 use App\Domain\Billing\Payment\Readiness\MandateReadinessService;
@@ -18,10 +17,6 @@ use Override;
 
 final readonly class MandateReadinessServiceImpl implements MandateReadinessService
 {
-    public function __construct(
-        private MandateExpiry $mandateExpiry,
-    ) {}
-
     /** @param list<MemberId> $memberIds @return array<int, MandateReadiness> */
     #[Override]
     public function forMembers(array $memberIds): array
@@ -53,10 +48,10 @@ final readonly class MandateReadinessServiceImpl implements MandateReadinessServ
 
             $status = $active === null
                 ? MandateReadinessStatus::Revoked
-                : match ($mandate->state($this->mandateExpiry)) {
-                    MandateState::Active => MandateReadinessStatus::Active,
-                    MandateState::Expired => MandateReadinessStatus::Expired,
-                    MandateState::Revoked => MandateReadinessStatus::Revoked,
+                : match ($mandate->expiration_status) {
+                    MandateExpirationStatus::Active => MandateReadinessStatus::Active,
+                    MandateExpirationStatus::Expired => MandateReadinessStatus::Expired,
+                    MandateExpirationStatus::Revoked => MandateReadinessStatus::Revoked,
                 };
 
             $result[(int) $memberId] = new MandateReadiness(

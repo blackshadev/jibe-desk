@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Members\Schemas;
 
-use App\Domain\Billing\Payment\MandateExpiry;
-use App\Domain\Billing\Payment\MandateState;
+use App\Domain\Billing\Payment\MandateExpirationStatus;
 use App\Domain\Members\Gender;
 use App\Models\Member;
 use Filament\Forms\Components\DatePicker;
@@ -189,7 +188,7 @@ final class MemberForm
                     ->label(__('labels.mandate_state'))
                     ->state(static fn (?Member $record): string => $record?->paymentInformation === null
                         ? __('labels.no_active_mandate')
-                        : __('labels.mandate_states.' . $record->paymentInformation->state(app(MandateExpiry::class))->value)),
+                        : __('labels.mandate_states.' . $record->paymentInformation->expiration_status->value)),
 
                 TextEntry::make('active_mandate_iban')
                     ->label(__('labels.banking_account_number'))
@@ -216,15 +215,13 @@ final class MemberForm
                     ->label(__('labels.mandate_expires_at'))
                     ->state(static fn (?Member $record): string => $record?->paymentInformation === null
                         ? '—'
-                        : app(MandateExpiry::class)
-                            ->expiresAt($record->paymentInformation->mandate_accepted_date, $record->paymentInformation->last_collected_at)
-                            ->format('d-m-Y')),
+                        : $record->paymentInformation->expires_at->format('d-m-Y')),
 
                 TextEntry::make('mandate_expired_notice')
                     ->hiddenLabel()
                     ->columnSpanFull()
                     ->visible(static fn (?Member $record): bool => $record?->paymentInformation !== null
-                        && $record->paymentInformation->state(app(MandateExpiry::class)) === MandateState::Expired)
+                        && $record->paymentInformation->expiration_status === MandateExpirationStatus::Expired)
                     ->state(__('labels.mandate_expired_notice')),
             ])
             ->visible(static fn (Member $record): bool => auth()->user()?->can('view-payment-information', $record) ?? false);

@@ -7,7 +7,7 @@ namespace Tests\Feature\Filament\Admin\Resources\Members;
 use App\Domain\Authorization\RoleName;
 use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoiceStatus;
-use App\Domain\Billing\Payment\MandateState;
+use App\Domain\Billing\Payment\MandateExpirationStatus;
 use App\Filament\Admin\Resources\Members\Pages\EditMember;
 use App\Filament\Admin\Resources\Members\Pages\ListMembers;
 use App\Filament\Admin\Resources\Members\Pages\ViewMember;
@@ -292,7 +292,7 @@ final class MandateLifecycleTest extends FeatureTestCase
             ->createQuietly(['member_id' => $member->id]);
 
         Livewire::test(ListMembers::class)
-            ->assertTableColumnStateSet('mandate_state', MandateState::Expired, $member);
+            ->assertTableColumnStateSet('mandate_state', MandateExpirationStatus::Expired, $member);
     }
 
     public function test_payment_tab_shows_the_active_mandate_reference_and_state(): void

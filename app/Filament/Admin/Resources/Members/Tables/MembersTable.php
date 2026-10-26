@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Members\Tables;
 
-use App\Domain\Billing\Payment\MandateExpiry;
-use App\Domain\Billing\Payment\MandateState;
+use App\Domain\Billing\Payment\MandateExpirationStatus;
 use App\Domain\Members\AcceptMemberService;
 use App\Domain\Members\MemberId;
 use App\Filament\Admin\Resources\Members\MemberResource;
@@ -33,14 +32,14 @@ final class MembersTable
                 TextColumn::make('mandate_state')
                     ->label(__('labels.mandate_state'))
                     ->badge()
-                    ->state(static fn (Member $record): ?MandateState => $record->paymentInformation?->state(app(MandateExpiry::class)))
-                    ->formatStateUsing(static fn (?MandateState $state): string => $state === null
+                    ->state(static fn (Member $record): ?MandateExpirationStatus => $record->paymentInformation?->expiration_status)
+                    ->formatStateUsing(static fn (?MandateExpirationStatus $state): string => $state === null
                         ? __('labels.no_active_mandate')
                         : __('labels.mandate_states.' . $state->value))
-                    ->color(static fn (?MandateState $state): string => match ($state) {
-                        MandateState::Active => 'success',
-                        MandateState::Expired => 'warning',
-                        MandateState::Revoked, null => 'gray',
+                    ->color(static fn (?MandateExpirationStatus $state): string => match ($state) {
+                        MandateExpirationStatus::Active => 'success',
+                        MandateExpirationStatus::Expired => 'warning',
+                        MandateExpirationStatus::Revoked, null => 'gray',
                     }),
                 TextColumn::make('user.email')
                     ->label(__('labels.account'))

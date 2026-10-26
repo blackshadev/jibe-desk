@@ -8,8 +8,7 @@ use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Invoices\InvoiceService;
 use App\Domain\Billing\Invoices\InvoiceStatus;
-use App\Domain\Billing\Payment\MandateExpiry;
-use App\Domain\Billing\Payment\MandateState;
+use App\Domain\Billing\Payment\MandateExpirationStatus;
 use App\Domain\Billing\Payment\Readiness\ExportConfirmation;
 use App\Domain\Billing\Payment\Readiness\ExportNotReadyException;
 use App\Domain\Billing\Payment\Readiness\ExportOverride;
@@ -105,7 +104,7 @@ final class MandateLifecycleScenarioTest extends FeatureTestCase
 
         $this->travelTo(CarbonImmutable::parse('2029-09-22 09:30:00'));
 
-        static::assertSame(MandateState::Active, $mandate->refresh()->state(app(MandateExpiry::class)));
+        static::assertSame(MandateExpirationStatus::Active, $mandate->refresh()->expiration_status);
     }
 
     public function test_an_expired_mandate_is_reported_as_an_overridable_exclusion(): void

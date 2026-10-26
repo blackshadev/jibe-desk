@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Billing\Payment;
 
-enum MandateState: string
+enum MandateExpirationStatus: string
 {
     case Active = 'active';
     case Expired = 'expired';

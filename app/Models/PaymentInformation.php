@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Domain\Billing\Payment\MandateExpiry;
+use App\Domain\Billing\Payment\MandateExpirationStatus;
 use App\Domain\Billing\Payment\MandateId;
-use App\Domain\Billing\Payment\MandateState;
 use App\Domain\Billing\Payment\PaymentInformationId;
 use App\Domain\Members\MemberId;
+use Carbon\CarbonImmutable;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -30,11 +30,18 @@ use Override;
  * @property null|DateTimeInterface $revoked_at
  * @property null|DateTimeInterface $last_collected_at
  * @property-read string $mandate_reference
+ * @property-read CarbonImmutable $expires_at
+ * @property-read MandateExpirationStatus $expiration_status
  */
 #[Guarded('id', 'updated_at', 'created_at')]
 final class PaymentInformation extends Model
 {
     use HasFactory;
+
+    /**
+     * A mandate lapses when it has not been used for this many months.
+     */
+    public const int MONTHS_WITHOUT_COLLECTION = 36;
 
     #[Override]
     protected $table = 'payment_information';
@@ -45,15 +52,6 @@ final class PaymentInformation extends Model
         return $this->belongsTo(Member::class);
     }
 
-    public function state(MandateExpiry $expiry): MandateState
-    {
-        return $expiry->state(
-            signedAt: $this->mandate_accepted_date,
-            lastCollectedAt: $this->last_collected_at,
-            revokedAt: $this->revoked_at,
-        );
-    }
-
     /** @return Attribute<string, never> */
     protected function mandateReference(): Attribute
     {
@@ -61,6 +59,38 @@ final class PaymentInformation extends Model
             MemberId::create($this->member_id),
             PaymentInformationId::create($this->id),
         )->value);
+    }
+
+    /**
+     * The moment the mandate lapses: thirty-six months after the last collection,
+     * or after signing when the mandate was never used.
+     *
+     * @return Attribute<CarbonImmutable, never>
+     */
+    protected function expiresAt(): Attribute
+    {
+        return Attribute::get(fn (): CarbonImmutable => ($this->last_collected_at === null
+            ? CarbonImmutable::instance($this->mandate_accepted_date)
+            : CarbonImmutable::instance($this->last_collected_at))
+            ->addMonthsNoOverflow(self::MONTHS_WITHOUT_COLLECTION));
+    }
+
+    /** @return Attribute<MandateExpirationStatus, never> */
+    protected function expirationStatus(): Attribute
+    {
+        // @mago-expect lint:prefer-first-class-callable
+        return Attribute::get(fn (): MandateExpirationStatus => $this->determineExpirationStatus());
+    }
+
+    private function determineExpirationStatus(): MandateExpirationStatus
+    {
+        if ($this->revoked_at !== null) {
+            return MandateExpirationStatus::Revoked;
+        }
+
+        return $this->expires_at->isFuture()
+            ? MandateExpirationStatus::Active
+            : MandateExpirationStatus::Expired;
     }
 
     /** @return array<string, string> */
