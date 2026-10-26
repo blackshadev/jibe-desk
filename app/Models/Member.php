@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\DB;
 use Override;
 use RuntimeException;
 
@@ -116,13 +117,20 @@ final class Member extends Model
 
     /**
      * The mandate to charge or refund: the active mandate when there is one,
-     * otherwise the most recently signed mandate.
+     * otherwise the most recently signed revoked mandate.
      *
      * @return HasOne<PaymentInformation, $this>
      */
     public function currentPaymentInformation(): HasOne
     {
-        return $this->hasOne(PaymentInformation::class)->latestOfMany();
+        return $this->hasOne(PaymentInformation::class)->where(
+            'payment_information.id',
+            DB::raw('(select current_mandate.id
+                    from payment_information as current_mandate
+                    where current_mandate.member_id = payment_information.member_id
+                    order by current_mandate.revoked_at is null desc, current_mandate.id desc
+                    limit 1)'),
+        );
     }
 
     /** @return HasMany<PaymentInformation, $this> */

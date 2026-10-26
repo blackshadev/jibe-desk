@@ -61,6 +61,21 @@ final class PaymentInformationTest extends FeatureTestCase
         static::assertSame($latest->id, $member->currentPaymentInformation?->id);
     }
 
+    public function test_current_payment_information_prefers_the_active_mandate_over_a_newer_revoked_one(): void
+    {
+        $member = Member::factory()->createQuietly();
+        $active = PaymentInformation::factory()->createQuietly(['member_id' => $member->id]);
+        PaymentInformation::factory()
+            ->revoked(CarbonImmutable::parse('2026-01-01'))
+            ->createQuietly(['member_id' => $member->id]);
+
+        static::assertSame($active->id, $member->currentPaymentInformation?->id);
+
+        $reloaded = Member::query()->with('currentPaymentInformation')->findOrFail($member->id);
+
+        static::assertSame($active->id, $reloaded->currentPaymentInformation?->id);
+    }
+
     public function test_expiration_status_returns_active_for_a_non_revoked_mandate(): void
     {
         $mandate = PaymentInformation::factory()->createQuietly();
