@@ -9,23 +9,23 @@ use App\Domain\Billing\Payment\PaymentInformationId;
 use App\Domain\Billing\Payment\Readiness\MandateReadinessStatus;
 use App\Domain\Billing\Payment\SequenceType;
 use App\Domain\Members\MemberId;
-use App\Infrastructure\Billing\Payment\MandateReadinessServiceImpl;
+use App\Infrastructure\Billing\Payment\MandateReadinessRepositoryDb;
 use App\Models\Member;
 use App\Models\PaymentInformation;
 use Carbon\CarbonImmutable;
 use Override;
 use Tests\FeatureTestCase;
 
-final class MandateReadinessServiceImplTest extends FeatureTestCase
+final class MandateReadinessRepositoryDbTest extends FeatureTestCase
 {
-    private MandateReadinessServiceImpl $service;
+    private MandateReadinessRepositoryDb $service;
 
     #[Override]
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->service = app(MandateReadinessServiceImpl::class);
+        $this->service = app(MandateReadinessRepositoryDb::class);
     }
 
     #[Override]

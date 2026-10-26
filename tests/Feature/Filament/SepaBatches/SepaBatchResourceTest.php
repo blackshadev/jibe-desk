@@ -9,7 +9,7 @@ use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Domain\Billing\Payment\Readiness\ExportReadinessReason;
 use App\Domain\Billing\Payment\Readiness\ExportReadinessService;
 use App\Domain\Billing\Payment\Readiness\MandateReadiness;
-use App\Domain\Billing\Payment\Readiness\MandateReadinessService;
+use App\Domain\Billing\Payment\Readiness\MandateReadinessRepository;
 use App\Domain\Billing\Payment\Readiness\MandateReadinessStatus;
 use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Billing\Payment\SepaBatchStatus;
@@ -947,7 +947,7 @@ final class SepaBatchResourceTest extends FeatureTestCase
 
     private function bindExpiredMandateReadiness(): void
     {
-        $this->app->instance(MandateReadinessService::class, new class() implements MandateReadinessService {
+        $this->app->instance(MandateReadinessRepository::class, new class() implements MandateReadinessRepository {
             /** @param list<MemberId> $memberIds */
             #[Override]
             public function forMembers(array $memberIds): array

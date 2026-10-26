@@ -20,7 +20,7 @@ final readonly class ExportReadinessServiceImpl implements ExportReadinessServic
         private SepaBatchRepository $batchRepository,
         private SepaConfiguration $configuration,
         private ClockInterface $clock,
-        private MandateReadinessService $mandateReadiness,
+        private MandateReadinessRepository $mandateReadiness,
     ) {}
 
     #[Override]
