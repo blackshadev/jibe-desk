@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Domain\Billing\Payment;
 
 use App\Domain\Billing\Payment\MandateRepository;
-use App\Domain\Billing\Payment\PaymentInformationIdList;
+use App\Domain\Billing\Payment\SepaBatchId;
 use DateTimeInterface;
 use Mockery;
 use Mockery\MockInterface;
@@ -23,11 +23,11 @@ final readonly class MandateRepositoryExpectation
         return new self(Mockery::mock(MandateRepository::class));
     }
 
-    public function expectsStampCollections(PaymentInformationIdList $ids, DateTimeInterface $collectedAt): void
+    public function expectsStampCollectionsForBatch(SepaBatchId $batchId, DateTimeInterface $collectedAt): void
     {
         $this->mock
-            ->expects('stampCollections')
-            ->with(equalTo($ids), equalTo($collectedAt))
-            ->andReturn(count($ids->ids));
+            ->expects('stampCollectionsForBatch')
+            ->with(equalTo($batchId), equalTo($collectedAt))
+            ->andReturn(0);
     }
 }

@@ -17,5 +17,9 @@ interface MandateRepository
 
     public function revoke(PaymentInformationId $id, DateTimeInterface $revokedAt): void;
 
-    public function stampCollections(PaymentInformationIdList $ids, DateTimeInterface $collectedAt): int;
+    /**
+     * Stamp last_collected_at on the active mandates of every member with a
+     * positive, non-credit invoice in the batch.
+     */
+    public function stampCollectionsForBatch(SepaBatchId $batchId, DateTimeInterface $collectedAt): int;
 }

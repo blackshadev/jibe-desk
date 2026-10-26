@@ -401,26 +401,4 @@ final class SepaBatchRepositoryDb implements SepaBatchRepository
                 'submitted_by' => $submittedByUserId,
             ]);
     }
-
-    /** @return list<PaymentInformationId> */
-    #[Override]
-    public function getCollectedMandateIds(SepaBatchId $batchId): array
-    {
-        $memberIds = DB::table('invoices')
-            ->join('invoice_lines', 'invoice_lines.invoice_id', '=', 'invoices.id')
-            ->where('invoices.sepa_batch_id', $batchId->value)
-            ->whereNull('invoices.credit_invoice_id')
-            ->groupBy('invoices.id', 'invoices.member_id')
-            ->havingRaw('SUM(invoice_lines.price * invoice_lines.quantity) > 0')
-            ->select('invoices.member_id')
-            ->distinct()
-            ->pluck('member_id');
-
-        return PaymentInformation::query()
-            ->whereIn('member_id', $memberIds->all())
-            ->whereNull('revoked_at')
-            ->pluck('id')
-            ->map(PaymentInformationId::create(...))
-            ->all();
-    }
 }

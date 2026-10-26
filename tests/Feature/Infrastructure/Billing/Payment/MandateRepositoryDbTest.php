@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Infrastructure\Billing\Payment;
 
+use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Domain\Billing\Payment\MandateCorrection;
 use App\Domain\Billing\Payment\MandateDetails;
 use App\Domain\Billing\Payment\MandateId;
 use App\Domain\Billing\Payment\MandateRepository;
 use App\Domain\Billing\Payment\PaymentInformationId;
-use App\Domain\Billing\Payment\PaymentInformationIdList;
+use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Members\MemberId;
+use App\Models\Invoice;
+use App\Models\InvoiceLine;
 use App\Models\Member;
 use App\Models\PaymentInformation;
+use App\Models\SepaBatch;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\QueryException;
 use Override;
@@ -201,13 +205,16 @@ final class MandateRepositoryDbTest extends FeatureTestCase
         static::assertSame('2026-10-01 12:00:00', $mandate->refresh()->revoked_at?->format('Y-m-d H:i:s'));
     }
 
-    public function test_stamp_collections_sets_last_collected_at(): void
+    public function test_stamp_collections_for_batch_sets_last_collected_at_on_the_active_mandate(): void
     {
-        $mandate = PaymentInformation::factory()->createQuietly();
+        $batch = SepaBatch::factory()->createQuietly();
+        $member = Member::factory()->createQuietly();
+        $mandate = PaymentInformation::factory()->createQuietly(['member_id' => $member->id]);
+        $this->invoiceInBatch($batch, $member);
         $collectedAt = CarbonImmutable::parse('2026-10-23 09:30:00');
 
-        $updated = $this->repository->stampCollections(
-            new PaymentInformationIdList([PaymentInformationId::create($mandate->id)]),
+        $updated = $this->repository->stampCollectionsForBatch(
+            SepaBatchId::create($batch->id),
             $collectedAt,
         );
 
@@ -215,26 +222,126 @@ final class MandateRepositoryDbTest extends FeatureTestCase
         static::assertSame('2026-10-23 09:30:00', $mandate->refresh()->last_collected_at?->format('Y-m-d H:i:s'));
     }
 
-    public function test_stamp_collections_does_not_move_last_collected_at_backwards(): void
+    public function test_stamp_collections_for_batch_does_not_move_last_collected_at_backwards(): void
     {
+        $batch = SepaBatch::factory()->createQuietly();
+        $member = Member::factory()->createQuietly();
         $mandate = PaymentInformation::factory()
             ->collectedAt(CarbonImmutable::parse('2026-10-01 12:00:00'))
-            ->createQuietly();
+            ->createQuietly(['member_id' => $member->id]);
+        $this->invoiceInBatch($batch, $member);
 
-        $this->repository->stampCollections(
-            new PaymentInformationIdList([PaymentInformationId::create($mandate->id)]),
+        $updated = $this->repository->stampCollectionsForBatch(
+            SepaBatchId::create($batch->id),
             CarbonImmutable::parse('2026-09-01 12:00:00'),
         );
 
+        static::assertSame(0, $updated);
         static::assertSame('2026-10-01 12:00:00', $mandate->refresh()->last_collected_at?->format('Y-m-d H:i:s'));
     }
 
-    public function test_stamp_collections_ignores_an_empty_list(): void
+    public function test_stamp_collections_for_batch_ignores_a_batch_without_invoices(): void
     {
-        static::assertSame(0, $this->repository->stampCollections(
-            new PaymentInformationIdList([]),
+        $batch = SepaBatch::factory()->createQuietly();
+
+        $updated = $this->repository->stampCollectionsForBatch(
+            SepaBatchId::create($batch->id),
             CarbonImmutable::parse('2026-10-01 12:00:00'),
-        ));
+        );
+
+        static::assertSame(0, $updated);
+    }
+
+    public function test_stamp_collections_for_batch_ignores_a_credit_invoice(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly();
+        $member = Member::factory()->createQuietly();
+        $mandate = PaymentInformation::factory()->createQuietly(['member_id' => $member->id]);
+        $original = Invoice::factory()->forMember($member)->createQuietly();
+        $this->invoiceInBatch($batch, $member, price: -10.00, creditInvoiceId: $original->id);
+
+        $updated = $this->repository->stampCollectionsForBatch(
+            SepaBatchId::create($batch->id),
+            CarbonImmutable::parse('2026-10-01 12:00:00'),
+        );
+
+        static::assertSame(0, $updated);
+        static::assertNull($mandate->refresh()->last_collected_at);
+    }
+
+    public function test_stamp_collections_for_batch_ignores_a_member_without_an_active_mandate(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly();
+        $member = Member::factory()->createQuietly();
+        $mandate = PaymentInformation::factory()
+            ->revoked(CarbonImmutable::parse('2025-01-01'))
+            ->createQuietly(['member_id' => $member->id]);
+        $this->invoiceInBatch($batch, $member);
+
+        $updated = $this->repository->stampCollectionsForBatch(
+            SepaBatchId::create($batch->id),
+            CarbonImmutable::parse('2026-10-01 12:00:00'),
+        );
+
+        static::assertSame(0, $updated);
+        static::assertNull($mandate->refresh()->last_collected_at);
+    }
+
+    public function test_stamp_collections_for_batch_counts_a_presented_invoice_even_after_it_is_declined(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly();
+        $member = Member::factory()->createQuietly();
+        $mandate = PaymentInformation::factory()->createQuietly(['member_id' => $member->id]);
+        $this->invoiceInBatch($batch, $member, status: InvoiceStatus::Declined);
+
+        $updated = $this->repository->stampCollectionsForBatch(
+            SepaBatchId::create($batch->id),
+            CarbonImmutable::parse('2026-10-01 12:00:00'),
+        );
+
+        static::assertSame(1, $updated);
+        static::assertNotNull($mandate->refresh()->last_collected_at);
+    }
+
+    public function test_stamp_collections_for_batch_stamps_each_mandate_once(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly();
+        $member = Member::factory()->createQuietly();
+        $mandate = PaymentInformation::factory()->createQuietly(['member_id' => $member->id]);
+        $this->invoiceInBatch($batch, $member);
+        $this->invoiceInBatch($batch, $member);
+
+        $updated = $this->repository->stampCollectionsForBatch(
+            SepaBatchId::create($batch->id),
+            CarbonImmutable::parse('2026-10-01 12:00:00'),
+        );
+
+        static::assertSame(1, $updated);
+        static::assertSame(1, PaymentInformation::query()->whereNotNull('last_collected_at')->count());
+    }
+
+    private function invoiceInBatch(
+        SepaBatch $batch,
+        Member $member,
+        float $price = 10.00,
+        InvoiceStatus $status = InvoiceStatus::Open,
+        ?int $creditInvoiceId = null,
+    ): Invoice {
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->forBatch($batch)
+            ->createQuietly([
+                'status' => $status,
+                'credit_invoice_id' => $creditInvoiceId,
+            ]);
+
+        InvoiceLine::factory()->createQuietly([
+            'invoice_id' => $invoice->id,
+            'price' => $price,
+            'quantity' => 1,
+        ]);
+
+        return $invoice;
     }
 
     public function test_one_active_mandate_per_member_is_enforced_by_the_database(): void

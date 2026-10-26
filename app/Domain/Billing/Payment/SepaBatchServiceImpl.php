@@ -114,9 +114,6 @@ final readonly class SepaBatchServiceImpl implements SepaBatchService
 
         $this->batchRepository->markSubmitted($batchId, $submittedByUserId, $submittedAt);
 
-        $this->mandateRepository->stampCollections(
-            new PaymentInformationIdList($this->batchRepository->getCollectedMandateIds($batchId)),
-            $submittedAt,
-        );
+        $this->mandateRepository->stampCollectionsForBatch($batchId, $submittedAt);
     }
 }

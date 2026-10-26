@@ -8,7 +8,7 @@ use App\Domain\Billing\Payment\MandateCorrection;
 use App\Domain\Billing\Payment\MandateDetails;
 use App\Domain\Billing\Payment\MandateRepository;
 use App\Domain\Billing\Payment\PaymentInformationId;
-use App\Domain\Billing\Payment\PaymentInformationIdList;
+use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Members\MemberId;
 use App\Models\PaymentInformation;
 use Carbon\CarbonImmutable;
@@ -64,14 +64,20 @@ final class MandateRepositoryDb implements MandateRepository
     }
 
     #[Override]
-    public function stampCollections(PaymentInformationIdList $ids, DateTimeInterface $collectedAt): int
+    public function stampCollectionsForBatch(SepaBatchId $batchId, DateTimeInterface $collectedAt): int
     {
-        if ($ids->ids === []) {
-            return 0;
-        }
+        $collectedMemberIds = DB::table('invoices')
+            ->join('invoice_lines', 'invoice_lines.invoice_id', '=', 'invoices.id')
+            ->where('invoices.sepa_batch_id', $batchId->value)
+            ->whereNull('invoices.credit_invoice_id')
+            ->groupBy('invoices.id', 'invoices.member_id')
+            ->havingRaw('SUM(invoice_lines.price * invoice_lines.quantity) > 0')
+            ->select('invoices.member_id')
+            ->distinct();
 
         return PaymentInformation::query()
-            ->whereIn('id', $ids->values())
+            ->whereIn('member_id', $collectedMemberIds)
+            ->whereNull('revoked_at')
             ->where(static function (Builder $query) use ($collectedAt): void {
                 $query->whereNull('last_collected_at')
                     ->orWhere('last_collected_at', '<', $collectedAt);
