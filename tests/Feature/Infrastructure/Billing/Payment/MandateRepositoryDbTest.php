@@ -30,11 +30,11 @@ final class MandateRepositoryDbTest extends FeatureTestCase
         $this->repository = app(MandateRepository::class);
     }
 
-    public function test_register_creates_the_first_active_mandate(): void
+    public function test_create_creates_the_first_active_mandate(): void
     {
         $member = Member::factory()->createQuietly();
 
-        $id = $this->repository->register(
+        $id = $this->repository->create(
             MemberId::create($member->id),
             new MandateDetails(
                 iban: 'NL91ABNA0417164300',
@@ -55,12 +55,12 @@ final class MandateRepositoryDbTest extends FeatureTestCase
         static::assertNull($mandate->last_collected_at);
     }
 
-    public function test_register_creates_a_new_active_mandate_and_revokes_the_old_one(): void
+    public function test_create_creates_a_new_active_mandate_and_revokes_the_old_one(): void
     {
         $member = Member::factory()->createQuietly();
         $old = PaymentInformation::factory()->createQuietly(['member_id' => $member->id]);
 
-        $newId = $this->repository->register(
+        $newId = $this->repository->create(
             MemberId::create($member->id),
             new MandateDetails(
                 iban: 'NL20RABO0123456789',
@@ -78,7 +78,7 @@ final class MandateRepositoryDbTest extends FeatureTestCase
         static::assertSame(1, PaymentInformation::query()->where('member_id', $member->id)->whereNull('revoked_at')->count());
     }
 
-    public function test_register_keeps_the_iban_on_the_revoked_mandate(): void
+    public function test_create_keeps_the_iban_on_the_revoked_mandate(): void
     {
         $member = Member::factory()->createQuietly();
         $old = PaymentInformation::factory()->createQuietly([
@@ -86,7 +86,7 @@ final class MandateRepositoryDbTest extends FeatureTestCase
             'banking_account_number' => 'NL91ABNA0417164300',
         ]);
 
-        $this->repository->register(
+        $this->repository->create(
             MemberId::create($member->id),
             new MandateDetails(
                 iban: 'NL20RABO0123456789',
@@ -99,13 +99,13 @@ final class MandateRepositoryDbTest extends FeatureTestCase
         static::assertSame('NL91ABNA0417164300', $old->refresh()->banking_account_number);
     }
 
-    public function test_register_creates_a_new_reference_so_the_first_collection_is_first_again(): void
+    public function test_create_creates_a_new_reference_so_the_first_collection_is_first_again(): void
     {
         $member = Member::factory()->createQuietly();
         $old = PaymentInformation::factory()->createQuietly(['member_id' => $member->id]);
         $oldReference = $old->mandate_reference;
 
-        $newId = $this->repository->register(
+        $newId = $this->repository->create(
             MemberId::create($member->id),
             new MandateDetails(
                 iban: 'NL20RABO0123456789',
@@ -121,11 +121,11 @@ final class MandateRepositoryDbTest extends FeatureTestCase
         static::assertSame($oldReference, $old->refresh()->mandate_reference);
     }
 
-    public function test_correct_details_changes_the_bic_and_account_holder_name(): void
+    public function test_update_changes_the_bic_and_account_holder_name(): void
     {
         $mandate = PaymentInformation::factory()->createQuietly();
 
-        $this->repository->correctDetails(
+        $this->repository->update(
             PaymentInformationId::create($mandate->id),
             new MandateCorrection(bic: 'RABONL2U', accountHolderName: 'J. de Vries'),
         );
@@ -136,14 +136,14 @@ final class MandateRepositoryDbTest extends FeatureTestCase
         static::assertSame('J. de Vries', $mandate->banking_account_holder_name);
     }
 
-    public function test_correct_details_leaves_the_iban_and_signed_date_untouched(): void
+    public function test_update_leaves_the_iban_and_signed_date_untouched(): void
     {
         $mandate = PaymentInformation::factory()->createQuietly([
             'banking_account_number' => 'NL91ABNA0417164300',
             'mandate_accepted_date' => '2025-01-15',
         ]);
 
-        $this->repository->correctDetails(
+        $this->repository->update(
             PaymentInformationId::create($mandate->id),
             new MandateCorrection(bic: 'RABONL2U', accountHolderName: 'J. de Vries'),
         );
@@ -154,13 +154,13 @@ final class MandateRepositoryDbTest extends FeatureTestCase
         static::assertSame('2025-01-15', $mandate->mandate_accepted_date->format('Y-m-d'));
     }
 
-    public function test_correct_details_leaves_a_revoked_mandate_untouched(): void
+    public function test_update_leaves_a_revoked_mandate_untouched(): void
     {
         $mandate = PaymentInformation::factory()
             ->revoked(CarbonImmutable::parse('2026-01-01'))
             ->createQuietly(['banking_bic' => 'ABNANL2A']);
 
-        $this->repository->correctDetails(
+        $this->repository->update(
             PaymentInformationId::create($mandate->id),
             new MandateCorrection(bic: 'RABONL2U', accountHolderName: 'J. de Vries'),
         );

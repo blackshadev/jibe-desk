@@ -10,7 +10,6 @@ use App\Domain\Billing\Payment\MandateRepository;
 use App\Domain\Billing\Payment\PaymentInformationId;
 use App\Domain\Billing\Payment\PaymentInformationIdList;
 use App\Domain\Members\MemberId;
-use App\Models\Member;
 use App\Models\PaymentInformation;
 use Carbon\CarbonImmutable;
 use DateTimeInterface;
@@ -21,14 +20,9 @@ use Override;
 final class MandateRepositoryDb implements MandateRepository
 {
     #[Override]
-    public function register(MemberId $memberId, MandateDetails $details): PaymentInformationId
+    public function create(MemberId $memberId, MandateDetails $details): PaymentInformationId
     {
         return DB::transaction(static function () use ($memberId, $details): PaymentInformationId {
-            Member::query()
-                ->whereKey($memberId->value)
-                ->lockForUpdate()
-                ->firstOrFail();
-
             PaymentInformation::query()
                 ->where('member_id', $memberId->value)
                 ->whereNull('revoked_at')
@@ -49,7 +43,7 @@ final class MandateRepositoryDb implements MandateRepository
     }
 
     #[Override]
-    public function correctDetails(PaymentInformationId $id, MandateCorrection $details): void
+    public function update(PaymentInformationId $id, MandateCorrection $details): void
     {
         PaymentInformation::query()
             ->whereKey($id->value)

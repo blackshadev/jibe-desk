@@ -99,7 +99,7 @@ final class MandatesRelationManager extends MemberRelationManager
                         /** @var Member $member */
                         $member = $livewire->getOwnerRecord();
 
-                        $mandates->register(
+                        $mandates->create(
                             MemberId::create($member->id),
                             new MandateDetails(
                                 iban: (string) $data['banking_account_number'],
@@ -134,7 +134,7 @@ final class MandatesRelationManager extends MemberRelationManager
                         array $data,
                         MandateRepository $mandates,
                     ): void {
-                        $mandates->correctDetails(
+                        $mandates->update(
                             PaymentInformationId::create($record->id),
                             new MandateCorrection(
                                 bic: (string) $data['banking_bic'],

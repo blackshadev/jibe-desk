@@ -11,9 +11,9 @@ use JeroenG\Autowire\Attribute\Autowire;
 #[Autowire]
 interface MandateRepository
 {
-    public function register(MemberId $memberId, MandateDetails $details): PaymentInformationId;
+    public function create(MemberId $memberId, MandateDetails $details): PaymentInformationId;
 
-    public function correctDetails(PaymentInformationId $id, MandateCorrection $details): void;
+    public function update(PaymentInformationId $id, MandateCorrection $details): void;
 
     public function revoke(PaymentInformationId $id, DateTimeInterface $revokedAt): void;
 
