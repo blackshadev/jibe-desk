@@ -116,9 +116,6 @@ final class Member extends Model
     }
 
     /**
-     * The mandate to charge or refund: the active mandate when there is one,
-     * otherwise the most recently signed revoked mandate.
-     *
      * @return HasOne<PaymentInformation, $this>
      */
     public function currentPaymentInformation(): HasOne

@@ -13,10 +13,6 @@ use Intervention\Validation\Rules\Iban;
 
 final class MandateForm
 {
-    /**
-     * IBAN and signed date identify the signed authorisation, so they are read-only on edit.
-     * A change to either is a re-authorisation and goes through the "Nieuwe machtiging" action.
-     */
     public static function configure(Schema $schema): Schema
     {
         return $schema
