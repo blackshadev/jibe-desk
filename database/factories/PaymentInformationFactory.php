@@ -21,8 +21,6 @@ final class PaymentInformationFactory extends Factory
             'banking_account_number' => fake()->iban('NL'),
             'banking_bic' => fake()->swiftBicNumber(),
             'banking_account_holder_name' => fake()->name(),
-            // Within the 36-month window: a random date since 1970 would make
-            // factory-made mandates expired and break unrelated export tests.
             'mandate_accepted_date' => fake()->dateTimeBetween('-1 year', 'now'),
             'revoked_at' => null,
             'last_collected_at' => null,
