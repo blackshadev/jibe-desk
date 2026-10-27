@@ -42,11 +42,11 @@ The database enforces referential and uniqueness invariants: a foreign key rejec
 
 A `mago-expect` comment (including `mago-expect lint:halstead`) switches off a rule whose threshold this repo tuned for a reason. Reach the threshold with structure instead: split the method into named steps (`isExportable`, `mandateIdFromRow`, `lastCollectedAtFromRow`), extract one mapper per row shape, and give a repeated array row a `@phpstan-type` alias so the query and its filter share one annotation. A new suppression comment is review-blocking.
 
-## A docblock adds what the signature cannot
+## A comment adds what the code cannot
 
 PHPDoc earns its line by carrying what the type cannot say: the shape (`@return list<ExportReadinessIssue>`, `@param array{id: int, name: string}`), a constraint, or a `@throws`. A block that only restates the class name, the method name, or the parameter types goes — it is one more line to keep in sync and nothing to read. A class-level `/** Assesses collection readiness. */` above `CollectionReadinessAssessor` is the archetype to delete.
 
-This refines the global "prefer PHPDoc over inline comments": the shape stays a docblock, the narration is deleted.
+The same bar rules out narration anywhere in the file. A docblock on an enum case that spells out the case name, or on a method that must run after another workflow step, restates what the case name and the caller's body already say; delete the comment rather than keep it in sync by hand. This refines the global "prefer PHPDoc over inline comments": the shape stays a docblock, the narration is deleted.
 
 ## Constructor argument lists stay flat
 
@@ -64,7 +64,18 @@ A nullable return pushes a null check into every caller and every composition, s
 
 Order the branches by likelihood and let the exceptional case return early: a credit in a debit batch is the rare one, so `if ($candidate->isCredit()) { return $this->assessCreditCandidate(…); }` comes first and the debit assessment is the fallthrough. The reader then meets the common path last, at the same nesting level as the method body.
 
+## Break a compound condition into guards
+
+A condition that decides a value reads as a stack of guard clauses: each rejecting case returns early, and the happy path is the last statement, built from variables named above it. Packing the whole decision into one nested ternary is not a substitute. Inside a guard, a nullable chain uses the nullsafe operator (`$batch?->exported_at !== null`) instead of a nested `if`, and the guard states only what the query did not already enforce on that row — a repeat of the `where` clause above it is noise.
+
 ## Put the predicate on the value object
 
 A state test that appears at more than one call site becomes a named predicate on the value object: `SepaExportInvoice::isCredit()` instead of `amountInCents() < 0` in the assessor and again in the export. Name it for the domain question, not the field: a zero-amount candidate is neither credit nor debit, so a guard that means "not a debit" stays `!isDebit()`.
 
+## Return a value object, not an associative array
+
+A helper that hands back more than one thing returns a small `readonly` value object with typed properties instead of an associative array. The class sits beside the code that produces it, so an infrastructure helper owns its VO in the infrastructure layer. An array costs a `@phpstan-type` on every consumer and a mistyped key that reads as missing; the VO fails at construction and gives PHPStan a member to resolve.
+
+## The handler decides whether it has work
+
+The caller dispatches work for every id it holds and each handler skips its own no-ops: a job returns early when the subject is already settled or already handled. Filtering candidates at the dispatch site hides the rule in the caller and leaves the handler unsafe to dispatch from anywhere else — it usually only exists because a repository action was made to return ids for the caller to filter (see the repository *action* bullet in `docs/architecture.md`).
