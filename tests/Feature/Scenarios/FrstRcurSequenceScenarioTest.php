@@ -347,10 +347,13 @@ final class FrstRcurSequenceScenarioTest extends FeatureTestCase
         $invoice = Invoice::factory()
             ->forMember($member)
             ->forBatch($batch)
-            ->createQuietly(array_filter([
-                'status' => InvoiceStatus::Open,
-                'invoice_number' => $invoiceNumber,
-            ], static fn (mixed $value): bool => $value !== null));
+            ->createQuietly(array_filter(
+                [
+                    'status' => InvoiceStatus::Open,
+                    'invoice_number' => $invoiceNumber,
+                ],
+                static fn (mixed $value): bool => $value !== null,
+            ));
 
         $this->attachDecimal($invoice);
 

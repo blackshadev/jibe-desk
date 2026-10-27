@@ -80,8 +80,7 @@ final readonly class InvoiceMailRepositoryDb implements InvoiceMailRepository
 
         $mandate = $invoice->member?->paymentInformations->first();
 
-        $mandateNeedsReauthorisation = $mandate !== null
-            && $mandate->expiration_status !== MandateExpirationStatus::Active;
+        $mandateNeedsReauthorisation = $mandate !== null && $mandate->expiration_status !== MandateExpirationStatus::Active;
 
         return new InvoicePaymentDeclinedMailData(
             invoiceId: InvoiceId::create($invoice->id),

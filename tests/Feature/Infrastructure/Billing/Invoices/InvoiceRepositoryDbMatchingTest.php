@@ -177,7 +177,8 @@ final class InvoiceRepositoryDbMatchingTest extends FeatureTestCase
         static::assertNull($result);
     }
 
-    public function test_it_picks_closest_amount_when_multiple_candidates(): void    {
+    public function test_it_picks_closest_amount_when_multiple_candidates(): void
+    {
         $iban = 'NL91ABNA0417164300';
         $member = Member::factory()->createQuietly();
         PaymentInformation::factory()->create([

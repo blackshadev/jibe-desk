@@ -460,7 +460,6 @@ final class SepaExportServiceImplTest extends FeatureTestCase
         static::assertSame('', $sepa->creditTransfers);
     }
 
-
     public function test_export_creates_one_direct_debit_block_per_sequence_type(): void
     {
         $batchId = SepaBatchId::create(1);

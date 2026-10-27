@@ -7,9 +7,9 @@ namespace Tests\Feature\Infrastructure\Billing\Payment;
 use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Invoices\InvoiceStatus;
+use App\Domain\Billing\Payment\MandateSequenceResolver;
 use App\Domain\Billing\Payment\Readiness\ExportConfirmation;
 use App\Domain\Billing\Payment\Readiness\ExportOverride;
-use App\Domain\Billing\Payment\MandateSequenceResolver;
 use App\Domain\Billing\Payment\Readiness\ExportReadinessReason;
 use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Billing\Payment\SepaBatchStatus;
@@ -1047,6 +1047,7 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
         static::assertSame($mandate->id, $result[0]->paymentInformationId->value);
         static::assertSame('2026-09-30', $result[0]->lastCollectedAt?->format('Y-m-d'));
     }
+
     public function test_get_export_context_exposes_the_submission_moment(): void
     {
         $batch = SepaBatch::factory()->createQuietly([

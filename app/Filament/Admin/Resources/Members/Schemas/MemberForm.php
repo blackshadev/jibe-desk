@@ -220,8 +220,12 @@ final class MemberForm
                 TextEntry::make('mandate_expired_notice')
                     ->hiddenLabel()
                     ->columnSpanFull()
-                    ->visible(static fn (?Member $record): bool => $record?->paymentInformation !== null
-                        && $record->paymentInformation->expiration_status === MandateExpirationStatus::Expired)
+                    ->visible(
+                        static fn (?Member $record): bool => (
+                            $record?->paymentInformation !== null
+                            && $record->paymentInformation->expiration_status === MandateExpirationStatus::Expired
+                        ),
+                    )
                     ->state(__('labels.mandate_expired_notice')),
             ])
             ->visible(static fn (Member $record): bool => auth()->user()?->can('view-payment-information', $record) ?? false);

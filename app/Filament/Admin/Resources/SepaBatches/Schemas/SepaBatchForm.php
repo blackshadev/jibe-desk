@@ -28,7 +28,7 @@ final class SepaBatchForm
                             ->format('d-m-Y')
                             ->default(now()->format('d-m-Y'))
                             ->required()
-                            ->disabled(static fn (?SepaBatch $record): bool => $record?->status !== SepaBatchStatus::Open),
+                            ->disabled(static fn (?SepaBatch $record): bool => $record !== null && $record->status !== SepaBatchStatus::Open),
                         DatePicker::make('sepa_transfer_date')
                             ->label(__('labels.sepa_transfer_date'))
                             ->native(false)

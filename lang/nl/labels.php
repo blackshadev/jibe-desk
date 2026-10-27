@@ -219,6 +219,7 @@ return [
     'mark_submitted_warning' => 'Bevestig dat het SEPA-bestand bij de bank is ingediend. Dit kan niet worden teruggedraaid.',
     'replan_sequence' => 'Incassovolgorde herplannen',
     'replan_sequence_warning' => 'De eerste/volgende-incasso wordt opnieuw bepaald uit de huidige machtigingen. Doe dit alleen als de machtiging sinds het sluiten is gewijzigd; de export wordt hierna opnieuw gecontroleerd.',
+    'more_actions' => 'Meer acties',
     'sepa_transfer_date_pending_help' => 'De incassodatum kan nog worden aangepast zolang de ronde niet is geëxporteerd. Verstuur de factuurmails opnieuw als u de datum wijzigt.',
     'export_readiness' => [
         'action' => 'Exportcontrole',

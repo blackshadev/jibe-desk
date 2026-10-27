@@ -98,5 +98,7 @@ final class MandatesRelationManager extends MemberRelationManager
     }
 
     #[On('refresh')]
-    public function refresh(): void {}
+    public function refresh(): void
+    {
+    }
 }

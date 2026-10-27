@@ -20,6 +20,7 @@ use App\Filament\Admin\Resources\SepaBatches\SepaBatchResource;
 use App\Filament\Admin\Resources\SepaBatches\Widgets\BatchStatsOverview;
 use App\Filament\Admin\Resources\SepaBatches\Widgets\SepaBatchGenerationProgress;
 use App\Models\SepaBatch;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Livewire\Attributes\On;
@@ -65,14 +66,19 @@ final class EditSepaBatch extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            RetryDeclined::make(),
-            ReadinessAction::make(),
             CloseBatchAction::make(),
-            CompleteBatchAction::make(),
-            ReplanSequenceAction::make(),
             ExportSepaAction::make(),
             MarkSubmittedAction::make(),
-            DeleteAction::make(),
+            CompleteBatchAction::make(),
+            ActionGroup::make([
+                ReadinessAction::make(),
+                ReplanSequenceAction::make(),
+                RetryDeclined::make(),
+                DeleteAction::make(),
+            ])
+                ->label(__('labels.more_actions'))
+                ->button()
+                ->color('gray'),
         ];
     }
 

@@ -22,9 +22,7 @@ final class ReplanSequenceAction
             ->modalHeading(__('labels.replan_sequence'))
             ->modalDescription(__('labels.replan_sequence_warning'))
             ->visible(
-                static fn (SepaBatch $record): bool => (
-                    auth()->user()?->can('replanSequence', $record) ?? false
-                ),
+                static fn (SepaBatch $record): bool => auth()->user()?->can('replanSequence', $record) ?? false,
             )
             ->action(static function (SepaBatch $record, SepaBatchService $service): void {
                 $service->replanSequenceTypes(SepaBatchId::create($record->id));
