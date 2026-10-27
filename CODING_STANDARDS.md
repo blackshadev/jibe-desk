@@ -54,9 +54,15 @@ An argument derived by a call is assigned to a named variable first, so the obje
 
 A nullable column parsed into a value object gets a named static constructor — `SequenceType::optionallyFrom($row->sepa_sequence_type)` — rather than a ternary or an `if` at the call site.
 
-## Report steps return a list, never `null`
+## Model absence as an empty value, not `null`
 
-A step that reports problems returns `list<Issue>`, with `[]` for "none". A `?array` return pushes a null check into every caller and every composition, so `assessIban()` and its siblings all return `[]` and the parent spreads them (see `.agents/skills/project-best-practices/rules/collections.md`). Name the steps `assess<Subject>()` — `assessIban`, `assessCreditCandidate` — so the method name states the judgement it makes.
+A nullable return pushes a null check into every caller and every composition, so "nothing" becomes a value the caller can use: `list<Issue>` with `[]`, an empty string, or a list value object whose lookup answers `[]` and whose predicate answers `false` for a category that is not there. `assessIban()` and its siblings return `[]` and the parent spreads them; `SepaExportInvoiceList::forCategory()` returns `[]` for a category with none, so the export guards with `hasForCategory()` instead of testing for `null` (see `.agents/skills/project-best-practices/rules/collections.md`).
+
+`null` earns its place where the domain models an absence — a member with no mandate yet, an unknown lookup — and the signature says so (`?MandateReadiness`). Even then, hand the caller something it can ask rather than something it must test: `SequenceType::optionallyFrom()` turns a nullable column into a VO at the edge.
+
+## Name report steps `assess<Subject>()`
+
+A method that judges one thing and reports what is wrong is `assess<Subject>()` — `assessIban`, `assessSepaCandidateSequence`, `assessCreditCandidate` — so the call site states the judgement instead of a vague `check()` or `issues()`.
 
 ## Rare branch first, common path as the fallthrough
 
