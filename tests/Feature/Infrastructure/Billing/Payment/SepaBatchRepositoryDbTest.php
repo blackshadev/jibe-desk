@@ -16,6 +16,7 @@ use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Domain\Billing\Payment\SequenceType;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderApprovalStatus;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
+use App\Infrastructure\Billing\Invoices\CreditInvoiceSettlement;
 use App\Infrastructure\Billing\Payment\SepaBatchRepositoryDb;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;
@@ -41,7 +42,10 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
     {
         parent::setUp();
 
-        $this->repository = new SepaBatchRepositoryDb(new MandateSequenceResolver());
+        $this->repository = new SepaBatchRepositoryDb(
+            new MandateSequenceResolver(),
+            new CreditInvoiceSettlement(),
+        );
     }
 
     public function test_create_batch(): void

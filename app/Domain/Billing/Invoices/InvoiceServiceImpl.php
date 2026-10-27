@@ -63,10 +63,10 @@ final readonly class InvoiceServiceImpl implements InvoiceService
     #[Override]
     public function markAsPending(InvoiceIdList $ids): void
     {
-        $this->invoiceRepository->markAsPending($ids);
+        $pendingIds = $this->invoiceRepository->markAsPending($ids);
         $this->bookkeepingRepository->createForInvoice($ids);
 
-        foreach ($ids->ids as $id) {
+        foreach ($pendingIds->ids as $id) {
             $this->jobDispatcher->dispatch(new SendInvoiceEmail(new SendInvoiceEmailData($id)));
         }
     }

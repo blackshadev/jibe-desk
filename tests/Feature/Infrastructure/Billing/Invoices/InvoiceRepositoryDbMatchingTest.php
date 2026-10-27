@@ -177,6 +177,31 @@ final class InvoiceRepositoryDbMatchingTest extends FeatureTestCase
         static::assertNull($result);
     }
 
+    public function test_it_ignores_settled_invoices(): void
+    {
+        $iban = 'NL91ABNA0417164300';
+        $member = Member::factory()->createQuietly();
+        PaymentInformation::factory()->create([
+            'member_id' => $member->id,
+            'banking_account_number' => $iban,
+        ]);
+
+        $invoice = Invoice::factory()->create([
+            'member_id' => $member->id,
+            'status' => InvoiceStatus::Settled,
+            'date' => '2026-01-15',
+        ]);
+        InvoiceLine::factory()->create([
+            'invoice_id' => $invoice->id,
+            'price' => 100.00,
+            'quantity' => 1,
+        ]);
+
+        $result = $this->repository->findMatchingCredit($iban, 100.00, new DateTimeImmutable('2026-01-15'));
+
+        static::assertNull($result);
+    }
+
     public function test_it_picks_closest_amount_when_multiple_candidates(): void
     {
         $iban = 'NL91ABNA0417164300';

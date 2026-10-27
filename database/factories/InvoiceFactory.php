@@ -26,7 +26,12 @@ final class InvoiceFactory extends Factory
             'recipient_name' => fake()->name(),
             'recipient_address' => fake()->address(),
             'recipient_email' => fake()->safeEmail(),
-            'status' => fake()->randomElement(InvoiceStatus::cases()),
+            'status' => fake()->randomElement([
+                InvoiceStatus::Open,
+                InvoiceStatus::Pending,
+                InvoiceStatus::Paid,
+                InvoiceStatus::Declined,
+            ]),
         ];
     }
 

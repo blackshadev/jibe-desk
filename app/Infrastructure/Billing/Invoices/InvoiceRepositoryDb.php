@@ -31,6 +31,7 @@ final class InvoiceRepositoryDb implements InvoiceRepository
 
     public function __construct(
         private InvoiceNumberGenerator $invoiceNumberGenerator,
+        private CreditInvoiceSettlement $creditInvoiceSettlement,
     ) {}
 
     #[Override]
@@ -176,7 +177,8 @@ final class InvoiceRepositoryDb implements InvoiceRepository
     public function markAsPaid(InvoiceIdList $ids): void
     {
         Invoice::query()
-            ->whereIn('id', array_map(static fn (InvoiceId $id) => $id->value, $ids->ids))
+            ->whereIn('id', $ids->values())
+            ->where('status', '!=', InvoiceStatus::Settled)
             ->update(['status' => InvoiceStatus::Paid]);
     }
 
@@ -237,18 +239,36 @@ final class InvoiceRepositoryDb implements InvoiceRepository
     #[Override]
     public function markAsPendingIfDeclined(InvoiceIdList $ids): void
     {
-        Invoice::query()
-            ->whereIn('id', $ids->values())
-            ->where('status', InvoiceStatus::Declined)
-            ->update(['status' => InvoiceStatus::Pending]);
+        DB::transaction(function () use ($ids): void {
+            Invoice::query()
+                ->whereIn('id', $ids->values())
+                ->where('status', InvoiceStatus::Declined)
+                ->update(['status' => InvoiceStatus::Pending]);
+
+            $this->creditInvoiceSettlement->settlePending($ids);
+        });
     }
 
     #[Override]
-    public function markAsPending(InvoiceIdList $ids): void
+    public function markAsPending(InvoiceIdList $ids): InvoiceIdList
     {
-        Invoice::query()
-            ->whereIn('id', array_map(static fn (InvoiceId $id) => $id->value, $ids->ids))
-            ->update(['status' => InvoiceStatus::Pending]);
+        return DB::transaction(function () use ($ids): InvoiceIdList {
+            Invoice::query()
+                ->whereIn('id', $ids->values())
+                ->where('status', '!=', InvoiceStatus::Settled)
+                ->update(['status' => InvoiceStatus::Pending]);
+
+            $this->creditInvoiceSettlement->settlePending($ids);
+
+            return new InvoiceIdList(
+                Invoice::query()
+                    ->whereIn('id', $ids->values())
+                    ->where('status', InvoiceStatus::Pending)
+                    ->pluck('id')
+                    ->map(InvoiceId::create(...))
+                    ->all(),
+            );
+        });
     }
 
     #[Override]

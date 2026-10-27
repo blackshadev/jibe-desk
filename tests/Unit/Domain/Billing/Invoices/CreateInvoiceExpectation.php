@@ -84,10 +84,11 @@ final readonly class CreateInvoiceExpectation
             ->with(equalTo($ids));
     }
 
-    public function expectsMarkAsPending(InvoiceIdList $ids): void
+    public function expectsMarkAsPending(InvoiceIdList $ids, InvoiceIdList $return): void
     {
         $this->mock
             ->expects('markAsPending')
-            ->with(equalTo($ids));
+            ->with(equalTo($ids))
+            ->andReturn($return);
     }
 }

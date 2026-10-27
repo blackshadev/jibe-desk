@@ -127,10 +127,23 @@ final class InvoiceServiceImplTest extends UnitTestCase
         $id2 = InvoiceId::create(2);
         $ids = new InvoiceIdList([$id1, $id2]);
 
-        $this->repo->expectsMarkAsPending($ids);
+        $this->repo->expectsMarkAsPending($ids, $ids);
         $this->bookkeepingRepo->expectsCreateForInvoice($ids);
         $this->jobDispatcher->expectsDispatch(new SendInvoiceEmail(new SendInvoiceEmailData($id1)));
         $this->jobDispatcher->expectsDispatch(new SendInvoiceEmail(new SendInvoiceEmailData($id2)));
+
+        $this->service->markAsPending($ids);
+    }
+
+    public function test_mark_as_pending_only_queues_mail_for_invoices_that_remain_pending(): void
+    {
+        $settledId = InvoiceId::create(1);
+        $pendingId = InvoiceId::create(2);
+        $ids = new InvoiceIdList([$settledId, $pendingId]);
+
+        $this->repo->expectsMarkAsPending($ids, new InvoiceIdList([$pendingId]));
+        $this->bookkeepingRepo->expectsCreateForInvoice($ids);
+        $this->jobDispatcher->expectsDispatch(new SendInvoiceEmail(new SendInvoiceEmailData($pendingId)));
 
         $this->service->markAsPending($ids);
     }
