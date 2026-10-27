@@ -10,4 +10,7 @@ enum InvoiceStatus: string
     case Pending = 'pending';
     case Paid = 'paid';
     case Declined = 'declined';
+
+    /** Terminal: no transition out of it. */
+    case Settled = 'settled';
 }

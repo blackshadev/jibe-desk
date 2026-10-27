@@ -19,6 +19,7 @@ final class InvoiceTest extends FeatureTestCase
         Invoice::factory()->forMember($member)->createQuietly(['status' => InvoiceStatus::Pending]);
         Invoice::factory()->forMember($member)->createQuietly(['status' => InvoiceStatus::Paid]);
         Invoice::factory()->forMember($member)->createQuietly(['status' => InvoiceStatus::Declined]);
+        Invoice::factory()->forMember($member)->createQuietly(['status' => InvoiceStatus::Settled]);
 
         $results = Invoice::query()->openOrPending()->get();
 
@@ -27,6 +28,22 @@ final class InvoiceTest extends FeatureTestCase
         static::assertTrue($results->contains('status', InvoiceStatus::Pending));
         static::assertFalse($results->contains('status', InvoiceStatus::Paid));
         static::assertFalse($results->contains('status', InvoiceStatus::Declined));
+        static::assertFalse($results->contains('status', InvoiceStatus::Settled));
+    }
+
+    public function test_outstanding_or_declined_scope_excludes_settled_invoices(): void
+    {
+        $member = Member::factory()->createQuietly();
+        Invoice::factory()->forMember($member)->createQuietly(['status' => InvoiceStatus::Open]);
+        Invoice::factory()->forMember($member)->createQuietly(['status' => InvoiceStatus::Pending]);
+        Invoice::factory()->forMember($member)->createQuietly(['status' => InvoiceStatus::Declined]);
+        Invoice::factory()->forMember($member)->createQuietly(['status' => InvoiceStatus::Paid]);
+        Invoice::factory()->forMember($member)->createQuietly(['status' => InvoiceStatus::Settled]);
+
+        $results = Invoice::query()->outstandingOrDeclined()->get();
+
+        static::assertCount(3, $results);
+        static::assertFalse($results->contains('status', InvoiceStatus::Settled));
     }
 
     public function test_order_by_amount_proximity_scope_orders_correctly(): void

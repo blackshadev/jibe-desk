@@ -91,6 +91,7 @@ final class InvoicesTable
                         InvoiceStatus::Pending->value => __('labels.invoice_status.pending'),
                         InvoiceStatus::Paid->value => __('labels.invoice_status.paid'),
                         InvoiceStatus::Declined->value => __('labels.invoice_status.declined'),
+                        InvoiceStatus::Settled->value => __('labels.invoice_status.settled'),
                     ])
                     ->query(static function (Builder $query, array $state) {
                         $value = $state['value'] ?? '';

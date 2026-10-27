@@ -38,6 +38,10 @@ final class ListInvoices extends ListRecords
                 ->modifyQueryUsing(
                     static fn (Builder $query) => $query->where('status', InvoiceStatus::Declined),
                 ),
+            'settled' => Tabs\Tab::make(__('labels.invoice_status.settled'))
+                ->modifyQueryUsing(
+                    static fn (Builder $query) => $query->where('status', InvoiceStatus::Settled),
+                ),
         ];
     }
 

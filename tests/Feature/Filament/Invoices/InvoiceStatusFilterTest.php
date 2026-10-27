@@ -30,6 +30,43 @@ final class InvoiceStatusFilterTest extends FeatureTestCase
             ->assertCanNotSeeTableRecords([$paid]);
     }
 
+    public function test_settled_filter_shows_only_settled(): void
+    {
+        $this->withUserHavingRole(RoleName::FinancialAdministration);
+
+        $settled = Invoice::factory()->createQuietly(['status' => InvoiceStatus::Settled, 'date' => now()->toDateString()]);
+        $pending = Invoice::factory()->createQuietly(['status' => InvoiceStatus::Pending, 'date' => now()->toDateString()]);
+
+        Livewire::test(ListInvoices::class)
+            ->filterTable('status', InvoiceStatus::Settled->value)
+            ->assertCanSeeTableRecords([$settled])
+            ->assertCanNotSeeTableRecords([$pending]);
+    }
+
+    public function test_settled_tab_shows_only_settled_invoices(): void
+    {
+        $this->withUserHavingRole(RoleName::FinancialAdministration);
+
+        $settled = Invoice::factory()->createQuietly(['status' => InvoiceStatus::Settled, 'date' => now()->toDateString()]);
+        $pending = Invoice::factory()->createQuietly(['status' => InvoiceStatus::Pending, 'date' => now()->toDateString()]);
+
+        Livewire::test(ListInvoices::class)
+            ->set('activeTab', 'settled')
+            ->assertCanSeeTableRecords([$settled])
+            ->assertCanNotSeeTableRecords([$pending]);
+    }
+
+    public function test_settled_invoice_renders_the_verrekend_label(): void
+    {
+        $this->withUserHavingRole(RoleName::FinancialAdministration);
+
+        $settled = Invoice::factory()->createQuietly(['status' => InvoiceStatus::Settled, 'date' => now()->toDateString()]);
+
+        Livewire::test(ListInvoices::class)
+            ->assertCanSeeTableRecords([$settled])
+            ->assertSee('Verrekend');
+    }
+
     public function test_all_book_year_shows_previous_years(): void
     {
         $this->withUserHavingRole(RoleName::FinancialAdministration);
