@@ -104,3 +104,26 @@ public function scopeOrderByLastLogin($query): void
     );
 }
 ```
+
+## Model "Current X per Parent" as a Relation
+
+When more than one query needs the same per-parent pick, put it on the parent as a relation once and load it everywhere through `with()`.
+
+`ofMany()`/`latestOfMany()` orders by columns only, which cannot express "the unrevoked row wins, otherwise the newest revoked one". Order the pick inside a correlated subquery and attach it with a basic `where()` condition that carries the subquery; `orderBy()` + `limit()` on the relation itself is dropped by `joinRelationship()` and breaks eager loading.
+
+```php
+/** @return HasOne<PaymentInformation, $this> */
+public function currentPaymentInformation(): HasOne
+{
+    return $this->hasOne(PaymentInformation::class)->where(
+        'payment_information.id',
+        DB::raw('(select current_mandate.id
+                from payment_information as current_mandate
+                where current_mandate.member_id = payment_information.member_id
+                order by current_mandate.revoked_at is null desc, current_mandate.id desc
+                limit 1)'),
+    );
+}
+```
+
+Cover both lazy and eager loading in the model test: a relation that works lazily can still fall over when eager-loaded.
