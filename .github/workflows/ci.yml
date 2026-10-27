@@ -47,7 +47,7 @@ jobs:
             ${{ runner.os }}-composer-
 
       - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist --no-progress --locked
+        run: composer install --no-interaction --prefer-dist --no-progress
 
       - name: Run tests
         run: php artisan test
@@ -77,7 +77,7 @@ jobs:
             ${{ runner.os }}-composer-
 
       - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist --no-progress --locked
+        run: composer install --no-interaction --prefer-dist --no-progress
 
       - name: Analyse domain code
         run: ./vendor/bin/phpstan analyse --configuration=phpstan-domain.neon --memory-limit=2G --no-progress
