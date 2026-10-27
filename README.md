@@ -111,7 +111,6 @@ This chains the tasks below. Fixers and formatters are wired in too.
 | --- | --- | --- |
 | `./Taskfile psr` | Composer | Verifies PSR-4 autoload compliance. |
 | `./Taskfile rector` | Rector | Automated refactoring and code-modernisation suggestions. Pass `--dry-run` to inspect only. |
-| `./Taskfile ecs` | EasyCodingStandard | Code-style checks. `./Taskfile fix` applies the fixes. |
 | `./Taskfile stan` | PHPStan (Larastan) | Static analysis on the domain and infrastructure code. `./Taskfile stan:clear` clears the cache. |
 | `./Taskfile test` | PHPUnit | Runs the test suite in parallel; pass filters as extra arguments, e.g. `./Taskfile test --filter=UserTest`. |
 | `./Taskfile test:coverage` | PHPUnit + Xdebug | Runs tests with HTML and text coverage (report in `./coverage/phpunit/`). |
