@@ -27,7 +27,6 @@ Check sibling files, related controllers, models, or tests for established patte
 - Index columns used in `WHERE`, `ORDER BY`, `JOIN`
 - `withCount()` instead of loading relations to count
 - `cursor()` for memory-efficient read-only iteration
-- Push filtering and ordering into the query, not into a PHP loop
 - Never query in Blade templates
 
 ### 2. Advanced Query Patterns → `rules/advanced-queries.md`
@@ -40,7 +39,6 @@ Check sibling files, related controllers, models, or tests for established patte
 - Two simple queries can beat one complex query
 - Compound indexes matching `orderBy` column order
 - Correlated subqueries in `orderBy` for has-many sorting (avoid joins)
-- "Current X per parent" as one relation, ordered inside a correlated subquery
 
 ### 3. Security → `rules/security.md`
 
@@ -68,7 +66,6 @@ Check sibling files, related controllers, models, or tests for established patte
 - Global scopes sparingly — document their existence
 - Attribute casts in the `casts()` method
 - Cast date columns, use Carbon instances in templates
-- `CarbonImmutable` for date arithmetic (`addMonthsNoOverflow()`), instances for comparisons
 - `whereBelongsTo($model)` for cleaner queries
 - Never hardcode table names — use `(new Model)->getTable()` or Eloquent queries
 
@@ -169,7 +166,6 @@ Check sibling files, related controllers, models, or tests for established patte
 - `cursor()` vs. `lazy()` — choose based on relationship needs
 - `lazyById()` when updating records while iterating
 - `toQuery()` for bulk operations on collections
-- `filter()` + `mapWithKeys()` over `foreach` + `continue`
 
 ### 18. Blade & Views → `rules/blade-views.md`
 

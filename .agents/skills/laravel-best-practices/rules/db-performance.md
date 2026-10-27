@@ -167,25 +167,6 @@ foreach (User::where('active', true)->cursor() as $user) {
 
 Use `cursor()` for read-only iteration. Use `chunk()` / `chunkById()` when modifying records.
 
-## Push Filtering and Ordering into the Query
-
-A query that hydrates every row so PHP can pick one per key pays for every row it throws away. Express the predicate and the order in SQL, then read the one value you need.
-
-Incorrect:
-```php
-$latest = [];
-foreach (PaymentInformation::all() as $paymentInformation) {
-    $latest[$paymentInformation->member_id] = $paymentInformation;
-}
-```
-
-Correct:
-```php
-$members = Member::with('currentPaymentInformation')->get();
-```
-
-When the same per-parent pick repeats, define it once as a relation (see `advanced-queries.md`) and reuse it through `with()`.
-
 ## No Queries in Blade Templates
 
 Never execute queries in Blade templates. Pass data from controllers.
