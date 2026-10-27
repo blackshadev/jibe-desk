@@ -31,7 +31,7 @@ final class InvoiceRepositoryDb implements InvoiceRepository
 
     public function __construct(
         private InvoiceNumberGenerator $invoiceNumberGenerator,
-        private CreditInvoiceSettlement $creditInvoiceSettlement,
+        private CreditInvoiceSettlementDb $creditInvoiceSettlement,
     ) {}
 
     #[Override]

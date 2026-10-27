@@ -26,7 +26,7 @@ use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Domain\Members\MemberId;
 use App\Domain\SharedKernel\CompoundPrice;
-use App\Infrastructure\Billing\Invoices\CreditInvoiceSettlement;
+use App\Infrastructure\Billing\Invoices\CreditInvoiceSettlementDb;
 use App\Models\Invoice;
 use App\Models\PurchaseOrder;
 use App\Models\SepaBatch;
@@ -71,7 +71,7 @@ final readonly class SepaBatchRepositoryDb implements SepaBatchRepository
 {
     public function __construct(
         private MandateSequenceResolver $sequenceResolver,
-        private CreditInvoiceSettlement $creditInvoiceSettlement,
+        private CreditInvoiceSettlementDb $creditInvoiceSettlement,
     ) {}
 
     #[Override]
@@ -274,12 +274,6 @@ final readonly class SepaBatchRepositoryDb implements SepaBatchRepository
             ]);
     }
 
-    /**
-     * Settles credit pairs after the batch bookkeeping has been written.
-     *
-     * `BookkeepingRecordDbRepository::createForBatch` selects Pending invoices by batch, so
-     * settling inside {@see self::markInvoicesAsPending()} would drop the pair from bookkeeping.
-     */
     #[Override]
     public function settleCreditPairs(SepaBatchId $batchId): void
     {
