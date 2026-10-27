@@ -13,6 +13,7 @@ use App\Domain\Billing\Payment\Readiness\MandateReadinessRepository;
 use App\Domain\Billing\Payment\Readiness\MandateReadinessStatus;
 use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Billing\Payment\SepaBatchStatus;
+use App\Domain\Billing\Payment\SequenceType;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Domain\Members\MemberId;
 use App\Filament\Admin\Resources\SepaBatches\Pages\EditSepaBatch;
@@ -888,6 +889,107 @@ final class SepaBatchResourceTest extends FeatureTestCase
             ->assertSee('22-10-2026 12:00');
     }
 
+    public function test_replan_sequence_action_is_visible_on_a_pending_unexported_batch(): void
+    {
+        $this->withAuthorizedUser();
+
+        $batch = SepaBatch::factory()->create([
+            'status' => SepaBatchStatus::Pending,
+            'exported_at' => null,
+            'submitted_at' => null,
+        ]);
+
+        Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
+            ->assertActionVisible('replanSequence');
+    }
+
+    public function test_replan_sequence_action_is_hidden_after_the_first_export(): void
+    {
+        $this->withAuthorizedUser();
+
+        $batch = SepaBatch::factory()->create([
+            'status' => SepaBatchStatus::Pending,
+            'exported_at' => CarbonImmutable::parse('2026-10-22 12:00:00'),
+        ]);
+
+        Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
+            ->assertActionHidden('replanSequence');
+    }
+
+    public function test_replan_sequence_action_is_hidden_after_submission(): void
+    {
+        $this->withAuthorizedUser();
+
+        $batch = SepaBatch::factory()->create([
+            'status' => SepaBatchStatus::Pending,
+            'exported_at' => CarbonImmutable::parse('2026-10-22 12:00:00'),
+            'submitted_at' => CarbonImmutable::parse('2026-10-23 12:00:00'),
+        ]);
+
+        Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
+            ->assertActionHidden('replanSequence');
+    }
+
+    public function test_replan_sequence_action_is_hidden_without_update_permission(): void
+    {
+        $this->withAuthorizedUser();
+
+        Gate::before(static fn (User $_user, string $ability): ?bool => $ability === 'replanSequence' ? false : null);
+
+        $batch = SepaBatch::factory()->create([
+            'status' => SepaBatchStatus::Pending,
+            'exported_at' => null,
+        ]);
+
+        Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
+            ->assertActionHidden('replanSequence');
+    }
+
+    public function test_replan_sequence_action_clears_and_refreezes_the_plan(): void
+    {
+        $this->withAuthorizedUser();
+
+        $batch = SepaBatch::factory()->create([
+            'status' => SepaBatchStatus::Pending,
+            'exported_at' => null,
+        ]);
+        $invoice = $this->createInvoiceForBatch($batch);
+        Invoice::query()->whereKey($invoice->id)->update(['sepa_sequence_type' => SequenceType::First]);
+
+        PaymentInformation::factory()
+            ->collectedAt(CarbonImmutable::parse('2026-09-30 00:00:00'))
+            ->createQuietly(['member_id' => $invoice->member_id]);
+
+        Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
+            ->callAction('replanSequence');
+
+        static::assertSame(SequenceType::Recurring, $invoice->refresh()->sepa_sequence_type);
+    }
+
+    public function test_replan_sequence_action_unblocks_a_stale_export(): void
+    {
+        $this->withAuthorizedUser();
+
+        $batch = $this->exportableBatch();
+        $invoice = $this->createInvoiceForBatch($batch);
+        Invoice::query()->whereKey($invoice->id)->update(['sepa_sequence_type' => SequenceType::First]);
+
+        PaymentInformation::factory()
+            ->collectedAt(CarbonImmutable::parse('2026-09-30 00:00:00'))
+            ->createQuietly([
+                'member_id' => $invoice->member_id,
+                'banking_account_number' => 'NL91ABNA0417164300',
+                'banking_bic' => 'ABNANL2A',
+            ]);
+
+        Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
+            ->callAction('replanSequence');
+
+        Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
+            ->callAction('exportSepa', data: ['acknowledge_exclusions' => true])
+            ->assertFileDownloaded();
+    }
+
     private function exportableBatch(): SepaBatch
     {
         return SepaBatch::factory()->create([
@@ -959,6 +1061,7 @@ final class SepaBatchResourceTest extends FeatureTestCase
                         status: MandateReadinessStatus::Expired,
                         iban: 'NL91ABNA0417164300',
                         bic: 'ABNANL2A',
+                        expectedSequenceType: SequenceType::First,
                     );
                 }
 

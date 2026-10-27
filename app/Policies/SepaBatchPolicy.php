@@ -38,6 +38,16 @@ final class SepaBatchPolicy extends ResourcePolicy
         return $user->can('update_sepa_batches') && $batch->status === SepaBatchStatus::Pending;
     }
 
+    public function replanSequence(User $user, Model $batch): bool
+    {
+        Assert::isInstanceOf($batch, SepaBatch::class);
+
+        return $user->can('update_sepa_batches')
+            && $batch->status === SepaBatchStatus::Pending
+            && $batch->exported_at === null
+            && $batch->submitted_at === null;
+    }
+
     public function markSubmitted(User $user, Model $batch): bool
     {
         Assert::isInstanceOf($batch, SepaBatch::class);

@@ -130,6 +130,20 @@ final readonly class SepaBatchRepositoryExpectation
             ->andReturn($return);
     }
 
+    public function expectsFreezeSequenceTypes(SepaBatchId $batchId): void
+    {
+        $this->mock
+            ->expects('freezeSequenceTypes')
+            ->with(equalTo($batchId));
+    }
+
+    public function expectsReplanSequenceTypes(SepaBatchId $batchId): void
+    {
+        $this->mock
+            ->expects('replanSequenceTypes')
+            ->with(equalTo($batchId));
+    }
+
     public function expectsGetExportContext(SepaBatchId $batchId, SepaBatchExportContext $return): void
     {
         $this->mock

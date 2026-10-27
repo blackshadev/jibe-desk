@@ -10,6 +10,7 @@ use App\Filament\Admin\Resources\SepaBatches\Actions\CompleteBatchAction;
 use App\Filament\Admin\Resources\SepaBatches\Actions\ExportSepaAction;
 use App\Filament\Admin\Resources\SepaBatches\Actions\MarkSubmittedAction;
 use App\Filament\Admin\Resources\SepaBatches\Actions\ReadinessAction;
+use App\Filament\Admin\Resources\SepaBatches\Actions\ReplanSequenceAction;
 use App\Filament\Admin\Resources\SepaBatches\Actions\RetryDeclined;
 use App\Filament\Admin\Resources\SepaBatches\Helpers\OnOpenSepaBatch;
 use App\Filament\Admin\Resources\SepaBatches\RelationManagers\SepaBatchExportOverridesRelationManager;
@@ -68,6 +69,7 @@ final class EditSepaBatch extends EditRecord
             ReadinessAction::make(),
             CloseBatchAction::make(),
             CompleteBatchAction::make(),
+            ReplanSequenceAction::make(),
             ExportSepaAction::make(),
             MarkSubmittedAction::make(),
             DeleteAction::make(),

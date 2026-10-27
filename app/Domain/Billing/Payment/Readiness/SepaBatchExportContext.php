@@ -13,5 +13,6 @@ final readonly class SepaBatchExportContext
         public SepaBatchStatus $status,
         public DateTimeInterface $sepaTransferDate,
         public ?DateTimeInterface $closedAt,
+        public ?DateTimeInterface $submittedAt = null,
     ) {}
 }

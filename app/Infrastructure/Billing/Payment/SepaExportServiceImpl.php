@@ -11,8 +11,8 @@ use App\Domain\Billing\Payment\SepaExport;
 use App\Domain\Billing\Payment\SepaExportInvoice;
 use App\Domain\Billing\Payment\SepaExportPurchaseOrder;
 use App\Domain\Billing\Payment\SepaExportService;
+use App\Domain\Billing\Payment\SequenceType;
 use Digitick\Sepa\Exception\InvalidArgumentException;
-use Digitick\Sepa\PaymentInformation;
 use Digitick\Sepa\TransferFile\Factory\TransferFileFacadeFactory;
 use DOMException;
 use Override;
@@ -39,7 +39,7 @@ final readonly class SepaExportServiceImpl implements SepaExportService
         /** @var list<SepaExportPurchaseOrder> $purchaseOrders */
         $purchaseOrders = $this->batchRepository->getPurchaseOrdersForExport($batchId);
 
-        $paymentInfoId = 'payment-batch-' . $batchId->value;
+        $creditPaymentInfoId = 'payment-batch-' . $batchId->value;
         $uniqueMessageId = 'BATCH-' . $batchId->value;
 
         $credit = TransferFileFacadeFactory::createCustomerCredit(
@@ -47,8 +47,8 @@ final readonly class SepaExportServiceImpl implements SepaExportService
             $this->configuration->creditorName,
         );
 
-        $credit->addPaymentInfo($paymentInfoId, [
-            'id' => $paymentInfoId,
+        $credit->addPaymentInfo($creditPaymentInfoId, [
+            'id' => $creditPaymentInfoId,
             'debtorName' => $this->configuration->creditorName,
             'debtorAccountIBAN' => $this->configuration->creditorIban,
             'debtorAgentBIC' => $this->configuration->creditorBic,
@@ -61,45 +61,63 @@ final readonly class SepaExportServiceImpl implements SepaExportService
             $this->configuration->creditorName,
         );
 
-        $directDebit->addPaymentInfo($paymentInfoId, [
-            'id' => $paymentInfoId,
-            'creditorName' => $this->configuration->creditorName,
-            'creditorAccountIBAN' => $this->configuration->creditorIban,
-            'creditorAgentBIC' => $this->configuration->creditorBic,
-            'seqType' => PaymentInformation::S_RECURRING,
-            'creditorId' => $this->configuration->creditorId,
-            'batchBooking' => true,
-            'dueDate' => $dueDate,
-        ]);
-
+        /** @var array<string, list<SepaExportInvoice>> $debitsBySequenceType */
+        $debitsBySequenceType = [];
         $hasCreditTransfer = false;
-        $hasDirectDebit = false;
+
         foreach ($invoices as $invoice) {
             if ($invoice->amountInCents() === 0) {
                 continue;
             }
 
-            if ($invoice->amountInCents() > 0) {
-                $hasDirectDebit = true;
-                $directDebit->addTransfer($paymentInfoId, [
+            if ($invoice->amountInCents() < 0) {
+                $hasCreditTransfer = true;
+                $credit->addTransfer($creditPaymentInfoId, [
+                    'amount' => abs($invoice->amountInCents()),
+                    'creditorIban' => $invoice->iban,
+                    'creditorName' => $invoice->recipientName,
+                    'creditorBic' => $invoice->bic,
+                    'endToEndId' => $invoice->invoiceNumber,
+                    'remittanceInformation' => $invoice->invoiceNumber,
+                ]);
+                continue;
+            }
+
+            $debitsBySequenceType[$invoice->sequenceType->value][] = $invoice;
+        }
+
+        $hasDirectDebit = false;
+
+        foreach (SequenceType::cases() as $sequenceType) {
+            $debits = $debitsBySequenceType[$sequenceType->value] ?? [];
+
+            if ($debits === []) {
+                continue;
+            }
+
+            $directDebitPaymentInfoId = sprintf('BATCH-%d-%s', $batchId->value, $sequenceType->value);
+
+            $directDebit->addPaymentInfo($directDebitPaymentInfoId, [
+                'id' => $directDebitPaymentInfoId,
+                'creditorName' => $this->configuration->creditorName,
+                'creditorAccountIBAN' => $this->configuration->creditorIban,
+                'creditorAgentBIC' => $this->configuration->creditorBic,
+                'seqType' => $sequenceType->value,
+                'creditorId' => $this->configuration->creditorId,
+                'batchBooking' => true,
+                'dueDate' => $dueDate,
+            ]);
+
+            $hasDirectDebit = true;
+
+            foreach ($debits as $invoice) {
+                $directDebit->addTransfer($directDebitPaymentInfoId, [
                     'amount' => $invoice->amountInCents(),
                     'debtorIban' => $invoice->iban,
                     'debtorName' => $invoice->recipientName,
                     'debtorBic' => $invoice->bic,
                     'debtorMandate' => $invoice->mandateId->value,
                     'debtorMandateSignDate' => $invoice->mandateDate,
-                    'endToEndId' => $invoice->invoiceNumber,
-                    'remittanceInformation' => $invoice->invoiceNumber,
-                ]);
-            }
-
-            if ($invoice->amountInCents() < 0) {
-                $hasCreditTransfer = true;
-                $credit->addTransfer($paymentInfoId, [
-                    'amount' => abs($invoice->amountInCents()),
-                    'creditorIban' => $invoice->iban,
-                    'creditorName' => $invoice->recipientName,
-                    'creditorBic' => $invoice->bic,
                     'endToEndId' => $invoice->invoiceNumber,
                     'remittanceInformation' => $invoice->invoiceNumber,
                 ]);
@@ -112,7 +130,7 @@ final readonly class SepaExportServiceImpl implements SepaExportService
             }
 
             $hasCreditTransfer = true;
-            $credit->addTransfer($paymentInfoId, [
+            $credit->addTransfer($creditPaymentInfoId, [
                 'amount' => $purchaseOrder->amountInCents(),
                 'creditorIban' => $purchaseOrder->creditorIban,
                 'creditorName' => $purchaseOrder->creditorName,

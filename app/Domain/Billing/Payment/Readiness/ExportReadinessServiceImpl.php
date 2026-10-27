@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Billing\Payment\Readiness;
 
-use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Billing\Payment\SepaBatchRepository;
-use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Domain\Billing\Payment\SepaConfiguration;
 use App\Domain\Members\MemberId;
 use Carbon\CarbonImmutable;
@@ -21,6 +19,7 @@ final readonly class ExportReadinessServiceImpl implements ExportReadinessServic
         private SepaConfiguration $configuration,
         private ClockInterface $clock,
         private MandateReadinessRepository $mandateReadiness,
+        private CollectionReadinessAssessor $candidateAssessor,
     ) {}
 
     #[Override]
@@ -45,7 +44,7 @@ final readonly class ExportReadinessServiceImpl implements ExportReadinessServic
             );
         }
 
-        /** @var list<MemberId> $memberIds */
+        /** @var array<int, MemberId> $memberIds */
         $memberIds = [];
 
         foreach ($candidates as $candidate) {
@@ -53,59 +52,20 @@ final readonly class ExportReadinessServiceImpl implements ExportReadinessServic
                 continue;
             }
 
-            $memberIds[] = $candidate->memberId;
+            $memberIds[$candidate->memberId->value] = $candidate->memberId;
         }
+
+        $memberIds = array_values($memberIds);
 
         $mandates = $this->mandateReadiness->forMembers($memberIds);
 
         foreach ($candidates as $candidate) {
-            $mandate = $candidate->memberId === null ? null : $mandates[$candidate->memberId->value] ?? null;
+            $mandate = $candidate->memberId === null
+                ? null
+                : $mandates[$candidate->memberId->value] ?? null;
 
-            if ($context->status === SepaBatchStatus::Pending && $candidate->status === InvoiceStatus::Open) {
-                $issues[] = ExportReadinessIssue::forInvoice(ExportReadinessReason::UncollectableStatus, $candidate);
-                continue;
-            }
-
-            if ($candidate->amountInCents() === 0) {
-                $issues[] = ExportReadinessIssue::forInvoice(ExportReadinessReason::ZeroAmount, $candidate);
-                continue;
-            }
-
-            if ($candidate->isDebit()) {
-                if ($mandate === null || $mandate->status === MandateReadinessStatus::Missing) {
-                    $issues[] = ExportReadinessIssue::forInvoice(ExportReadinessReason::MissingMandate, $candidate);
-                    continue;
-                }
-
-                if ($mandate->status === MandateReadinessStatus::Revoked) {
-                    $issues[] = ExportReadinessIssue::forInvoice(ExportReadinessReason::RevokedMandate, $candidate);
-                    continue;
-                }
-
-                if ($mandate->status === MandateReadinessStatus::Expired) {
-                    $issues[] = ExportReadinessIssue::forInvoice(ExportReadinessReason::ExpiredMandate, $candidate);
-                }
-
-                if ($mandate->expectedSequenceType !== $candidate->sequenceType) {
-                    $issues[] = ExportReadinessIssue::forInvoice(ExportReadinessReason::SequenceTypeMismatch, $candidate);
-                }
-            }
-
-            $iban = $mandate?->iban;
-
-            if ($iban === null || trim($iban) === '') {
-                // A refund without an IBAN cannot be paid out. Plan 06 owns that row; until then it is not a field
-                // the gate blocks on, otherwise every manual-payer refund would dead-lock the batch.
-                if ($candidate->isRefund()) {
-                    continue;
-                }
-
-                $issues[] = ExportReadinessIssue::forInvoice(ExportReadinessReason::MissingIban, $candidate);
-                continue;
-            }
-
-            if (!IbanFormat::isWellFormed($iban)) {
-                $issues[] = ExportReadinessIssue::forInvoice(ExportReadinessReason::MalformedIban, $candidate);
+            foreach ($this->candidateAssessor->assess($candidate, $mandate, $context) as $issue) {
+                $issues[] = $issue;
             }
         }
 

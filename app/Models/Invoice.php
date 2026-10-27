@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Domain\Billing\Invoices\InvoiceStatus;
+use App\Domain\Billing\Payment\SequenceType;
 use App\Domain\SharedKernel\CompoundPrice;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
@@ -24,6 +25,7 @@ use Override;
  * @property InvoiceStatus $status
  * @property DateTimeInterface $date
  * @property DateTimeInterface|null $sent_at
+ * @property SequenceType|null $sepa_sequence_type
  * @property-read bool $is_credit
  */
 #[Guarded(['id', 'created_at', 'updated_at'])]
@@ -87,6 +89,7 @@ final class Invoice extends Model
             'date' => 'datetime',
             'sent_at' => 'datetime',
             'status' => InvoiceStatus::class,
+            'sepa_sequence_type' => SequenceType::class,
         ];
     }
 

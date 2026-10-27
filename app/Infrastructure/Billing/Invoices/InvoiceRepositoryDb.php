@@ -230,6 +230,7 @@ final class InvoiceRepositoryDb implements InvoiceRepository
                 'status' => InvoiceStatus::Open,
                 'sepa_batch_id' => null,
                 'sent_at' => null,
+                'sepa_sequence_type' => null,
             ]);
     }
 

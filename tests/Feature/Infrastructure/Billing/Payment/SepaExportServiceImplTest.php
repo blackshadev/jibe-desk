@@ -9,8 +9,10 @@ use App\Domain\Billing\Payment\MandateId;
 use App\Domain\Billing\Payment\PaymentInformationId;
 use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Billing\Payment\SepaConfiguration;
+use App\Domain\Billing\Payment\SepaExport;
 use App\Domain\Billing\Payment\SepaExportInvoice;
 use App\Domain\Billing\Payment\SepaExportPurchaseOrder;
+use App\Domain\Billing\Payment\SequenceType;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
 use App\Domain\Members\MemberId;
 use App\Domain\SharedKernel\CompoundPrice;
@@ -458,6 +460,210 @@ final class SepaExportServiceImplTest extends FeatureTestCase
         static::assertSame('', $sepa->creditTransfers);
     }
 
+
+    public function test_export_creates_one_direct_debit_block_per_sequence_type(): void
+    {
+        $batchId = SepaBatchId::create(1);
+        $this->expectInvoices($batchId, [
+            $this->createDebitInvoice(invoiceNumber: 'INV-FRST', amount: 25.00, sequenceType: SequenceType::First),
+            $this->createDebitInvoice(invoiceNumber: 'INV-RCUR', amount: 30.00, sequenceType: SequenceType::Recurring),
+        ]);
+
+        $xpath = $this->directDebitXpath($this->export($batchId));
+
+        static::assertSame(2, $xpath->query('//pain:PmtInf')->length);
+        static::assertEqualsCanonicalizing(
+            ['FRST', 'RCUR'],
+            $this->sequenceTypes($xpath),
+        );
+    }
+
+    public function test_export_emits_only_the_frst_block_for_an_all_first_batch(): void
+    {
+        $batchId = SepaBatchId::create(1);
+        $this->expectInvoices($batchId, [
+            $this->createDebitInvoice(invoiceNumber: 'INV-001', amount: 25.00, sequenceType: SequenceType::First),
+            $this->createDebitInvoice(invoiceNumber: 'INV-002', amount: 15.00, sequenceType: SequenceType::First),
+        ]);
+
+        $xpath = $this->directDebitXpath($this->export($batchId));
+
+        static::assertSame(1, $xpath->query('//pain:PmtInf')->length);
+        static::assertSame(['FRST'], $this->sequenceTypes($xpath));
+    }
+
+    public function test_export_emits_only_the_rcur_block_for_an_all_recurring_batch(): void
+    {
+        $batchId = SepaBatchId::create(1);
+        $this->expectInvoices($batchId, [
+            $this->createDebitInvoice(invoiceNumber: 'INV-001', amount: 25.00),
+            $this->createDebitInvoice(invoiceNumber: 'INV-002', amount: 15.00),
+        ]);
+
+        $xpath = $this->directDebitXpath($this->export($batchId));
+
+        static::assertSame(1, $xpath->query('//pain:PmtInf')->length);
+        static::assertSame(['RCUR'], $this->sequenceTypes($xpath));
+    }
+
+    public function test_export_uses_the_batch_transfer_date_on_both_direct_debit_blocks(): void
+    {
+        $batchId = SepaBatchId::create(1);
+        $this->expectInvoices($batchId, [
+            $this->createDebitInvoice(invoiceNumber: 'INV-FRST', amount: 25.00, sequenceType: SequenceType::First),
+            $this->createDebitInvoice(invoiceNumber: 'INV-RCUR', amount: 30.00),
+        ]);
+
+        $xpath = $this->directDebitXpath($this->export($batchId));
+
+        $dates = [];
+
+        foreach ($xpath->query('//pain:PmtInf/pain:ReqdColltnDt') as $node) {
+            $dates[] = $node->textContent;
+        }
+
+        static::assertSame(['2026-06-30', '2026-06-30'], $dates);
+    }
+
+    public function test_export_gives_each_direct_debit_block_a_unique_payment_information_id(): void
+    {
+        $batchId = SepaBatchId::create(1);
+        $this->expectInvoices($batchId, [
+            $this->createDebitInvoice(invoiceNumber: 'INV-FRST', amount: 25.00, sequenceType: SequenceType::First),
+            $this->createDebitInvoice(invoiceNumber: 'INV-RCUR', amount: 30.00),
+        ]);
+
+        $xpath = $this->directDebitXpath($this->export($batchId));
+
+        $ids = [];
+
+        foreach ($xpath->query('//pain:PmtInf/pain:PmtInfId') as $node) {
+            $ids[] = $node->textContent;
+        }
+
+        static::assertSame(['BATCH-1-FRST', 'BATCH-1-RCUR'], $ids);
+        static::assertCount(2, array_unique($ids));
+    }
+
+    public function test_export_groups_each_invoice_into_exactly_one_block(): void
+    {
+        $batchId = SepaBatchId::create(1);
+        $this->expectInvoices($batchId, [
+            $this->createDebitInvoice(invoiceNumber: 'INV-FRST', amount: 25.00, sequenceType: SequenceType::First),
+            $this->createDebitInvoice(invoiceNumber: 'INV-RCUR-1', amount: 30.00),
+            $this->createDebitInvoice(invoiceNumber: 'INV-RCUR-2', amount: 35.00),
+        ]);
+
+        $xpath = $this->directDebitXpath($this->export($batchId));
+
+        $blockIds = [];
+
+        foreach ($xpath->query('//pain:PmtInf') as $block) {
+            $sequenceType = $xpath->query('./pain:PmtTpInf/pain:SeqTp', $block)->item(0)?->textContent;
+
+            foreach ($xpath->query('.//pain:EndToEndId', $block) as $endToEndId) {
+                $blockIds[$sequenceType][] = $endToEndId->textContent;
+            }
+        }
+
+        static::assertSame(['INV-FRST'], $blockIds['FRST']);
+        static::assertEqualsCanonicalizing(['INV-RCUR-1', 'INV-RCUR-2'], $blockIds['RCUR']);
+
+        $allIds = array_merge(...array_values($blockIds));
+        static::assertCount(count($allIds), array_unique($allIds));
+    }
+
+    public function test_export_emits_no_direct_debit_block_without_debit_invoices(): void
+    {
+        $batchId = SepaBatchId::create(1);
+        $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
+        $this->repo->expectsGetInvoicesForExport($batchId, [
+            $this->createCreditInvoice(invoiceNumber: 'INV-CREDIT', amount: 25.00),
+        ]);
+        $this->repo->expectsGetPurchaseOrdersForExport($batchId, [
+            new SepaExportPurchaseOrder(
+                purchaseOrderId: PurchaseOrderId::create(9),
+                creditorName: 'Supplier Ltd',
+                creditorIban: 'NL20RABO0123456789',
+                total: new CompoundPrice(10.0, 2.1),
+            ),
+        ]);
+
+        $sepa = $this->export($batchId);
+
+        static::assertSame('', $sepa->directDebit);
+        static::assertNotSame('', $sepa->creditTransfers);
+    }
+
+    public function test_export_leaves_refunds_and_purchase_orders_in_the_credit_transfer_file(): void
+    {
+        $batchId = SepaBatchId::create(1);
+        $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
+        $this->repo->expectsGetInvoicesForExport($batchId, [
+            $this->createDebitInvoice(invoiceNumber: 'INV-FRST', amount: 25.00, sequenceType: SequenceType::First),
+            $this->createCreditInvoice(invoiceNumber: 'INV-CREDIT', amount: 25.00),
+        ]);
+        $this->repo->expectsGetPurchaseOrdersForExport($batchId, [
+            new SepaExportPurchaseOrder(
+                purchaseOrderId: PurchaseOrderId::create(9),
+                creditorName: 'Supplier Ltd',
+                creditorIban: 'NL20RABO0123456789',
+                total: new CompoundPrice(10.0, 2.1),
+            ),
+        ]);
+
+        $sepa = $this->export($batchId);
+
+        $debitXpath = $this->directDebitXpath($sepa);
+        static::assertSame(1, $debitXpath->query('//pain:PmtInf')->length);
+        static::assertSame(1, $debitXpath->query('//pain:DrctDbtTxInf')->length);
+
+        $creditXml = new DOMDocument();
+        static::assertTrue($creditXml->loadXML($sepa->creditTransfers));
+        $creditXpath = new DOMXPath($creditXml);
+        $creditXpath->registerNamespace('pain', 'urn:iso:std:iso:20022:tech:xsd:pain.001.001.09');
+
+        static::assertSame(2, $creditXpath->query('//pain:CdtTrfTxInf')->length);
+    }
+
+    private function export(SepaBatchId $batchId): SepaExport
+    {
+        $exportService = new SepaExportServiceImpl($this->repo->mock, $this->config);
+
+        return $exportService->export($batchId);
+    }
+
+    /** @param list<SepaExportInvoice> $invoices */
+    private function expectInvoices(SepaBatchId $batchId, array $invoices): void
+    {
+        $this->repo->expectsGetSepaTransferDate($batchId, CarbonImmutable::parse('2026-06-30'));
+        $this->repo->expectsGetInvoicesForExport($batchId, $invoices);
+        $this->repo->expectsGetPurchaseOrdersForExport($batchId, []);
+    }
+
+    private function directDebitXpath(SepaExport $sepa): DOMXPath
+    {
+        $xml = new DOMDocument();
+        static::assertTrue($xml->loadXML($sepa->directDebit));
+
+        $xpath = new DOMXPath($xml);
+        $xpath->registerNamespace('pain', 'urn:iso:std:iso:20022:tech:xsd:pain.008.001.09');
+
+        return $xpath;
+    }
+
+    /** @return list<string> */
+    private function sequenceTypes(DOMXPath $xpath): array
+    {
+        $sequenceTypes = [];
+
+        foreach ($xpath->query('//pain:PmtInf/pain:PmtTpInf/pain:SeqTp') as $node) {
+            $sequenceTypes[] = $node->textContent;
+        }
+
+        return $sequenceTypes;
+    }
+
     private function createDebitInvoice(
         string $invoiceNumber,
         float $amount,
@@ -465,6 +671,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
         string $iban = 'NL20RABO0123456789',
         string $bic = 'RABONL2U',
         string $mandateDate = '2025-01-01',
+        SequenceType $sequenceType = SequenceType::Recurring,
     ): SepaExportInvoice {
         return new SepaExportInvoice(
             invoiceId: InvoiceId::create(1),
@@ -477,6 +684,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
             paymentInformationId: new PaymentInformationId(1),
             mandateDate: CarbonImmutable::parse($mandateDate),
             lastCollectedAt: null,
+            sequenceType: $sequenceType,
         );
     }
 
@@ -498,6 +706,7 @@ final class SepaExportServiceImplTest extends FeatureTestCase
             paymentInformationId: new PaymentInformationId(2),
             mandateDate: CarbonImmutable::now(),
             lastCollectedAt: null,
+            sequenceType: SequenceType::Recurring,
         );
     }
 }

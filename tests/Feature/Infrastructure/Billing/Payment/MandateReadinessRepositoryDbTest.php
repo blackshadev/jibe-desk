@@ -152,10 +152,22 @@ final class MandateReadinessRepositoryDbTest extends FeatureTestCase
         );
     }
 
-    public function test_for_members_keeps_expected_sequence_type_recurring_until_plan_05(): void
+    public function test_for_members_returns_first_for_a_never_collected_mandate(): void
     {
         $member = Member::factory()->createQuietly();
         PaymentInformation::factory()->createQuietly(['member_id' => $member->id]);
+
+        $result = $this->service->forMembers([MemberId::create($member->id)]);
+
+        static::assertSame(SequenceType::First, $result[$member->id]->expectedSequenceType);
+    }
+
+    public function test_for_members_returns_recurring_for_a_collected_mandate(): void
+    {
+        $member = Member::factory()->createQuietly();
+        PaymentInformation::factory()
+            ->collectedAt(CarbonImmutable::parse('2026-09-01 10:00:00'))
+            ->createQuietly(['member_id' => $member->id]);
 
         $result = $this->service->forMembers([MemberId::create($member->id)]);
 

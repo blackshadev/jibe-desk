@@ -62,6 +62,7 @@ final readonly class SepaBatchServiceImpl implements SepaBatchService
     public function closeBatch(SepaBatchId $batchId): void
     {
         $this->batchRepository->markInvoicesAsPending($batchId);
+        $this->batchRepository->freezeSequenceTypes($batchId);
         $this->bookkeepingRepository->createForBatch($batchId);
         $this->batchRepository->closeBatch($batchId);
 
@@ -100,6 +101,8 @@ final readonly class SepaBatchServiceImpl implements SepaBatchService
             throw new ExportNotReadyException($report);
         }
 
+        $this->batchRepository->freezeSequenceTypes($batchId);
+
         $export = $this->exportService->export($batchId);
 
         $this->batchRepository->recordExport($batchId, $confirmation, $exportedByUserId, $this->clock->now());
@@ -115,5 +118,11 @@ final readonly class SepaBatchServiceImpl implements SepaBatchService
         $this->batchRepository->markSubmitted($batchId, $submittedByUserId, $submittedAt);
 
         $this->mandateRepository->stampCollectionsForBatch($batchId, $submittedAt);
+    }
+
+    #[Override]
+    public function replanSequenceTypes(SepaBatchId $batchId): void
+    {
+        $this->batchRepository->replanSequenceTypes($batchId);
     }
 }

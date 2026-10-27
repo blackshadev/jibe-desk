@@ -51,6 +51,17 @@ interface SepaBatchRepository
     /** @return list<SepaCollectionCandidate> */
     public function getCollectionCandidates(SepaBatchId $batchId): array;
 
+    /**
+     * Record the FRST/RCUR plan of every collectable invoice in the batch.
+     * Existing plans are never overwritten.
+     */
+    public function freezeSequenceTypes(SepaBatchId $batchId): void;
+
+    /**
+     * Clear and re-freeze the sequence plan of a Pending, unexported batch.
+     */
+    public function replanSequenceTypes(SepaBatchId $batchId): void;
+
     public function getExportContext(SepaBatchId $batchId): SepaBatchExportContext;
 
     public function recordExport(

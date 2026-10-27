@@ -8,6 +8,7 @@ use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Payment\MandateId;
 use App\Domain\Billing\Payment\PaymentInformationId;
 use App\Domain\Billing\Payment\SepaExportInvoice;
+use App\Domain\Billing\Payment\SequenceType;
 use App\Domain\Members\MemberId;
 use App\Domain\SharedKernel\CompoundPrice;
 use Carbon\CarbonImmutable;
@@ -33,6 +34,7 @@ final class SepaExportInvoiceTest extends UnitTestCase
             paymentInformationId: PaymentInformationId::create(2),
             mandateDate: $mandateDate,
             lastCollectedAt: CarbonImmutable::parse('2026-02-15'),
+            sequenceType: SequenceType::First,
         );
 
         static::assertSame($invoiceId, $subject->invoiceId);
@@ -45,6 +47,26 @@ final class SepaExportInvoiceTest extends UnitTestCase
         static::assertSame(2, $subject->paymentInformationId->value);
         static::assertSame($mandateDate, $subject->mandateDate);
         static::assertSame('2026-02-15', $subject->lastCollectedAt?->format('Y-m-d'));
+        static::assertSame(SequenceType::First, $subject->sequenceType);
+    }
+
+    public function test_it_keeps_the_sequence_type(): void
+    {
+        $subject = new SepaExportInvoice(
+            invoiceId: InvoiceId::create(1),
+            invoiceNumber: 'INV-001',
+            recipientName: 'Test',
+            total: new CompoundPrice(10.0, 2.1),
+            iban: 'NL91ABNA0417164300',
+            bic: 'ABNANL2A',
+            mandateId: new MandateId(MemberId::create(1), PaymentInformationId::create(1)),
+            paymentInformationId: PaymentInformationId::create(1),
+            mandateDate: CarbonImmutable::parse('2026-01-01'),
+            lastCollectedAt: CarbonImmutable::parse('2026-02-01'),
+            sequenceType: SequenceType::First,
+        );
+
+        static::assertSame(SequenceType::First, $subject->sequenceType);
     }
 
     public function test_amount_in_cents(): void
@@ -60,6 +82,7 @@ final class SepaExportInvoiceTest extends UnitTestCase
             paymentInformationId: PaymentInformationId::create(1),
             mandateDate: CarbonImmutable::parse('2026-01-01'),
             lastCollectedAt: null,
+            sequenceType: SequenceType::Recurring,
         );
 
         static::assertSame(9995, $subject->amountInCents());

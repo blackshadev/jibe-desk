@@ -21,6 +21,7 @@ final readonly class SepaExportInvoice
         public PaymentInformationId $paymentInformationId,
         public DateTimeInterface $mandateDate,
         public ?DateTimeInterface $lastCollectedAt,
+        public SequenceType $sequenceType,
     ) {}
 
     public function amountInCents(): int

@@ -35,4 +35,6 @@ interface SepaBatchService
     public function export(SepaBatchId $batchId, ExportConfirmation $confirmation, ?int $exportedByUserId): SepaExport;
 
     public function markSubmitted(SepaBatchId $batchId, int $submittedByUserId): void;
+
+    public function replanSequenceTypes(SepaBatchId $batchId): void;
 }
