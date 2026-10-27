@@ -104,6 +104,7 @@ final class SepaBatchServiceImplTest extends UnitTestCase
         $batchId = SepaBatchId::create(5);
 
         $this->repo->expectsMarkInvoicesAsPending($batchId);
+        $this->repo->expectsFreezeSequenceTypes($batchId);
         $this->bookkeepingRepo->expectsCreateForBatch($batchId);
         $this->repo->expectsCloseBatch($batchId);
 
@@ -170,6 +171,7 @@ final class SepaBatchServiceImplTest extends UnitTestCase
 
         $this->repo->expectsGetExportContext($batchId, $this->pendingContext());
         $this->readinessService->expectsAssess($batchId, $this->readyReport($batchId));
+        $this->repo->expectsFreezeSequenceTypes($batchId);
         $this->exportService->expectsExport($batchId, $export);
         $this->clock->expectsNow($now);
         $this->repo->expectsRecordExport($batchId, $confirmation, 7, $now);
@@ -193,6 +195,15 @@ final class SepaBatchServiceImplTest extends UnitTestCase
         $this->expectException(DomainException::class);
 
         $this->service->export($batchId, $confirmation, 1);
+    }
+
+    public function test_replan_sequence_types_delegates_to_the_repository(): void
+    {
+        $batchId = SepaBatchId::create(5);
+
+        $this->repo->expectsReplanSequenceTypes($batchId);
+
+        $this->service->replanSequenceTypes($batchId);
     }
 
     public function test_mark_submitted_stamps_the_user_and_time(): void

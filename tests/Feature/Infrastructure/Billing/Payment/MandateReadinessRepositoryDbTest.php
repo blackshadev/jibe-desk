@@ -73,9 +73,11 @@ final class MandateReadinessRepositoryDbTest extends FeatureTestCase
         $this->travelTo(CarbonImmutable::parse('2026-10-22 12:00:00'));
 
         $member = Member::factory()->createQuietly();
-        PaymentInformation::factory()->signedAt(CarbonImmutable::parse('2023-11-01'))->createQuietly([
-            'member_id' => $member->id,
-        ]);
+        PaymentInformation::factory()
+            ->signedAt(CarbonImmutable::parse('2023-11-01'))
+            ->createQuietly([
+                'member_id' => $member->id,
+            ]);
 
         $result = $this->service->forMembers([MemberId::create($member->id)]);
 
@@ -87,9 +89,11 @@ final class MandateReadinessRepositoryDbTest extends FeatureTestCase
         $this->travelTo(CarbonImmutable::parse('2026-10-22 12:00:00'));
 
         $member = Member::factory()->createQuietly();
-        PaymentInformation::factory()->signedAt(CarbonImmutable::parse('2023-10-22'))->createQuietly([
-            'member_id' => $member->id,
-        ]);
+        PaymentInformation::factory()
+            ->signedAt(CarbonImmutable::parse('2023-10-22'))
+            ->createQuietly([
+                'member_id' => $member->id,
+            ]);
 
         $result = $this->service->forMembers([MemberId::create($member->id)]);
 
@@ -99,9 +103,11 @@ final class MandateReadinessRepositoryDbTest extends FeatureTestCase
     public function test_for_members_returns_revoked_for_a_member_with_only_a_revoked_mandate(): void
     {
         $member = Member::factory()->createQuietly();
-        PaymentInformation::factory()->revoked(CarbonImmutable::parse('2026-01-01'))->createQuietly([
-            'member_id' => $member->id,
-        ]);
+        PaymentInformation::factory()
+            ->revoked(CarbonImmutable::parse('2026-01-01'))
+            ->createQuietly([
+                'member_id' => $member->id,
+            ]);
 
         $result = $this->service->forMembers([MemberId::create($member->id)]);
 
@@ -111,14 +117,18 @@ final class MandateReadinessRepositoryDbTest extends FeatureTestCase
     public function test_for_members_returns_the_latest_revoked_mandate_for_the_refund_iban(): void
     {
         $member = Member::factory()->createQuietly();
-        PaymentInformation::factory()->revoked(CarbonImmutable::parse('2025-01-01'))->createQuietly([
-            'member_id' => $member->id,
-            'banking_account_number' => 'NL91ABNA0417164300',
-        ]);
-        $latest = PaymentInformation::factory()->revoked(CarbonImmutable::parse('2026-01-01'))->createQuietly([
-            'member_id' => $member->id,
-            'banking_account_number' => 'NL20RABO0123456789',
-        ]);
+        PaymentInformation::factory()
+            ->revoked(CarbonImmutable::parse('2025-01-01'))
+            ->createQuietly([
+                'member_id' => $member->id,
+                'banking_account_number' => 'NL91ABNA0417164300',
+            ]);
+        $latest = PaymentInformation::factory()
+            ->revoked(CarbonImmutable::parse('2026-01-01'))
+            ->createQuietly([
+                'member_id' => $member->id,
+                'banking_account_number' => 'NL20RABO0123456789',
+            ]);
 
         $result = $this->service->forMembers([MemberId::create($member->id)]);
 
@@ -133,9 +143,11 @@ final class MandateReadinessRepositoryDbTest extends FeatureTestCase
     public function test_for_members_does_not_duplicate_a_member_with_mandate_history(): void
     {
         $member = Member::factory()->createQuietly();
-        PaymentInformation::factory()->revoked(CarbonImmutable::parse('2025-01-01'))->createQuietly([
-            'member_id' => $member->id,
-        ]);
+        PaymentInformation::factory()
+            ->revoked(CarbonImmutable::parse('2025-01-01'))
+            ->createQuietly([
+                'member_id' => $member->id,
+            ]);
         $active = PaymentInformation::factory()->createQuietly([
             'member_id' => $member->id,
             'banking_account_number' => 'NL20RABO0123456789',
@@ -152,10 +164,22 @@ final class MandateReadinessRepositoryDbTest extends FeatureTestCase
         );
     }
 
-    public function test_for_members_keeps_expected_sequence_type_recurring_until_plan_05(): void
+    public function test_for_members_returns_first_for_a_never_collected_mandate(): void
     {
         $member = Member::factory()->createQuietly();
         PaymentInformation::factory()->createQuietly(['member_id' => $member->id]);
+
+        $result = $this->service->forMembers([MemberId::create($member->id)]);
+
+        static::assertSame(SequenceType::First, $result[$member->id]->expectedSequenceType);
+    }
+
+    public function test_for_members_returns_recurring_for_a_collected_mandate(): void
+    {
+        $member = Member::factory()->createQuietly();
+        PaymentInformation::factory()
+            ->collectedAt(CarbonImmutable::parse('2026-09-01 10:00:00'))
+            ->createQuietly(['member_id' => $member->id]);
 
         $result = $this->service->forMembers([MemberId::create($member->id)]);
 

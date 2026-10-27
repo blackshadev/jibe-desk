@@ -6,6 +6,8 @@ namespace Tests\Unit\Domain\Billing\Payment\Readiness;
 
 use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoiceStatus;
+use App\Domain\Billing\Payment\Readiness\CollectionReadinessAssessor;
+use App\Domain\Billing\Payment\Readiness\ExportReadinessCategory;
 use App\Domain\Billing\Payment\Readiness\ExportReadinessIssue;
 use App\Domain\Billing\Payment\Readiness\ExportReadinessReason;
 use App\Domain\Billing\Payment\Readiness\ExportReadinessReport;
@@ -49,6 +51,7 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
             $this->configuration(),
             $this->clock->mock,
             $this->mandateReadiness->mock,
+            new CollectionReadinessAssessor(),
         );
     }
 
@@ -160,6 +163,77 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
         $report = $this->service->assess($this->batchId());
 
         $this->assertReasons($report, [ExportReadinessReason::SequenceTypeMismatch]);
+        static::assertSame(ExportReadinessCategory::BrokenData, $report->brokenDataIssues()[0]->category());
+        static::assertTrue($report->isBlocked());
+    }
+
+    public function test_assess_passes_a_legitimate_first_collection(): void
+    {
+        $memberId = MemberId::create(7);
+        $this->expectAssessment(
+            [$this->candidate(new CompoundPrice(100.0, 21.0), $memberId, sequenceType: SequenceType::First)],
+            [$memberId->value => $this->activeMandate(expectedSequenceType: SequenceType::First)],
+        );
+
+        $report = $this->service->assess($this->batchId());
+
+        static::assertTrue($report->isEmpty());
+    }
+
+    public function test_assess_passes_a_legitimate_recurring_collection(): void
+    {
+        $memberId = MemberId::create(7);
+        $this->expectAssessment(
+            [$this->candidate(new CompoundPrice(100.0, 21.0), $memberId, sequenceType: SequenceType::Recurring)],
+            [$memberId->value => $this->activeMandate(expectedSequenceType: SequenceType::Recurring)],
+        );
+
+        $report = $this->service->assess($this->batchId());
+
+        static::assertTrue($report->isEmpty());
+    }
+
+    public function test_assess_reports_a_stale_frst_plan_as_broken_data(): void
+    {
+        $memberId = MemberId::create(7);
+        $this->expectAssessment(
+            [$this->candidate(new CompoundPrice(100.0, 21.0), $memberId, sequenceType: SequenceType::First)],
+            [$memberId->value => $this->activeMandate(expectedSequenceType: SequenceType::Recurring)],
+        );
+
+        $report = $this->service->assess($this->batchId());
+
+        $this->assertReasons($report, [ExportReadinessReason::SequenceTypeMismatch]);
+        static::assertSame(ExportReadinessCategory::BrokenData, $report->brokenDataIssues()[0]->category());
+        static::assertTrue($report->isBlocked());
+    }
+
+    public function test_assess_reports_a_stale_rcur_plan_after_reauthorisation(): void
+    {
+        $memberId = MemberId::create(7);
+        $this->expectAssessment(
+            [$this->candidate(new CompoundPrice(100.0, 21.0), $memberId, sequenceType: SequenceType::Recurring)],
+            [$memberId->value => $this->activeMandate(expectedSequenceType: SequenceType::First)],
+        );
+
+        $report = $this->service->assess($this->batchId());
+
+        $this->assertReasons($report, [ExportReadinessReason::SequenceTypeMismatch]);
+        static::assertTrue($report->isBlocked());
+    }
+
+    public function test_assess_does_not_report_the_sequence_of_a_presented_batch(): void
+    {
+        $memberId = MemberId::create(7);
+        $this->expectAssessment(
+            [$this->candidate(new CompoundPrice(100.0, 21.0), $memberId, sequenceType: SequenceType::First)],
+            [$memberId->value => $this->activeMandate(expectedSequenceType: SequenceType::Recurring)],
+            submittedAt: '2026-10-23 09:30:00',
+        );
+
+        $report = $this->service->assess($this->batchId());
+
+        static::assertTrue($report->isEmpty());
     }
 
     public function test_assess_passes_an_active_mandate_with_a_valid_iban(): void
@@ -281,6 +355,7 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
         SepaBatchStatus $status = SepaBatchStatus::Pending,
         string $sepaTransferDate = '2026-11-05',
         ?string $closedAt = '2026-10-22',
+        ?string $submittedAt = null,
     ): void {
         $batchId = $this->batchId();
 
@@ -288,6 +363,7 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
             status: $status,
             sepaTransferDate: CarbonImmutable::parse($sepaTransferDate),
             closedAt: $closedAt === null ? null : CarbonImmutable::parse($closedAt),
+            submittedAt: $submittedAt === null ? null : CarbonImmutable::parse($submittedAt),
         ));
 
         $this->repository->expectsGetCollectionCandidates($batchId, $candidates);

@@ -25,8 +25,7 @@ interface SepaBatchRepository
 
     public function markGenerationFinished(SepaBatchId $batchId): void;
 
-    /** @return list<SepaExportInvoice> */
-    public function getInvoicesForExport(SepaBatchId $batchId): array;
+    public function getInvoicesForExport(SepaBatchId $batchId): SepaExportInvoiceList;
 
     /** @return list<SepaExportPurchaseOrder> */
     public function getPurchaseOrdersForExport(SepaBatchId $batchId): array;
@@ -50,6 +49,10 @@ interface SepaBatchRepository
 
     /** @return list<SepaCollectionCandidate> */
     public function getCollectionCandidates(SepaBatchId $batchId): array;
+
+    public function freezeSequenceTypes(SepaBatchId $batchId): void;
+
+    public function replanSequenceTypes(SepaBatchId $batchId): void;
 
     public function getExportContext(SepaBatchId $batchId): SepaBatchExportContext;
 

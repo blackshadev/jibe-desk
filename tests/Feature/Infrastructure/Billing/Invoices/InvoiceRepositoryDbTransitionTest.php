@@ -7,6 +7,7 @@ namespace Tests\Feature\Infrastructure\Billing\Invoices;
 use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Invoices\InvoiceStatus;
+use App\Domain\Billing\Payment\SequenceType;
 use App\Domain\Bookkeeping\Banking\BankTransactions\BankTransactionId;
 use App\Infrastructure\Billing\Invoices\InvoiceRepositoryDb;
 use App\Models\BankTransaction;
@@ -98,6 +99,20 @@ final class InvoiceRepositoryDbTransitionTest extends FeatureTestCase
             'status' => InvoiceStatus::Open->value,
             'sepa_batch_id' => null,
         ]);
+    }
+
+    public function test_reopen_clears_the_frozen_sequence_type(): void
+    {
+        $batch = SepaBatch::factory()->createQuietly();
+        $invoice = Invoice::factory()->createQuietly([
+            'status' => InvoiceStatus::Declined,
+            'sepa_batch_id' => $batch->id,
+            'sepa_sequence_type' => SequenceType::First,
+        ]);
+
+        $this->repository->reopen(new InvoiceIdList([InvoiceId::create($invoice->id)]));
+
+        static::assertNull($invoice->refresh()->sepa_sequence_type);
     }
 
     public function test_reopen_clears_sent_at(): void

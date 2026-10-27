@@ -116,8 +116,7 @@ final class MandateLifecycleScenarioTest extends FeatureTestCase
         $report = app(ExportReadinessService::class)->assess(SepaBatchId::create($batch->id));
 
         $issue = collect($report->overridableIssues())
-            ->first(static fn ($issue): bool => $issue->reason === ExportReadinessReason::ExpiredMandate
-                && $issue->invoiceId?->value === $invoice->id);
+            ->first(static fn ($issue): bool => $issue->reason === ExportReadinessReason::ExpiredMandate && $issue->invoiceId?->value === $invoice->id);
 
         static::assertNotNull($issue);
         static::assertSame(ExportReadinessCategory::Overridable, $issue->category());

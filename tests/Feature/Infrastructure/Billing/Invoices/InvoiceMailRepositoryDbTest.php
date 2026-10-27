@@ -389,7 +389,7 @@ final class InvoiceMailRepositoryDbTest extends FeatureTestCase
             noticePeriodDays: 14,
         );
 
-        $rendered = (new MailMailable(new InvoiceMail($data, $configuration)))->render();
+        $rendered = new MailMailable(new InvoiceMail($data, $configuration))->render();
 
         static::assertStringContainsString('automatisch geïncasseerd op', $rendered);
         static::assertStringContainsString('15-07-2026', $rendered);

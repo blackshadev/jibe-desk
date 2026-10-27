@@ -8,4 +8,9 @@ enum SequenceType: string
 {
     case First = 'FRST';
     case Recurring = 'RCUR';
+
+    public static function optionallyFrom(?string $value): ?self
+    {
+        return $value === null ? null : self::from($value);
+    }
 }

@@ -21,10 +21,23 @@ final readonly class SepaExportInvoice
         public PaymentInformationId $paymentInformationId,
         public DateTimeInterface $mandateDate,
         public ?DateTimeInterface $lastCollectedAt,
+        public SequenceType $sequenceType,
     ) {}
 
     public function amountInCents(): int
     {
         return (int) round($this->total->price * 100);
+    }
+
+    public function isCredit(): bool
+    {
+        return $this->total->price < 0.0;
+    }
+
+    public function category(): SepaCategory
+    {
+        return $this->isCredit()
+            ? SepaCategory::Credit
+            : SepaCategory::forSequenceType($this->sequenceType);
     }
 }

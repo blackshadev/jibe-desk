@@ -6,11 +6,11 @@ namespace App\Infrastructure\Billing\Payment;
 
 use App\Domain\Billing\Payment\MandateExpirationStatus;
 use App\Domain\Billing\Payment\MandateId;
+use App\Domain\Billing\Payment\MandateSequenceResolver;
 use App\Domain\Billing\Payment\PaymentInformationId;
 use App\Domain\Billing\Payment\Readiness\MandateReadiness;
 use App\Domain\Billing\Payment\Readiness\MandateReadinessRepository;
 use App\Domain\Billing\Payment\Readiness\MandateReadinessStatus;
-use App\Domain\Billing\Payment\SequenceType;
 use App\Domain\Members\MemberId;
 use App\Models\Member;
 use App\Models\PaymentInformation;
@@ -18,6 +18,10 @@ use Override;
 
 final readonly class MandateReadinessRepositoryDb implements MandateReadinessRepository
 {
+    public function __construct(
+        private MandateSequenceResolver $sequenceResolver,
+    ) {}
+
     /** @param list<MemberId> $memberIds @return array<int, MandateReadiness> */
     #[Override]
     public function forMembers(array $memberIds): array
@@ -31,16 +35,16 @@ final readonly class MandateReadinessRepositoryDb implements MandateReadinessRep
             ->with('currentPaymentInformation')
             ->get()
             ->filter(static fn (Member $member): bool => $member->currentPaymentInformation instanceof PaymentInformation)
-            ->mapWithKeys(static function (Member $member): array {
+            ->mapWithKeys(function (Member $member): array {
                 /** @var PaymentInformation $mandate */
                 $mandate = $member->currentPaymentInformation;
 
-                return [$member->id => self::readiness($mandate)];
+                return [$member->id => $this->readiness($mandate)];
             })
             ->all();
     }
 
-    private static function readiness(PaymentInformation $mandate): MandateReadiness
+    private function readiness(PaymentInformation $mandate): MandateReadiness
     {
         return new MandateReadiness(
             status: match ($mandate->expiration_status) {
@@ -55,7 +59,7 @@ final readonly class MandateReadinessRepositoryDb implements MandateReadinessRep
                 PaymentInformationId::create($mandate->id),
             ),
             signedOn: $mandate->mandate_accepted_date,
-            expectedSequenceType: SequenceType::Recurring,
+            expectedSequenceType: $this->sequenceResolver->resolve($mandate->last_collected_at),
         );
     }
 }

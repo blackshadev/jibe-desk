@@ -23,8 +23,7 @@ final class RevokeMandateAction
             ->modalHeading(__('labels.revoke_mandate'))
             ->modalDescription(__('labels.revoke_mandate_warning'))
             ->visible(
-                static fn (PaymentInformation $record): bool => $record->revoked_at === null
-                    && (auth()->user()?->can('update_member_payment_information') ?? false),
+                static fn (PaymentInformation $record): bool => $record->revoked_at === null && (auth()->user()?->can('update_member_payment_information') ?? false),
             )
             ->action(static function (PaymentInformation $record, MandateRepository $mandates): void {
                 $mandates->revoke(

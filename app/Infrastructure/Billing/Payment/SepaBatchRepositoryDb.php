@@ -8,6 +8,7 @@ use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Domain\Billing\Payment\MandateId;
+use App\Domain\Billing\Payment\MandateSequenceResolver;
 use App\Domain\Billing\Payment\PaymentInformationId;
 use App\Domain\Billing\Payment\Readiness\ExportConfirmation;
 use App\Domain\Billing\Payment\Readiness\SepaBatchExportContext;
@@ -17,6 +18,7 @@ use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Billing\Payment\SepaBatchRepository;
 use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Domain\Billing\Payment\SepaExportInvoice;
+use App\Domain\Billing\Payment\SepaExportInvoiceList;
 use App\Domain\Billing\Payment\SepaExportPurchaseOrder;
 use App\Domain\Billing\Payment\SequenceType;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderApprovalStatus;
@@ -31,6 +33,7 @@ use App\Models\SepaExportOverride;
 use Carbon\CarbonImmutable;
 use DateTimeInterface;
 use DomainException;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Override;
@@ -47,12 +50,28 @@ use Override;
  *     mandate_date: string,
  *     last_collected_at: null|string,
  *     revoked_at: null|string,
+ *     sepa_sequence_type: null|string,
+ *     total_price: numeric-string,
+ *     total_vat: numeric-string,
+ * }
+ * @phpstan-type CollectionCandidateRow object{
+ *     invoice_id: int,
+ *     invoice_number: string,
+ *     recipient_name: string,
+ *     member_id: null|int,
+ *     status: string,
+ *     sepa_sequence_type: null|string,
+ *     last_collected_at: null|string,
  *     total_price: numeric-string,
  *     total_vat: numeric-string,
  * }
  */
-final class SepaBatchRepositoryDb implements SepaBatchRepository
+final readonly class SepaBatchRepositoryDb implements SepaBatchRepository
 {
+    public function __construct(
+        private MandateSequenceResolver $sequenceResolver,
+    ) {}
+
     #[Override]
     public function create(DateTimeInterface $invoiceDate, DateTimeInterface $sepaTransferDate, SepaBatchStatus $status): SepaBatchId
     {
@@ -125,9 +144,8 @@ final class SepaBatchRepositoryDb implements SepaBatchRepository
             ->update(['generation_finished_at' => now()]);
     }
 
-    /** @return list<SepaExportInvoice> */
     #[Override]
-    public function getInvoicesForExport(SepaBatchId $batchId): array
+    public function getInvoicesForExport(SepaBatchId $batchId): SepaExportInvoiceList
     {
         /** @var Collection<int, ExportInvoiceRow> $rows */
         $rows = Invoice::query()
@@ -140,6 +158,7 @@ final class SepaBatchRepositoryDb implements SepaBatchRepository
                 'invoices.invoice_number',
                 'invoices.member_id',
                 'invoices.recipient_name',
+                'invoices.sepa_sequence_type',
                 'payment_information.id as payment_information_id',
                 'payment_information.banking_account_number as iban',
                 'payment_information.banking_bic as bic',
@@ -154,6 +173,7 @@ final class SepaBatchRepositoryDb implements SepaBatchRepository
                 'invoices.invoice_number',
                 'invoices.member_id',
                 'invoices.recipient_name',
+                'invoices.sepa_sequence_type',
                 'payment_information.id',
                 'payment_information.banking_account_number',
                 'payment_information.banking_bic',
@@ -164,11 +184,13 @@ final class SepaBatchRepositoryDb implements SepaBatchRepository
             ->toBase()
             ->get();
 
-        return $rows
-            ->filter(self::isExportable(...))
-            ->map(self::exportInvoiceFromRow(...))
-            ->values()
-            ->all();
+        return new SepaExportInvoiceList(
+            $rows
+                ->filter(self::isExportable(...))
+                ->map($this->exportInvoiceFromRow(...))
+                ->values()
+                ->all(),
+        );
     }
 
     /** @param ExportInvoiceRow $row */
@@ -178,8 +200,14 @@ final class SepaBatchRepositoryDb implements SepaBatchRepository
     }
 
     /** @param ExportInvoiceRow $row */
-    private static function exportInvoiceFromRow(object $row): SepaExportInvoice
+    private function exportInvoiceFromRow(object $row): SepaExportInvoice
     {
+        $lastCollectedAt = self::lastCollectedAtFromRow($row);
+        $sequenceType = $this->sequenceResolver->resolve(
+            lastCollectedAt: $lastCollectedAt,
+            frozenSequence: SequenceType::optionallyFrom($row->sepa_sequence_type),
+        );
+
         return new SepaExportInvoice(
             invoiceId: InvoiceId::create($row->invoice_id),
             invoiceNumber: $row->invoice_number,
@@ -190,7 +218,8 @@ final class SepaBatchRepositoryDb implements SepaBatchRepository
             mandateId: self::mandateIdFromRow($row),
             paymentInformationId: PaymentInformationId::create($row->payment_information_id),
             mandateDate: CarbonImmutable::parse($row->mandate_date),
-            lastCollectedAt: self::lastCollectedAtFromRow($row),
+            lastCollectedAt: $lastCollectedAt,
+            sequenceType: $sequenceType,
         );
     }
 
@@ -354,8 +383,13 @@ final class SepaBatchRepositoryDb implements SepaBatchRepository
     #[Override]
     public function getCollectionCandidates(SepaBatchId $batchId): array
     {
+        /** @var Collection<int, CollectionCandidateRow> $rows */
         $rows = DB::table('invoices')
             ->leftJoin('invoice_lines', 'invoice_lines.invoice_id', '=', 'invoices.id')
+            ->leftJoin('payment_information', static function (JoinClause $join): void {
+                $join->on('payment_information.member_id', '=', 'invoices.member_id')
+                    ->whereNull('payment_information.revoked_at');
+            })
             ->where('invoices.sepa_batch_id', $batchId->value)
             ->whereIn('invoices.status', [InvoiceStatus::Open, InvoiceStatus::Pending])
             ->groupBy(
@@ -364,6 +398,8 @@ final class SepaBatchRepositoryDb implements SepaBatchRepository
                 'invoices.recipient_name',
                 'invoices.member_id',
                 'invoices.status',
+                'invoices.sepa_sequence_type',
+                'payment_information.last_collected_at',
             )
             ->select(
                 'invoices.id as invoice_id',
@@ -371,21 +407,82 @@ final class SepaBatchRepositoryDb implements SepaBatchRepository
                 'invoices.recipient_name',
                 'invoices.member_id',
                 'invoices.status',
+                'invoices.sepa_sequence_type',
+                'payment_information.last_collected_at',
                 DB::raw('COALESCE(SUM(invoice_lines.price * invoice_lines.quantity), 0) as total_price'),
                 DB::raw('COALESCE(SUM(invoice_lines.vat * invoice_lines.quantity), 0) as total_vat'),
             )
             ->orderBy('invoices.id')
             ->get();
 
-        return $rows->map(static fn (object $row): SepaCollectionCandidate => new SepaCollectionCandidate(
-            invoiceId: InvoiceId::create((int) $row->invoice_id),
-            invoiceNumber: (string) $row->invoice_number,
-            recipientName: (string) $row->recipient_name,
-            memberId: $row->member_id === null ? null : MemberId::create((int) $row->member_id),
-            total: new CompoundPrice((float) $row->total_price, (float) $row->total_vat),
-            status: InvoiceStatus::from((string) $row->status),
-            sequenceType: SequenceType::Recurring,
-        ))->all();
+        return $rows
+            ->map(function (object $row): SepaCollectionCandidate {
+                $lastCollectedAt = $row->last_collected_at === null
+                    ? null
+                    : CarbonImmutable::parse($row->last_collected_at);
+                $sequenceType = $this->sequenceResolver->resolve(
+                    lastCollectedAt: $lastCollectedAt,
+                    frozenSequence: SequenceType::optionallyFrom($row->sepa_sequence_type),
+                );
+
+                return new SepaCollectionCandidate(
+                    invoiceId: InvoiceId::create($row->invoice_id),
+                    invoiceNumber: $row->invoice_number,
+                    recipientName: $row->recipient_name,
+                    memberId: $row->member_id === null ? null : MemberId::create($row->member_id),
+                    total: new CompoundPrice((float) $row->total_price, (float) $row->total_vat),
+                    status: InvoiceStatus::from($row->status),
+                    sequenceType: $sequenceType,
+                );
+            })
+            ->all();
+    }
+
+    #[Override]
+    public function freezeSequenceTypes(SepaBatchId $batchId): void
+    {
+        /** @var array<string, list<int>> $invoiceIdsBySequenceType */
+        $invoiceIdsBySequenceType = [];
+
+        foreach ($this->getCollectionCandidates($batchId) as $candidate) {
+            if (!$candidate->isDebit()) {
+                continue;
+            }
+
+            $invoiceIdsBySequenceType[$candidate->sequenceType->value][] = $candidate->invoiceId->value;
+        }
+
+        foreach ($invoiceIdsBySequenceType as $sequenceType => $invoiceIds) {
+            Invoice::query()
+                ->whereIn('id', $invoiceIds)
+                ->whereNull('sepa_sequence_type')
+                ->update(['sepa_sequence_type' => $sequenceType]);
+        }
+    }
+
+    #[Override]
+    public function replanSequenceTypes(SepaBatchId $batchId): void
+    {
+        DB::transaction(function () use ($batchId): void {
+            $batch = SepaBatch::query()
+                ->whereKey($batchId->value)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if (
+                $batch->status !== SepaBatchStatus::Pending
+                || $batch->exported_at !== null
+                || $batch->submitted_at !== null
+            ) {
+                throw new DomainException('Only a pending, unexported and unsubmitted batch can be re-planned.');
+            }
+
+            Invoice::query()
+                ->where('sepa_batch_id', $batchId->value)
+                ->update(['sepa_sequence_type' => null]);
+
+            $this->freezeSequenceTypes($batchId);
+        });
     }
 
     #[Override]
@@ -398,6 +495,7 @@ final class SepaBatchRepositoryDb implements SepaBatchRepository
             status: $batch->status,
             sepaTransferDate: $batch->sepa_transfer_date,
             closedAt: $batch->closed_at,
+            submittedAt: $batch->submitted_at,
         );
     }
 

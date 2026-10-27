@@ -24,8 +24,7 @@ final class EditMandateAction
             ->modalHeading(__('labels.edit_mandate'))
             ->modalDescription(__('labels.edit_mandate_help'))
             ->visible(
-                static fn (PaymentInformation $record): bool => $record->revoked_at === null
-                    && (auth()->user()?->can('update_member_payment_information') ?? false),
+                static fn (PaymentInformation $record): bool => $record->revoked_at === null && (auth()->user()?->can('update_member_payment_information') ?? false),
             )
             ->fillForm(static fn (PaymentInformation $record): array => [
                 'banking_account_number' => $record->banking_account_number,
