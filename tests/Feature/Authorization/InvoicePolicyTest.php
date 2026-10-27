@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Policies;
+namespace Tests\Feature\Authorization;
 
 use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Models\Invoice;
