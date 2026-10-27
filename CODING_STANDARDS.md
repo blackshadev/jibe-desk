@@ -42,6 +42,34 @@ The database enforces referential and uniqueness invariants: a foreign key rejec
 
 A `mago-expect` comment (including `mago-expect lint:halstead`) switches off a rule whose threshold this repo tuned for a reason. Reach the threshold with structure instead: split the method into named steps (`isExportable`, `mandateIdFromRow`, `lastCollectedAtFromRow`), extract one mapper per row shape, and give a repeated array row a `@phpstan-type` alias so the query and its filter share one annotation. A new suppression comment is review-blocking.
 
+## A docblock adds what the signature cannot
+
+PHPDoc earns its line by carrying what the type cannot say: the shape (`@return list<ExportReadinessIssue>`, `@param array{id: int, name: string}`), a constraint, or a `@throws`. A block that only restates the class name, the method name, or the parameter types goes — it is one more line to keep in sync and nothing to read. A class-level `/** Assesses collection readiness. */` above `CollectionReadinessAssessor` is the archetype to delete.
+
+This refines the global "prefer PHPDoc over inline comments": the shape stays a docblock, the narration is deleted.
+
+## Constructor argument lists stay flat
+
+An argument derived by a call is assigned to a named variable first, so the object construction reads as a list of values. `new SepaExportInvoice(lastCollectedAt: self::lastCollectedAtFromRow($row), sequenceType: $this->sequenceResolver->resolve(…))` buries the derivation two levels deep; assign `$lastCollectedAt` and `$sequenceType` above it. The same move applies inside a closure body, not only a method body.
+
+A nullable column parsed into a value object gets a named static constructor — `SequenceType::optionallyFrom($row->sepa_sequence_type)` — rather than a ternary or an `if` at the call site.
+
+## Report steps return a list, never `null`
+
+A step that reports problems returns `list<Issue>`, with `[]` for "none". A `?array` return pushes a null check into every caller and every composition, so `assessIban()` and its siblings all return `[]` and the parent spreads them (see `.agents/skills/project-best-practices/rules/collections.md`). Name the steps `assess<Subject>()` — `assessIban`, `assessCreditCandidate` — so the method name states the judgement it makes.
+
+## Rare branch first, common path as the fallthrough
+
+Order the branches by likelihood and let the exceptional case return early: a credit in a debit batch is the rare one, so `if ($candidate->isCredit()) { return $this->assessCreditCandidate(…); }` comes first and the debit assessment is the fallthrough. The reader then meets the common path last, at the same nesting level as the method body.
+
+## Put the predicate on the value object
+
+A state test that appears at more than one call site becomes a named predicate on the value object: `SepaExportInvoice::isCredit()` instead of `amountInCents() < 0` in the assessor and again in the export. Name it for the domain question, not the field: a zero-amount candidate is neither credit nor debit, so a guard that means "not a debit" stays `!isDebit()`.
+
+## Group a list once, in its list value object
+
+When a service filters the same list more than once, wrap it in a readonly list value object (`SepaExportInvoiceList`) that groups in the constructor into a keyed map, and expose `forCategory()` plus `hasForCategory()`. The predicate name carries the dimension — `hasForCategory()`, not `has()` — and the list answers the question the caller actually asks (`hasCredit()`, `hasDebit()`), so the service asks the list instead of pulling its array apart. Callers guard with `has…()` and fetch only when the category is present. Rows the list cannot classify are dropped at construction, which keeps the zero-amount guard out of every caller.
+
 ## SEPA export: `digitick/sepa-xml` never omits `<CdtrAgt>`
 
 When a credit-transfer entry is added without a `creditorBic`, the library does
