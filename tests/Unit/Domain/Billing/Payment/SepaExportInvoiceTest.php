@@ -7,6 +7,7 @@ namespace Tests\Unit\Domain\Billing\Payment;
 use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Payment\MandateId;
 use App\Domain\Billing\Payment\PaymentInformationId;
+use App\Domain\Billing\Payment\SepaCategory;
 use App\Domain\Billing\Payment\SepaExportInvoice;
 use App\Domain\Billing\Payment\SequenceType;
 use App\Domain\Members\MemberId;
@@ -86,5 +87,45 @@ final class SepaExportInvoiceTest extends UnitTestCase
         );
 
         static::assertSame(9995, $subject->amountInCents());
+    }
+
+    public function test_category_follows_the_sign_and_the_sequence_type(): void
+    {
+        static::assertSame(
+            SepaCategory::Credit,
+            $this->invoice(new CompoundPrice(-10.0, -2.1), SequenceType::Recurring)->category(),
+        );
+        static::assertSame(
+            SepaCategory::DebitFirst,
+            $this->invoice(new CompoundPrice(10.0, 2.1), SequenceType::First)->category(),
+        );
+        static::assertSame(
+            SepaCategory::DebitRecurring,
+            $this->invoice(new CompoundPrice(10.0, 2.1), SequenceType::Recurring)->category(),
+        );
+    }
+
+    public function test_is_credit_only_for_a_negative_total(): void
+    {
+        static::assertTrue($this->invoice(new CompoundPrice(-10.0, -2.1), SequenceType::Recurring)->isCredit());
+        static::assertFalse($this->invoice(new CompoundPrice(10.0, 2.1), SequenceType::Recurring)->isCredit());
+        static::assertFalse($this->invoice(new CompoundPrice(0.0, 0.0), SequenceType::Recurring)->isCredit());
+    }
+
+    private function invoice(CompoundPrice $total, SequenceType $sequenceType): SepaExportInvoice
+    {
+        return new SepaExportInvoice(
+            invoiceId: InvoiceId::create(1),
+            invoiceNumber: 'INV-001',
+            recipientName: 'Test',
+            total: $total,
+            iban: 'NL91ABNA0417164300',
+            bic: 'ABNANL2A',
+            mandateId: new MandateId(MemberId::create(1), PaymentInformationId::create(1)),
+            paymentInformationId: PaymentInformationId::create(1),
+            mandateDate: CarbonImmutable::parse('2026-01-01'),
+            lastCollectedAt: null,
+            sequenceType: $sequenceType,
+        );
     }
 }

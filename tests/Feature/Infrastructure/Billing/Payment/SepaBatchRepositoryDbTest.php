@@ -271,19 +271,19 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
 
         $result = $this->repository->getInvoicesForExport(SepaBatchId::create($batch->id));
 
-        static::assertCount(1, $result);
-        static::assertSame($invoice->invoice_number, $result[0]->invoiceNumber);
-        static::assertSame($member->name, $result[0]->recipientName);
-        static::assertSame('NL91ABNA0417164300', $result[0]->iban);
-        static::assertSame('ABNANL2A', $result[0]->bic);
-        static::assertSame('C000001-000001', $result[0]->mandateId->value);
-        static::assertSame(1, $result[0]->paymentInformationId->value);
-        static::assertNull($result[0]->lastCollectedAt);
-        static::assertGreaterThan(0.0, $result[0]->total->price);
-        static::assertGreaterThan(0.0, $result[0]->total->vat);
+        static::assertCount(1, $result->invoices);
+        static::assertSame($invoice->invoice_number, $result->invoices[0]->invoiceNumber);
+        static::assertSame($member->name, $result->invoices[0]->recipientName);
+        static::assertSame('NL91ABNA0417164300', $result->invoices[0]->iban);
+        static::assertSame('ABNANL2A', $result->invoices[0]->bic);
+        static::assertSame('C000001-000001', $result->invoices[0]->mandateId->value);
+        static::assertSame(1, $result->invoices[0]->paymentInformationId->value);
+        static::assertNull($result->invoices[0]->lastCollectedAt);
+        static::assertGreaterThan(0.0, $result->invoices[0]->total->price);
+        static::assertGreaterThan(0.0, $result->invoices[0]->total->vat);
         static::assertSame(
-            (int) round($result[0]->total->price * 100),
-            $result[0]->amountInCents(),
+            (int) round($result->invoices[0]->total->price * 100),
+            $result->invoices[0]->amountInCents(),
         );
     }
 
@@ -650,7 +650,7 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
 
         $result = $this->repository->getInvoicesForExport(SepaBatchId::create($batch->id));
 
-        static::assertCount(1, $result);
+        static::assertCount(1, $result->invoices);
     }
 
     public function test_get_collection_candidates_returns_open_and_pending_invoices_with_totals(): void
@@ -932,9 +932,9 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
 
         $result = $this->repository->getInvoicesForExport(SepaBatchId::create($batch->id));
 
-        static::assertCount(1, $result);
-        static::assertSame('NL20RABO0123456789', $result[0]->iban);
-        static::assertSame($active->id, $result[0]->paymentInformationId->value);
+        static::assertCount(1, $result->invoices);
+        static::assertSame('NL20RABO0123456789', $result->invoices[0]->iban);
+        static::assertSame($active->id, $result->invoices[0]->paymentInformationId->value);
     }
 
     public function test_get_invoices_for_export_does_not_duplicate_a_member_with_mandate_history(): void
@@ -959,7 +959,7 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
 
         $result = $this->repository->getInvoicesForExport(SepaBatchId::create($batch->id));
 
-        static::assertCount(1, $result);
+        static::assertCount(1, $result->invoices);
     }
 
     public function test_get_invoices_for_export_excludes_a_collection_without_an_active_mandate(): void
@@ -983,7 +983,7 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
 
         $result = $this->repository->getInvoicesForExport(SepaBatchId::create($batch->id));
 
-        static::assertSame([], $result);
+        static::assertSame([], $result->invoices);
     }
 
     public function test_get_invoices_for_export_uses_the_latest_mandate_for_a_refund_after_revocation(): void
@@ -1016,9 +1016,9 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
 
         $result = $this->repository->getInvoicesForExport(SepaBatchId::create($batch->id));
 
-        static::assertCount(1, $result);
-        static::assertSame('NL20RABO0123456789', $result[0]->iban);
-        static::assertSame($latest->id, $result[0]->paymentInformationId->value);
+        static::assertCount(1, $result->invoices);
+        static::assertSame('NL20RABO0123456789', $result->invoices[0]->iban);
+        static::assertSame($latest->id, $result->invoices[0]->paymentInformationId->value);
     }
 
     public function test_get_invoices_for_export_exposes_the_mandate_id_and_last_collected_at(): void
@@ -1043,9 +1043,9 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
 
         $result = $this->repository->getInvoicesForExport(SepaBatchId::create($batch->id));
 
-        static::assertCount(1, $result);
-        static::assertSame($mandate->id, $result[0]->paymentInformationId->value);
-        static::assertSame('2026-09-30', $result[0]->lastCollectedAt?->format('Y-m-d'));
+        static::assertCount(1, $result->invoices);
+        static::assertSame($mandate->id, $result->invoices[0]->paymentInformationId->value);
+        static::assertSame('2026-09-30', $result->invoices[0]->lastCollectedAt?->format('Y-m-d'));
     }
 
     public function test_get_export_context_exposes_the_submission_moment(): void
@@ -1068,8 +1068,8 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
 
         $result = $this->repository->getInvoicesForExport(SepaBatchId::create($batch->id));
 
-        static::assertCount(1, $result);
-        static::assertSame(SequenceType::First, $result[0]->sequenceType);
+        static::assertCount(1, $result->invoices);
+        static::assertSame(SequenceType::First, $result->invoices[0]->sequenceType);
     }
 
     public function test_get_invoices_for_export_returns_recurring_for_a_collected_mandate(): void
@@ -1084,9 +1084,9 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
 
         $result = $this->repository->getInvoicesForExport(SepaBatchId::create($batch->id));
 
-        static::assertCount(1, $result);
-        static::assertSame(SequenceType::Recurring, $result[0]->sequenceType);
-        static::assertSame($invoice->id, $result[0]->invoiceId->value);
+        static::assertCount(1, $result->invoices);
+        static::assertSame(SequenceType::Recurring, $result->invoices[0]->sequenceType);
+        static::assertSame($invoice->id, $result->invoices[0]->invoiceId->value);
     }
 
     public function test_get_invoices_for_export_prefers_the_frozen_plan_over_the_mandate(): void
@@ -1101,8 +1101,8 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
 
         $result = $this->repository->getInvoicesForExport(SepaBatchId::create($batch->id));
 
-        static::assertCount(1, $result);
-        static::assertSame(SequenceType::First, $result[0]->sequenceType);
+        static::assertCount(1, $result->invoices);
+        static::assertSame(SequenceType::First, $result->invoices[0]->sequenceType);
     }
 
     public function test_get_invoices_for_export_keeps_first_after_the_batch_is_submitted(): void
@@ -1121,8 +1121,8 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
 
         $result = $this->repository->getInvoicesForExport(SepaBatchId::create($batch->id));
 
-        static::assertCount(1, $result);
-        static::assertSame(SequenceType::First, $result[0]->sequenceType);
+        static::assertCount(1, $result->invoices);
+        static::assertSame(SequenceType::First, $result->invoices[0]->sequenceType);
     }
 
     public function test_get_invoices_for_export_uses_the_new_active_mandate_after_reauthorisation(): void
@@ -1139,8 +1139,8 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
 
         $result = $this->repository->getInvoicesForExport(SepaBatchId::create($batch->id));
 
-        static::assertCount(1, $result);
-        static::assertSame(SequenceType::First, $result[0]->sequenceType);
+        static::assertCount(1, $result->invoices);
+        static::assertSame(SequenceType::First, $result->invoices[0]->sequenceType);
     }
 
     public function test_get_collection_candidates_returns_the_resolved_sequence(): void

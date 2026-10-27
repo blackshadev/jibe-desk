@@ -28,4 +28,16 @@ final readonly class SepaExportInvoice
     {
         return (int) round($this->total->price * 100);
     }
+
+    public function isCredit(): bool
+    {
+        return $this->total->price < 0.0;
+    }
+
+    public function category(): SepaCategory
+    {
+        return $this->isCredit()
+            ? SepaCategory::Credit
+            : SepaCategory::forSequenceType($this->sequenceType);
+    }
 }

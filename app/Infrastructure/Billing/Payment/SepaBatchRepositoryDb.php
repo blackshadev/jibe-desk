@@ -18,6 +18,7 @@ use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Billing\Payment\SepaBatchRepository;
 use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Domain\Billing\Payment\SepaExportInvoice;
+use App\Domain\Billing\Payment\SepaExportInvoiceList;
 use App\Domain\Billing\Payment\SepaExportPurchaseOrder;
 use App\Domain\Billing\Payment\SequenceType;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderApprovalStatus;
@@ -50,6 +51,17 @@ use Override;
  *     last_collected_at: null|string,
  *     revoked_at: null|string,
  *     sepa_sequence_type: null|string,
+ *     total_price: numeric-string,
+ *     total_vat: numeric-string,
+ * }
+ * @phpstan-type CollectionCandidateRow object{
+ *     invoice_id: int,
+ *     invoice_number: string,
+ *     recipient_name: string,
+ *     member_id: null|int,
+ *     status: string,
+ *     sepa_sequence_type: null|string,
+ *     last_collected_at: null|string,
  *     total_price: numeric-string,
  *     total_vat: numeric-string,
  * }
@@ -132,9 +144,8 @@ final readonly class SepaBatchRepositoryDb implements SepaBatchRepository
             ->update(['generation_finished_at' => now()]);
     }
 
-    /** @return list<SepaExportInvoice> */
     #[Override]
-    public function getInvoicesForExport(SepaBatchId $batchId): array
+    public function getInvoicesForExport(SepaBatchId $batchId): SepaExportInvoiceList
     {
         /** @var Collection<int, ExportInvoiceRow> $rows */
         $rows = Invoice::query()
@@ -173,11 +184,13 @@ final readonly class SepaBatchRepositoryDb implements SepaBatchRepository
             ->toBase()
             ->get();
 
-        return $rows
-            ->filter(self::isExportable(...))
-            ->map($this->exportInvoiceFromRow(...))
-            ->values()
-            ->all();
+        return new SepaExportInvoiceList(
+            $rows
+                ->filter(self::isExportable(...))
+                ->map($this->exportInvoiceFromRow(...))
+                ->values()
+                ->all(),
+        );
     }
 
     /** @param ExportInvoiceRow $row */
@@ -190,6 +203,10 @@ final readonly class SepaBatchRepositoryDb implements SepaBatchRepository
     private function exportInvoiceFromRow(object $row): SepaExportInvoice
     {
         $lastCollectedAt = self::lastCollectedAtFromRow($row);
+        $sequenceType = $this->sequenceResolver->resolve(
+            lastCollectedAt: $lastCollectedAt,
+            frozenSequence: SequenceType::optionallyFrom($row->sepa_sequence_type),
+        );
 
         return new SepaExportInvoice(
             invoiceId: InvoiceId::create($row->invoice_id),
@@ -202,12 +219,7 @@ final readonly class SepaBatchRepositoryDb implements SepaBatchRepository
             paymentInformationId: PaymentInformationId::create($row->payment_information_id),
             mandateDate: CarbonImmutable::parse($row->mandate_date),
             lastCollectedAt: $lastCollectedAt,
-            sequenceType: $this->sequenceResolver->resolve(
-                lastCollectedAt: $lastCollectedAt,
-                frozenSequence: $row->sepa_sequence_type === null
-                    ? null
-                    : SequenceType::from($row->sepa_sequence_type),
-            ),
+            sequenceType: $sequenceType,
         );
     }
 
@@ -371,6 +383,7 @@ final readonly class SepaBatchRepositoryDb implements SepaBatchRepository
     #[Override]
     public function getCollectionCandidates(SepaBatchId $batchId): array
     {
+        /** @var Collection<int, CollectionCandidateRow> $rows */
         $rows = DB::table('invoices')
             ->leftJoin('invoice_lines', 'invoice_lines.invoice_id', '=', 'invoices.id')
             ->leftJoin('payment_information', static function (JoinClause $join): void {
@@ -402,22 +415,27 @@ final readonly class SepaBatchRepositoryDb implements SepaBatchRepository
             ->orderBy('invoices.id')
             ->get();
 
-        return $rows->map(fn (object $row): SepaCollectionCandidate => new SepaCollectionCandidate(
-            invoiceId: InvoiceId::create((int) $row->invoice_id),
-            invoiceNumber: (string) $row->invoice_number,
-            recipientName: (string) $row->recipient_name,
-            memberId: $row->member_id === null ? null : MemberId::create((int) $row->member_id),
-            total: new CompoundPrice((float) $row->total_price, (float) $row->total_vat),
-            status: InvoiceStatus::from((string) $row->status),
-            sequenceType: $this->sequenceResolver->resolve(
-                lastCollectedAt: $row->last_collected_at === null
+        return $rows
+            ->map(function (object $row): SepaCollectionCandidate {
+                $lastCollectedAt = $row->last_collected_at === null
                     ? null
-                    : CarbonImmutable::parse((string) $row->last_collected_at),
-                frozenSequence: $row->sepa_sequence_type === null
-                    ? null
-                    : SequenceType::from((string) $row->sepa_sequence_type),
-            ),
-        ))->all();
+                    : CarbonImmutable::parse($row->last_collected_at);
+                $sequenceType = $this->sequenceResolver->resolve(
+                    lastCollectedAt: $lastCollectedAt,
+                    frozenSequence: SequenceType::optionallyFrom($row->sepa_sequence_type),
+                );
+
+                return new SepaCollectionCandidate(
+                    invoiceId: InvoiceId::create($row->invoice_id),
+                    invoiceNumber: $row->invoice_number,
+                    recipientName: $row->recipient_name,
+                    memberId: $row->member_id === null ? null : MemberId::create($row->member_id),
+                    total: new CompoundPrice((float) $row->total_price, (float) $row->total_vat),
+                    status: InvoiceStatus::from($row->status),
+                    sequenceType: $sequenceType,
+                );
+            })
+            ->all();
     }
 
     #[Override]
