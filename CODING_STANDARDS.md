@@ -60,10 +60,6 @@ A nullable return pushes a null check into every caller and every composition, s
 
 `null` earns its place where the domain models an absence — a member with no mandate yet, an unknown lookup — and the signature says so (`?MandateReadiness`). Even then, hand the caller something it can ask rather than something it must test: `SequenceType::optionallyFrom()` turns a nullable column into a VO at the edge.
 
-## Name report steps `assess<Subject>()`
-
-A method that judges one thing and reports what is wrong is `assess<Subject>()` — `assessIban`, `assessSepaCandidateSequence`, `assessCreditCandidate` — so the call site states the judgement instead of a vague `check()` or `issues()`.
-
 ## Rare branch first, common path as the fallthrough
 
 Order the branches by likelihood and let the exceptional case return early: a credit in a debit batch is the rare one, so `if ($candidate->isCredit()) { return $this->assessCreditCandidate(…); }` comes first and the debit assessment is the fallthrough. The reader then meets the common path last, at the same nesting level as the method body.
@@ -72,15 +68,3 @@ Order the branches by likelihood and let the exceptional case return early: a cr
 
 A state test that appears at more than one call site becomes a named predicate on the value object: `SepaExportInvoice::isCredit()` instead of `amountInCents() < 0` in the assessor and again in the export. Name it for the domain question, not the field: a zero-amount candidate is neither credit nor debit, so a guard that means "not a debit" stays `!isDebit()`.
 
-## Group a list once, in its list value object
-
-When a service filters the same list more than once, wrap it in a readonly list value object (`SepaExportInvoiceList`) that groups in the constructor into a keyed map, and expose `forCategory()` plus `hasForCategory()`. The predicate name carries the dimension — `hasForCategory()`, not `has()` — and the list answers the question the caller actually asks (`hasCredit()`, `hasDebit()`), so the service asks the list instead of pulling its array apart. Callers guard with `has…()` and fetch only when the category is present. Rows the list cannot classify are dropped at construction, which keeps the zero-amount guard out of every caller.
-
-## SEPA export: `digitick/sepa-xml` never omits `<CdtrAgt>`
-
-When a credit-transfer entry is added without a `creditorBic`, the library does
-**not** omit the `<CdtrAgt>` element — it emits
-`<CdtrAgt><FinInstnId><Othr><Id>NOTPROVIDED</Id></Othr></FinInstnId></CdtrAgt>`.
-Purchase orders have no BIC, so tests asserting "no BIC" must assert the absence
-of `//pain:CdtrAgt//pain:BICFI` (optionally the presence of `NOTPROVIDED`), not
-the absence of `CdtrAgt`. See `SepaExportServiceImplTest`.
