@@ -30,3 +30,4 @@ coverage
 TODO.md
 .agents
 .spec/maps
+.worktrees/

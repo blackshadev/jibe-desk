@@ -1,0 +1,145 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  APP_KEY: base64:Z9IEYXCWT4zyCLQE2xEKxSOiPWC0gB4WyN6F73HcDy0=
+
+jobs:
+  tests:
+    name: tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Shared by every job through the *php-setup alias so the PHP version and
+      # extension list are defined once.
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with: &php-setup
+          php-version: '8.5'
+          extensions: intl, zip, sqlite3, pdo_sqlite, pdo_pgsql, dom, bcmath, gd, exif, iconv, mbstring, pcntl, posix, fileinfo, xml, xmlwriter, xmlreader, simplexml, curl, tokenizer
+          coverage: none
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Run tests
+        run: php artisan test
+
+  phpstan:
+    name: phpstan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with: *php-setup
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Analyse domain code
+        run: ./vendor/bin/phpstan analyse --configuration=phpstan-domain.neon --memory-limit=2G --no-progress
+
+      - name: Analyse infrastructure code
+        run: ./vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=2G --no-progress
+
+      - name: Analyse tests
+        run: ./vendor/bin/phpstan analyse --configuration=phpstan-tests.neon --memory-limit=2G --no-progress
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with: *php-setup
+
+      - name: Install mago
+        run: |
+          composer global require carthage-software/mago:1.59.0 --no-interaction --no-progress
+          echo "$(composer global config bin-dir --absolute)" >> "$GITHUB_PATH"
+
+      - name: Lint
+        run: mago --config mago.toml lint
+
+  composer:
+    name: composer
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with: *php-setup
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Validate composer.json
+        run: composer validate --strict --no-check-publish
+
+      - name: Audit dependencies
+        id: audit
+        continue-on-error: true
+        run: composer audit --no-dev --locked
+
+      - name: Warn about audit advisories
+        if: steps.audit.outcome == 'failure'
+        run: echo "::warning::composer audit reported advisories, see the 'Audit dependencies' step above. Not blocking yet."

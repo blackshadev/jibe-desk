@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Foundation\Testing\WithCachedConfig;
 use Illuminate\Foundation\Testing\WithCachedRoutes;
 use JeroenG\Autowire\Testing\WithCachedAutowire;
+use Override;
 
 abstract class FeatureTestCase extends BaseTestCase
 {
@@ -18,4 +19,12 @@ abstract class FeatureTestCase extends BaseTestCase
     use WithCachedRoutes;
 
     // Use the base TestCase createApplication implementation from the framework.
+
+    #[Override]
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->withoutVite();
+    }
 }
