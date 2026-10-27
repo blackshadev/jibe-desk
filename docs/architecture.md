@@ -56,9 +56,10 @@ The infrastructure layer contains the concrete implementations of the domain's r
 - One folder per bounded context (`Billing`, `Members`, `Activities`, …).
 - Example: `App\Infrastructure\Billing\Invoices\InvoiceRepositoryDb` implements `App\Domain\Billing\Invoices\InvoiceRepository`. It owns the Eloquent queries, transactions, and casts; the domain only sees the interface.
 - This is the only place where Eloquent should be used to satisfy a domain contract. Domain code must not import `App\Models\*`.
-- Name the adapter after its role: a class that queries the database is `XRepository` (domain interface) plus `XRepositoryDb` (implementation), even when it starts life as a `…Service`.
+- Name the adapter after its role: a class that queries the database is `XRepository` (domain interface) plus `XRepositoryDb` (implementation), even when it starts life as a `…Service`. The `Db` suffix marks any infrastructure class that talks to the database, not only one behind a repository contract — a helper that reads or writes rows carries it too.
 - Repository methods use the business verb — `create()`, `update()`, `stampCollectionsForBatch()` — not an `add`/`change`/`save` variant of it.
 - The repository owns the query and the write. Callers pass an id, a filter, or a value object, never a pre-fetched list of ids: a caller that queries for ids only to hand them back is telling you the query belongs in the repository.
+- A repository *action* — a method that moves rows to a new state — returns `void`, so the signature says "mutates, nothing more". Creation and query methods return a value, and it is a domain type rather than raw rows.
 
 ## Laravel layer — `app/Http`, `app/Models`, `app/Observers`, `app/Policies`, `app/Rules`, `app/Console`, `app/Actions`, `app/Providers`, `app/Formatters`
 
