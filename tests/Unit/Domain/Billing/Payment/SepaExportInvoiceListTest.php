@@ -37,9 +37,32 @@ final class SepaExportInvoiceListTest extends UnitTestCase
             $this->invoice(1, new CompoundPrice(-25.0, -5.25), SequenceType::Recurring),
         ]);
 
-        static::assertTrue($list->has(SepaCategory::Credit));
-        static::assertFalse($list->has(SepaCategory::DebitFirst));
-        static::assertFalse($list->has(SepaCategory::DebitRecurring));
+        static::assertTrue($list->hasForCategory(SepaCategory::Credit));
+        static::assertFalse($list->hasForCategory(SepaCategory::DebitFirst));
+        static::assertFalse($list->hasForCategory(SepaCategory::DebitRecurring));
+    }
+
+    public function test_it_knows_whether_it_holds_credits_or_debits(): void
+    {
+        $credit = $this->invoice(1, new CompoundPrice(-25.0, -5.25), SequenceType::Recurring);
+        $first = $this->invoice(2, new CompoundPrice(25.0, 5.25), SequenceType::First);
+        $recurring = $this->invoice(3, new CompoundPrice(25.0, 5.25), SequenceType::Recurring);
+
+        $creditOnly = new SepaExportInvoiceList([$credit]);
+        static::assertTrue($creditOnly->hasCredit());
+        static::assertFalse($creditOnly->hasDebit());
+
+        $debitOnly = new SepaExportInvoiceList([$first, $recurring]);
+        static::assertFalse($debitOnly->hasCredit());
+        static::assertTrue($debitOnly->hasDebit());
+
+        $mixed = new SepaExportInvoiceList([$credit, $first]);
+        static::assertTrue($mixed->hasCredit());
+        static::assertTrue($mixed->hasDebit());
+
+        $empty = new SepaExportInvoiceList([]);
+        static::assertFalse($empty->hasCredit());
+        static::assertFalse($empty->hasDebit());
     }
 
     public function test_it_never_categorises_an_invoice_without_an_amount(): void
@@ -50,7 +73,7 @@ final class SepaExportInvoiceListTest extends UnitTestCase
 
         foreach (SepaCategory::cases() as $category) {
             static::assertSame([], $list->forCategory($category));
-            static::assertFalse($list->has($category));
+            static::assertFalse($list->hasForCategory($category));
         }
     }
 
@@ -60,7 +83,7 @@ final class SepaExportInvoiceListTest extends UnitTestCase
 
         foreach (SepaCategory::cases() as $category) {
             static::assertSame([], $list->forCategory($category));
-            static::assertFalse($list->has($category));
+            static::assertFalse($list->hasForCategory($category));
         }
     }
 

@@ -59,24 +59,10 @@ final readonly class SepaExportServiceImpl implements SepaExportService
             $this->configuration->creditorName,
         );
 
-        $hasCreditTransfer = $invoices->has(SepaCategory::Credit);
-        $hasDirectDebit = $invoices->has(SepaCategory::DebitFirst) || $invoices->has(SepaCategory::DebitRecurring);
-
-        foreach ($invoices->forCategory(SepaCategory::Credit) as $invoice) {
-            $credit->addTransfer($creditPaymentInfoId, [
-                'amount' => abs($invoice->amountInCents()),
-                'creditorIban' => $invoice->iban,
-                'creditorName' => $invoice->recipientName,
-                'creditorBic' => $invoice->bic,
-                'endToEndId' => $invoice->invoiceNumber,
-                'remittanceInformation' => $invoice->invoiceNumber,
-            ]);
-        }
-
         foreach (SequenceType::cases() as $sequenceType) {
-            $debits = $invoices->forCategory(SepaCategory::forSequenceType($sequenceType));
+            $category = SepaCategory::forSequenceType($sequenceType);
 
-            if ($debits === []) {
+            if (! $invoices->hasForCategory($category)) {
                 continue;
             }
 
@@ -93,7 +79,7 @@ final readonly class SepaExportServiceImpl implements SepaExportService
                 'dueDate' => $dueDate,
             ]);
 
-            foreach ($debits as $invoice) {
+            foreach ($invoices->forCategory($category) as $invoice) {
                 $directDebit->addTransfer($directDebitPaymentInfoId, [
                     'amount' => $invoice->amountInCents(),
                     'debtorIban' => $invoice->iban,
@@ -107,12 +93,23 @@ final readonly class SepaExportServiceImpl implements SepaExportService
             }
         }
 
-        foreach ($purchaseOrders as $purchaseOrder) {
-            if ($purchaseOrder->amountInCents() === 0) {
-                continue;
-            }
+        foreach ($invoices->forCategory(SepaCategory::Credit) as $invoice) {
+            $credit->addTransfer($creditPaymentInfoId, [
+                'amount' => abs($invoice->amountInCents()),
+                'creditorIban' => $invoice->iban,
+                'creditorName' => $invoice->recipientName,
+                'creditorBic' => $invoice->bic,
+                'endToEndId' => $invoice->invoiceNumber,
+                'remittanceInformation' => $invoice->invoiceNumber,
+            ]);
+        }
 
-            $hasCreditTransfer = true;
+        $exportablePurchaseOrders = array_values(array_filter(
+            $purchaseOrders,
+            static fn (SepaExportPurchaseOrder $purchaseOrder): bool => $purchaseOrder->amountInCents() !== 0,
+        ));
+
+        foreach ($exportablePurchaseOrders as $purchaseOrder) {
             $credit->addTransfer($creditPaymentInfoId, [
                 'amount' => $purchaseOrder->amountInCents(),
                 'creditorIban' => $purchaseOrder->creditorIban,
@@ -122,9 +119,11 @@ final readonly class SepaExportServiceImpl implements SepaExportService
             ]);
         }
 
+        $hasCreditTransfer = $invoices->hasCredit() || $exportablePurchaseOrders !== [];
+
         return new SepaExport(
             creditTransfers: $hasCreditTransfer ? $credit->asXML() : '',
-            directDebit: $hasDirectDebit ? $directDebit->asXML() : '',
+            directDebit: $invoices->hasDebit() ? $directDebit->asXML() : '',
         );
     }
 }
