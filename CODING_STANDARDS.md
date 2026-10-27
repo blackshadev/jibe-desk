@@ -34,6 +34,14 @@ first time instead of discovering the message.
   `->accepted()`, `modifyQueryUsing`) resolve on `Builder` and need
   `@phpstan-ignore-next-line method.notFound`.
 
+## Trust the schema's constraints
+
+The database enforces referential and uniqueness invariants: a foreign key rejects an unknown `member_id`, a partial unique index rejects a second active mandate. A repository that pre-checks or locks the parent row for the same reason adds a query and a race, not safety. Let the write fail, and translate the constraint violation into a domain error when the caller needs one.
+
+## Fix the method, don't silence the rule
+
+A `mago-expect` comment (including `mago-expect lint:halstead`) switches off a rule whose threshold this repo tuned for a reason. Reach the threshold with structure instead: split the method into named steps (`isExportable`, `mandateIdFromRow`, `lastCollectedAtFromRow`), extract one mapper per row shape, and give a repeated array row a `@phpstan-type` alias so the query and its filter share one annotation. A new suppression comment is review-blocking.
+
 ## SEPA export: `digitick/sepa-xml` never omits `<CdtrAgt>`
 
 When a credit-transfer entry is added without a `creditorBic`, the library does

@@ -163,6 +163,8 @@ Before working in a domain, read [docs/architecture.md](./docs/architecture.md) 
 
 ## Coding standards
 
+Project coding rules live in the `project-best-practices` skill (`.agents/skills/project-best-practices/SKILL.md`) — activate it before writing, reviewing, or refactoring code.
+
 Review-enforced conventions live in [CODING_STANDARDS.md](./CODING_STANDARDS.md).
 
 ## Running commands

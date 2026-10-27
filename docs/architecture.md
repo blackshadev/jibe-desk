@@ -56,12 +56,16 @@ The infrastructure layer contains the concrete implementations of the domain's r
 - One folder per bounded context (`Billing`, `Members`, `Activities`, …).
 - Example: `App\Infrastructure\Billing\Invoices\InvoiceRepositoryDb` implements `App\Domain\Billing\Invoices\InvoiceRepository`. It owns the Eloquent queries, transactions, and casts; the domain only sees the interface.
 - This is the only place where Eloquent should be used to satisfy a domain contract. Domain code must not import `App\Models\*`.
+- Name the adapter after its role: a class that queries the database is `XRepository` (domain interface) plus `XRepositoryDb` (implementation), even when it starts life as a `…Service`.
+- Repository methods use the business verb — `create()`, `update()`, `stampCollectionsForBatch()` — not an `add`/`change`/`save` variant of it.
+- The repository owns the query and the write. Callers pass an id, a filter, or a value object, never a pre-fetched list of ids: a caller that queries for ids only to hand them back is telling you the query belongs in the repository.
 
 ## Laravel layer — `app/Http`, `app/Models`, `app/Observers`, `app/Policies`, `app/Rules`, `app/Console`, `app/Actions`, `app/Providers`, `app/Formatters`
 
 The Laravel layer is the framework-facing code. It owns:
 
 - **Eloquent models** (`app/Models`) — the persistence schema, relationships, casts, accessors. They cast to domain enums and value objects where it makes sense, but they are framework types, not domain types.
+- **Derived model values** — a value computed from the model's own columns (expiry, totals, status) is an `Attribute::get()` accessor on the model. Models never inject or call a service for it, and no extra `state()`-style wrapper stands between the accessor and the UI.
 - **HTTP controllers** (`app/Http/Controllers`) — translate requests into calls to domain services or infrastructure adapters.
 - **Observers** (`app/Observers`) — react to Eloquent model events and translate them into domain-side work.
 - **Policies** (`app/Policies`) — authorisation rules for actions.
@@ -78,6 +82,9 @@ This layer is allowed to know about both the domain and Laravel. Domain services
 Filament is the user-facing admin panel. It is intentionally thin.
 
 - **Resources** (`app/Filament/Admin/Resources/<Thing>`) — group a `Resource` class with its `Pages` (List/Create/Edit), `Schemas` (form definitions), `Tables` (table definitions), `RelationManagers`, and `Actions` (header / row actions such as `GenerateStorageSpacesAction`).
+    - A row or header action is its own invokable class in `Actions` (`CreateMandateAction`, `EditMandateAction`, `RevokeMandateAction`). A `RelationManager` or `Table` stays declarative and calls these classes.
+    - One `Schemas/<Thing>Form` class describes both create and edit through a single `configure()`. A field that is immutable after creation uses `->readOnlyOn(Operation::Edit->value)` rather than a second `configureForEdit()` field set.
+    - Table columns and form fields use the model's attribute name (`expiration_status`) and read the attribute directly; an `->state()` closure that only fetches a value is a signal the value belongs on the model.
 - **Pages** (`app/Filament/Admin/Pages`) — standalone pages such as the dashboard.
 - **Navigation**, **Labels**, **Widgets**, **Utils** — cross-resource helpers and chrome.
 - The panel is registered in `app/Providers/Filament/AdminPanelProvider.php`.
