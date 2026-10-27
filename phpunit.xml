@@ -36,5 +36,9 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="SEPA_CREDITOR_ID" value="NL00ZZZZ0000000000"/>
+        <env name="SEPA_CREDITOR_NAME" value="WSV Test"/>
+        <env name="SEPA_CREDITOR_IBAN" value="NL91ABNA0417164300"/>
+        <env name="SEPA_CREDITOR_BIC" value="TESTNL2A"/>
     </php>
 </phpunit>
