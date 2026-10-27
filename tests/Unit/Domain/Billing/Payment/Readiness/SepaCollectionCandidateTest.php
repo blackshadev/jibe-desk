@@ -19,20 +19,20 @@ final class SepaCollectionCandidateTest extends UnitTestCase
         static::assertSame(-1050, $this->candidate(new CompoundPrice(-10.50, -2.21))->amountInCents());
     }
 
-    public function test_is_debit_and_is_refund_split_on_the_sign(): void
+    public function test_is_debit_and_is_credit_split_on_the_sign(): void
     {
         $debit = $this->candidate(new CompoundPrice(10.0, 2.1));
-        $refund = $this->candidate(new CompoundPrice(-10.0, -2.1));
+        $credit = $this->candidate(new CompoundPrice(-10.0, -2.1));
         $zero = $this->candidate(new CompoundPrice(0.0, 0.0));
 
         static::assertTrue($debit->isDebit());
-        static::assertFalse($debit->isRefund());
+        static::assertFalse($debit->isCredit());
 
-        static::assertFalse($refund->isDebit());
-        static::assertTrue($refund->isRefund());
+        static::assertFalse($credit->isDebit());
+        static::assertTrue($credit->isCredit());
 
         static::assertFalse($zero->isDebit());
-        static::assertFalse($zero->isRefund());
+        static::assertFalse($zero->isCredit());
     }
 
     private function candidate(CompoundPrice $total): SepaCollectionCandidate

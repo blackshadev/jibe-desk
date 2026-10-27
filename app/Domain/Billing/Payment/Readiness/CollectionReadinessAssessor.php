@@ -7,9 +7,6 @@ namespace App\Domain\Billing\Payment\Readiness;
 use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Domain\Billing\Payment\SepaBatchStatus;
 
-/**
- * Assesses one collection candidate against its mandate and the batch context.
- */
 final readonly class CollectionReadinessAssessor
 {
     /** @return list<ExportReadinessIssue> */
@@ -26,15 +23,15 @@ final readonly class CollectionReadinessAssessor
             return [ExportReadinessIssue::forInvoice(ExportReadinessReason::ZeroAmount, $candidate)];
         }
 
-        if ($candidate->isDebit()) {
-            return $this->debitIssues($candidate, $mandate, $context);
+        if ($candidate->isCredit()) {
+            return $this->assessCreditCandidate($candidate, $mandate);
         }
 
-        return $this->refundIssues($candidate, $mandate);
+        return $this->assessDebitCandidate($candidate, $mandate, $context);
     }
 
     /** @return list<ExportReadinessIssue> */
-    private function debitIssues(
+    private function assessDebitCandidate(
         SepaCollectionCandidate $candidate,
         ?MandateReadiness $mandate,
         SepaBatchExportContext $context,
@@ -47,29 +44,15 @@ final readonly class CollectionReadinessAssessor
             return [ExportReadinessIssue::forInvoice(ExportReadinessReason::RevokedMandate, $candidate)];
         }
 
-        $issues = [];
-
-        if ($mandate->status === MandateReadinessStatus::Expired) {
-            $issues[] = ExportReadinessIssue::forInvoice(ExportReadinessReason::ExpiredMandate, $candidate);
-        }
-
-        $sequenceIssue = $this->sequenceIssue($candidate, $mandate, $context);
-
-        if ($sequenceIssue !== null) {
-            $issues[] = $sequenceIssue;
-        }
-
-        $ibanIssue = $this->ibanIssue($candidate, $mandate);
-
-        if ($ibanIssue !== null) {
-            $issues[] = $ibanIssue;
-        }
-
-        return $issues;
+        return [
+            ...$this->assessMandateExpiration($candidate, $mandate),
+            ...$this->assessSepaCandidateSequence($candidate, $mandate, $context),
+            ...$this->assessIban($candidate, $mandate),
+        ];
     }
 
     /** @return list<ExportReadinessIssue> */
-    private function refundIssues(SepaCollectionCandidate $candidate, ?MandateReadiness $mandate): array
+    private function assessCreditCandidate(SepaCollectionCandidate $candidate, ?MandateReadiness $mandate): array
     {
         $iban = $mandate?->iban;
 
@@ -84,38 +67,52 @@ final readonly class CollectionReadinessAssessor
         return [ExportReadinessIssue::forInvoice(ExportReadinessReason::MalformedIban, $candidate)];
     }
 
-    private function sequenceIssue(
+    /** @return list<ExportReadinessIssue> */
+    private function assessMandateExpiration(SepaCollectionCandidate $candidate, MandateReadiness $mandate): array
+    {
+        if ($mandate->status !== MandateReadinessStatus::Expired) {
+            return [];
+        }
+
+        return [ExportReadinessIssue::forInvoice(ExportReadinessReason::ExpiredMandate, $candidate)];
+    }
+
+    /** @return list<ExportReadinessIssue> */
+    private function assessSepaCandidateSequence(
         SepaCollectionCandidate $candidate,
         MandateReadiness $mandate,
         SepaBatchExportContext $context,
-    ): ?ExportReadinessIssue {
+    ): array {
         if ($context->submittedAt !== null || $mandate->expectedSequenceType === $candidate->sequenceType) {
-            return null;
+            return [];
         }
 
-        return ExportReadinessIssue::forInvoice(
-            ExportReadinessReason::SequenceTypeMismatch,
-            $candidate,
-            sprintf(
-                'Gepland: %s, mandaat verwacht: %s.',
-                $candidate->sequenceType->value,
-                $mandate->expectedSequenceType->value,
+        return [
+            ExportReadinessIssue::forInvoice(
+                ExportReadinessReason::SequenceTypeMismatch,
+                $candidate,
+                sprintf(
+                    'Gepland: %s, mandaat verwacht: %s.',
+                    $candidate->sequenceType->value,
+                    $mandate->expectedSequenceType->value,
+                ),
             ),
-        );
+        ];
     }
 
-    private function ibanIssue(SepaCollectionCandidate $candidate, MandateReadiness $mandate): ?ExportReadinessIssue
+    /** @return list<ExportReadinessIssue> */
+    private function assessIban(SepaCollectionCandidate $candidate, MandateReadiness $mandate): array
     {
         $iban = $mandate->iban;
 
         if ($iban === null || trim($iban) === '') {
-            return ExportReadinessIssue::forInvoice(ExportReadinessReason::MissingIban, $candidate);
+            return [ExportReadinessIssue::forInvoice(ExportReadinessReason::MissingIban, $candidate)];
         }
 
         if (IbanFormat::isWellFormed($iban)) {
-            return null;
+            return [];
         }
 
-        return ExportReadinessIssue::forInvoice(ExportReadinessReason::MalformedIban, $candidate);
+        return [ExportReadinessIssue::forInvoice(ExportReadinessReason::MalformedIban, $candidate)];
     }
 }

@@ -32,7 +32,7 @@ final readonly class SepaCollectionCandidate
         return $this->total->price > 0.0;
     }
 
-    public function isRefund(): bool
+    public function isCredit(): bool
     {
         return $this->total->price < 0.0;
     }

@@ -28,50 +28,51 @@ final readonly class ExportReadinessServiceImpl implements ExportReadinessServic
         $context = $this->batchRepository->getExportContext($batchId);
         $candidates = $this->batchRepository->getCollectionCandidates($batchId);
 
-        $issues = [];
-
         $mailDate = CarbonImmutable::instance($context->closedAt ?? $this->clock->now())->startOfDay();
         $collectionDate = CarbonImmutable::instance($context->sepaTransferDate)->startOfDay();
 
-        if ($collectionDate->lessThan($mailDate->addDays($this->configuration->noticePeriodDays))) {
-            $issues[] = ExportReadinessIssue::forBatch(
-                ExportReadinessReason::NoticePeriodTooShort,
-                sprintf(
-                    '%d dagen tussen sluiting en incassodatum; minimaal %d.',
-                    max(0, $collectionDate->diffInDays($mailDate)),
-                    $this->configuration->noticePeriodDays,
+        $batchIssues = $collectionDate->lessThan($mailDate->addDays($this->configuration->noticePeriodDays))
+            ? [
+                ExportReadinessIssue::forBatch(
+                    ExportReadinessReason::NoticePeriodTooShort,
+                    sprintf(
+                        '%d dagen tussen sluiting en incassodatum; minimaal %d.',
+                        max(0, $collectionDate->diffInDays($mailDate)),
+                        $this->configuration->noticePeriodDays,
+                    ),
                 ),
-            );
-        }
+            ]
+            : [];
 
-        /** @var array<int, MemberId> $memberIds */
-        $memberIds = [];
-
-        foreach ($candidates as $candidate) {
-            if ($candidate->memberId === null) {
-                continue;
-            }
-
-            $memberIds[$candidate->memberId->value] = $candidate->memberId;
-        }
-
-        $memberIds = array_values($memberIds);
+        $memberIds = $candidates
+            |> (static fn (array $candidates): array => array_map(
+                static fn (SepaCollectionCandidate $candidate): ?MemberId => $candidate->memberId,
+                $candidates,
+            ))
+            |> (static fn (array $memberIds): array => array_filter($memberIds))
+            |> (static fn (array $memberIds): array => array_values(array_combine(
+                array_map(static fn (MemberId $memberId): int => $memberId->value, $memberIds),
+                $memberIds,
+            )));
 
         $mandates = $this->mandateReadiness->forMembers($memberIds);
 
-        foreach ($candidates as $candidate) {
-            $mandate = $candidate->memberId === null
-                ? null
-                : $mandates[$candidate->memberId->value] ?? null;
-
-            foreach ($this->candidateAssessor->assess($candidate, $mandate, $context) as $issue) {
-                $issues[] = $issue;
-            }
-        }
+        $candidateIssues = $candidates
+            |> (fn (array $candidates): array => array_map(
+                fn (SepaCollectionCandidate $candidate): array => $this->candidateAssessor->assess(
+                    $candidate,
+                    $candidate->memberId === null
+                        ? null
+                        : $mandates[$candidate->memberId->value] ?? null,
+                    $context,
+                ),
+                $candidates,
+            ))
+            |> (static fn (array $issues): array => array_merge([], ...$issues));
 
         return new ExportReadinessReport(
             batchId: $batchId,
-            issues: $issues,
+            issues: [...$batchIssues, ...$candidateIssues],
             noticePeriodDays: $this->configuration->noticePeriodDays,
         );
     }
