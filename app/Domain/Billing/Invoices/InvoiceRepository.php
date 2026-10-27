@@ -29,8 +29,7 @@ interface InvoiceRepository
 
     public function markAsPendingIfDeclined(InvoiceIdList $ids): void;
 
-    /** Returns the ids that are still pending after settlement. */
-    public function markAsPending(InvoiceIdList $ids): InvoiceIdList;
+    public function markAsPending(InvoiceIdList $ids): void;
 
     public function findMatchingCredit(string $bankingAccountNumber, float $amount, DateTimeInterface $date): ?InvoiceId;
 }

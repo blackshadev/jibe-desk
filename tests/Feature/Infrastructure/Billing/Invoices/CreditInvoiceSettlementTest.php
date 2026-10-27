@@ -8,7 +8,6 @@ use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoiceIdList;
 use App\Domain\Billing\Invoices\InvoiceService;
 use App\Domain\Billing\Invoices\InvoiceStatus;
-use App\Domain\Billing\Invoices\Jobs\SendInvoiceEmail;
 use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Billing\Payment\SepaBatchService;
 use App\Domain\Billing\Payment\SepaBatchStatus;
@@ -20,6 +19,7 @@ use App\Models\Member;
 use App\Models\PaymentInformation;
 use App\Models\SepaBatch;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Mail;
 use Tests\FeatureTestCase;
 
 final class CreditInvoiceSettlementTest extends FeatureTestCase
@@ -93,9 +93,9 @@ final class CreditInvoiceSettlementTest extends FeatureTestCase
         static::assertSame(InvoiceStatus::Pending, $credit->refresh()->status);
     }
 
-    public function test_manual_mark_as_pending_settles_the_pair_without_queueing_mail(): void
+    public function test_manual_mark_as_pending_settles_the_pair_without_sending_mail(): void
     {
-        Bus::fake();
+        Mail::fake();
 
         [$member] = $this->memberAndOpenBatch();
         $original = $this->originalInvoice($member, InvoiceStatus::Pending);
@@ -106,7 +106,7 @@ final class CreditInvoiceSettlementTest extends FeatureTestCase
         $this->assertSettledAndDetached($original);
         $this->assertSettledAndDetached($credit);
 
-        Bus::assertNotDispatched(SendInvoiceEmail::class);
+        Mail::assertNothingQueued();
     }
 
     public function test_settlement_is_symmetric_when_the_original_reaches_pending_last(): void

@@ -33,6 +33,14 @@ final readonly class InvoiceMailRepositoryExpectation
             ->andReturn($return);
     }
 
+    public function expectsIsSettled(InvoiceId $invoiceId, bool $return): void
+    {
+        $this->mock
+            ->expects('isSettled')
+            ->with(equalTo($invoiceId))
+            ->andReturn($return);
+    }
+
     public function expectsGetInvoicePaymentDeclinedMailData(
         InvoiceId $invoiceId,
         InvoicePaymentDeclinedMailData $return,

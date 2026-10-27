@@ -250,24 +250,15 @@ final class InvoiceRepositoryDb implements InvoiceRepository
     }
 
     #[Override]
-    public function markAsPending(InvoiceIdList $ids): InvoiceIdList
+    public function markAsPending(InvoiceIdList $ids): void
     {
-        return DB::transaction(function () use ($ids): InvoiceIdList {
+        DB::transaction(function () use ($ids): void {
             Invoice::query()
                 ->whereIn('id', $ids->values())
                 ->where('status', '!=', InvoiceStatus::Settled)
                 ->update(['status' => InvoiceStatus::Pending]);
 
             $this->creditInvoiceSettlement->settlePending($ids);
-
-            return new InvoiceIdList(
-                Invoice::query()
-                    ->whereIn('id', $ids->values())
-                    ->where('status', InvoiceStatus::Pending)
-                    ->pluck('id')
-                    ->map(InvoiceId::create(...))
-                    ->all(),
-            );
         });
     }
 

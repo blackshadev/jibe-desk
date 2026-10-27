@@ -46,6 +46,7 @@ final class SendInvoiceEmailTest extends UnitTestCase
         $invoiceId = InvoiceId::create(42);
         $mailData = $this->invoiceMailData();
 
+        $this->repository->expectsIsSettled($invoiceId, false);
         $this->repository->expectsGetInvoiceMailData($invoiceId, $mailData);
         $this->mailSender->expectsSend(new InvoiceMail($mailData, $this->configuration));
         $this->repository->expectsMarkInvoiceAsSent($invoiceId);
@@ -60,6 +61,7 @@ final class SendInvoiceEmailTest extends UnitTestCase
         $invoiceId = InvoiceId::create(42);
         $mailData = $this->invoiceMailData(sentAt: CarbonImmutable::parse('2026-05-26'));
 
+        $this->repository->expectsIsSettled($invoiceId, false);
         $this->repository->expectsGetInvoiceMailData($invoiceId, $mailData);
 
         $job = new SendInvoiceEmail(new SendInvoiceEmailData($invoiceId));
@@ -75,6 +77,7 @@ final class SendInvoiceEmailTest extends UnitTestCase
         $invoiceId = InvoiceId::create(42);
         $mailData = $this->invoiceMailData(sentAt: CarbonImmutable::parse('2026-05-26'));
 
+        $this->repository->expectsIsSettled($invoiceId, false);
         $this->repository->expectsGetInvoiceMailData($invoiceId, $mailData);
         $this->mailSender->expectsSend(new InvoiceMail($mailData, $this->configuration));
         $this->repository->expectsMarkInvoiceAsSent($invoiceId);
@@ -94,6 +97,22 @@ final class SendInvoiceEmailTest extends UnitTestCase
         $job->handle($this->repository->mock, $this->configuration, $this->mailSender->mock);
 
         $this->repository->mock->shouldNotHaveReceived('getInvoiceMailData');
+        $this->repository->mock->shouldNotHaveReceived('isSettled');
+        $this->mailSender->mock->shouldNotHaveReceived('send');
+    }
+
+    public function test_handle_does_nothing_when_invoice_is_settled(): void
+    {
+        $invoiceId = InvoiceId::create(42);
+
+        $this->repository->expectsIsSettled($invoiceId, true);
+
+        $job = new SendInvoiceEmail(new SendInvoiceEmailData($invoiceId));
+
+        $job->handle($this->repository->mock, $this->configuration, $this->mailSender->mock);
+
+        $this->repository->mock->shouldNotHaveReceived('getInvoiceMailData');
+        $this->repository->mock->shouldNotHaveReceived('markInvoiceAsSent');
         $this->mailSender->mock->shouldNotHaveReceived('send');
     }
 

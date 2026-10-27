@@ -11,6 +11,8 @@ interface InvoiceMailRepository
 {
     public function getInvoiceMailData(InvoiceId $id): InvoiceMailData;
 
+    public function isSettled(InvoiceId $id): bool;
+
     /** @throws InvoicePaymentDeclinedMailUnavailableException */
     public function getInvoicePaymentDeclinedMailData(InvoiceId $id): InvoicePaymentDeclinedMailData;
 
