@@ -121,7 +121,7 @@ final class InvoiceServiceImplTest extends UnitTestCase
         $this->service->restoreDeclined($ids);
     }
 
-    public function test_mark_as_pending_delegates_to_repository_and_dispatches_job(): void
+    public function test_mark_as_pending_delegates_to_repository_and_dispatches_job_for_every_invoice(): void
     {
         $id1 = InvoiceId::create(1);
         $id2 = InvoiceId::create(2);
@@ -131,6 +131,20 @@ final class InvoiceServiceImplTest extends UnitTestCase
         $this->bookkeepingRepo->expectsCreateForInvoice($ids);
         $this->jobDispatcher->expectsDispatch(new SendInvoiceEmail(new SendInvoiceEmailData($id1)));
         $this->jobDispatcher->expectsDispatch(new SendInvoiceEmail(new SendInvoiceEmailData($id2)));
+
+        $this->service->markAsPending($ids);
+    }
+
+    public function test_mark_as_pending_queues_mail_for_settled_invoices_too(): void
+    {
+        $settledId = InvoiceId::create(1);
+        $pendingId = InvoiceId::create(2);
+        $ids = new InvoiceIdList([$settledId, $pendingId]);
+
+        $this->repo->expectsMarkAsPending($ids);
+        $this->bookkeepingRepo->expectsCreateForInvoice($ids);
+        $this->jobDispatcher->expectsDispatch(new SendInvoiceEmail(new SendInvoiceEmailData($settledId)));
+        $this->jobDispatcher->expectsDispatch(new SendInvoiceEmail(new SendInvoiceEmailData($pendingId)));
 
         $this->service->markAsPending($ids);
     }

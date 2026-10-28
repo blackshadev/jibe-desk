@@ -64,6 +64,7 @@ final readonly class SepaBatchServiceImpl implements SepaBatchService
         $this->batchRepository->markInvoicesAsPending($batchId);
         $this->batchRepository->freezeSequenceTypes($batchId);
         $this->bookkeepingRepository->createForBatch($batchId);
+        $this->batchRepository->settleCreditPairs($batchId);
         $this->batchRepository->closeBatch($batchId);
 
         $this->eventDispatcher->dispatch(new SepaBatchClosed(batchId: $batchId));

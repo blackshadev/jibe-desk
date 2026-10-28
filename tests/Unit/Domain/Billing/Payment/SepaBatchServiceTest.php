@@ -106,6 +106,7 @@ final class SepaBatchServiceTest extends UnitTestCase
         $this->repo->expectsMarkInvoicesAsPending($batchId);
         $this->repo->expectsFreezeSequenceTypes($batchId);
         $this->bookkeepingRepo->expectsCreateForBatch($batchId);
+        $this->repo->expectsSettleCreditPairs($batchId);
         $this->repo->expectsCloseBatch($batchId);
 
         $this->dispatcher->expectsDispatch(new SepaBatchClosed(batchId: $batchId));

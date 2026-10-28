@@ -146,6 +146,24 @@ final class InvoiceRepositoryDbTransitionTest extends FeatureTestCase
         ]);
     }
 
+    public function test_repository_transitions_never_move_a_settled_invoice(): void
+    {
+        $settled = Invoice::factory()->createQuietly([
+            'status' => InvoiceStatus::Settled,
+            'sent_at' => now(),
+        ]);
+
+        $ids = new InvoiceIdList([InvoiceId::create($settled->id)]);
+
+        $this->repository->markAsPaid($ids);
+        $this->repository->markAsPending($ids);
+        $this->repository->markAsPendingIfDeclined($ids);
+        $this->repository->markAsDeclined($ids);
+        $this->repository->reopen($ids);
+
+        static::assertSame(InvoiceStatus::Settled, $settled->refresh()->status);
+    }
+
     public function test_mark_as_pending_if_declined_leaves_other_statuses_untouched(): void
     {
         $declined = Invoice::factory()->createQuietly(['status' => InvoiceStatus::Declined]);

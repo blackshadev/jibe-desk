@@ -53,6 +53,15 @@ final readonly class InvoiceMailRepositoryDb implements InvoiceMailRepository
         );
     }
 
+    #[Override]
+    public function isSettled(InvoiceId $id): bool
+    {
+        return Invoice::query()
+            ->whereKey($id->value)
+            ->where('status', InvoiceStatus::Settled)
+            ->exists();
+    }
+
     /** @throws InvoicePaymentDeclinedMailUnavailableException */
     #[Override]
     public function getInvoicePaymentDeclinedMailData(InvoiceId $id): InvoicePaymentDeclinedMailData

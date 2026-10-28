@@ -68,6 +68,13 @@ final readonly class SepaBatchRepositoryExpectation
             ->with(equalTo($batchId));
     }
 
+    public function expectsSettleCreditPairs(SepaBatchId $batchId): void
+    {
+        $this->mock
+            ->expects('settleCreditPairs')
+            ->with(equalTo($batchId));
+    }
+
     public function expectsCloseBatch(SepaBatchId $batchId): void
     {
         $this->mock

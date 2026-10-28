@@ -26,6 +26,7 @@ use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Domain\Members\MemberId;
 use App\Domain\SharedKernel\CompoundPrice;
+use App\Infrastructure\Billing\Invoices\CreditInvoiceSettlementDb;
 use App\Models\Invoice;
 use App\Models\PurchaseOrder;
 use App\Models\SepaBatch;
@@ -70,6 +71,7 @@ final readonly class SepaBatchRepositoryDb implements SepaBatchRepository
 {
     public function __construct(
         private MandateSequenceResolver $sequenceResolver,
+        private CreditInvoiceSettlementDb $creditInvoiceSettlement,
     ) {}
 
     #[Override]
@@ -270,6 +272,19 @@ final readonly class SepaBatchRepositoryDb implements SepaBatchRepository
                 'status' => InvoiceStatus::Pending,
                 'date' => $batch->invoice_date,
             ]);
+    }
+
+    #[Override]
+    public function settleCreditPairs(SepaBatchId $batchId): void
+    {
+        $pendingIds = Invoice::query()
+            ->where('sepa_batch_id', $batchId->value)
+            ->where('status', InvoiceStatus::Pending)
+            ->pluck('id')
+            ->map(InvoiceId::create(...))
+            ->all();
+
+        $this->creditInvoiceSettlement->settlePending(new InvoiceIdList($pendingIds));
     }
 
     #[Override]

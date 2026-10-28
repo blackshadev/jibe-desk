@@ -184,6 +184,7 @@ return [
         'pending' => 'In behandeling',
         'paid' => 'Betaald',
         'declined' => 'Geweigerd',
+        'settled' => 'Verrekend',
     ],
     'batch_status' => [
         'open' => 'Open',

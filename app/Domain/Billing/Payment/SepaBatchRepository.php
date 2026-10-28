@@ -32,6 +32,8 @@ interface SepaBatchRepository
 
     public function markInvoicesAsPending(SepaBatchId $batchId): void;
 
+    public function settleCreditPairs(SepaBatchId $batchId): void;
+
     public function closeBatch(SepaBatchId $batchId): void;
 
     public function completeBatch(SepaBatchId $batchId): void;

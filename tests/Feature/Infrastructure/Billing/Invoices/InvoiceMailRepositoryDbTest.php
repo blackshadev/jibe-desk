@@ -212,6 +212,25 @@ final class InvoiceMailRepositoryDbTest extends FeatureTestCase
         static::assertNotNull($invoice->fresh()->sent_at);
     }
 
+    public function test_is_settled_is_true_for_a_settled_invoice(): void
+    {
+        $invoice = Invoice::factory()->createQuietly(['status' => InvoiceStatus::Settled]);
+
+        static::assertTrue($this->repository->isSettled(InvoiceId::create($invoice->id)));
+    }
+
+    public function test_is_settled_is_false_for_an_invoice_that_is_not_settled(): void
+    {
+        $invoice = Invoice::factory()->createQuietly(['status' => InvoiceStatus::Pending]);
+
+        static::assertFalse($this->repository->isSettled(InvoiceId::create($invoice->id)));
+    }
+
+    public function test_is_settled_is_false_for_an_unknown_invoice(): void
+    {
+        static::assertFalse($this->repository->isSettled(InvoiceId::create(999_999)));
+    }
+
     public function test_get_invoice_payment_declined_mail_data_returns_the_invoice_and_snapshot_recipient(): void
     {
         $invoice = Invoice::factory()->createQuietly([

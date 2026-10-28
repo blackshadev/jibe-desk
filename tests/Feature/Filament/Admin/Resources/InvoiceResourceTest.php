@@ -51,6 +51,22 @@ final class InvoiceResourceTest extends FeatureTestCase
         ]);
     }
 
+    public function test_settled_invoice_hides_every_status_action(): void
+    {
+        $this->withAuthorizedUser();
+        $invoice = Invoice::factory()->withLines(1)->createQuietly(['status' => InvoiceStatus::Settled]);
+
+        Livewire::test(ViewInvoice::class, ['record' => $invoice->getRouteKey()])
+            ->assertSuccessful()
+            ->assertActionHidden('markAsPending')
+            ->assertActionHidden('markAsPaid')
+            ->assertActionHidden('markAsDeclined')
+            ->assertActionHidden('reopen')
+            ->assertActionHidden('resendInvoiceEmail')
+            ->assertActionHidden('createCredit')
+            ->assertActionHidden('delete');
+    }
+
     public function test_mark_as_paid_action_hidden_without_bank_transaction(): void
     {
         $this->withAuthorizedUser();
