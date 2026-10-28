@@ -10,6 +10,8 @@ use App\Domain\Billing\Payment\MandateRepository;
 use App\Domain\Billing\Payment\PaymentInformationId;
 use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Members\MemberId;
+use App\Domain\Members\PaymentMethod;
+use App\Models\Member;
 use App\Models\PaymentInformation;
 use Carbon\CarbonImmutable;
 use DateTimeInterface;
@@ -22,7 +24,21 @@ final class MandateRepositoryDb implements MandateRepository
     #[Override]
     public function create(MemberId $memberId, MandateDetails $details): PaymentInformationId
     {
-        return DB::transaction(static function () use ($memberId, $details): PaymentInformationId {
+        return $this->createMandate($memberId, $details);
+    }
+
+    #[Override]
+    public function createAndSwitchToDirectDebit(MemberId $memberId, MandateDetails $details): PaymentInformationId
+    {
+        return $this->createMandate($memberId, $details, PaymentMethod::DirectDebit);
+    }
+
+    private function createMandate(
+        MemberId $memberId,
+        MandateDetails $details,
+        ?PaymentMethod $switchMemberTo = null,
+    ): PaymentInformationId {
+        return DB::transaction(static function () use ($memberId, $details, $switchMemberTo): PaymentInformationId {
             PaymentInformation::query()
                 ->where('member_id', $memberId->value)
                 ->whereNull('revoked_at')
@@ -37,6 +53,12 @@ final class MandateRepositoryDb implements MandateRepository
                 'revoked_at' => null,
                 'last_collected_at' => null,
             ]);
+
+            if ($switchMemberTo !== null) {
+                Member::query()
+                    ->whereKey($memberId->value)
+                    ->update(['payment_method' => $switchMemberTo]);
+            }
 
             return PaymentInformationId::create($mandate->id);
         });

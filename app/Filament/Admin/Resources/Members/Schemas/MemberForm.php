@@ -6,6 +6,7 @@ namespace App\Filament\Admin\Resources\Members\Schemas;
 
 use App\Domain\Billing\Payment\MandateExpirationStatus;
 use App\Domain\Members\Gender;
+use App\Domain\Members\PaymentMethod;
 use App\Models\Member;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
@@ -73,7 +74,7 @@ final class MemberForm
 
                         Tabs\Tab::make(__('labels.membership_information'))
                             ->schema([
-                                Select::make('membership')
+                                Select::make('membership_id')
                                     ->label(__('labels.membership'))
                                     ->relationship('membership', 'name')
                                     ->required(),
@@ -105,7 +106,7 @@ final class MemberForm
 
                         Tabs\Tab::make(__('labels.address_information'))
                             ->columns(12)
-                            ->disabled(static fn (Member $record): bool => !auth()->user()?->can('update-address-information', $record))
+                            ->disabled(static fn (?Member $record): bool => $record !== null && !(auth()->user()?->can('update-address-information', $record) ?? false))
                             ->schema([
                                 TextInput::make('address_street')
                                     ->columnSpan(6)
@@ -133,7 +134,7 @@ final class MemberForm
                                     ->columnSpan(6)
                                     ->label(__('labels.address_city')),
                             ])
-                            ->visible(static fn (Member $record): bool => auth()->user()?->can('view-address-information', $record) ?? false),
+                            ->visible(static fn (?Member $record): bool => $record === null || (auth()->user()?->can('view-address-information', $record) ?? false)),
 
                         self::paymentTab(),
 
@@ -171,7 +172,7 @@ final class MemberForm
                                             ]),
                                     ]),
                             ])
-                            ->visible(static fn (Member $record): bool => auth()->user()?->can('view-registration-data', $record) ?? false),
+                            ->visible(static fn (?Member $record): bool => $record !== null && (auth()->user()?->can('view-registration-data', $record) ?? false)),
                     ]),
             ]);
     }
@@ -180,6 +181,19 @@ final class MemberForm
     {
         return Tabs\Tab::make(__('labels.payment_information'))
             ->schema([
+                Select::make('payment_method')
+                    ->label(__('labels.payment_method'))
+                    ->options([
+                        PaymentMethod::DirectDebit->value => __('labels.payment_methods.direct_debit'),
+                        PaymentMethod::Transfer->value => __('labels.payment_methods.transfer'),
+                    ])
+                    ->required()
+                    ->helperText(__('labels.payment_method_help'))
+                    ->disabled(
+                        static fn (?Member $record): bool => $record === null
+                            || !(auth()->user()?->can('update-payment-information', $record) ?? false),
+                    ),
+
                 TextEntry::make('mandate_reference')
                     ->label(__('labels.mandate_reference'))
                     ->state(static fn (?Member $record): string => $record?->paymentInformation->mandate_reference ?? __('labels.no_active_mandate')),
@@ -192,24 +206,24 @@ final class MemberForm
 
                 TextEntry::make('active_mandate_iban')
                     ->label(__('labels.banking_account_number'))
-                    ->state(static fn (?Member $record): string => $record?->paymentInformation->banking_account_number ?? '—'),
+                    ->state(static fn (?Member $record): string => $record?->currentPaymentInformation->banking_account_number ?? '—'),
 
                 TextEntry::make('active_mandate_bic')
                     ->label(__('labels.banking_bic'))
-                    ->state(static fn (?Member $record): string => $record?->paymentInformation->banking_bic ?? '—'),
+                    ->state(static fn (?Member $record): string => $record?->currentPaymentInformation->banking_bic ?? '—'),
 
                 TextEntry::make('active_mandate_holder')
                     ->label(__('labels.banking_account_holder_name'))
                     ->columnSpanFull()
-                    ->state(static fn (?Member $record): string => $record?->paymentInformation->banking_account_holder_name ?? '—'),
+                    ->state(static fn (?Member $record): string => $record?->currentPaymentInformation->banking_account_holder_name ?? '—'),
 
                 TextEntry::make('active_mandate_signed_at')
                     ->label(__('labels.mandate_date'))
-                    ->state(static fn (?Member $record): ?string => $record?->paymentInformation?->mandate_accepted_date?->format('d-m-Y')),
+                    ->state(static fn (?Member $record): ?string => $record?->currentPaymentInformation?->mandate_accepted_date?->format('d-m-Y')),
 
                 TextEntry::make('active_mandate_last_collected_at')
                     ->label(__('labels.last_collected_at'))
-                    ->state(static fn (?Member $record): string => $record?->paymentInformation?->last_collected_at?->format('d-m-Y') ?? '—'),
+                    ->state(static fn (?Member $record): string => $record?->currentPaymentInformation?->last_collected_at?->format('d-m-Y') ?? '—'),
 
                 TextEntry::make('active_mandate_expires_at')
                     ->label(__('labels.mandate_expires_at'))
@@ -228,6 +242,6 @@ final class MemberForm
                     )
                     ->state(__('labels.mandate_expired_notice')),
             ])
-            ->visible(static fn (Member $record): bool => auth()->user()?->can('view-payment-information', $record) ?? false);
+            ->visible(static fn (?Member $record): bool => $record !== null && (auth()->user()?->can('view-payment-information', $record) ?? false));
     }
 }

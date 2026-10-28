@@ -24,7 +24,11 @@ Bijgaand ontvangt u factuur {{ $invoiceNumber }} van {{ $invoiceDate->format('d-
 ---
 
 @if ($total->price < 0)
+@if (trim($recipientIban) !== '')
 U ontvangt het terug te betalen bedrag op het bij ons bekende rekeningnummer {{ $recipientIban }}
+@else
+Het terug te betalen bedrag wordt zo snel mogelijk aan u overgemaakt; wij nemen hiervoor contact met u op.
+@endif
 @elseif ($sepaTransferDate)
 Het bedrag wordt automatisch geïncasseerd op {{ $sepaTransferDate->format('d-m-Y') }}.
 @else

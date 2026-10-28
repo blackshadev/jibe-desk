@@ -11,6 +11,7 @@ use App\Domain\Members\Dto\NewMemberPersonalInformation;
 use App\Domain\Members\Gender;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MembershipId;
+use App\Domain\Members\PaymentMethod;
 use App\Infrastructure\Members\MemberDbRepository;
 use App\Models\Member;
 use App\Models\Membership;
@@ -88,6 +89,7 @@ final class MemberDbRepositoryTest extends FeatureTestCase
         static::assertSame('jan@example.com', $member->email);
         static::assertSame(Gender::Male, $member->gender);
         static::assertSame($membership?->id, $member->membership_id);
+        static::assertSame(PaymentMethod::DirectDebit, $member->payment_method);
         static::assertFalse($member->is_volunteer);
         static::assertNull($member->accepted_at);
         static::assertNull($member->user_id);

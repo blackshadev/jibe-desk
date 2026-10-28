@@ -13,6 +13,8 @@ interface MandateRepository
 {
     public function create(MemberId $memberId, MandateDetails $details): PaymentInformationId;
 
+    public function createAndSwitchToDirectDebit(MemberId $memberId, MandateDetails $details): PaymentInformationId;
+
     public function update(PaymentInformationId $id, MandateCorrection $details): void;
 
     public function revoke(PaymentInformationId $id, DateTimeInterface $revokedAt): void;

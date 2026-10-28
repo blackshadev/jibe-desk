@@ -25,7 +25,7 @@ final readonly class InvoiceMailRepositoryDb implements InvoiceMailRepository
     {
         /** @var Invoice $invoice */
         $invoice = Invoice::query()
-            ->with(['member.paymentInformation', 'lines', 'sepaBatch'])
+            ->with(['member.paymentInformation', 'member.currentPaymentInformation', 'lines', 'sepaBatch'])
             ->findOrFail($id->value);
 
         $mandate = $invoice->member?->paymentInformation;
@@ -43,7 +43,7 @@ final readonly class InvoiceMailRepositoryDb implements InvoiceMailRepository
             invoiceId: $invoice->id,
             invoiceNumber: $invoice->invoice_number,
             recipient: new Recipient($invoice->recipient_name, $invoice->recipient_email),
-            recipientIban: $invoice->member?->paymentInformation->iban ?? '',
+            recipientIban: $invoice->member?->currentPaymentInformation->banking_account_number ?? '',
             recipientAddress: $invoice->recipient_address,
             invoiceDate: $invoice->date,
             total: $invoice->total,
