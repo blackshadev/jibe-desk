@@ -6,6 +6,7 @@ namespace App\Domain\Billing\Payment\Readiness;
 
 use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Domain\Billing\Payment\SepaBatchStatus;
+use App\Domain\Members\PaymentMethod;
 
 final readonly class CollectionReadinessAssessor
 {
@@ -36,12 +37,28 @@ final readonly class CollectionReadinessAssessor
         ?MandateReadiness $mandate,
         SepaBatchExportContext $context,
     ): array {
+        $mandateCategory = self::mandateCategory($mandate);
+
         if ($mandate === null || $mandate->status === MandateReadinessStatus::Missing) {
-            return [ExportReadinessIssue::forInvoice(ExportReadinessReason::MissingMandate, $candidate)];
+            return [ExportReadinessIssue::forInvoice(
+                ExportReadinessReason::MissingMandate,
+                $candidate,
+                $mandateCategory === ExportReadinessCategory::BrokenData
+                    ? 'Automatische incasso verwacht, geen actieve machtiging.'
+                    : null,
+                $mandateCategory,
+            )];
         }
 
         if ($mandate->status === MandateReadinessStatus::Revoked) {
-            return [ExportReadinessIssue::forInvoice(ExportReadinessReason::RevokedMandate, $candidate)];
+            return [ExportReadinessIssue::forInvoice(
+                ExportReadinessReason::RevokedMandate,
+                $candidate,
+                $mandateCategory === ExportReadinessCategory::BrokenData
+                    ? 'Automatische incasso verwacht, machtiging is ingetrokken.'
+                    : null,
+                $mandateCategory,
+            )];
         }
 
         return [
@@ -51,20 +68,27 @@ final readonly class CollectionReadinessAssessor
         ];
     }
 
+    private static function mandateCategory(?MandateReadiness $mandate): ExportReadinessCategory
+    {
+        return $mandate?->paymentMethod === PaymentMethod::Transfer
+            ? ExportReadinessCategory::ManualPayerExpected
+            : ExportReadinessCategory::BrokenData;
+    }
+
     /** @return list<ExportReadinessIssue> */
     private function assessCreditCandidate(SepaCollectionCandidate $candidate, ?MandateReadiness $mandate): array
     {
         $iban = $mandate?->iban;
 
-        if ($iban === null || trim($iban) === '') {
+        if ($iban !== null && IbanFormat::isWellFormed($iban)) {
             return [];
         }
 
-        if (IbanFormat::isWellFormed($iban)) {
-            return [];
-        }
-
-        return [ExportReadinessIssue::forInvoice(ExportReadinessReason::MalformedIban, $candidate)];
+        return [ExportReadinessIssue::forInvoice(
+            ExportReadinessReason::RefundIbanUnavailable,
+            $candidate,
+            $iban === null || trim($iban) === '' ? 'Geen IBAN bekend.' : 'IBAN is ongeldig.',
+        )];
     }
 
     /** @return list<ExportReadinessIssue> */

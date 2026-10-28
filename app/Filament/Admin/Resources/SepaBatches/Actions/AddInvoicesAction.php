@@ -27,13 +27,21 @@ final class AddInvoicesAction
                     ->searchable()
                     ->options(
                         static fn () => Invoice::query()
+                            ->with('member')
                             ->whereNull('sepa_batch_id')
                             ->where('status', InvoiceStatus::Open)
                             ->orderBy('invoice_number')
                             ->get()
-                            ->mapWithKeys(static fn (Invoice $invoice) => [
-                                $invoice->id => $invoice->invoice_number . ' — ' . $invoice->recipient_name,
-                            ]),
+                            ->mapWithKeys(static function (Invoice $invoice): array {
+                                $label = $invoice->invoice_number . ' — ' . $invoice->recipient_name;
+                                $paymentMethod = $invoice->member?->payment_method;
+
+                                if ($paymentMethod !== null) {
+                                    $label .= ' (' . __('labels.payment_methods.' . $paymentMethod->value) . ')';
+                                }
+
+                                return [$invoice->id => $label];
+                            }),
                     ),
             ])
             ->requiresConfirmation()

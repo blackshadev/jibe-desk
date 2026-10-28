@@ -28,6 +28,12 @@ final readonly class ExportReadinessReport
     }
 
     /** @return list<ExportReadinessIssue> */
+    public function refundExclusions(): array
+    {
+        return $this->withCategory(ExportReadinessCategory::RefundExclusion);
+    }
+
+    /** @return list<ExportReadinessIssue> */
     public function overridableIssues(): array
     {
         return $this->withCategory(ExportReadinessCategory::Overridable);
@@ -70,7 +76,7 @@ final readonly class ExportReadinessReport
 
     public function requiresExclusionAcknowledgement(): bool
     {
-        return $this->expectedExclusions() !== [];
+        return $this->expectedExclusions() !== [] || $this->refundExclusions() !== [];
     }
 
     public function isSatisfiedBy(ExportConfirmation $confirmation): bool

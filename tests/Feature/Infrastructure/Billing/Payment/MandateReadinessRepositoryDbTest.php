@@ -9,6 +9,7 @@ use App\Domain\Billing\Payment\PaymentInformationId;
 use App\Domain\Billing\Payment\Readiness\MandateReadinessStatus;
 use App\Domain\Billing\Payment\SequenceType;
 use App\Domain\Members\MemberId;
+use App\Domain\Members\PaymentMethod;
 use App\Infrastructure\Billing\Payment\MandateReadinessRepositoryDb;
 use App\Models\Member;
 use App\Models\PaymentInformation;
@@ -59,13 +60,26 @@ final class MandateReadinessRepositoryDbTest extends FeatureTestCase
         static::assertSame('2025-01-15', $result[$member->id]->signedOn?->format('Y-m-d'));
     }
 
-    public function test_for_members_returns_missing_for_a_member_without_payment_information(): void
+    public function test_for_members_returns_missing_with_the_stored_payment_method_for_a_member_without_payment_information(): void
     {
-        $member = Member::factory()->createQuietly();
+        $member = Member::factory()->transfer()->createQuietly();
 
         $result = $this->service->forMembers([MemberId::create($member->id)]);
 
-        static::assertArrayNotHasKey($member->id, $result);
+        static::assertArrayHasKey($member->id, $result);
+        static::assertSame(MandateReadinessStatus::Missing, $result[$member->id]->status);
+        static::assertSame(PaymentMethod::Transfer, $result[$member->id]->paymentMethod);
+    }
+
+    public function test_for_members_returns_the_stored_payment_method_alongside_the_mandate(): void
+    {
+        $member = Member::factory()->transfer()->createQuietly();
+        PaymentInformation::factory()->createQuietly(['member_id' => $member->id]);
+
+        $result = $this->service->forMembers([MemberId::create($member->id)]);
+
+        static::assertSame(MandateReadinessStatus::Active, $result[$member->id]->status);
+        static::assertSame(PaymentMethod::Transfer, $result[$member->id]->paymentMethod);
     }
 
     public function test_for_members_returns_active_for_a_mandate_within_thirty_six_months(): void

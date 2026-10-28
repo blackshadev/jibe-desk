@@ -45,6 +45,18 @@ final class ExportReadinessReportTest extends UnitTestCase
         static::assertTrue($report->isSatisfiedBy(new ExportConfirmation(exclusionsAcknowledged: true)));
     }
 
+    public function test_it_treats_refund_exclusions_as_acknowledgeable_and_non_blocking(): void
+    {
+        $report = $this->report([$this->invoiceIssue(ExportReadinessReason::RefundIbanUnavailable)]);
+
+        static::assertCount(1, $report->refundExclusions());
+        static::assertSame([], $report->expectedExclusions());
+        static::assertFalse($report->isBlocked());
+        static::assertTrue($report->requiresExclusionAcknowledgement());
+        static::assertFalse($report->isSatisfiedBy(new ExportConfirmation(exclusionsAcknowledged: false)));
+        static::assertTrue($report->isSatisfiedBy(new ExportConfirmation(exclusionsAcknowledged: true)));
+    }
+
     public function test_it_requires_an_override_for_an_expired_mandate(): void
     {
         $report = $this->report([$this->invoiceIssue(ExportReadinessReason::ExpiredMandate)]);

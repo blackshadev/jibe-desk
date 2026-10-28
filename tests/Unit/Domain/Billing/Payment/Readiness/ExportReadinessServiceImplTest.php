@@ -21,6 +21,7 @@ use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Domain\Billing\Payment\SepaConfiguration;
 use App\Domain\Billing\Payment\SequenceType;
 use App\Domain\Members\MemberId;
+use App\Domain\Members\PaymentMethod;
 use App\Domain\SharedKernel\CompoundPrice;
 use Carbon\CarbonImmutable;
 use Override;
@@ -60,7 +61,7 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
         $memberId = MemberId::create(7);
         $this->expectAssessment(
             [$this->candidate(new CompoundPrice(100.0, 21.0), $memberId)],
-            [$memberId->value => MandateReadiness::missing()],
+            [$memberId->value => MandateReadiness::missing(PaymentMethod::Transfer)],
         );
 
         $report = $this->service->assess($this->batchId());
@@ -70,12 +71,30 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
         static::assertFalse($report->isBlocked());
     }
 
-    public function test_assess_reports_a_revoked_mandate_as_an_expected_exclusion(): void
+    public function test_assess_reports_a_direct_debit_member_without_a_mandate_as_broken_data(): void
     {
         $memberId = MemberId::create(7);
         $this->expectAssessment(
             [$this->candidate(new CompoundPrice(100.0, 21.0), $memberId)],
-            [$memberId->value => new MandateReadiness(MandateReadinessStatus::Revoked)],
+            [$memberId->value => MandateReadiness::missing(PaymentMethod::DirectDebit)],
+        );
+
+        $report = $this->service->assess($this->batchId());
+
+        $this->assertReasons($report, [ExportReadinessReason::MissingMandate]);
+        static::assertCount(1, $report->brokenDataIssues());
+        static::assertTrue($report->isBlocked());
+    }
+
+    public function test_assess_reports_a_revoked_mandate_of_a_transfer_member_as_an_expected_exclusion(): void
+    {
+        $memberId = MemberId::create(7);
+        $this->expectAssessment(
+            [$this->candidate(new CompoundPrice(100.0, 21.0), $memberId)],
+            [$memberId->value => new MandateReadiness(
+                MandateReadinessStatus::Revoked,
+                paymentMethod: PaymentMethod::Transfer,
+            )],
         );
 
         $report = $this->service->assess($this->batchId());
@@ -249,7 +268,7 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
         static::assertTrue($report->isEmpty());
     }
 
-    public function test_assess_does_not_flag_a_refund_without_an_iban(): void
+    public function test_assess_reports_a_refund_without_an_iban_as_a_refund_exclusion(): void
     {
         $memberId = MemberId::create(7);
         $this->expectAssessment(
@@ -259,10 +278,13 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
 
         $report = $this->service->assess($this->batchId());
 
-        static::assertTrue($report->isEmpty());
+        $this->assertReasons($report, [ExportReadinessReason::RefundIbanUnavailable]);
+        static::assertCount(1, $report->refundExclusions());
+        static::assertFalse($report->isBlocked());
+        static::assertTrue($report->requiresExclusionAcknowledgement());
     }
 
-    public function test_assess_reports_a_malformed_refund_iban(): void
+    public function test_assess_reports_a_malformed_refund_iban_as_a_refund_exclusion(): void
     {
         $memberId = MemberId::create(7);
         $this->expectAssessment(
@@ -272,7 +294,9 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
 
         $report = $this->service->assess($this->batchId());
 
-        $this->assertReasons($report, [ExportReadinessReason::MalformedIban]);
+        $this->assertReasons($report, [ExportReadinessReason::RefundIbanUnavailable]);
+        static::assertCount(1, $report->refundExclusions());
+        static::assertFalse($report->isBlocked());
     }
 
     public function test_assess_blocks_one_day_inside_the_notice_period(): void

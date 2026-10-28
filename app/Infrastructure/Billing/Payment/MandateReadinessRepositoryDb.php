@@ -12,6 +12,7 @@ use App\Domain\Billing\Payment\Readiness\MandateReadiness;
 use App\Domain\Billing\Payment\Readiness\MandateReadinessRepository;
 use App\Domain\Billing\Payment\Readiness\MandateReadinessStatus;
 use App\Domain\Members\MemberId;
+use App\Domain\Members\PaymentMethod;
 use App\Models\Member;
 use App\Models\PaymentInformation;
 use Override;
@@ -34,17 +35,19 @@ final readonly class MandateReadinessRepositoryDb implements MandateReadinessRep
             ->whereIn('id', array_map(static fn (MemberId $memberId): int => $memberId->value, $memberIds))
             ->with('currentPaymentInformation')
             ->get()
-            ->filter(static fn (Member $member): bool => $member->currentPaymentInformation instanceof PaymentInformation)
             ->mapWithKeys(function (Member $member): array {
-                /** @var PaymentInformation $mandate */
                 $mandate = $member->currentPaymentInformation;
 
-                return [$member->id => $this->readiness($mandate)];
+                if (!$mandate instanceof PaymentInformation) {
+                    return [$member->id => MandateReadiness::missing($member->payment_method)];
+                }
+
+                return [$member->id => $this->readiness($mandate, $member->payment_method)];
             })
             ->all();
     }
 
-    private function readiness(PaymentInformation $mandate): MandateReadiness
+    private function readiness(PaymentInformation $mandate, PaymentMethod $paymentMethod): MandateReadiness
     {
         return new MandateReadiness(
             status: match ($mandate->expiration_status) {
@@ -60,6 +63,7 @@ final readonly class MandateReadinessRepositoryDb implements MandateReadinessRep
             ),
             signedOn: $mandate->mandate_accepted_date,
             expectedSequenceType: $this->sequenceResolver->resolve($mandate->last_collected_at),
+            paymentMethod: $paymentMethod,
         );
     }
 }

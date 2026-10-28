@@ -11,6 +11,7 @@ use App\Domain\Billing\Payment\MandateId;
 use App\Domain\Billing\Payment\MandateSequenceResolver;
 use App\Domain\Billing\Payment\PaymentInformationId;
 use App\Domain\Billing\Payment\Readiness\ExportConfirmation;
+use App\Domain\Billing\Payment\Readiness\IbanFormat;
 use App\Domain\Billing\Payment\Readiness\SepaBatchExportContext;
 use App\Domain\Billing\Payment\Readiness\SepaCollectionCandidate;
 use App\Domain\Billing\Payment\SepaBatchEmailData;
@@ -25,6 +26,7 @@ use App\Domain\Billing\PurchaseOrders\PurchaseOrderApprovalStatus;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderId;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
 use App\Domain\Members\MemberId;
+use App\Domain\Members\PaymentMethod;
 use App\Domain\SharedKernel\CompoundPrice;
 use App\Infrastructure\Billing\Invoices\CreditInvoiceSettlementDb;
 use App\Models\Invoice;
@@ -34,6 +36,7 @@ use App\Models\SepaExportOverride;
 use Carbon\CarbonImmutable;
 use DateTimeInterface;
 use DomainException;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -90,14 +93,29 @@ final readonly class SepaBatchRepositoryDb implements SepaBatchRepository
     public function addOpenInvoicesFromBatchMonth(SepaBatchId $batchId): int
     {
         $month = new CarbonImmutable(SepaBatch::findOrFail($batchId->value)->invoice_date);
+        $from = $month->subMonth()->startOfMonth();
+        $to = $month->endOfMonth();
+
+        $transferDebitInvoiceIds = Invoice::query()
+            ->join('invoice_lines', 'invoice_lines.invoice_id', '=', 'invoices.id')
+            ->join('members', 'members.id', '=', 'invoices.member_id')
+            ->where('members.payment_method', PaymentMethod::Transfer->value)
+            ->whereNull('invoices.sepa_batch_id')
+            ->whereIn('invoices.status', [InvoiceStatus::Open, InvoiceStatus::Pending])
+            ->whereBetween('invoices.date', [$from, $to])
+            ->groupBy('invoices.id')
+            ->havingRaw('SUM(invoice_lines.price * invoice_lines.quantity) > 0')
+            ->pluck('invoices.id')
+            ->all();
 
         return Invoice::query()
             ->whereNull('sepa_batch_id')
             ->whereIn('status', [InvoiceStatus::Open, InvoiceStatus::Pending])
-            ->whereBetween('date', [
-                $month->subMonth()->startOfMonth(),
-                $month->endOfMonth(),
-            ])
+            ->whereBetween('date', [$from, $to])
+            ->when(
+                $transferDebitInvoiceIds !== [],
+                static fn (Builder $query): Builder => $query->whereNotIn('id', $transferDebitInvoiceIds),
+            )
             ->update(['sepa_batch_id' => $batchId->value]);
     }
 
@@ -198,7 +216,11 @@ final readonly class SepaBatchRepositoryDb implements SepaBatchRepository
     /** @param ExportInvoiceRow $row */
     private static function isExportable(object $row): bool
     {
-        return (float) $row->total_price < 0 || $row->revoked_at === null;
+        if ((float) $row->total_price < 0) {
+            return IbanFormat::isWellFormed($row->iban);
+        }
+
+        return $row->revoked_at === null;
     }
 
     /** @param ExportInvoiceRow $row */

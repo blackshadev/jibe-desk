@@ -7,6 +7,7 @@ namespace Tests\Unit\Domain\Billing\Payment\Readiness;
 use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Domain\Billing\Payment\Readiness\CollectionReadinessAssessor;
+use App\Domain\Billing\Payment\Readiness\ExportReadinessCategory;
 use App\Domain\Billing\Payment\Readiness\ExportReadinessIssue;
 use App\Domain\Billing\Payment\Readiness\ExportReadinessReason;
 use App\Domain\Billing\Payment\Readiness\MandateReadiness;
@@ -16,6 +17,7 @@ use App\Domain\Billing\Payment\Readiness\SepaCollectionCandidate;
 use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Domain\Billing\Payment\SequenceType;
 use App\Domain\Members\MemberId;
+use App\Domain\Members\PaymentMethod;
 use App\Domain\SharedKernel\CompoundPrice;
 use Carbon\CarbonImmutable;
 use DateTimeInterface;
@@ -45,11 +47,48 @@ final class CollectionReadinessAssessorTest extends UnitTestCase
         static::assertSame([ExportReadinessReason::UncollectableStatus], $this->reasons($issues));
     }
 
-    public function test_it_reports_a_missing_mandate_for_a_debit(): void
+    public function test_it_reports_a_missing_mandate_for_a_direct_debit_member_as_broken_data(): void
     {
         $issues = $this->assessor->assess($this->candidate(), null, $this->context());
 
         static::assertSame([ExportReadinessReason::MissingMandate], $this->reasons($issues));
+        static::assertSame(ExportReadinessCategory::BrokenData, $issues[0]->category());
+    }
+
+    public function test_it_reports_a_missing_mandate_for_a_transfer_member_as_an_expected_exclusion(): void
+    {
+        $issues = $this->assessor->assess(
+            $this->candidate(),
+            MandateReadiness::missing(PaymentMethod::Transfer),
+            $this->context(),
+        );
+
+        static::assertSame([ExportReadinessReason::MissingMandate], $this->reasons($issues));
+        static::assertSame(ExportReadinessCategory::ManualPayerExpected, $issues[0]->category());
+    }
+
+    public function test_it_reports_a_revoked_mandate_for_a_direct_debit_member_as_broken_data(): void
+    {
+        $issues = $this->assessor->assess(
+            $this->candidate(),
+            new MandateReadiness(MandateReadinessStatus::Revoked),
+            $this->context(),
+        );
+
+        static::assertSame([ExportReadinessReason::RevokedMandate], $this->reasons($issues));
+        static::assertSame(ExportReadinessCategory::BrokenData, $issues[0]->category());
+    }
+
+    public function test_it_reports_a_revoked_mandate_for_a_transfer_member_as_an_expected_exclusion(): void
+    {
+        $issues = $this->assessor->assess(
+            $this->candidate(),
+            new MandateReadiness(MandateReadinessStatus::Revoked, paymentMethod: PaymentMethod::Transfer),
+            $this->context(),
+        );
+
+        static::assertSame([ExportReadinessReason::RevokedMandate], $this->reasons($issues));
+        static::assertSame(ExportReadinessCategory::ManualPayerExpected, $issues[0]->category());
     }
 
     public function test_it_reports_an_expired_mandate_and_a_sequence_mismatch_together(): void
@@ -85,7 +124,18 @@ final class CollectionReadinessAssessorTest extends UnitTestCase
         static::assertSame([], $issues);
     }
 
-    public function test_it_skips_a_missing_refund_iban(): void
+    public function test_it_passes_a_refund_with_a_known_iban(): void
+    {
+        $issues = $this->assessor->assess(
+            $this->candidate(total: new CompoundPrice(-10.0, -2.1), sequenceType: SequenceType::Recurring),
+            new MandateReadiness(status: MandateReadinessStatus::Active, iban: 'NL91ABNA0417164300'),
+            $this->context(),
+        );
+
+        static::assertSame([], $issues);
+    }
+
+    public function test_it_reports_a_refund_without_an_iban_as_a_refund_exclusion(): void
     {
         $issues = $this->assessor->assess(
             $this->candidate(total: new CompoundPrice(-10.0, -2.1), sequenceType: SequenceType::Recurring),
@@ -93,7 +143,32 @@ final class CollectionReadinessAssessorTest extends UnitTestCase
             $this->context(),
         );
 
-        static::assertSame([], $issues);
+        static::assertSame([ExportReadinessReason::RefundIbanUnavailable], $this->reasons($issues));
+        static::assertSame(ExportReadinessCategory::RefundExclusion, $issues[0]->category());
+    }
+
+    public function test_it_reports_a_refund_without_any_mandate_as_a_refund_exclusion(): void
+    {
+        $issues = $this->assessor->assess(
+            $this->candidate(total: new CompoundPrice(-10.0, -2.1), sequenceType: SequenceType::Recurring),
+            null,
+            $this->context(),
+        );
+
+        static::assertSame([ExportReadinessReason::RefundIbanUnavailable], $this->reasons($issues));
+        static::assertSame(ExportReadinessCategory::RefundExclusion, $issues[0]->category());
+    }
+
+    public function test_it_reports_a_refund_with_a_malformed_iban_as_a_refund_exclusion(): void
+    {
+        $issues = $this->assessor->assess(
+            $this->candidate(total: new CompoundPrice(-10.0, -2.1), sequenceType: SequenceType::Recurring),
+            new MandateReadiness(status: MandateReadinessStatus::Revoked, iban: 'NOT-AN-IBAN'),
+            $this->context(),
+        );
+
+        static::assertSame([ExportReadinessReason::RefundIbanUnavailable], $this->reasons($issues));
+        static::assertSame(ExportReadinessCategory::RefundExclusion, $issues[0]->category());
     }
 
     private function candidate(

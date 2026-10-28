@@ -516,7 +516,7 @@ final class SepaBatchResourceTest extends FeatureTestCase
         $this->withAuthorizedUser();
 
         $batch = SepaBatch::factory()->create(['status' => SepaBatchStatus::Pending]);
-        $member = Member::factory()->createQuietly();
+        $member = Member::factory()->transfer()->createQuietly();
         $invoice = Invoice::factory()
             ->forMember($member)
             ->forBatch($batch)
@@ -540,6 +540,25 @@ final class SepaBatchResourceTest extends FeatureTestCase
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
             ->mountAction('readiness')
             ->assertMountedActionModalSee(__('labels.export_readiness.broken_data'));
+    }
+
+    public function test_readiness_action_lists_refund_exclusions(): void
+    {
+        $this->withAuthorizedUser();
+
+        $batch = SepaBatch::factory()->create(['status' => SepaBatchStatus::Pending]);
+        $member = Member::factory()->createQuietly();
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Pending]);
+        InvoiceLine::factory()
+            ->state(['invoice_id' => $invoice->id])
+            ->createQuietly(['price' => -10.00, 'quantity' => 1, 'vat' => -2.10]);
+
+        Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
+            ->mountAction('readiness')
+            ->assertMountedActionModalSee(__('labels.export_readiness.refund_exclusions'));
     }
 
     public function test_close_batch_warns_but_still_closes_the_batch(): void
@@ -659,7 +678,7 @@ final class SepaBatchResourceTest extends FeatureTestCase
         $this->withAuthorizedUser();
 
         $batch = $this->exportableBatch();
-        $member = Member::factory()->createQuietly();
+        $member = Member::factory()->transfer()->createQuietly();
         $invoice = Invoice::factory()
             ->forMember($member)
             ->forBatch($batch)
@@ -721,7 +740,7 @@ final class SepaBatchResourceTest extends FeatureTestCase
         $this->withAuthorizedUser();
 
         $batch = $this->exportableBatch();
-        $member = Member::factory()->createQuietly();
+        $member = Member::factory()->transfer()->createQuietly();
         $invoice = Invoice::factory()
             ->forMember($member)
             ->forBatch($batch)

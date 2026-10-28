@@ -18,12 +18,14 @@ final readonly class ExportReadinessIssue
         public ?string $memberName = null,
         public ?CompoundPrice $amount = null,
         public ?string $detail = null,
+        public ?ExportReadinessCategory $categoryOverride = null,
     ) {}
 
     public static function forInvoice(
         ExportReadinessReason $reason,
         SepaCollectionCandidate $candidate,
         ?string $detail = null,
+        ?ExportReadinessCategory $categoryOverride = null,
     ): self {
         return new self(
             reason: $reason,
@@ -33,6 +35,7 @@ final readonly class ExportReadinessIssue
             memberName: $candidate->recipientName,
             amount: $candidate->total,
             detail: $detail,
+            categoryOverride: $categoryOverride,
         );
     }
 
@@ -43,6 +46,6 @@ final readonly class ExportReadinessIssue
 
     public function category(): ExportReadinessCategory
     {
-        return $this->reason->category();
+        return $this->categoryOverride ?? $this->reason->category();
     }
 }
