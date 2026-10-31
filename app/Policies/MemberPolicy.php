@@ -61,4 +61,9 @@ final class MemberPolicy extends ResourcePolicy
     {
         return $user->can('update_member_registration_data');
     }
+
+    public function scheduleStop(User $user, Model $record): bool
+    {
+        return $user->can('schedule_member_stop');
+    }
 }

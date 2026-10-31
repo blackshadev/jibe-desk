@@ -23,6 +23,9 @@ enum ResourcePermission: string
     case ViewMemberRegistrationData = 'view_member_registration_data';
     case UpdateMemberRegistrationData = 'update_member_registration_data';
 
+    // Member Actions (not part of standard CRUD)
+    case ScheduleMemberStop = 'schedule_member_stop';
+
     // Memberships
     case ViewAnyMemberships = 'view_any_memberships';
     case ViewMemberships = 'view_memberships';

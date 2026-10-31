@@ -62,6 +62,7 @@ final class RolePermissionSeeder extends Seeder
             $this->viewPermissionsFor('storage_space_locations'),
             $this->viewPermissionsFor('storage_space_rentals'),
             ['view_member_address_information', 'update_member_address_information'],
+            [ResourcePermission::ScheduleMemberStop->value],
         );
 
         $role->syncPermissions($permissions);
