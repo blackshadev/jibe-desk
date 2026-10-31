@@ -34,3 +34,6 @@ TODO.md
 
 # Legacy member export used for manual import testing
 Leden_export.xlsx
+
+# Generated data exports (contain member personal data)
+exports/

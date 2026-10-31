@@ -82,8 +82,15 @@ final class MemberForm
                                 Toggle::make('is_volunteer')
                                     ->label(__('labels.is_volunteer')),
 
-                                DateTimePicker::make('stopped_at')
+                                DatePicker::make('stopped_at')
                                     ->label(__('labels.stopped_at'))
+                                    ->readonly()
+                                    ->disabled()
+                                    ->date()
+                                    ->native(false),
+
+                                DatePicker::make('stop_requested_at')
+                                    ->label(__('labels.stop_requested_at'))
                                     ->readonly()
                                     ->disabled()
                                     ->date()

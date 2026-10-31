@@ -471,6 +471,7 @@ return [
     'stop_date' => 'Stopdatum',
     'stops_per' => 'Stopt per :date',
     'stopped_at' => 'Lidmaatschap stopt op',
+    'stop_requested_at' => 'Stop aangevraagd op',
     'revenue' => 'Omzet',
     'dashboard' => 'Dashboard',
     'profile' => 'Profiel',

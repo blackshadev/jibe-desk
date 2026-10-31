@@ -18,14 +18,14 @@ final readonly class MemberStopService
         private ClockInterface $clock,
     ) {}
 
-    public function schedule(MemberId $memberId, DateTimeInterface $stopDate): void
+    public function schedule(MemberId $memberId, DateTimeInterface $stopDate, DateTimeInterface $stopRequestedAt): void
     {
         $member = $this->memberRepository->getById($memberId);
         $now = $this->clock->now();
         $isImmediate = CarbonImmutable::instance($stopDate)->isSameDay($now);
         $stoppedAt = $isImmediate ? $now : CarbonImmutable::instance($stopDate)->endOfDay();
 
-        $this->memberRepository->scheduleStop($memberId, $stoppedAt);
+        $this->memberRepository->scheduleStop($memberId, $stoppedAt, $stopRequestedAt);
 
         $this->eventDispatcher->dispatch(new MemberStopScheduled(
             memberId: $memberId,

@@ -19,7 +19,7 @@ interface MemberRepository
 
     public function accept(MemberId $memberId): void;
 
-    public function scheduleStop(MemberId $memberId, DateTimeInterface $stoppedAt): void;
+    public function scheduleStop(MemberId $memberId, DateTimeInterface $stoppedAt, DateTimeInterface $stopRequestedAt): void;
 
     public function cancelStop(MemberId $memberId): void;
 }

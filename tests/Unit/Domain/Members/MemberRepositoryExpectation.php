@@ -64,11 +64,14 @@ final readonly class MemberRepositoryExpectation
             ->never();
     }
 
-    public function expectsScheduleStop(MemberId $memberId, DateTimeInterface $stoppedAt): void
-    {
+    public function expectsScheduleStop(
+        MemberId $memberId,
+        DateTimeInterface $stoppedAt,
+        DateTimeInterface $stopRequestedAt,
+    ): void {
         $this->mock
             ->expects('scheduleStop')
-            ->with(equalTo($memberId), equalTo($stoppedAt))
+            ->with(equalTo($memberId), equalTo($stoppedAt), equalTo($stopRequestedAt))
             ->andReturnNull();
     }
 

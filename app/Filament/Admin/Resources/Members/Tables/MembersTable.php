@@ -75,9 +75,11 @@ final class MembersTable
 
                         $stopDate = $record->stopped_at->format('d-m-Y');
 
-                        return $record->isScheduledForStopping()
-                            ? __('labels.stops_per', ['date' => $stopDate])
-                            : $stopDate;
+                        return (
+                            $record->isScheduledForStopping()
+                                ? __('labels.stops_per', ['date' => $stopDate])
+                                : $stopDate
+                        );
                     })
                     ->color(static fn (Member $record): string => $record->isScheduledForStopping() ? 'warning' : 'gray')
                     ->sortable()

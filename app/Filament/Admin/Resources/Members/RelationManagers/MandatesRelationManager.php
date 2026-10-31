@@ -13,7 +13,6 @@ use App\Models\User;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
-use Livewire\Attributes\On;
 use Override;
 
 final class MandatesRelationManager extends MemberRelationManager
@@ -95,10 +94,5 @@ final class MandatesRelationManager extends MemberRelationManager
     public static function getPluralModelLabel(): string
     {
         return mb_strtolower(__('labels.mandates'));
-    }
-
-    #[On('refresh')]
-    public function refresh(): void
-    {
     }
 }
