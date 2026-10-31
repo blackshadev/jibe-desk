@@ -32,7 +32,7 @@ final readonly class MemberImportImpl implements MemberImport
 {
     private const string ERELID_MEMBERSHIP_NAME = 'Erelid';
 
-    private const int MINIMUM_INSTRUCTOR_AGE = 12;
+    private const int MINIMUM_INSTRUCTOR_AGE = 16;
 
     public function __construct(
         private MemberSpreadsheetReader $reader,
@@ -113,7 +113,7 @@ final readonly class MemberImportImpl implements MemberImport
 
         foreach ($spreadsheetRows as $spreadsheetRow) {
             $row = $this->rowMapper->map($spreadsheetRow->values, $spreadsheetRow->number);
-            $this->assertInstructorIsAdult($row, $spreadsheetRow->number);
+            $this->assertSailInstructorIsAdult($row, $spreadsheetRow->number);
 
             $membershipId = $membershipIds[$row->membershipName]
                 ?? throw MemberImportException::missingMembership($row->membershipName);
@@ -151,9 +151,9 @@ final readonly class MemberImportImpl implements MemberImport
         ]);
     }
 
-    private function assertInstructorIsAdult(MappedMemberRow $row, int $rowNumber): void
+    private function assertSailInstructorIsAdult(MappedMemberRow $row, int $rowNumber): void
     {
-        if (!$row->isInstructor()) {
+        if (!$row->isSailInstructor()) {
             return;
         }
 

@@ -14,6 +14,7 @@ final readonly class HouseholdCreator
     public function create(array $continuingMembers): int
     {
         $households = collect($continuingMembers)
+            ->filter(static fn (CreatedMember $member): bool => !$member->row->isLeaver())
             ->groupBy(static fn (CreatedMember $member): string => $member->row->addressKey())
             ->filter(static fn (Collection $members): bool => $members->count() >= 2);
 

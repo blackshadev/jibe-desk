@@ -41,7 +41,7 @@ final readonly class MappedMemberRow
         return $this->stopDate !== null;
     }
 
-    public function isInstructor(): bool
+    public function isSailInstructor(): bool
     {
         return $this->membershipType === 'zeil-instructeur - 2026';
     }
