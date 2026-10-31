@@ -88,7 +88,7 @@ final class ScheduleStopActionTest extends FeatureTestCase
 
         $member->refresh();
         static::assertTrue($member->isActive());
-        static::assertTrue($member->isScheduled());
+        static::assertTrue($member->isScheduledForStopping());
         static::assertSame('2026-12-31 23:59:59', $member->stopped_at?->format('Y-m-d H:i:s'));
         Mail::assertQueued(MailMailable::class);
     }

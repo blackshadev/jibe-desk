@@ -18,7 +18,7 @@ final class ScheduleStopAction
         return Action::make('scheduleStop')
             ->label(__('labels.schedule_member_stop'))
             ->visible(static fn (Member $record): bool => $record->isActive()
-                && !$record->isScheduled()
+                && !$record->isScheduledForStopping()
                 && (auth()->user()?->can('scheduleStop', $record) ?? false))
             ->schema([
                 DatePicker::make('stopped_at')
