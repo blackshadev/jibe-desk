@@ -14,6 +14,7 @@ use App\Models\Membership;
 use App\Models\PaymentInformation;
 use App\Models\StorageSpaceRental;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Database\Seeders\CostCenterSeeder;
 use Database\Seeders\MembershipSeeder;
 use Override;
@@ -37,6 +38,7 @@ final class ImportMembersCommandTest extends FeatureTestCase
     public function test_it_imports_members_households_mandates_and_billing(): void
     {
         $this->seed([CostCenterSeeder::class, MembershipSeeder::class]);
+        $this->travelTo(CarbonImmutable::parse('2027-06-01'));
         $path = $this->createSpreadsheet($this->rows());
 
         $this
