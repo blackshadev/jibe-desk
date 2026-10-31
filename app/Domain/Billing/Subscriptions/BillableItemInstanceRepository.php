@@ -23,5 +23,7 @@ interface BillableItemInstanceRepository
 
     public function stopAll(MemberId $memberId, DateTimeInterface $endDate): void;
 
+    public function reopenAll(MemberId $memberId, DateTimeInterface $endDate): void;
+
     public function updateEndDate(BillableItemInstanceId $instanceId, ?DateTimeInterface $endDate): void;
 }

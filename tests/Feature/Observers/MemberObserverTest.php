@@ -10,6 +10,7 @@ use App\Models\Household;
 use App\Models\Member;
 use App\Models\Membership;
 use App\Observers\MemberObserver;
+use Carbon\CarbonImmutable;
 use Override;
 use Tests\FeatureTestCase;
 use Tests\Unit\Domain\Billing\Subscriptions\BillingItemApplicators\ApplyMembershipBillingExpectation;
@@ -131,6 +132,32 @@ final class MemberObserverTest extends FeatureTestCase
         $this->applyMembership->expectsApplyNever();
         $this->applyVolunteer->expectsApply($memberId);
         $this->applySameHousehold->expectsApplyNever();
+
+        $this->subject->updated($member);
+    }
+
+    public function test_it_stops_billing_at_the_scheduled_stop_date(): void
+    {
+        $member = Member::factory()->createQuietly(['stopped_at' => null]);
+        $stopDate = CarbonImmutable::parse('2026-12-31 23:59:59');
+
+        $member->stopped_at = $stopDate;
+        $member->syncChanges();
+
+        $this->applyStoppedMembership->expectsApply(new MemberId($member->id), $stopDate);
+
+        $this->subject->updated($member);
+    }
+
+    public function test_it_reopens_billing_at_the_cleared_stop_date(): void
+    {
+        $stopDate = CarbonImmutable::parse('2026-12-31 23:59:59');
+        $member = Member::factory()->createQuietly(['stopped_at' => $stopDate]);
+
+        $member->stopped_at = null;
+        $member->syncChanges();
+
+        $this->applyStoppedMembership->expectsClear(new MemberId($member->id), $stopDate);
 
         $this->subject->updated($member);
     }
