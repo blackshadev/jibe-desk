@@ -13,6 +13,7 @@ use App\Domain\Members\MemberRepository;
 use App\Domain\Members\MembershipId;
 use App\Domain\Members\PaymentMethod;
 use App\Models\Member;
+use DateTimeInterface;
 use Override;
 
 final class MemberDbRepository implements MemberRepository
@@ -101,5 +102,21 @@ final class MemberDbRepository implements MemberRepository
 
         $member->accepted_at = now();
         $member->save();
+    }
+
+    #[Override]
+    public function scheduleStop(MemberId $memberId, DateTimeInterface $stoppedAt): void
+    {
+        Member::query()->findOrFail($memberId->value)->update([
+            'stopped_at' => $stoppedAt,
+        ]);
+    }
+
+    #[Override]
+    public function cancelStop(MemberId $memberId): void
+    {
+        Member::query()->findOrFail($memberId->value)->update([
+            'stopped_at' => null,
+        ]);
     }
 }
