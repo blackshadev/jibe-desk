@@ -17,7 +17,7 @@ final class CancelStopAction
             ->label(__('labels.cancel_member_stop'))
             ->requiresConfirmation()
             ->modalDescription(__('labels.cancel_member_stop_description'))
-            ->visible(static fn (Member $record): bool => $record->isScheduled()
+            ->visible(static fn (Member $record): bool => $record->isScheduledForStopping()
                 && (auth()->user()?->can('scheduleStop', $record) ?? false))
             ->action(static function (Member $record, MemberStopService $service): void {
                 $service->cancel(MemberId::create($record->id));

@@ -26,7 +26,7 @@ final class MemberTest extends FeatureTestCase
         $member = Member::factory()->createQuietly(['stopped_at' => null]);
 
         static::assertTrue($member->isActive());
-        static::assertFalse($member->isScheduled());
+        static::assertFalse($member->isScheduledForStopping());
     }
 
     public function test_member_with_future_stop_date_is_active_and_scheduled(): void
@@ -34,7 +34,7 @@ final class MemberTest extends FeatureTestCase
         $member = Member::factory()->createQuietly(['stopped_at' => now()->addMonth()]);
 
         static::assertTrue($member->isActive());
-        static::assertTrue($member->isScheduled());
+        static::assertTrue($member->isScheduledForStopping());
     }
 
     public function test_member_with_past_stop_date_is_inactive(): void
@@ -42,7 +42,7 @@ final class MemberTest extends FeatureTestCase
         $member = Member::factory()->createQuietly(['stopped_at' => now()->subDay()]);
 
         static::assertFalse($member->isActive());
-        static::assertFalse($member->isScheduled());
+        static::assertFalse($member->isScheduledForStopping());
     }
 
     public function test_pending_member_is_never_active_or_scheduled(): void
@@ -50,7 +50,7 @@ final class MemberTest extends FeatureTestCase
         $member = Member::factory()->pending()->scheduled()->createQuietly();
 
         static::assertFalse($member->isActive());
-        static::assertFalse($member->isScheduled());
+        static::assertFalse($member->isScheduledForStopping());
     }
 
     public function test_active_scope_includes_null_and_future_stop_dates(): void

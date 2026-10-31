@@ -170,21 +170,28 @@ final class Member extends Model
 
     public function isActive(): bool
     {
-        return $this->accepted_at !== null && !$this->isStopInEffect();
+        if ($this->accepted_at === null) {
+            return false;
+        }
+
+        if ($this->stopped_at === null) {
+            return true;
+        }
+
+        return CarbonImmutable::instance($this->stopped_at)->isFuture();
     }
 
-    public function isScheduled(): bool
+    public function isScheduledForStopping(): bool
     {
-        return $this->isActive() && $this->stopped_at !== null;
-    }
+        if ($this->accepted_at === null) {
+            return false;
+        }
 
-    private function isStopInEffect(): bool
-    {
         if ($this->stopped_at === null) {
             return false;
         }
 
-        return !CarbonImmutable::instance($this->stopped_at)->isFuture();
+        return CarbonImmutable::instance($this->stopped_at)->isFuture();
     }
 
     /** @return array<string, string> */
