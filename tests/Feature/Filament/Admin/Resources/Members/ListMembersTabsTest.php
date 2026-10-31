@@ -21,6 +21,7 @@ final class ListMembersTabsTest extends FeatureTestCase
 
         Member::factory()->count(2)->pending()->createQuietly();
         Member::factory()->count(3)->createQuietly();
+        Member::factory()->scheduled()->createQuietly();
         Member::factory()->stopped()->createQuietly();
 
         $component = Livewire::test(ListMembers::class)->instance();
@@ -31,7 +32,18 @@ final class ListMembersTabsTest extends FeatureTestCase
         static::assertArrayHasKey('inactive', $tabs);
 
         static::assertSame('2', $tabs['new']->getBadge());
-        static::assertSame('3', $tabs['active']->getBadge());
+        static::assertSame('4', $tabs['active']->getBadge());
         static::assertSame('1', $tabs['inactive']->getBadge());
+    }
+
+    public function test_scheduled_members_show_a_stop_badge_and_the_stop_column_by_default(): void
+    {
+        $this->withUserHavingRole(RoleName::MemberAdministration);
+
+        Member::factory()->createQuietly(['stopped_at' => now()->addMonth()->startOfDay()]);
+
+        Livewire::test(ListMembers::class)
+            ->assertTableColumnVisible('stopped_at')
+            ->assertSee(__('labels.stops_per', ['date' => now()->addMonth()->format('d-m-Y')]));
     }
 }

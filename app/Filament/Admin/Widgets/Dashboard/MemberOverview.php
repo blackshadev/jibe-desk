@@ -53,7 +53,7 @@ final class MemberOverview extends StatsOverviewWidget
                         ->where(
                             static fn (Builder $query) => $query
                                 ->whereNull('stopped_at')
-                                ->orWhere('stopped_at', '<=', $date),
+                                ->orWhere('stopped_at', '>', $date),
                         )
                         ->count(),
                 ),

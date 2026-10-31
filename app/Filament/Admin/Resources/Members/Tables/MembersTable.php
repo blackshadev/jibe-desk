@@ -66,9 +66,22 @@ final class MembersTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('stopped_at')
-                    ->dateTime()
+                    ->label(__('labels.stopped_at'))
+                    ->badge()
+                    ->state(static function (Member $record): ?string {
+                        if ($record->stopped_at === null) {
+                            return null;
+                        }
+
+                        $stopDate = $record->stopped_at->format('d-m-Y');
+
+                        return $record->isScheduled()
+                            ? __('labels.stops_per', ['date' => $stopDate])
+                            : $stopDate;
+                    })
+                    ->color(static fn (Member $record): string => $record->isScheduled() ? 'warning' : 'gray')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
             ])
             ->recordUrl(ResourceRouteHelper::viewOrEdit(MemberResource::class))
             ->filters([

@@ -26,7 +26,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\DB;
 use Override;
-use RuntimeException;
 
 /**
  * @phpstan-import-type FormDataArray from FormData
@@ -167,16 +166,6 @@ final class Member extends Model
     public function outgoingEmails(): HasMany
     {
         return $this->hasMany(OutgoingEmail::class);
-    }
-
-    public function stop(): void
-    {
-        if ($this->stopped_at !== null) {
-            throw new RuntimeException('Already stopped');
-        }
-
-        $this->stopped_at = now();
-        $this->save();
     }
 
     public function isActive(): bool
