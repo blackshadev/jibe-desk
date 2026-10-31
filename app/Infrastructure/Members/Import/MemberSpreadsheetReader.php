@@ -147,7 +147,7 @@ final readonly class MemberSpreadsheetReader
     {
         return array_all(
             $values,
-            static fn (mixed $value): bool => $value === null || (is_string($value) && trim($value) === ''),
+            static fn (mixed $value): bool => $value === null || is_string($value) && trim($value) === '',
         );
     }
 }

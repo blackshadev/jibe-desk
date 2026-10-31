@@ -7,7 +7,7 @@ namespace App\Infrastructure\Members\Import;
 use App\Domain\Members\Gender;
 use App\Domain\Members\Import\MemberImportException;
 
-final readonly class SpreadsheetFieldValidator
+final readonly class SpreadsheetValueParser
 {
     public function gender(string $value, int $rowNumber): Gender
     {
@@ -67,7 +67,7 @@ final readonly class SpreadsheetFieldValidator
             $digits = ctype_alpha($character) ? (string) (ord($character) - 55) : $character;
 
             foreach (str_split($digits) as $digit) {
-                $remainder = ($remainder * 10 + (int) $digit) % 97;
+                $remainder = (($remainder * 10) + (int) $digit) % 97;
             }
         }
 

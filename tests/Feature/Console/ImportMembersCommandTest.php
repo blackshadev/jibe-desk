@@ -39,7 +39,8 @@ final class ImportMembersCommandTest extends FeatureTestCase
         $this->seed([CostCenterSeeder::class, MembershipSeeder::class]);
         $path = $this->createSpreadsheet($this->rows());
 
-        $this->artisan('app:import-members', ['path' => $path])
+        $this
+            ->artisan('app:import-members', ['path' => $path])
             ->expectsOutputToContain('Import complete.')
             ->expectsOutputToContain('Leavers (1)')
             ->expectsOutputToContain('RTC members (1)')
@@ -106,7 +107,8 @@ final class ImportMembersCommandTest extends FeatureTestCase
         $this->seed([CostCenterSeeder::class, MembershipSeeder::class]);
         $path = $this->createSpreadsheet($this->rows());
 
-        $this->artisan('app:import-members', ['path' => $path, '--dry-run' => true])
+        $this
+            ->artisan('app:import-members', ['path' => $path, '--dry-run' => true])
             ->expectsOutputToContain('Dry run complete. The transaction was rolled back and no data was written.')
             ->assertSuccessful();
 
@@ -122,7 +124,8 @@ final class ImportMembersCommandTest extends FeatureTestCase
         Member::factory()->createQuietly();
         $path = $this->createSpreadsheet($this->rows());
 
-        $this->artisan('app:import-members', ['path' => $path])
+        $this
+            ->artisan('app:import-members', ['path' => $path])
             ->expectsOutputToContain('The members table is not empty.')
             ->assertFailed();
 
@@ -143,7 +146,8 @@ final class ImportMembersCommandTest extends FeatureTestCase
             ]),
         ]);
 
-        $this->artisan('app:import-members', ['path' => $path])
+        $this
+            ->artisan('app:import-members', ['path' => $path])
             ->expectsOutputToContain('Row 4, column "Banknummer 1"')
             ->assertFailed();
 
@@ -167,7 +171,8 @@ final class ImportMembersCommandTest extends FeatureTestCase
             ]),
         ]);
 
-        $this->artisan('app:import-members', ['path' => $path])
+        $this
+            ->artisan('app:import-members', ['path' => $path])
             ->expectsOutputToContain('Row 4, column "Geb.datum", value "2026-04-25" is too young to be a sailing instructor.')
             ->assertFailed();
 

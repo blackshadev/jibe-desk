@@ -190,8 +190,7 @@ final class MemberForm
                     ->required()
                     ->helperText(__('labels.payment_method_help'))
                     ->disabled(
-                        static fn (?Member $record): bool => $record === null
-                            || !(auth()->user()?->can('update-payment-information', $record) ?? false),
+                        static fn (?Member $record): bool => $record === null || !(auth()->user()?->can('update-payment-information', $record) ?? false),
                     ),
 
                 TextEntry::make('mandate_reference')

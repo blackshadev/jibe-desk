@@ -377,19 +377,16 @@ final class SepaBatchResourceTest extends FeatureTestCase
             ->assertSchemaComponentExists(
                 'invoice_ids',
                 'mountedActionSchema0',
-                static function (Select $select) use (
-                    $collectableTransferInvoice,
-                    $transferWithoutMandateInvoice,
-                    $transferWithRevokedMandateInvoice,
-                    $directDebitInvoice,
-                ): bool {
+                static function (Select $select) use ($collectableTransferInvoice, $transferWithoutMandateInvoice, $transferWithRevokedMandateInvoice, $directDebitInvoice): bool {
                     /** @var array<int, string> $options */
                     $options = $select->getOptions();
 
-                    return array_key_exists($collectableTransferInvoice->id, $options)
+                    return (
+                        array_key_exists($collectableTransferInvoice->id, $options)
                         && array_key_exists($directDebitInvoice->id, $options)
                         && !array_key_exists($transferWithoutMandateInvoice->id, $options)
-                        && !array_key_exists($transferWithRevokedMandateInvoice->id, $options);
+                        && !array_key_exists($transferWithRevokedMandateInvoice->id, $options)
+                    );
                 },
             );
     }

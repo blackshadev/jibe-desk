@@ -47,7 +47,7 @@ final readonly class SpreadsheetDateReader
         $value = $values[$column] ?? null;
 
         if ($value instanceof DateTimeInterface) {
-            return DateTimeImmutable::createFromInterface($value)->setTime(0, 0)->format('Y-m-d');
+            return $value->format('Y-m-d');
         }
 
         $text = trim((string) $value);
