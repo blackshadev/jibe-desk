@@ -34,17 +34,20 @@ final class MemberImportFixture
         'Container stalling',
     ];
 
-    /** @param list<array<string, mixed>> $rows */
-    public static function create(array $rows): string
+    /**
+     * @param list<array<string, mixed>> $rows
+     * @param list<string>|null $headers
+     */
+    public static function create(array $rows, string $sheetName = 'Worksheet', ?array $headers = null): string
     {
         $path = sys_get_temp_dir() . '/member-import-' . bin2hex(random_bytes(8)) . '.xlsx';
 
         $writer = new Writer();
         $writer->openToFile($path);
-        $writer->getCurrentSheet()->setName('Worksheet');
+        $writer->getCurrentSheet()->setName($sheetName);
 
         $writer->addRow(Row::fromValues(['Leden export']));
-        $writer->addRow(Row::fromValues(self::HEADERS));
+        $writer->addRow(Row::fromValues($headers ?? self::HEADERS));
 
         foreach ($rows as $row) {
             $writer->addRow(Row::fromValues(self::values($row)));

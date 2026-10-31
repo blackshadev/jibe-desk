@@ -65,7 +65,12 @@ final readonly class SpreadsheetValueReader
             return $fullName;
         }
 
-        return trim(sprintf('%s %s %s', $firstName, $infixName, $lastName));
+        $parts = array_filter(
+            [$firstName, $infixName, $lastName],
+            static fn (string $part): bool => $part !== '',
+        );
+
+        return trim(implode(' ', $parts));
     }
 
     public function accountHolderName(string $accountHolderName, string $fullName): string
