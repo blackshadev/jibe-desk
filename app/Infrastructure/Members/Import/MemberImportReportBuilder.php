@@ -29,7 +29,7 @@ final readonly class MemberImportReportBuilder
             importedMembers: count($continuingMembers),
             stoppedMembers: count($allMembers) - count($continuingMembers),
             householdsCreated: $householdsCreated,
-            mandatesCreated: count($continuingMembers),
+            mandatesCreated: count($allMembers),
             billingInstancesCreated: $billingInstancesCreated,
             erelidMembershipCreated: $erelidMembershipCreated,
             leavers: $this->reportRows(

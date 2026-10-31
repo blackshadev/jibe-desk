@@ -63,11 +63,16 @@ final class ImportMembersCommandTest extends FeatureTestCase
         static::assertSame('2026-12-31', $leaver->stopped_at?->format('Y-m-d'));
         static::assertSame('2015-05-05', $leaver->accepted_at?->format('Y-m-d'));
 
+        $leaverMandate = PaymentInformation::query()->where('member_id', $leaver->id)->firstOrFail();
+        static::assertSame('NL10RABO0335556922', $leaverMandate->banking_account_number);
+        static::assertSame('2026-12-31', $leaverMandate->last_collected_at?->format('Y-m-d'));
+        static::assertNull($leaverMandate->revoked_at);
+
         static::assertSame(1, Household::count());
         static::assertSame(2, Member::query()->whereNotNull('household_id')->count());
         static::assertSame(2, Household::query()->firstOrFail()->members()->count());
 
-        static::assertSame(7, PaymentInformation::count());
+        static::assertSame(8, PaymentInformation::count());
 
         foreach (PaymentInformation::all() as $mandate) {
             static::assertSame('2026-12-31', $mandate->last_collected_at?->format('Y-m-d'));

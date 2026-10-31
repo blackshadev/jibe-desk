@@ -71,7 +71,7 @@ final class MemberImportImplTest extends FeatureTestCase
         static::assertSame(5, $report->importedMembers);
         static::assertSame(1, $report->stoppedMembers);
         static::assertSame(1, $report->householdsCreated);
-        static::assertSame(5, $report->mandatesCreated);
+        static::assertSame(6, $report->mandatesCreated);
         static::assertFalse($report->erelidMembershipCreated);
 
         static::assertCount(1, $report->leavers);
@@ -138,7 +138,7 @@ final class MemberImportImplTest extends FeatureTestCase
         static::assertSame(2, $household->members()->count());
     }
 
-    public function test_import_creates_a_mandate_and_billing_for_each_continuing_member(): void
+    public function test_import_creates_payment_information_for_every_member_and_billing_for_continuing_members(): void
     {
         $this->seed([CostCenterSeeder::class, MembershipSeeder::class]);
 
@@ -149,8 +149,8 @@ final class MemberImportImplTest extends FeatureTestCase
             $this->danaRow(),
         ]));
 
-        static::assertSame(3, PaymentInformation::count());
-        static::assertSame(3, $report->mandatesCreated);
+        static::assertSame(4, PaymentInformation::count());
+        static::assertSame(4, $report->mandatesCreated);
 
         foreach (PaymentInformation::all() as $mandate) {
             static::assertSame('2026-12-31', $mandate->last_collected_at?->format('Y-m-d'));
@@ -168,6 +168,10 @@ final class MemberImportImplTest extends FeatureTestCase
         }
 
         $leaver = Member::query()->where('email', 'dana@example.com')->firstOrFail();
+        $leaverMandate = PaymentInformation::query()->where('member_id', $leaver->id)->firstOrFail();
+        static::assertSame('NL10RABO0335556922', $leaverMandate->banking_account_number);
+        static::assertSame('2026-12-31', $leaverMandate->last_collected_at?->format('Y-m-d'));
+        static::assertNull($leaverMandate->revoked_at);
         static::assertFalse(
             BillableItemInstance::query()->where('member_id', $leaver->id)->exists(),
         );

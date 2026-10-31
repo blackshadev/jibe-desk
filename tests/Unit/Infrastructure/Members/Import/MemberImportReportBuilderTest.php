@@ -47,7 +47,7 @@ final class MemberImportReportBuilderTest extends UnitTestCase
         static::assertSame(2, $report->importedMembers);
         static::assertSame(1, $report->stoppedMembers);
         static::assertSame(1, $report->householdsCreated);
-        static::assertSame(2, $report->mandatesCreated);
+        static::assertSame(3, $report->mandatesCreated);
         static::assertSame(7, $report->billingInstancesCreated);
         static::assertTrue($report->erelidMembershipCreated);
     }

@@ -82,14 +82,16 @@ final readonly class MemberImportImpl implements MemberImport
         $membershipIds = $this->membershipIds();
         $createdMembers = $this->createMembers($spreadsheetRows, $membershipIds);
 
+        foreach ($createdMembers as $createdMember) {
+            $this->createMandate($createdMember, $request->lastCollected);
+        }
+
         $continuingMembers = array_values(
             array_filter($createdMembers, static fn (CreatedMember $member): bool => !$member->row->isLeaver()),
         );
 
         $householdsCreated = $this->householdCreator->create($continuingMembers);
-
         foreach ($continuingMembers as $createdMember) {
-            $this->createMandate($createdMember, $request->lastCollected);
             $this->applyBilling($createdMember, $request->billingStart);
         }
 
