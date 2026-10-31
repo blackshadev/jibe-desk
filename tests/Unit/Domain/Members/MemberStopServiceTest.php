@@ -56,7 +56,7 @@ final class MemberStopServiceTest extends UnitTestCase
             memberName: 'Jan de Vries',
             memberEmail: 'jan@example.com',
             stoppedAt: $stoppedAt,
-            immediate: false,
+            isImmediate: false,
         ));
 
         $this->subject->schedule($memberId, $stopDate);
@@ -76,7 +76,7 @@ final class MemberStopServiceTest extends UnitTestCase
             memberName: 'Jan de Vries',
             memberEmail: 'jan@example.com',
             stoppedAt: $now,
-            immediate: true,
+            isImmediate: true,
         ));
 
         $this->subject->schedule($memberId, $stopDate);

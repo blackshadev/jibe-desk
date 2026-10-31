@@ -22,8 +22,8 @@ final readonly class MemberStopService
     {
         $member = $this->memberRepository->getById($memberId);
         $now = $this->clock->now();
-        $immediate = CarbonImmutable::instance($stopDate)->isSameDay($now);
-        $stoppedAt = $immediate ? $now : CarbonImmutable::instance($stopDate)->endOfDay();
+        $isImmediate = CarbonImmutable::instance($stopDate)->isSameDay($now);
+        $stoppedAt = $isImmediate ? $now : CarbonImmutable::instance($stopDate)->endOfDay();
 
         $this->memberRepository->scheduleStop($memberId, $stoppedAt);
 
@@ -32,7 +32,7 @@ final readonly class MemberStopService
             memberName: $member->name,
             memberEmail: $member->email,
             stoppedAt: $stoppedAt,
-            immediate: $immediate,
+            isImmediate: $isImmediate,
         ));
     }
 

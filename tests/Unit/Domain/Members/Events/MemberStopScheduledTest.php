@@ -21,13 +21,13 @@ final class MemberStopScheduledTest extends UnitTestCase
             memberName: 'Vries, Jan de',
             memberEmail: 'jan@example.com',
             stoppedAt: $stoppedAt,
-            immediate: false,
+            isImmediate: false,
         );
 
         static::assertSame($memberId, $event->memberId);
         static::assertSame('Vries, Jan de', $event->memberName);
         static::assertSame('jan@example.com', $event->memberEmail);
         static::assertSame($stoppedAt, $event->stoppedAt);
-        static::assertFalse($event->immediate);
+        static::assertFalse($event->isImmediate);
     }
 }

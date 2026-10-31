@@ -3,7 +3,7 @@
 
 Beste {{ $memberName }},
 
-@if ($immediate)
+@if ($isImmediate)
 Je lidmaatschap van Watersportvereniging Almere Centraal is per direct stopgezet.
 @else
 Je lidmaatschap van Watersportvereniging Almere Centraal wordt stopgezet per {{ $stopDate }}.
