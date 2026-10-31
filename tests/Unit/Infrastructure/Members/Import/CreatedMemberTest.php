@@ -39,8 +39,6 @@ final class CreatedMemberTest extends UnitTestCase
             iban: 'NL75ABNA0510419224',
             bic: 'ABNANL2A',
             accountHolderName: 'Djoeke Adriaanse',
-            attendsRtc: false,
-            hasContainer: false,
         );
 
         $subject = new CreatedMember(MemberId::create(12), MembershipId::create(3), $row);

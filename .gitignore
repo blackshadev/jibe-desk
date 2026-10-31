@@ -31,3 +31,6 @@ TODO.md
 .agents
 .spec/maps
 .worktrees/
+
+# Legacy member export used for manual import testing
+Leden_export.xlsx

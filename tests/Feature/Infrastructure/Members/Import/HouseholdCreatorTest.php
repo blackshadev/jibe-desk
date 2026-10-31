@@ -150,8 +150,6 @@ final class HouseholdCreatorTest extends FeatureTestCase
                 iban: 'NL10RABO0335556922',
                 bic: 'RABONL2U',
                 accountHolderName: $member->name,
-                attendsRtc: false,
-                hasContainer: false,
             ),
         );
     }

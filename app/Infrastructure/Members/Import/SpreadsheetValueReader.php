@@ -40,12 +40,6 @@ final readonly class SpreadsheetValueReader
         return $value === '' ? null : $value;
     }
 
-    /** @param array<string, mixed> $values */
-    public function isYes(array $values, string $column): bool
-    {
-        return $this->text($values, $column) === 'Ja';
-    }
-
     public function email(string $privateEmail, ?string $contactEmail, int $rowNumber): string
     {
         if ($privateEmail !== '') {

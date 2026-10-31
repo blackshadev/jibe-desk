@@ -37,8 +37,6 @@ final readonly class MemberSpreadsheetReader
         'Afw. Tenaamst. incasso',
         'Banknummer 1',
         'BIC 1',
-        'Deelname aan RTC',
-        'Container stalling',
     ];
 
     /** @return list<SpreadsheetImportRow> */

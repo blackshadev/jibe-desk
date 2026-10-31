@@ -30,8 +30,6 @@ final class MemberImportFixture
         'Afw. Tenaamst. incasso',
         'Banknummer 1',
         'BIC 1',
-        'Deelname aan RTC',
-        'Container stalling',
     ];
 
     /**
@@ -85,8 +83,6 @@ final class MemberImportFixture
             'Afw. Tenaamst. incasso' => '',
             'Banknummer 1' => 'NL10RABO0335556922',
             'BIC 1' => 'RABONL2U',
-            'Deelname aan RTC' => 'Nee',
-            'Container stalling' => 'Nee',
             ...$overrides,
         ];
     }

@@ -32,8 +32,6 @@ final readonly class MappedMemberRow
         public string $iban,
         public string $bic,
         public string $accountHolderName,
-        public bool $attendsRtc,
-        public bool $hasContainer,
     ) {}
 
     public function isLeaver(): bool

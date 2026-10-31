@@ -85,8 +85,6 @@ final readonly class SpreadsheetRowMapper
                 $this->values->text($values, 'Afw. Tenaamst. incasso'),
                 $fullName,
             ),
-            attendsRtc: $this->values->isYes($values, 'Deelname aan RTC'),
-            hasContainer: $this->values->isYes($values, 'Container stalling'),
         );
     }
 

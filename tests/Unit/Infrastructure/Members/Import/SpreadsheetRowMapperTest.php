@@ -53,8 +53,6 @@ final class SpreadsheetRowMapperTest extends UnitTestCase
         static::assertSame('NL75ABNA0510419224', $mapped->iban);
         static::assertSame('ABNANL2A', $mapped->bic);
         static::assertSame('Djoeke Adriaanse', $mapped->accountHolderName);
-        static::assertFalse($mapped->attendsRtc);
-        static::assertFalse($mapped->hasContainer);
         static::assertTrue($mapped->hasMembershipType());
     }
 
@@ -206,8 +204,6 @@ final class SpreadsheetRowMapperTest extends UnitTestCase
             'Afw. Tenaamst. incasso' => '',
             'Banknummer 1' => 'NL75ABNA0510419224',
             'BIC 1' => 'ABNANL2A',
-            'Deelname aan RTC' => 'Nee',
-            'Container stalling' => 'Nee',
             ...$overrides,
         ];
     }

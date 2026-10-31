@@ -74,10 +74,6 @@ final class MemberImportImplTest extends FeatureTestCase
 
         static::assertCount(1, $report->leavers);
         static::assertSame('1004', $report->leavers[0]->lidnr);
-        static::assertCount(1, $report->rtcMembers);
-        static::assertSame('1001', $report->rtcMembers[0]->lidnr);
-        static::assertCount(1, $report->containerMembers);
-        static::assertSame('1001', $report->containerMembers[0]->lidnr);
         static::assertCount(1, $report->rowsWithoutMembershipType);
         static::assertSame('124361', $report->rowsWithoutMembershipType[0]->lidnr);
         static::assertCount(1, $report->emailMismatches);
@@ -340,8 +336,6 @@ final class MemberImportImplTest extends FeatureTestCase
             'Naamvoluit' => 'Anna Aalbers',
             'E-mail privé' => 'anna@example.com',
             'Contact.email' => 'anna@example.com',
-            'Deelname aan RTC' => 'Ja',
-            'Container stalling' => 'Ja',
         ]);
     }
 

@@ -22,8 +22,6 @@ final class MemberImportReportTest extends UnitTestCase
             billingInstancesCreated: 431,
             erelidMembershipCreated: true,
             leavers: [$row],
-            rtcMembers: [$row],
-            containerMembers: [$row],
             rowsWithoutMembershipType: [$row],
             emailMismatches: [],
         );
@@ -35,8 +33,6 @@ final class MemberImportReportTest extends UnitTestCase
         static::assertSame(431, $subject->billingInstancesCreated);
         static::assertTrue($subject->erelidMembershipCreated);
         static::assertSame([$row], $subject->leavers);
-        static::assertSame([$row], $subject->rtcMembers);
-        static::assertSame([$row], $subject->containerMembers);
         static::assertSame([$row], $subject->rowsWithoutMembershipType);
         static::assertSame([], $subject->emailMismatches);
     }

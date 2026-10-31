@@ -90,8 +90,6 @@ final class MappedMemberRowTest extends UnitTestCase
             iban: 'NL75ABNA0510419224',
             bic: 'ABNANL2A',
             accountHolderName: 'Djoeke Adriaanse',
-            attendsRtc: false,
-            hasContainer: false,
         );
     }
 }

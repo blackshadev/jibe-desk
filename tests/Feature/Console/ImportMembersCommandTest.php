@@ -43,8 +43,6 @@ final class ImportMembersCommandTest extends FeatureTestCase
             ->artisan('app:import-members', ['path' => $path])
             ->expectsOutputToContain('Import complete.')
             ->expectsOutputToContain('Leavers (1)')
-            ->expectsOutputToContain('RTC members (1)')
-            ->expectsOutputToContain('Container members (1)')
             ->expectsOutputToContain('Rows defaulted to Windsurfer (1)')
             ->expectsOutputToContain('Email mismatches (1)')
             ->expectsOutputToContain('Dana Doekes')
@@ -222,7 +220,6 @@ final class ImportMembersCommandTest extends FeatureTestCase
             'Naamvoluit' => 'Anna Aalbers',
             'E-mail privé' => 'anna@example.com',
             'Contact.email' => 'anna@example.com',
-            'Deelname aan RTC' => 'Ja',
         ]);
     }
 
@@ -316,7 +313,6 @@ final class ImportMembersCommandTest extends FeatureTestCase
             'Straat' => 'Singel',
             'Huisnr' => '4',
             'Postcode' => '4000 DD',
-            'Container stalling' => 'Ja',
         ]);
     }
 

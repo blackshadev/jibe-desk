@@ -8,8 +8,6 @@ final readonly class MemberImportReport
 {
     /**
      * @param list<MemberImportReportRow> $leavers
-     * @param list<MemberImportReportRow> $rtcMembers
-     * @param list<MemberImportReportRow> $containerMembers
      * @param list<MemberImportReportRow> $rowsWithoutMembershipType
      * @param list<MemberImportEmailMismatch> $emailMismatches
      */
@@ -21,8 +19,6 @@ final readonly class MemberImportReport
         public int $billingInstancesCreated,
         public bool $erelidMembershipCreated,
         public array $leavers,
-        public array $rtcMembers,
-        public array $containerMembers,
         public array $rowsWithoutMembershipType,
         public array $emailMismatches,
     ) {}

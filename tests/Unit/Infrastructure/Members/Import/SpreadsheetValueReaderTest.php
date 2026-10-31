@@ -69,13 +69,6 @@ final class SpreadsheetValueReaderTest extends UnitTestCase
         static::assertSame('de', $this->subject->optionalText(['Tussenv.' => ' de '], 'Tussenv.'));
     }
 
-    public function test_is_yes_only_accepts_ja(): void
-    {
-        static::assertTrue($this->subject->isYes(['Deelname aan RTC' => 'Ja'], 'Deelname aan RTC'));
-        static::assertFalse($this->subject->isYes(['Deelname aan RTC' => 'Nee'], 'Deelname aan RTC'));
-        static::assertFalse($this->subject->isYes([], 'Deelname aan RTC'));
-    }
-
     public function test_email_prefers_the_private_email(): void
     {
         static::assertSame(

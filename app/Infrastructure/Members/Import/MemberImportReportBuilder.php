@@ -35,12 +35,6 @@ final readonly class MemberImportReportBuilder
             leavers: $this->reportRows(
                 $this->filterByRow($allMembers, static fn (MappedMemberRow $row): bool => $row->isLeaver()),
             ),
-            rtcMembers: $this->reportRows(
-                $this->filterByRow($allMembers, static fn (MappedMemberRow $row): bool => $row->attendsRtc),
-            ),
-            containerMembers: $this->reportRows(
-                $this->filterByRow($allMembers, static fn (MappedMemberRow $row): bool => $row->hasContainer),
-            ),
             rowsWithoutMembershipType: $rowsWithoutMembershipType,
             emailMismatches: $this->emailMismatches($allMembers),
         );

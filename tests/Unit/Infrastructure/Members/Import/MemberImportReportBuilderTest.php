@@ -52,9 +52,9 @@ final class MemberImportReportBuilderTest extends UnitTestCase
         static::assertTrue($report->erelidMembershipCreated);
     }
 
-    public function test_build_reports_leavers_rtc_members_and_container_members(): void
+    public function test_build_reports_leavers(): void
     {
-        $anna = $this->createdMember(attendsRtc: true, hasContainer: true);
+        $anna = $this->createdMember();
         $bob = $this->createdMember(
             lidnr: '1002',
             name: 'Bob Bakker',
@@ -74,10 +74,6 @@ final class MemberImportReportBuilderTest extends UnitTestCase
         static::assertSame('1002', $report->leavers[0]->lidnr);
         static::assertSame('Bob Bakker', $report->leavers[0]->name);
         static::assertSame('bob@example.com', $report->leavers[0]->email);
-        static::assertCount(1, $report->rtcMembers);
-        static::assertSame('1001', $report->rtcMembers[0]->lidnr);
-        static::assertCount(1, $report->containerMembers);
-        static::assertSame('1001', $report->containerMembers[0]->lidnr);
     }
 
     public function test_build_reports_rows_without_a_membership_type(): void
@@ -147,8 +143,6 @@ final class MemberImportReportBuilderTest extends UnitTestCase
         static::assertSame(0, $report->stoppedMembers);
         static::assertSame(0, $report->mandatesCreated);
         static::assertSame([], $report->leavers);
-        static::assertSame([], $report->rtcMembers);
-        static::assertSame([], $report->containerMembers);
         static::assertSame([], $report->rowsWithoutMembershipType);
         static::assertSame([], $report->emailMismatches);
     }
@@ -160,8 +154,6 @@ final class MemberImportReportBuilderTest extends UnitTestCase
         ?string $contactEmail = 'anna@example.com',
         ?string $membershipType = 'Volwassenlid',
         ?DateTimeImmutable $stopDate = null,
-        bool $attendsRtc = false,
-        bool $hasContainer = false,
     ): CreatedMember {
         return new CreatedMember(
             MemberId::create(1),
@@ -189,8 +181,6 @@ final class MemberImportReportBuilderTest extends UnitTestCase
                 iban: 'NL10RABO0335556922',
                 bic: 'RABONL2U',
                 accountHolderName: $name,
-                attendsRtc: $attendsRtc,
-                hasContainer: $hasContainer,
             ),
         );
     }
