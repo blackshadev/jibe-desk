@@ -62,7 +62,7 @@ final readonly class SepaExportServiceImpl implements SepaExportService
         foreach (SequenceType::cases() as $sequenceType) {
             $category = SepaCategory::forSequenceType($sequenceType);
 
-            if (! $invoices->hasForCategory($category)) {
+            if (!$invoices->hasForCategory($category)) {
                 continue;
             }
 

@@ -115,8 +115,7 @@ final readonly class MemberImportImpl implements MemberImport
             $row = $this->rowMapper->map($spreadsheetRow->values, $spreadsheetRow->number);
             $this->assertSailInstructorIsAdult($row, $spreadsheetRow->number);
 
-            $membershipId = $membershipIds[$row->membershipName]
-                ?? throw MemberImportException::missingMembership($row->membershipName);
+            $membershipId = $membershipIds[$row->membershipName] ?? throw MemberImportException::missingMembership($row->membershipName);
 
             $member = $this->createMember($row, $membershipId);
             $createdMembers[] = new CreatedMember(

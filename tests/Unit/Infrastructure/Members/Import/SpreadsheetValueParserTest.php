@@ -6,21 +6,21 @@ namespace Tests\Unit\Infrastructure\Members\Import;
 
 use App\Domain\Members\Gender;
 use App\Domain\Members\Import\MemberImportException;
-use App\Infrastructure\Members\Import\SpreadsheetFieldValidator;
+use App\Infrastructure\Members\Import\SpreadsheetValueParser;
 use Override;
 use PHPUnit\Framework\Attributes\TestWith;
 use Tests\UnitTestCase;
 
-final class SpreadsheetFieldValidatorTest extends UnitTestCase
+final class SpreadsheetValueParserTest extends UnitTestCase
 {
-    private SpreadsheetFieldValidator $subject;
+    private SpreadsheetValueParser $subject;
 
     #[Override]
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->subject = new SpreadsheetFieldValidator();
+        $this->subject = new SpreadsheetValueParser();
     }
 
     #[TestWith(['Man', Gender::Male])]

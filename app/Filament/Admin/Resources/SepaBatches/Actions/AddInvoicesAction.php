@@ -37,9 +37,11 @@ final class AddInvoicesAction
                             ->filter(static function (Invoice $invoice): bool {
                                 $member = $invoice->member;
 
-                                return $member === null
+                                return (
+                                    $member === null
                                     || $member->payment_method !== PaymentMethod::Transfer
-                                    || $member->currentPaymentInformation?->expiration_status === MandateExpirationStatus::Active;
+                                    || $member->currentPaymentInformation?->expiration_status === MandateExpirationStatus::Active
+                                );
                             })
                             ->mapWithKeys(static function (Invoice $invoice): array {
                                 $label = $invoice->invoice_number . ' — ' . $invoice->recipient_name;

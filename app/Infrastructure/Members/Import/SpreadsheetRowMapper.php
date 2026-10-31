@@ -27,7 +27,7 @@ final readonly class SpreadsheetRowMapper
     public function __construct(
         private SpreadsheetValueReader $values = new SpreadsheetValueReader(),
         private SpreadsheetDateReader $dates = new SpreadsheetDateReader(),
-        private SpreadsheetFieldValidator $validator = new SpreadsheetFieldValidator(),
+        private SpreadsheetValueParser $parser = new SpreadsheetValueParser(),
     ) {}
 
     /**
@@ -56,14 +56,14 @@ final readonly class SpreadsheetRowMapper
             email: $this->values->email($privateEmail, $contactEmail, $rowNumber),
             contactEmail: $contactEmail,
             birthdate: $this->dates->date($values, 'Geb.datum', $rowNumber),
-            gender: $this->validator->gender(
+            gender: $this->parser->gender(
                 $this->values->requiredText($values, 'Geslacht', $rowNumber),
                 $rowNumber,
             ),
             addressStreet: $this->values->requiredText($values, 'Straat', $rowNumber),
             addressHousenumber: $this->values->requiredText($values, 'Huisnr', $rowNumber),
             addressHousenumberAddition: $this->values->optionalText($values, 'Huisnr.toev.'),
-            addressPostalcode: $this->validator->postalCode(
+            addressPostalcode: $this->parser->postalCode(
                 $this->values->requiredText($values, 'Postcode', $rowNumber),
                 $rowNumber,
             ),
@@ -73,11 +73,11 @@ final readonly class SpreadsheetRowMapper
             isVolunteer: $this->isVolunteer($membershipType),
             startDate: $this->dates->date($values, 'Startdat. lid', $rowNumber),
             stopDate: $this->dates->optionalDate($values, 'Stopdat. lid', $rowNumber),
-            iban: $this->validator->iban(
+            iban: $this->parser->iban(
                 $this->values->requiredText($values, 'Banknummer 1', $rowNumber),
                 $rowNumber,
             ),
-            bic: $this->validator->bic(
+            bic: $this->parser->bic(
                 $this->values->requiredText($values, 'BIC 1', $rowNumber),
                 $rowNumber,
             ),
@@ -96,8 +96,7 @@ final readonly class SpreadsheetRowMapper
             return self::DEFAULT_MEMBERSHIP_NAME;
         }
 
-        return self::MEMBERSHIP_NAME_BY_TYPE[$membershipType]
-            ?? throw MemberImportException::unknownMembershipType($rowNumber, $membershipType);
+        return self::MEMBERSHIP_NAME_BY_TYPE[$membershipType] ?? throw MemberImportException::unknownMembershipType($rowNumber, $membershipType);
     }
 
     private function isVolunteer(?string $membershipType): bool

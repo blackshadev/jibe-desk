@@ -22,14 +22,19 @@ enum ExportReadinessReason: string
         return match ($this) {
             self::ExpiredMandate, self::TransferWithActiveMandate => ExportReadinessCategory::Overridable,
             self::NoticePeriodTooShort => ExportReadinessCategory::BatchLevel,
-            self::MissingMandate, self::RevokedMandate, self::MissingIban, self::MalformedIban, self::ZeroAmount, self::UncollectableStatus, self::SequenceTypeMismatch => ExportReadinessCategory::BrokenData,
+            self::MissingMandate,
+            self::RevokedMandate,
+            self::MissingIban,
+            self::MalformedIban,
+            self::ZeroAmount,
+            self::UncollectableStatus,
+            self::SequenceTypeMismatch,
+                => ExportReadinessCategory::BrokenData,
         };
     }
 
     public function isOverridable(): bool
     {
-        return $this === self::ExpiredMandate
-            || $this === self::TransferWithActiveMandate
-            || $this === self::NoticePeriodTooShort;
+        return $this === self::ExpiredMandate || $this === self::TransferWithActiveMandate || $this === self::NoticePeriodTooShort;
     }
 }

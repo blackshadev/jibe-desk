@@ -84,9 +84,11 @@ final class MembersTable
                     ]),
                 Filter::make('cleanup_direct_debit_without_mandate')
                     ->label(__('labels.cleanup_direct_debit_without_mandate'))
-                    ->query(static fn (Builder $query): Builder => $query
-                        ->where('payment_method', PaymentMethod::DirectDebit->value)
-                        ->whereDoesntHave('paymentInformation')),
+                    ->query(
+                        static fn (Builder $query): Builder => $query
+                            ->where('payment_method', PaymentMethod::DirectDebit->value)
+                            ->whereDoesntHave('paymentInformation'),
+                    ),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

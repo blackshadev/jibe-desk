@@ -20,8 +20,7 @@ final readonly class CreditInvoicePair
             return true;
         }
 
-        return !$this->hasMoneyInFlight($this->credit)
-            && !$this->hasMoneyInFlight($this->original);
+        return !$this->hasMoneyInFlight($this->credit) && !$this->hasMoneyInFlight($this->original);
     }
 
     private function hasMoneyInFlight(Invoice $invoice): bool

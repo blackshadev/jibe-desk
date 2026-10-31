@@ -45,8 +45,7 @@ final readonly class SepaExportInvoiceList
 
     public function hasDebit(): bool
     {
-        return $this->hasForCategory(SepaCategory::DebitFirst)
-            || $this->hasForCategory(SepaCategory::DebitRecurring);
+        return $this->hasForCategory(SepaCategory::DebitFirst) || $this->hasForCategory(SepaCategory::DebitRecurring);
     }
 
     /**
