@@ -7,12 +7,16 @@ https://almerecentraal-cms.e-captain.nl/index2.php:
    report "Leden export" (report id 39). See "Source 5". This file is directly
    consumable by `MemberSpreadsheetReader` / `ImportMembersCommand`.
 
-1. `exports/members-with-active-verhuurobject.csv` — members holding an active
-   rental object. Columns: `email,lidnr,objectnummers`. One row per member;
-   multiple objects comma-separated inside a quoted field.
-2. `exports/members-with-active-tags.csv` — members and their active RFID tags.
-   Columns: `email,lidnr,tagnummers`. One row per member (include members with
-   no tags as empty cells); multiple tag numbers comma-separated.
+1. `exports/members-with-active-verhuurobject.csv` — one row per active rental
+   object. Columns: `email,lidnr,objectnummer,start_date,end_date`. A member with
+   multiple objects gets multiple rows.
+2. `exports/members-with-active-tags.csv` — one row per active RFID tag.
+   Columns: `email,lidnr,tagnummer,start_date,end_date`. A member with multiple
+   active tags gets multiple rows; members with no active tag are omitted.
+
+Both assignment files carry a period from e-Captain, not from the
+planobject/relatieobject master record: e-Captain stores `start`/`eind` on the
+planning and `Startdatum`/`Stopdatum` on the RFID tag.
 
 ## Access
 
@@ -58,7 +62,13 @@ Module ids: `3` Ledenbeheer, `5` Verhuurobjecten, `1` Beheercentrum,
 
 - 72 planningen, one per object. Scrape rows via elements matching
   `[onclick^=showrel]`; the `showrel(<relId>)` id is the member record id.
-  Cells: `td[1]` = plaats (object number), `td[2]` = start, `td[3]` = eind.
+  Cells: `td[1]` = plaats (object number), `td[2]` = start (`DD-MM-YYYY`),
+  `td[3]` = eind (`DD-MM-YYYY`).
+- **`td[2]` and `td[3]` are the only source for the rental period.** A
+  planobject's edit screen has no start/end fields (only type, number,
+  description, prices and dimensions); the period belongs to the planning.
+  Map `td[2]` -> `start_date`, `td[3]` -> `end_date`, normalised to
+  `YYYY-MM-DD`.
 - **`td[7]` is a colour square for INVOICE status, not rental status.** Ignore it.
 - The `mydate` URL parameter does NOT filter anything — every date returns the
   same rows. The list is already the current season only.
@@ -91,10 +101,33 @@ Generate report 35 ("TAGs") as CSV. Columns:
 `Uitgiftedatum`, `Stopdatum`, `Verloren`.
 
 - Active tag = `Stopdatum` empty AND `Verloren` != "Ja".
-- Drop tags whose lidnr is not in the 207 current members (15 tags belong to
-  ex-members).
+- **Date mapping:** `start_date` = `Startdatum`, `end_date` = `Stopdatum`,
+  normalised to `YYYY-MM-DD`.
+  - `Uitgiftedatum` is the issue date. It equals `Startdatum` in all but 3 rows,
+    so use `Startdatum` for the period start.
+  - `Innamedatum` is the return date, not the period end; `Stopdatum` is
+    authoritative.
+  - Because export 2 keeps only active tags (`Stopdatum` empty), `end_date` is
+    blank on every row. If populated historical end dates are needed, include
+    inactive tags for current members as well (88 rows instead of 78).
+- Drop tags whose lidnr is not in the 207 current members (the 2026-10-31 report
+  had 30 such rows across 27 lidnrs).
+- Counts from the 2026-10-31 report: 118 tag rows total; 88 belong to current
+  members; 78 are active across 73 members (5 members have 2 active tags).
 - Tag numbers differ in format — 69 are 9 chars with leading zero, 4 are 8 chars
   without. Pass through verbatim unless told to normalise.
+
+## Where the dates live (summary)
+
+| Export | e-Captain source | Start field | End field |
+|---|---|---|---|
+| verhuurobjecten | Source 1, `/objects/planlijst.php` | `td[2]` | `td[3]` |
+| objects / RFID tags | Source 4, report 35 | `Startdatum` | `Stopdatum` |
+
+The object master screens do not store a period: planobjecten only have
+type/number/description/prices/dimensions, and relatieobjecten only have
+name/number/dimensions/free fields. The period always lives on the planning or
+the RFID tag.
 
 ## Report generation (reusable)
 
@@ -178,12 +211,19 @@ complement list, so use report 35 instead.
   reporting success.
 - Assert every planning relId resolves to a lidnr, and every lidnr exists in the
   Leden export.
-- Expect: export 1 = 59 rows / 72 objects / 9 members with >1 object.
-  export 2 = 207 rows / 73 with tags / 5 with >1 tag.
+- Assert every `start_date` and `end_date` parses as a date and, where both are
+  present, `start_date <= end_date`. Export 1 must have both dates on every row;
+  export 2 has `end_date` empty on every active-tag row.
+- Expect: export 1 = 72 rows (one per active planning) / 59 distinct members /
+  9 members with >1 object.
+  export 2 = 78 rows (one per active tag for current members) / 73 distinct
+  members / 5 members with >1 active tag; no rows for members without tags.
   export 3 (xlsx) = 207 data rows.
 
 ## Output conventions
 
+- One row per object/tag, not one row per member.
+- Dates in `YYYY-MM-DD` (e-Captain shows `DD-MM-YYYY`; convert on export).
 - Comma delimiter, UTF-8, RFC4180 quoting. Note: Dutch-locale Excel puts this in
   one column — offer a `;` variant if the user will open it in Excel.
 - Write to `exports/`. Do not add the raw source CSVs to the repo.
@@ -192,6 +232,9 @@ complement list, so use report 35 instead.
 
 ## Always confirm with the user
 
-- One row per member (comma-separated objects) vs one row per object.
-- Whether members with zero tags belong in export 2.
+- Whether members with zero tags belong in export 2. With one row per tag they
+  are omitted; adding them means placeholder rows with empty
+  `tagnummer,start_date,end_date`.
+- Whether inactive tags belong in export 2 — needed if `end_date` must be
+  populated.
 - Whether lost tags count as active.
