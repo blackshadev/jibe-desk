@@ -111,13 +111,12 @@ final class ImportMembersCommand extends Command
         }
 
         $this->table(
-            ['Lidnr', 'Name', 'E-mail privé', 'Contact.email'],
+            ['Lidnr', 'Name', 'Email'],
             array_map(
                 static fn (MemberImportEmailMismatch $mismatch): array => [
                     $mismatch->lidnr,
                     $mismatch->name,
-                    $mismatch->privateEmail,
-                    $mismatch->contactEmail,
+                    $mismatch->email,
                 ],
                 $mismatches,
             ),

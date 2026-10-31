@@ -9,7 +9,6 @@ final readonly class MemberImportEmailMismatch
     public function __construct(
         public string $lidnr,
         public string $name,
-        public string $privateEmail,
-        public string $contactEmail,
+        public string $email,
     ) {}
 }
