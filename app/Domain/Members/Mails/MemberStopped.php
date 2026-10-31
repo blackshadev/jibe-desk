@@ -33,7 +33,7 @@ final readonly class MemberStopped extends BaseMail
     #[Override]
     public function subject(): string
     {
-        return 'Je lidmaatschap bij Watersportvereniging Almere Centraal is stopgezet';
+        return 'Je lidmaatschap bij Watersportvereniging Almere Centraal wordt stopgezet';
     }
 
     #[Override]
