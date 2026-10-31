@@ -16,6 +16,7 @@ use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Domain\Billing\Payment\SequenceType;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderApprovalStatus;
 use App\Domain\Billing\PurchaseOrders\PurchaseOrderStatus;
+use App\Domain\Members\PaymentMethod;
 use App\Infrastructure\Billing\Invoices\CreditInvoiceSettlementDb;
 use App\Infrastructure\Billing\Payment\SepaBatchRepositoryDb;
 use App\Models\Invoice;
@@ -768,6 +769,37 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
         static::assertCount(1, $result);
         static::assertSame($invoice->id, $result[0]->invoiceId->value);
         static::assertSame($member->id, $result[0]->memberId?->value);
+    }
+
+    public function test_get_collection_candidates_returns_the_members_payment_method(): void
+    {
+        $batch = SepaBatch::factory()->create();
+        $member = Member::factory()->transfer()->createQuietly();
+
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Pending]);
+
+        $result = $this->repository->getCollectionCandidates(SepaBatchId::create($batch->id));
+
+        static::assertCount(1, $result);
+        static::assertSame($invoice->id, $result[0]->invoiceId->value);
+        static::assertSame(PaymentMethod::Transfer, $result[0]->paymentMethod);
+    }
+
+    public function test_get_collection_candidates_defaults_to_direct_debit_without_a_member(): void
+    {
+        $batch = SepaBatch::factory()->create();
+
+        Invoice::factory()
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Pending]);
+
+        $result = $this->repository->getCollectionCandidates(SepaBatchId::create($batch->id));
+
+        static::assertCount(1, $result);
+        static::assertSame(PaymentMethod::DirectDebit, $result[0]->paymentMethod);
     }
 
     public function test_get_collection_candidates_returns_a_zero_total_for_an_invoice_without_lines(): void

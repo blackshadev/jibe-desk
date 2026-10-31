@@ -6,6 +6,7 @@ namespace App\Domain\Billing\Payment\Readiness;
 
 use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Domain\Billing\Payment\SepaBatchStatus;
+use App\Domain\Members\PaymentMethod;
 
 final readonly class CollectionReadinessAssessor
 {
@@ -53,6 +54,7 @@ final readonly class CollectionReadinessAssessor
         }
 
         return [
+            ...$this->assessPreferredPaymentMethod($candidate, $mandate),
             ...$this->assessMandateExpiration($candidate, $mandate),
             ...$this->assessSepaCandidateSequence($candidate, $mandate, $context),
             ...$this->assessIban($candidate, $mandate),
@@ -106,5 +108,24 @@ final readonly class CollectionReadinessAssessor
                 ),
             ),
         ];
+    }
+
+    /** @return list<ExportReadinessIssue> */
+    private function assessPreferredPaymentMethod(
+        SepaCollectionCandidate $candidate,
+        MandateReadiness $mandate,
+    ): array {
+        if ($candidate->paymentMethod !== PaymentMethod::Transfer) {
+            return [];
+        }
+
+        if ($mandate->status !== MandateReadinessStatus::Active) {
+            return [];
+        }
+
+        return [ExportReadinessIssue::forInvoice(
+            ExportReadinessReason::TransferWithActiveMandate,
+            $candidate,
+        )];
     }
 }

@@ -66,6 +66,7 @@ use Override;
  *     status: string,
  *     sepa_sequence_type: null|string,
  *     last_collected_at: null|string,
+ *     payment_method: null|string,
  *     total_price: numeric-string,
  *     total_vat: numeric-string,
  * }
@@ -423,6 +424,7 @@ final readonly class SepaBatchRepositoryDb implements SepaBatchRepository
         /** @var Collection<int, CollectionCandidateRow> $rows */
         $rows = DB::table('invoices')
             ->leftJoin('invoice_lines', 'invoice_lines.invoice_id', '=', 'invoices.id')
+            ->leftJoin('members', 'members.id', '=', 'invoices.member_id')
             ->leftJoin('payment_information', static function (JoinClause $join): void {
                 $join->on('payment_information.member_id', '=', 'invoices.member_id')
                     ->whereNull('payment_information.revoked_at');
@@ -437,6 +439,7 @@ final readonly class SepaBatchRepositoryDb implements SepaBatchRepository
                 'invoices.status',
                 'invoices.sepa_sequence_type',
                 'payment_information.last_collected_at',
+                'members.payment_method',
             )
             ->select(
                 'invoices.id as invoice_id',
@@ -446,6 +449,7 @@ final readonly class SepaBatchRepositoryDb implements SepaBatchRepository
                 'invoices.status',
                 'invoices.sepa_sequence_type',
                 'payment_information.last_collected_at',
+                'members.payment_method',
                 DB::raw('COALESCE(SUM(invoice_lines.price * invoice_lines.quantity), 0) as total_price'),
                 DB::raw('COALESCE(SUM(invoice_lines.vat * invoice_lines.quantity), 0) as total_vat'),
             )
@@ -470,6 +474,9 @@ final readonly class SepaBatchRepositoryDb implements SepaBatchRepository
                     total: new CompoundPrice((float) $row->total_price, (float) $row->total_vat),
                     status: InvoiceStatus::from($row->status),
                     sequenceType: $sequenceType,
+                    paymentMethod: $row->payment_method === null
+                        ? PaymentMethod::DirectDebit
+                        : PaymentMethod::from($row->payment_method),
                 );
             })
             ->all();

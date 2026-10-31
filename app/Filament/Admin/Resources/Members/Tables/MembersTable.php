@@ -35,9 +35,9 @@ final class MembersTable
                 TextColumn::make('expiration_status')
                     ->label(__('labels.expiration_status'))
                     ->badge()
-                    ->state(static fn (Member $record): ?MandateExpirationStatus => $record->paymentInformation?->expiration_status)
+                    ->state(static fn (Member $record): ?MandateExpirationStatus => $record->currentPaymentInformation?->expiration_status)
                     ->formatStateUsing(static fn (?MandateExpirationStatus $state): string => $state === null
-                        ? __('labels.no_active_mandate')
+                        ? __('labels.no_mandate')
                         : __('labels.expiration_statuses.' . $state->value))
                     ->color(static fn (?MandateExpirationStatus $state): string => match ($state) {
                         MandateExpirationStatus::Active => 'success',

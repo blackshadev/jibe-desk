@@ -824,6 +824,40 @@ final class SepaBatchResourceTest extends FeatureTestCase
         ]);
     }
 
+    public function test_export_action_requires_an_override_for_a_transfer_member_with_an_active_mandate(): void
+    {
+        $this->withAuthorizedUser();
+
+        $batch = $this->exportableBatch();
+        $member = Member::factory()->transfer()->createQuietly();
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Pending]);
+        $this->createInvoiceLine($invoice);
+        $this->attachPaymentInformation($invoice);
+
+        Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
+            ->callAction('exportSepa')
+            ->assertNotified(__('notifications.sepa_export_blocked'));
+
+        static::assertNull($batch->fresh()->exported_at);
+
+        Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
+            ->callAction('exportSepa', data: [
+                'overridden_invoices' => [$invoice->id],
+                'override_reason' => 'Member confirmed the collection.',
+            ])
+            ->assertFileDownloaded();
+
+        $this->assertDatabaseHas('sepa_export_overrides', [
+            'sepa_batch_id' => $batch->id,
+            'invoice_id' => $invoice->id,
+            'reason' => 'transfer_with_active_mandate',
+            'note' => 'Member confirmed the collection.',
+        ]);
+    }
+
     public function test_export_action_re_stamps_exported_at_on_a_second_export(): void
     {
         $this->withAuthorizedUser();

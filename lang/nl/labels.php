@@ -65,7 +65,7 @@ return [
     'last_collected_at' => 'Laatst geïncasseerd',
     'revoked_at' => 'Ingetrokken op',
     'mandate_expires_at' => 'Verloopt op',
-    'no_active_mandate' => 'Geen actieve machtiging',
+    'no_mandate' => 'Geen machtiging',
     'payment_method' => 'Betaalwijze',
     'payment_methods' => [
         'direct_debit' => 'Automatische incasso',
@@ -238,9 +238,9 @@ return [
         'close_confirm' => 'Weet je zeker dat je de SEPA-ronde wilt sluiten?',
         'close_warning' => 'Controleer de aandachtspunten hieronder. Ze blokkeren het sluiten niet, maar kunnen de export later tegenhouden.',
         'broken_data' => 'Actie nodig: gegevens onvolledig',
-        'overridable' => 'Afwijkend: verlopen mandaat',
+        'overridable' => 'Afwijkend: kan met een reden worden geëxporteerd',
         'batch_level' => 'Actie nodig: incassodatum',
-        'expired_mandate_overrides' => 'Toch incasseren op een verlopen mandaat',
+        'override_invoices' => 'Toch incasseren ondanks de afwijking',
         'override_reason' => 'Reden voor de afwijking',
         'reason' => [
             'missing_mandate' => 'Geen actief mandaat',
@@ -252,6 +252,7 @@ return [
             'uncollectable_status' => 'Factuur is nog niet vrijgegeven voor incasso',
             'sequence_type_mismatch' => 'Eerste/volgende incasso komt niet overeen met het mandaat',
             'notice_period_too_short' => 'Incassodatum ligt te dicht bij de factuurmail',
+            'transfer_with_active_mandate' => 'Betaalwijze staat op handmatige betaling, maar er is een actieve machtiging',
         ],
     ],
     'mark_as_paid' => 'Markeer als betaald',

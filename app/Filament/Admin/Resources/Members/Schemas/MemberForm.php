@@ -196,13 +196,19 @@ final class MemberForm
 
                 TextEntry::make('mandate_reference')
                     ->label(__('labels.mandate_reference'))
-                    ->state(static fn (?Member $record): string => $record?->paymentInformation->mandate_reference ?? __('labels.no_active_mandate')),
+                    ->state(static fn (?Member $record): string => $record?->paymentInformation->mandate_reference ?? __('labels.no_mandate')),
 
                 TextEntry::make('expiration_status')
                     ->label(__('labels.expiration_status'))
-                    ->state(static fn (?Member $record): string => $record?->paymentInformation === null
-                        ? __('labels.no_active_mandate')
-                        : __('labels.expiration_statuses.' . $record->paymentInformation->expiration_status->value)),
+                    ->state(static fn (?Member $record): string => $record?->currentPaymentInformation === null
+                        ? __('labels.no_mandate')
+                        : __('labels.expiration_statuses.' . $record->currentPaymentInformation->expiration_status->value))
+                    ->badge()
+                    ->color(static fn (?Member $record): string => match ($record?->currentPaymentInformation?->expiration_status) {
+                        MandateExpirationStatus::Active => 'success',
+                        MandateExpirationStatus::Expired => 'warning',
+                        MandateExpirationStatus::Revoked, null => 'gray',
+                    }),
 
                 TextEntry::make('active_mandate_iban')
                     ->label(__('labels.banking_account_number'))

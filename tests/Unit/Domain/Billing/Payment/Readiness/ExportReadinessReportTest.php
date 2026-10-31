@@ -71,6 +71,24 @@ final class ExportReadinessReportTest extends UnitTestCase
         static::assertTrue($report->isSatisfiedBy($confirmation));
     }
 
+    public function test_it_requires_an_override_for_a_transfer_member_with_an_active_mandate(): void
+    {
+        $report = $this->report([$this->invoiceIssue(ExportReadinessReason::TransferWithActiveMandate)]);
+
+        static::assertTrue($report->isBlocked());
+        static::assertCount(1, $report->overridableIssues());
+        static::assertFalse($report->isSatisfiedBy(new ExportConfirmation()));
+        static::assertTrue($report->isSatisfiedBy(new ExportConfirmation(
+            overrides: [
+                new ExportOverride(
+                    invoiceId: InvoiceId::create(1),
+                    reason: ExportReadinessReason::TransferWithActiveMandate,
+                    note: 'Member confirmed the collection.',
+                ),
+            ],
+        )));
+    }
+
     public function test_it_rejects_an_override_without_a_reason(): void
     {
         $report = $this->report([$this->invoiceIssue(ExportReadinessReason::ExpiredMandate)]);

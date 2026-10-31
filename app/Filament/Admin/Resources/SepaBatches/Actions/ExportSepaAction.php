@@ -9,7 +9,6 @@ use App\Domain\Billing\Payment\Readiness\ExportConfirmation;
 use App\Domain\Billing\Payment\Readiness\ExportNotReadyException;
 use App\Domain\Billing\Payment\Readiness\ExportOverride;
 use App\Domain\Billing\Payment\Readiness\ExportReadinessIssue;
-use App\Domain\Billing\Payment\Readiness\ExportReadinessReason;
 use App\Domain\Billing\Payment\Readiness\ExportReadinessService;
 use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Billing\Payment\SepaBatchService;
@@ -39,7 +38,7 @@ final class ExportSepaAction
                 return [
                     ExportReadinessView::make($report),
                     CheckboxList::make('overridden_invoices')
-                        ->label(__('labels.export_readiness.expired_mandate_overrides'))
+                        ->label(__('labels.export_readiness.override_invoices'))
                         ->options(
                             static fn (): array => collect($report->overridableIssues())
                                 ->mapWithKeys(static fn (ExportReadinessIssue $issue): array => [
@@ -63,18 +62,37 @@ final class ExportSepaAction
                 SepaBatch $record,
                 array $data,
                 SepaBatchService $batchService,
+                ExportReadinessService $readiness,
                 Action $action,
             ): ?Response {
-                $confirmation = new ExportConfirmation(
-                    overrides: array_map(
-                        static fn (int|string $invoiceId): ExportOverride => new ExportOverride(
-                            invoiceId: InvoiceId::create((int) $invoiceId),
-                            reason: ExportReadinessReason::ExpiredMandate,
-                            note: (string) ($data['override_reason'] ?? ''),
-                        ),
-                        $data['overridden_invoices'] ?? [],
-                    ),
-                );
+                $report = $readiness->assess(SepaBatchId::create($record->id));
+                $overridableReasons = [];
+
+                foreach ($report->overridableIssues() as $issue) {
+                    if ($issue->invoiceId === null) {
+                        continue;
+                    }
+
+                    $overridableReasons[$issue->invoiceId->value] = $issue->reason;
+                }
+
+                $overrides = [];
+
+                foreach ($data['overridden_invoices'] ?? [] as $invoiceId) {
+                    $reason = $overridableReasons[(int) $invoiceId] ?? null;
+
+                    if ($reason === null) {
+                        continue;
+                    }
+
+                    $overrides[] = new ExportOverride(
+                        invoiceId: InvoiceId::create((int) $invoiceId),
+                        reason: $reason,
+                        note: (string) ($data['override_reason'] ?? ''),
+                    );
+                }
+
+                $confirmation = new ExportConfirmation(overrides: $overrides);
 
                 try {
                     $xml = $batchService->export(

@@ -21,6 +21,7 @@ use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Domain\Billing\Payment\SepaConfiguration;
 use App\Domain\Billing\Payment\SequenceType;
 use App\Domain\Members\MemberId;
+use App\Domain\Members\PaymentMethod;
 use App\Domain\SharedKernel\CompoundPrice;
 use Carbon\CarbonImmutable;
 use Override;
@@ -166,6 +167,20 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
         $this->assertReasons($report, [ExportReadinessReason::SequenceTypeMismatch]);
         static::assertSame(ExportReadinessCategory::BrokenData, $report->brokenDataIssues()[0]->category());
         static::assertTrue($report->isBlocked());
+    }
+
+    public function test_assess_reports_a_transfer_member_with_an_active_mandate_as_overridable(): void
+    {
+        $memberId = MemberId::create(7);
+        $this->expectAssessment(
+            [$this->candidate(new CompoundPrice(100.0, 21.0), $memberId, paymentMethod: PaymentMethod::Transfer)],
+            [$memberId->value => $this->activeMandate()],
+        );
+
+        $report = $this->service->assess($this->batchId());
+
+        $this->assertReasons($report, [ExportReadinessReason::TransferWithActiveMandate]);
+        static::assertCount(1, $report->overridableIssues());
     }
 
     public function test_assess_passes_a_legitimate_first_collection(): void
@@ -407,6 +422,7 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
         ?MemberId $memberId = null,
         InvoiceStatus $status = InvoiceStatus::Pending,
         SequenceType $sequenceType = SequenceType::Recurring,
+        PaymentMethod $paymentMethod = PaymentMethod::DirectDebit,
     ): SepaCollectionCandidate {
         return new SepaCollectionCandidate(
             invoiceId: InvoiceId::create(1),
@@ -416,6 +432,7 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
             total: $total,
             status: $status,
             sequenceType: $sequenceType,
+            paymentMethod: $paymentMethod,
         );
     }
 

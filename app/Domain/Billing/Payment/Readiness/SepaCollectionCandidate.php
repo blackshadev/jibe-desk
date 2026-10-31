@@ -8,6 +8,7 @@ use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Domain\Billing\Payment\SequenceType;
 use App\Domain\Members\MemberId;
+use App\Domain\Members\PaymentMethod;
 use App\Domain\SharedKernel\CompoundPrice;
 
 final readonly class SepaCollectionCandidate
@@ -20,6 +21,7 @@ final readonly class SepaCollectionCandidate
         public CompoundPrice $total,
         public InvoiceStatus $status,
         public SequenceType $sequenceType,
+        public PaymentMethod $paymentMethod = PaymentMethod::DirectDebit,
     ) {}
 
     public function amountInCents(): int
