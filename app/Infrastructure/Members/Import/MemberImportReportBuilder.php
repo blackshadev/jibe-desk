@@ -95,8 +95,7 @@ final readonly class MemberImportReportBuilder
             $mismatches[] = new MemberImportEmailMismatch(
                 lidnr: $row->lidnr,
                 name: $row->fullName,
-                privateEmail: $row->email,
-                contactEmail: $row->contactEmail,
+                email: $row->email,
             );
         }
 
