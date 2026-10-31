@@ -58,6 +58,13 @@ final readonly class BillableItemInstanceRepositoryExpectation
             ->with(equalTo($memberId), equalTo($endDate));
     }
 
+    public function expectsReopenAll(MemberId $memberId, DateTimeInterface $endDate): void
+    {
+        $this->mock
+            ->expects('reopenAll')
+            ->with(equalTo($memberId), equalTo($endDate));
+    }
+
     public function expectsUpdateEndDate(BillableItemInstanceId $instanceId, ?DateTimeInterface $endDate): void
     {
         $this->mock

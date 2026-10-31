@@ -6,20 +6,24 @@ namespace App\Domain\Billing\Subscriptions\BillingItemApplicators;
 
 use App\Domain\Billing\Subscriptions\BillableItemInstanceRepository;
 use App\Domain\Members\MemberId;
+use DateTimeInterface;
 use Override;
-use Psr\Clock\ClockInterface;
 
 final readonly class ApplyStoppedMembershipImpl implements ApplyStoppedMembership
 {
     public function __construct(
         private BillableItemInstanceRepository $billableItemInstanceRepository,
-        private ClockInterface $clock,
     ) {}
 
     #[Override]
-    public function apply(MemberId $memberId): void
+    public function apply(MemberId $memberId, DateTimeInterface $stoppedAt): void
     {
-        $endDate = $this->clock->now();
-        $this->billableItemInstanceRepository->stopAll($memberId, $endDate);
+        $this->billableItemInstanceRepository->stopAll($memberId, $stoppedAt);
+    }
+
+    #[Override]
+    public function clear(MemberId $memberId, DateTimeInterface $stoppedAt): void
+    {
+        $this->billableItemInstanceRepository->reopenAll($memberId, $stoppedAt);
     }
 }

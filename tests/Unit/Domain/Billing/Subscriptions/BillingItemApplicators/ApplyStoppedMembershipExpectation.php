@@ -6,6 +6,7 @@ namespace Tests\Unit\Domain\Billing\Subscriptions\BillingItemApplicators;
 
 use App\Domain\Billing\Subscriptions\BillingItemApplicators\ApplyStoppedMembership;
 use App\Domain\Members\MemberId;
+use DateTimeInterface;
 use Mockery;
 use Mockery\MockInterface;
 
@@ -22,11 +23,19 @@ final readonly class ApplyStoppedMembershipExpectation
         return new self(Mockery::mock(ApplyStoppedMembership::class));
     }
 
-    public function expectsApply(MemberId $memberId): void
+    public function expectsApply(MemberId $memberId, DateTimeInterface $stoppedAt): void
     {
         $this->mock
             ->expects('apply')
-            ->with(equalTo($memberId))
+            ->with(equalTo($memberId), equalTo($stoppedAt))
+            ->andReturnNull();
+    }
+
+    public function expectsClear(MemberId $memberId, DateTimeInterface $stoppedAt): void
+    {
+        $this->mock
+            ->expects('clear')
+            ->with(equalTo($memberId), equalTo($stoppedAt))
             ->andReturnNull();
     }
 }
