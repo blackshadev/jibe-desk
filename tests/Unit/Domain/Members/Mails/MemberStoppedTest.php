@@ -24,7 +24,7 @@ final class MemberStoppedTest extends UnitTestCase
     {
         $mail = new MemberStopped(new Recipient('Vries, Jan de', 'jan@example.com'), '31-12-2026', false);
 
-        static::assertSame('Je lidmaatschap bij Watersportvereniging Almere Centraal is stopgezet', $mail->subject());
+        static::assertSame('Je lidmaatschap bij Watersportvereniging Almere Centraal wordt stopgezet', $mail->subject());
     }
 
     public function test_content_uses_the_stop_template_and_passes_the_payload(): void
