@@ -13,6 +13,7 @@ use App\Models\Household;
 use App\Models\Member;
 use App\Models\Membership;
 use App\Models\PaymentInformation;
+use Carbon\CarbonImmutable;
 use Database\Seeders\CostCenterSeeder;
 use Database\Seeders\MembershipSeeder;
 use DateTimeImmutable;
@@ -52,6 +53,7 @@ final class MemberImportImplTest extends FeatureTestCase
     public function test_import_creates_members_households_mandates_and_billing(): void
     {
         $this->seed([CostCenterSeeder::class, MembershipSeeder::class]);
+        $this->travelTo(CarbonImmutable::parse('2027-06-01'));
 
         $report = $this->subject->import($this->request([
             $this->annaRow(),

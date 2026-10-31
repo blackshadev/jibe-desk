@@ -8,6 +8,7 @@ use App\Domain\Members\Dto\NewMember;
 use App\Domain\Members\Member;
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MemberRepository;
+use DateTimeInterface;
 use Mockery;
 use Mockery\MockInterface;
 
@@ -61,5 +62,21 @@ final readonly class MemberRepositoryExpectation
         $this->mock
             ->expects('accept')
             ->never();
+    }
+
+    public function expectsScheduleStop(MemberId $memberId, DateTimeInterface $stoppedAt): void
+    {
+        $this->mock
+            ->expects('scheduleStop')
+            ->with(equalTo($memberId), equalTo($stoppedAt))
+            ->andReturnNull();
+    }
+
+    public function expectsCancelStop(MemberId $memberId): void
+    {
+        $this->mock
+            ->expects('cancelStop')
+            ->with(equalTo($memberId))
+            ->andReturnNull();
     }
 }

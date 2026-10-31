@@ -13,6 +13,7 @@ use App\Filament\Admin\Resources\OutgoingEmails\Pages\ListOutgoingEmails;
 use App\Filament\Admin\Resources\PurchaseOrders\Pages\ListPurchaseOrders;
 use App\Filament\Admin\Resources\SepaBatches\Pages\ListSepaBatches;
 use App\Filament\Admin\Resources\StorageSpaces\Pages\ListStorageSpaces;
+use App\Models\Member;
 use App\Models\User;
 use Livewire\Livewire;
 use Tests\Concerns\WithAuthorizedUser;
@@ -210,5 +211,23 @@ final class AuthorizationTest extends FeatureTestCase
 
         Livewire::test(ListBankStatements::class)
             ->assertForbidden();
+    }
+
+    public function test_member_administration_can_schedule_member_stops(): void
+    {
+        $user = $this->withUserHavingRole(RoleName::MemberAdministration);
+        $member = Member::factory()->createQuietly();
+
+        static::assertTrue($user->can('schedule_member_stop'));
+        static::assertTrue($user->can('scheduleStop', $member));
+    }
+
+    public function test_financial_administration_cannot_schedule_member_stops(): void
+    {
+        $user = $this->withUserHavingRole(RoleName::FinancialAdministration);
+        $member = Member::factory()->createQuietly();
+
+        static::assertFalse($user->can('schedule_member_stop'));
+        static::assertFalse($user->can('scheduleStop', $member));
     }
 }

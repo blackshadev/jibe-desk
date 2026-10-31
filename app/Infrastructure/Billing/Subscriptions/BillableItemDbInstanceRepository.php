@@ -85,6 +85,7 @@ final class BillableItemDbInstanceRepository implements BillableItemInstanceRepo
         $instances = BillableItemInstance::query()
             ->with('billableItem')
             ->where('member_id', $memberId->value)
+            ->whereNull('end_date')
             ->get();
 
         /** @var BillableItemInstance $instance */
@@ -97,6 +98,25 @@ final class BillableItemDbInstanceRepository implements BillableItemInstanceRepo
                 'end_date' => $actualEndDate,
             ]);
         }
+    }
+
+    #[Override]
+    public function reopenAll(MemberId $memberId, DateTimeInterface $endDate): void
+    {
+        $instances = BillableItemInstance::query()
+            ->with('billableItem')
+            ->where('member_id', $memberId->value)
+            ->whereNotNull('end_date')
+            ->get();
+
+        $instances
+            ->filter(static function (BillableItemInstance $instance) use ($endDate): bool {
+                $billPeriod = $instance->billableItem->bill_period->toPeriodName();
+                $scheduledEndDate = CarbonImmutable::instance($endDate)->endOf($billPeriod);
+
+                return $instance->end_date?->isSameDay($scheduledEndDate) ?? false;
+            })
+            ->each(static fn (BillableItemInstance $instance) => $instance->update(['end_date' => null]));
     }
 
     #[Override]

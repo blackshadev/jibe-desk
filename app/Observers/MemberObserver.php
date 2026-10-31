@@ -12,6 +12,7 @@ use App\Domain\Billing\Subscriptions\BillingItemApplicators\ApplyStoppedMembersh
 use App\Domain\Members\MemberId;
 use App\Domain\Members\MembershipId;
 use App\Models\Member;
+use Carbon\CarbonImmutable;
 
 final readonly class MemberObserver
 {
@@ -56,8 +57,13 @@ final readonly class MemberObserver
             $this->applySameHouseholdBilling->apply(MemberId::create($member->id));
         }
 
-        if ($member->wasChanged('stopped_at')) {
-            $this->applyStoppedMembership->apply(MemberId::create($member->id));
+        if ($member->wasChanged('stopped_at') && $member->stopped_at !== null) {
+            $this->applyStoppedMembership->apply(MemberId::create($member->id), $member->stopped_at);
+        }
+
+        if ($member->wasChanged('stopped_at') && $member->stopped_at === null) {
+            $previousStopDate = CarbonImmutable::parse((string) $member->getOriginal('stopped_at'));
+            $this->applyStoppedMembership->clear(MemberId::create($member->id), $previousStopDate);
         }
     }
 }

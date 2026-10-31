@@ -182,4 +182,29 @@ final class MemberDbRepositoryTest extends FeatureTestCase
         $model->refresh();
         static::assertEquals($acceptedAt, $model->accepted_at);
     }
+
+    public function test_schedule_stop_sets_stopped_at(): void
+    {
+        $model = Member::factory()->createQuietly(['stopped_at' => null]);
+        $stoppedAt = new DateTimeImmutable('2026-12-31 23:59:59');
+
+        $repo = new MemberDbRepository();
+
+        $repo->scheduleStop(MemberId::create($model->id), $stoppedAt);
+
+        $model->refresh();
+        static::assertSame('2026-12-31 23:59:59', $model->stopped_at?->format('Y-m-d H:i:s'));
+    }
+
+    public function test_cancel_stop_clears_stopped_at(): void
+    {
+        $model = Member::factory()->createQuietly(['stopped_at' => new DateTimeImmutable('2026-12-31 23:59:59')]);
+
+        $repo = new MemberDbRepository();
+
+        $repo->cancelStop(MemberId::create($model->id));
+
+        $model->refresh();
+        static::assertNull($model->stopped_at);
+    }
 }
