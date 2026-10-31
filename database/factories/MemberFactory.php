@@ -57,6 +57,14 @@ final class MemberFactory extends Factory
         ]);
     }
 
+    public function scheduled(): self
+    {
+        // @mago-expect lint:prefer-static-closure
+        return $this->state(fn (array $_attributes): array => [
+            'stopped_at' => now()->addMonth(),
+        ]);
+    }
+
     public function pending(): self
     {
         // @mago-expect lint:prefer-static-closure

@@ -11,6 +11,7 @@ use App\Domain\Registration\FormData;
 use App\Models\Pivots\ActivityMember;
 use App\Observers\MemberObserver;
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -180,7 +181,21 @@ final class Member extends Model
 
     public function isActive(): bool
     {
-        return $this->stopped_at === null && $this->accepted_at !== null;
+        return $this->accepted_at !== null && !$this->isStopInEffect();
+    }
+
+    public function isScheduled(): bool
+    {
+        return $this->isActive() && $this->stopped_at !== null;
+    }
+
+    private function isStopInEffect(): bool
+    {
+        if ($this->stopped_at === null) {
+            return false;
+        }
+
+        return !CarbonImmutable::instance($this->stopped_at)->isFuture();
     }
 
     /** @return array<string, string> */
@@ -201,13 +216,23 @@ final class Member extends Model
     #[Scope]
     protected function active(Builder $query): Builder
     {
-        return $query->whereNull('stopped_at')->whereNotNull('accepted_at');
+        return $query
+            ->whereNotNull('accepted_at')
+            ->where(static fn (Builder $query) => $query
+                ->whereNull('stopped_at')
+                ->orWhereFuture('stopped_at'));
+    }
+
+    #[Scope]
+    protected function scheduled(Builder $query): Builder
+    {
+        return $query->whereNotNull('accepted_at')->whereFuture('stopped_at');
     }
 
     #[Scope]
     protected function stopped(Builder $query): Builder
     {
-        return $query->whereNotNull('stopped_at');
+        return $query->whereNowOrPast('stopped_at');
     }
 
     #[Scope]
