@@ -25,7 +25,6 @@ final class MemberImportReportTest extends UnitTestCase
             rtcMembers: [$row],
             containerMembers: [$row],
             rowsWithoutMembershipType: [$row],
-            rowsDefaultedToWindsurfer: [$row],
             emailMismatches: [],
         );
 
@@ -39,7 +38,6 @@ final class MemberImportReportTest extends UnitTestCase
         static::assertSame([$row], $subject->rtcMembers);
         static::assertSame([$row], $subject->containerMembers);
         static::assertSame([$row], $subject->rowsWithoutMembershipType);
-        static::assertSame([$row], $subject->rowsDefaultedToWindsurfer);
         static::assertSame([], $subject->emailMismatches);
     }
 }

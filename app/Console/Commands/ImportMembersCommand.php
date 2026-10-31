@@ -72,8 +72,7 @@ final class ImportMembersCommand extends Command
         $this->renderRows('Leavers', $report->leavers);
         $this->renderRows('RTC members', $report->rtcMembers);
         $this->renderRows('Container members', $report->containerMembers);
-        $this->renderRows('Rows without Soortlid', $report->rowsWithoutMembershipType);
-        $this->renderRows('Rows defaulted to Windsurfer', $report->rowsDefaultedToWindsurfer);
+        $this->renderRows('Rows defaulted to Windsurfer', $report->rowsWithoutMembershipType);
         $this->renderEmailMismatches($report->emailMismatches);
     }
 

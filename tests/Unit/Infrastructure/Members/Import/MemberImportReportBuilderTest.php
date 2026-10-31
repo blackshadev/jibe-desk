@@ -80,7 +80,7 @@ final class MemberImportReportBuilderTest extends UnitTestCase
         static::assertSame('1001', $report->containerMembers[0]->lidnr);
     }
 
-    public function test_build_reports_rows_without_a_membership_type_as_defaulted(): void
+    public function test_build_reports_rows_without_a_membership_type(): void
     {
         $frank = $this->createdMember(
             lidnr: '124361',
@@ -98,8 +98,6 @@ final class MemberImportReportBuilderTest extends UnitTestCase
 
         static::assertCount(1, $report->rowsWithoutMembershipType);
         static::assertSame('124361', $report->rowsWithoutMembershipType[0]->lidnr);
-        static::assertCount(1, $report->rowsDefaultedToWindsurfer);
-        static::assertSame('124361', $report->rowsDefaultedToWindsurfer[0]->lidnr);
     }
 
     public function test_build_reports_email_mismatches_case_insensitively(): void
@@ -152,7 +150,6 @@ final class MemberImportReportBuilderTest extends UnitTestCase
         static::assertSame([], $report->rtcMembers);
         static::assertSame([], $report->containerMembers);
         static::assertSame([], $report->rowsWithoutMembershipType);
-        static::assertSame([], $report->rowsDefaultedToWindsurfer);
         static::assertSame([], $report->emailMismatches);
     }
 

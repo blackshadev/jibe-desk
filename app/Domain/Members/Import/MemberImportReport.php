@@ -11,7 +11,6 @@ final readonly class MemberImportReport
      * @param list<MemberImportReportRow> $rtcMembers
      * @param list<MemberImportReportRow> $containerMembers
      * @param list<MemberImportReportRow> $rowsWithoutMembershipType
-     * @param list<MemberImportReportRow> $rowsDefaultedToWindsurfer
      * @param list<MemberImportEmailMismatch> $emailMismatches
      */
     public function __construct(
@@ -25,7 +24,6 @@ final readonly class MemberImportReport
         public array $rtcMembers,
         public array $containerMembers,
         public array $rowsWithoutMembershipType,
-        public array $rowsDefaultedToWindsurfer,
         public array $emailMismatches,
     ) {}
 }
