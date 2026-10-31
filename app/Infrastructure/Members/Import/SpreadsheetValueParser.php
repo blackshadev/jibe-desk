@@ -29,7 +29,7 @@ final readonly class SpreadsheetValueParser
             throw MemberImportException::invalidPostalCode($rowNumber, $value);
         }
 
-        return sprintf('%s %s', $matches[1], $matches[2]);
+        return sprintf('%s%s', $matches[1], $matches[2]);
     }
 
     public function iban(string $value, int $rowNumber): string

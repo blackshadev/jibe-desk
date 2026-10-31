@@ -42,7 +42,7 @@ final class SpreadsheetRowMapperTest extends UnitTestCase
         static::assertSame('Krachtveld', $mapped->addressStreet);
         static::assertSame('30', $mapped->addressHousenumber);
         static::assertNull($mapped->addressHousenumberAddition);
-        static::assertSame('1359 KJ', $mapped->addressPostalcode);
+        static::assertSame('1359KJ', $mapped->addressPostalcode);
         static::assertSame('Almere', $mapped->addressCity);
         static::assertSame('Volwassenlid', $mapped->membershipType);
         static::assertSame('Windsurfer', $mapped->membershipName);
@@ -100,9 +100,9 @@ final class SpreadsheetRowMapperTest extends UnitTestCase
         ]), 3);
 
         static::assertSame('Frederik van Eedenweg', $mapped->addressStreet);
-        static::assertSame('1359 KJ', $mapped->addressPostalcode);
+        static::assertSame('1359KJ', $mapped->addressPostalcode);
         static::assertSame('A', $mapped->addressHousenumberAddition);
-        static::assertSame('frederik van eedenweg|30|a|1359 KJ', $mapped->addressKey());
+        static::assertSame('frederik van eedenweg|30|a|1359KJ', $mapped->addressKey());
     }
 
     public function test_it_falls_back_to_the_contact_email(): void

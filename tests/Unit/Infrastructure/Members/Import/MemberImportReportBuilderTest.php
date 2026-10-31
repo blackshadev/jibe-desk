@@ -171,7 +171,7 @@ final class MemberImportReportBuilderTest extends UnitTestCase
                 addressStreet: 'Dorpsstraat',
                 addressHousenumber: '1',
                 addressHousenumberAddition: null,
-                addressPostalcode: '1000 AA',
+                addressPostalcode: '1000AA',
                 addressCity: 'Almere',
                 membershipType: $membershipType,
                 membershipName: 'Windsurfer',

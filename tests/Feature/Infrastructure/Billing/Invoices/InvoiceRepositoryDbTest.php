@@ -31,7 +31,7 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
             'address_housenumber' => '12',
             'address_housenumber_addition' => 'B',
             'address_city' => 'Amsterdam',
-            'address_postalcode' => '1234 AB',
+            'address_postalcode' => '1234AB',
         ]);
         Invoice::factory()
             ->forMember($member)
@@ -57,7 +57,7 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
         $this->assertDatabaseHas('invoices', [
             'id' => $result->value,
             'recipient_name' => $member->name,
-            'recipient_address' => "Main Street 12B\n1234 AB, Amsterdam",
+            'recipient_address' => "Main Street 12B\n1234AB, Amsterdam",
             'invoice_number' => 'I-2026000001',
             'member_id' => $member->id,
         ]);
@@ -71,10 +71,10 @@ final class InvoiceRepositoryDbTest extends FeatureTestCase
             'address_housenumber' => '12',
             'address_housenumber_addition' => 'B',
             'address_city' => 'Amsterdam',
-            'address_postalcode' => '1234 AB',
+            'address_postalcode' => '1234AB',
         ]);
 
-        static::assertSame("Main Street 12B\n1234 AB, Amsterdam", $member->address);
+        static::assertSame("Main Street 12B\n1234AB, Amsterdam", $member->address);
     }
 
     public function test_create_persists_sepa_batch_id_when_provided(): void

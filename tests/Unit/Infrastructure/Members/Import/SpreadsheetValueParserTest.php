@@ -43,9 +43,9 @@ final class SpreadsheetValueParserTest extends UnitTestCase
         }
     }
 
-    #[TestWith(['1359 KJ', '1359 KJ'])]
-    #[TestWith(['1359kj', '1359 KJ'])]
-    #[TestWith([' 1359   kj ', '1359 KJ'])]
+    #[TestWith(['1359 KJ', '1359KJ'])]
+    #[TestWith(['1359kj', '1359KJ'])]
+    #[TestWith([' 1359   kj ', '1359KJ'])]
     public function test_postal_code_normalizes_the_value(string $value, string $expected): void
     {
         static::assertSame($expected, $this->subject->postalCode($value, 3));

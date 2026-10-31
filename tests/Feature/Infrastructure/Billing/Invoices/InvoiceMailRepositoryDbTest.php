@@ -61,7 +61,7 @@ final class InvoiceMailRepositoryDbTest extends FeatureTestCase
                 'date' => '2026-06-01',
                 'invoice_number' => 'I-20260001',
                 'recipient_name' => 'Test Lid',
-                'recipient_address' => 'Teststraat 1\n1234 AB Amsterdam',
+                'recipient_address' => 'Teststraat 1\n1234AB Amsterdam',
                 'recipient_email' => 'test@example.com',
             ]);
 
@@ -86,7 +86,7 @@ final class InvoiceMailRepositoryDbTest extends FeatureTestCase
         static::assertSame('Test Lid', $result->recipient->name);
         static::assertSame('test@example.com', $result->recipient->email);
         static::assertStringContainsString('Teststraat 1', $result->recipientAddress);
-        static::assertStringContainsString('1234 AB Amsterdam', $result->recipientAddress);
+        static::assertStringContainsString('1234AB Amsterdam', $result->recipientAddress);
         static::assertSame('2026-06-01', $result->invoiceDate->format('Y-m-d'));
         static::assertCount(2, $result->lines);
 

@@ -53,6 +53,10 @@ final class ImportMembersCommandTest extends FeatureTestCase
         static::assertSame(7, Member::query()->active()->count());
         static::assertSame(1, Member::query()->stopped()->count());
 
+        foreach (Member::all() as $member) {
+            static::assertMatchesRegularExpression('/^\d{4}[A-Z]{2}$/', $member->address_postalcode);
+        }
+
         $leaver = Member::query()->where('email', 'dana@example.com')->firstOrFail();
         static::assertSame('2026-12-31', $leaver->stopped_at?->format('Y-m-d'));
         static::assertSame('2015-05-05', $leaver->accepted_at?->format('Y-m-d'));

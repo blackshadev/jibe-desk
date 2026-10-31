@@ -29,7 +29,7 @@ final class CreatedMemberTest extends UnitTestCase
             addressStreet: 'Krachtveld',
             addressHousenumber: '30',
             addressHousenumberAddition: null,
-            addressPostalcode: '1359 KJ',
+            addressPostalcode: '1359KJ',
             addressCity: 'Almere',
             membershipType: 'Volwassenlid',
             membershipName: 'Windsurfer',

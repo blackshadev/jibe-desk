@@ -140,7 +140,7 @@ final class HouseholdCreatorTest extends FeatureTestCase
                 addressStreet: $street,
                 addressHousenumber: $housenumber,
                 addressHousenumberAddition: $addition,
-                addressPostalcode: '1000 AA',
+                addressPostalcode: '1000AA',
                 addressCity: 'Almere',
                 membershipType: 'Volwassenlid',
                 membershipName: 'Windsurfer',

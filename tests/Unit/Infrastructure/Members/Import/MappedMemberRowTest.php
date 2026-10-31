@@ -41,29 +41,29 @@ final class MappedMemberRowTest extends UnitTestCase
             addressStreet: 'Krachtveld',
             addressHousenumber: '30',
             addressHousenumberAddition: 'A',
-            addressPostalcode: '1359 KJ',
+            addressPostalcode: '1359KJ',
         );
         $second = $this->row(
             addressStreet: 'krachtveld',
             addressHousenumber: '30',
             addressHousenumberAddition: 'a',
-            addressPostalcode: '1359 KJ',
+            addressPostalcode: '1359KJ',
         );
 
         static::assertSame($first->addressKey(), $second->addressKey());
-        static::assertSame('krachtveld|30|a|1359 KJ', $first->addressKey());
+        static::assertSame('krachtveld|30|a|1359KJ', $first->addressKey());
     }
 
     public function test_address_key_treats_a_missing_addition_as_empty(): void
     {
-        static::assertSame('krachtveld|30||1359 KJ', $this->row(addressHousenumberAddition: null)->addressKey());
+        static::assertSame('krachtveld|30||1359KJ', $this->row(addressHousenumberAddition: null)->addressKey());
     }
 
     private function row(
         string $addressStreet = 'Krachtveld',
         string $addressHousenumber = '30',
         ?string $addressHousenumberAddition = 'A',
-        string $addressPostalcode = '1359 KJ',
+        string $addressPostalcode = '1359KJ',
         ?string $membershipType = 'Volwassenlid',
         ?DateTimeImmutable $stopDate = null,
     ): MappedMemberRow {
