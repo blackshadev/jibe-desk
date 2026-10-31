@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\Members\Pages;
 
 use App\Filament\Admin\Resources\Members\Actions\AcceptMemberAction;
+use App\Filament\Admin\Resources\Members\Actions\CancelStopAction;
 use App\Filament\Admin\Resources\Members\Actions\CreateUserAccountAction;
-use App\Filament\Admin\Resources\Members\Actions\StopAction;
+use App\Filament\Admin\Resources\Members\Actions\ScheduleStopAction;
 use App\Filament\Admin\Resources\Members\MemberResource;
 use App\Models\Member;
 use Filament\Actions\ActionGroup;
@@ -38,7 +39,8 @@ final class EditMember extends EditRecord
         return [
             ActionGroup::make([
                 CreateUserAccountAction::make(),
-                StopAction::make(),
+                ScheduleStopAction::make(),
+                CancelStopAction::make(),
                 AcceptMemberAction::make(),
                 DeleteAction::make()->visible(static fn (Member $record): bool => $record->isPending()),
             ])
