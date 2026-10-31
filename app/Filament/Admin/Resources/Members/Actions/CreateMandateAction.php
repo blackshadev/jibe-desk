@@ -51,13 +51,8 @@ final class CreateMandateAction
                     signedAt: CarbonImmutable::parse((string) $data['mandate_accepted_date']),
                 );
 
-                if ((bool) ($data['switch_to_direct_debit'] ?? false)) {
-                    $mandates->createAndSwitchToDirectDebit($memberId, $mandateDetails);
-
-                    return;
-                }
-
-                $mandates->create($memberId, $mandateDetails);
+                $switchToDirectDebit = $data['switch_to_direct_debit'] ?? false;
+                $mandates->create($memberId, $mandateDetails, $switchToDirectDebit ? PaymentMethod::DirectDebit : null);
             })
             ->successNotificationTitle(__('notifications.mandate_created'))
             ->after(static fn (Component $livewire) => $livewire->dispatch('refresh'));

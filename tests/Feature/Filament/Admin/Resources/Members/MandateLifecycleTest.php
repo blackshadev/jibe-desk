@@ -380,7 +380,7 @@ final class MandateLifecycleTest extends FeatureTestCase
             ->assertFormFieldDoesNotExist('uuid');
     }
 
-    public function test_payment_tab_shows_no_active_mandate_after_revocation(): void
+    public function test_payment_tab_shows_the_revoked_mandate_state_after_revocation(): void
     {
         $this->withAuthorizedUser();
         $member = Member::factory()->createQuietly();
@@ -389,6 +389,7 @@ final class MandateLifecycleTest extends FeatureTestCase
             ->createQuietly(['member_id' => $member->id]);
 
         Livewire::test(EditMember::class, ['record' => $member->getRouteKey()])
-            ->assertSee('Geen actieve machtiging');
+            ->assertSee('Geen machtiging')
+            ->assertSee('Ingetrokken');
     }
 }

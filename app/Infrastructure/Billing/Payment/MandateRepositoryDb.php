@@ -22,22 +22,8 @@ use Override;
 final class MandateRepositoryDb implements MandateRepository
 {
     #[Override]
-    public function create(MemberId $memberId, MandateDetails $details): PaymentInformationId
+    public function create(MemberId $memberId, MandateDetails $details, ?PaymentMethod $switchMemberTo = null): PaymentInformationId
     {
-        return $this->createMandate($memberId, $details);
-    }
-
-    #[Override]
-    public function createAndSwitchToDirectDebit(MemberId $memberId, MandateDetails $details): PaymentInformationId
-    {
-        return $this->createMandate($memberId, $details, PaymentMethod::DirectDebit);
-    }
-
-    private function createMandate(
-        MemberId $memberId,
-        MandateDetails $details,
-        ?PaymentMethod $switchMemberTo = null,
-    ): PaymentInformationId {
         return DB::transaction(static function () use ($memberId, $details, $switchMemberTo): PaymentInformationId {
             PaymentInformation::query()
                 ->where('member_id', $memberId->value)

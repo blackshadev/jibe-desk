@@ -37,7 +37,7 @@ final readonly class MandateReadinessRepositoryDb implements MandateReadinessRep
             ->mapWithKeys(function (Member $member): array {
                 $mandate = $member->currentPaymentInformation;
 
-                if (!$mandate instanceof PaymentInformation) {
+                if ($mandate === null) {
                     return [$member->id => MandateReadiness::missing()];
                 }
 

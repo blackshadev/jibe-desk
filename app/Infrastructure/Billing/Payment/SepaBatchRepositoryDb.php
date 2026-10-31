@@ -97,6 +97,7 @@ final readonly class SepaBatchRepositoryDb implements SepaBatchRepository
         $from = $month->subMonth()->startOfMonth();
         $to = $month->endOfMonth();
 
+        // Exclude transfer debit invoices. The Sepa export should still include transfer credit invoices.
         $transferDebitInvoiceIds = Invoice::query()
             ->join('invoice_lines', 'invoice_lines.invoice_id', '=', 'invoices.id')
             ->join('members', 'members.id', '=', 'invoices.member_id')
