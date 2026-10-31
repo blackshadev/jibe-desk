@@ -42,7 +42,6 @@ final readonly class MemberImportReportBuilder
                 $this->filterByRow($allMembers, static fn (MappedMemberRow $row): bool => $row->hasContainer),
             ),
             rowsWithoutMembershipType: $rowsWithoutMembershipType,
-            rowsDefaultedToWindsurfer: $rowsWithoutMembershipType,
             emailMismatches: $this->emailMismatches($allMembers),
         );
     }

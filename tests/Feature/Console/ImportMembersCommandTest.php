@@ -44,7 +44,7 @@ final class ImportMembersCommandTest extends FeatureTestCase
             ->expectsOutputToContain('Leavers (1)')
             ->expectsOutputToContain('RTC members (1)')
             ->expectsOutputToContain('Container members (1)')
-            ->expectsOutputToContain('Rows without Soortlid (1)')
+            ->expectsOutputToContain('Rows defaulted to Windsurfer (1)')
             ->expectsOutputToContain('Email mismatches (1)')
             ->expectsOutputToContain('Dana Doekes')
             ->expectsOutputToContain('Gijs Groot')
