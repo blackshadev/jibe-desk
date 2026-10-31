@@ -8,6 +8,7 @@ use App\Models\Member;
 use App\Models\User;
 use Filament\Resources\RelationManagers\RelationManager;
 use Illuminate\Database\Eloquent\Model;
+use Livewire\Attributes\On;
 use Override;
 
 abstract class MemberRelationManager extends RelationManager
@@ -30,5 +31,10 @@ abstract class MemberRelationManager extends RelationManager
         $owner = $this->getOwnerRecord();
 
         return $owner instanceof Member && $owner->isPending();
+    }
+
+    #[On('refresh')]
+    public function refresh(): void
+    {
     }
 }

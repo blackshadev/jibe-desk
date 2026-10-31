@@ -183,22 +183,27 @@ final class MemberDbRepositoryTest extends FeatureTestCase
         static::assertEquals($acceptedAt, $model->accepted_at);
     }
 
-    public function test_schedule_stop_sets_stopped_at(): void
+    public function test_schedule_stop_sets_stopped_at_and_stop_requested_at(): void
     {
-        $model = Member::factory()->createQuietly(['stopped_at' => null]);
+        $model = Member::factory()->createQuietly(['stopped_at' => null, 'stop_requested_at' => null]);
         $stoppedAt = new DateTimeImmutable('2026-12-31 23:59:59');
+        $stopRequestedAt = new DateTimeImmutable('2026-06-01');
 
         $repo = new MemberDbRepository();
 
-        $repo->scheduleStop(MemberId::create($model->id), $stoppedAt);
+        $repo->scheduleStop(MemberId::create($model->id), $stoppedAt, $stopRequestedAt);
 
         $model->refresh();
         static::assertSame('2026-12-31 23:59:59', $model->stopped_at?->format('Y-m-d H:i:s'));
+        static::assertSame('2026-06-01', $model->stop_requested_at?->format('Y-m-d'));
     }
 
-    public function test_cancel_stop_clears_stopped_at(): void
+    public function test_cancel_stop_clears_stopped_at_and_stop_requested_at(): void
     {
-        $model = Member::factory()->createQuietly(['stopped_at' => new DateTimeImmutable('2026-12-31 23:59:59')]);
+        $model = Member::factory()->createQuietly([
+            'stopped_at' => new DateTimeImmutable('2026-12-31 23:59:59'),
+            'stop_requested_at' => new DateTimeImmutable('2026-06-01'),
+        ]);
 
         $repo = new MemberDbRepository();
 
@@ -206,5 +211,6 @@ final class MemberDbRepositoryTest extends FeatureTestCase
 
         $model->refresh();
         static::assertNull($model->stopped_at);
+        static::assertNull($model->stop_requested_at);
     }
 }

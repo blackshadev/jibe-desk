@@ -32,6 +32,7 @@ use Override;
  *
  * @property PaymentMethod $payment_method
  * @property null|DateTimeInterface $stopped_at
+ * @property null|DateTimeInterface $stop_requested_at
  * @property null|DateTimeInterface $accepted_at
  * @property FormDataArray|null $registration_data
  */
@@ -205,6 +206,7 @@ final class Member extends Model
             'payment_method' => PaymentMethod::class,
             'registration_data' => 'array',
             'stopped_at' => 'datetime',
+            'stop_requested_at' => 'date',
             'accepted_at' => 'datetime',
         ];
     }
@@ -214,9 +216,11 @@ final class Member extends Model
     {
         return $query
             ->whereNotNull('accepted_at')
-            ->where(static fn (Builder $query) => $query
-                ->whereNull('stopped_at')
-                ->orWhereFuture('stopped_at'));
+            ->where(
+                static fn (Builder $query) => $query
+                    ->whereNull('stopped_at')
+                    ->orWhereFuture('stopped_at'),
+            );
     }
 
     #[Scope]

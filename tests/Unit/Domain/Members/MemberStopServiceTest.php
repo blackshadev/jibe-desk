@@ -7,8 +7,8 @@ namespace Tests\Unit\Domain\Members;
 use App\Domain\Members\Events\MemberStopScheduled;
 use App\Domain\Members\Member;
 use App\Domain\Members\MemberId;
-use App\Domain\Members\MemberStopService;
 use App\Domain\Members\MembershipId;
+use App\Domain\Members\MemberStopService;
 use Carbon\CarbonImmutable;
 use Override;
 use Tests\Unit\Domain\Clock\ClockExpectation;
@@ -47,10 +47,11 @@ final class MemberStopServiceTest extends UnitTestCase
         $now = CarbonImmutable::parse('2026-06-15 09:30:00');
         $stopDate = CarbonImmutable::parse('2026-12-31');
         $stoppedAt = CarbonImmutable::parse('2026-12-31')->endOfDay();
+        $stopRequestedAt = CarbonImmutable::parse('2026-06-01');
 
         $this->memberRepo->expectsGetById($memberId, $this->member($memberId));
         $this->clock->expectsNow($now);
-        $this->memberRepo->expectsScheduleStop($memberId, $stoppedAt);
+        $this->memberRepo->expectsScheduleStop($memberId, $stoppedAt, $stopRequestedAt);
         $this->eventDispatcher->expectsDispatch(new MemberStopScheduled(
             memberId: $memberId,
             memberName: 'Jan de Vries',
@@ -59,7 +60,7 @@ final class MemberStopServiceTest extends UnitTestCase
             isImmediate: false,
         ));
 
-        $this->subject->schedule($memberId, $stopDate);
+        $this->subject->schedule($memberId, $stopDate, $stopRequestedAt);
     }
 
     public function test_it_stops_immediately_when_the_selected_day_is_today(): void
@@ -67,10 +68,11 @@ final class MemberStopServiceTest extends UnitTestCase
         $memberId = MemberId::create(1);
         $now = CarbonImmutable::parse('2026-06-15 09:30:00');
         $stopDate = CarbonImmutable::parse('2026-06-15');
+        $stopRequestedAt = CarbonImmutable::parse('2026-06-01');
 
         $this->memberRepo->expectsGetById($memberId, $this->member($memberId));
         $this->clock->expectsNow($now);
-        $this->memberRepo->expectsScheduleStop($memberId, $now);
+        $this->memberRepo->expectsScheduleStop($memberId, $now, $stopRequestedAt);
         $this->eventDispatcher->expectsDispatch(new MemberStopScheduled(
             memberId: $memberId,
             memberName: 'Jan de Vries',
@@ -79,7 +81,7 @@ final class MemberStopServiceTest extends UnitTestCase
             isImmediate: true,
         ));
 
-        $this->subject->schedule($memberId, $stopDate);
+        $this->subject->schedule($memberId, $stopDate, $stopRequestedAt);
     }
 
     public function test_it_cancels_the_stop_without_sending_an_event(): void

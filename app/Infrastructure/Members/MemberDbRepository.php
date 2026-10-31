@@ -105,18 +105,24 @@ final class MemberDbRepository implements MemberRepository
     }
 
     #[Override]
-    public function scheduleStop(MemberId $memberId, DateTimeInterface $stoppedAt): void
+    public function scheduleStop(MemberId $memberId, DateTimeInterface $stoppedAt, DateTimeInterface $stopRequestedAt): void
     {
-        Member::query()->findOrFail($memberId->value)->update([
-            'stopped_at' => $stoppedAt,
-        ]);
+        Member::query()
+            ->findOrFail($memberId->value)
+            ->update([
+                'stopped_at' => $stoppedAt,
+                'stop_requested_at' => $stopRequestedAt,
+            ]);
     }
 
     #[Override]
     public function cancelStop(MemberId $memberId): void
     {
-        Member::query()->findOrFail($memberId->value)->update([
-            'stopped_at' => null,
-        ]);
+        Member::query()
+            ->findOrFail($memberId->value)
+            ->update([
+                'stopped_at' => null,
+                'stop_requested_at' => null,
+            ]);
     }
 }

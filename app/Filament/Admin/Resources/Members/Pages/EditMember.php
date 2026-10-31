@@ -14,6 +14,7 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Livewire\Attributes\On;
 use Override;
 
 final class EditMember extends EditRecord
@@ -75,5 +76,13 @@ final class EditMember extends EditRecord
         }
 
         return Notification::make()->success()->title(__('notifications.member_updated'))->body(implode('', $body));
+    }
+
+    #[Override]
+    #[On('refresh')]
+    public function refresh(): void
+    {
+        $this->record->refresh();
+        $this->fillForm();
     }
 }
