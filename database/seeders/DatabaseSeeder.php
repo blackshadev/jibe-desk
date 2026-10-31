@@ -24,6 +24,8 @@ final class DatabaseSeeder extends Seeder
 
         $this->call(InventoryCategorySeeder::class);
 
+        $this->call(StorageSpaceSeeder::class);
+
         if (app()->environment('local')) {
             $this->call(DevelopmentSeeder::class);
         }

@@ -9,11 +9,8 @@ use App\Models\Activity;
 use App\Models\BankAccount;
 use App\Models\Member;
 use App\Models\Membership;
-use App\Models\StorageSpace;
-use App\Models\StorageSpaceLocation;
 use App\Models\User;
 use Hash;
-use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Seeder;
 
 final class DevelopmentSeeder extends Seeder
@@ -33,33 +30,6 @@ final class DevelopmentSeeder extends Seeder
             ]);
             $user->assignRole($roleName->value);
         }
-
-        $location3 = StorageSpaceLocation::query()->where('name', 'Container 3')->firstOrFail();
-        StorageSpace::factory()
-            ->state([
-                'storage_space_location_id' => $location3->id,
-            ])
-            ->sequence(static fn (Sequence $sequence) => ['number' => $sequence->index + 1])
-            ->count(30)
-            ->create();
-
-        $location4 = StorageSpaceLocation::query()->where('name', 'Container 4')->firstOrFail();
-        StorageSpace::factory()
-            ->state([
-                'storage_space_location_id' => $location4->id,
-            ])
-            ->sequence(static fn (Sequence $sequence) => ['number' => $sequence->index + 1])
-            ->count(30)
-            ->create();
-
-        $location5 = StorageSpaceLocation::query()->where('name', 'Container 5')->firstOrFail();
-        StorageSpace::factory()
-            ->state([
-                'storage_space_location_id' => $location5->id,
-            ])
-            ->sequence(static fn (Sequence $sequence) => ['number' => $sequence->index + 1])
-            ->count(20)
-            ->create();
 
         $activities = Activity::all();
         $memberships = Membership::all();
