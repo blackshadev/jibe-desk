@@ -14,6 +14,6 @@ final readonly class MemberStopScheduled
         public string $memberName,
         public string $memberEmail,
         public DateTimeInterface $stoppedAt,
-        public bool $immediate,
+        public bool $isImmediate,
     ) {}
 }

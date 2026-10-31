@@ -14,7 +14,7 @@ final readonly class MemberStopped extends BaseMail
     public function __construct(
         public Recipient $recipient,
         public string $stopDate,
-        public bool $immediate,
+        public bool $isImmediate,
     ) {}
 
     #[Override]
@@ -25,7 +25,7 @@ final readonly class MemberStopped extends BaseMail
             with: [
                 'memberName' => $this->recipient->name,
                 'stopDate' => $this->stopDate,
-                'immediate' => $this->immediate,
+                'isImmediate' => $this->isImmediate,
             ],
         );
     }

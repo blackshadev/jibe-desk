@@ -37,7 +37,7 @@ final class MemberStoppedTest extends UnitTestCase
         static::assertSame('mail.member-stopped', $content->markdown);
         static::assertSame('Vries, Jan de', $content->with['memberName']);
         static::assertSame('31-12-2026', $content->with['stopDate']);
-        static::assertTrue($content->with['immediate']);
+        static::assertTrue($content->with['isImmediate']);
     }
 
     public function test_related_is_null_by_default(): void

@@ -37,13 +37,13 @@ final class SendMemberStopScheduledTest extends UnitTestCase
             memberName: 'Vries, Jan de',
             memberEmail: 'jan@example.com',
             stoppedAt: CarbonImmutable::parse('2026-12-31 23:59:59'),
-            immediate: false,
+            isImmediate: false,
         );
 
         $this->mailSender->expectsSend(new MemberStopped(
             recipient: new Recipient('Vries, Jan de', 'jan@example.com'),
             stopDate: '31-12-2026',
-            immediate: false,
+            isImmediate: false,
         ));
 
         $this->subject->handle($event);

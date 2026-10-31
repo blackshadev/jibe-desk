@@ -21,7 +21,7 @@ final readonly class SendMemberStopScheduled
         $this->mailSender->send(new MemberStopped(
             recipient: new Recipient(name: $event->memberName, email: $event->memberEmail),
             stopDate: CarbonImmutable::instance($event->stoppedAt)->format('d-m-Y'),
-            immediate: $event->immediate,
+            isImmediate: $event->isImmediate,
         ));
     }
 }
