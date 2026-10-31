@@ -57,19 +57,13 @@ final readonly class MemberObserver
             $this->applySameHouseholdBilling->apply(MemberId::create($member->id));
         }
 
-        if (!$member->wasChanged('stopped_at')) {
-            return;
+        if ($member->wasChanged('stopped_at') && $member->stopped_at !== null) {
+            $this->applyStoppedMembership->apply(MemberId::create($member->id), $member->stopped_at);
         }
 
-        $memberId = MemberId::create($member->id);
-
-        if ($member->stopped_at !== null) {
-            $this->applyStoppedMembership->apply($memberId, $member->stopped_at);
-
-            return;
+        if ($member->wasChanged('stopped_at') && $member->stopped_at === null) {
+            $previousStopDate = CarbonImmutable::parse((string) $member->getOriginal('stopped_at'));
+            $this->applyStoppedMembership->clear(MemberId::create($member->id), $previousStopDate);
         }
-
-        $previousStopDate = CarbonImmutable::parse((string) $member->getOriginal('stopped_at'));
-        $this->applyStoppedMembership->clear($memberId, $previousStopDate);
     }
 }
