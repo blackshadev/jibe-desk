@@ -6,7 +6,6 @@ namespace App\Domain\Billing\Payment\Readiness;
 
 use App\Domain\Billing\Payment\MandateId;
 use App\Domain\Billing\Payment\SequenceType;
-use App\Domain\Members\PaymentMethod;
 use DateTimeInterface;
 
 final readonly class MandateReadiness
@@ -18,12 +17,11 @@ final readonly class MandateReadiness
         public ?MandateId $mandateId = null,
         public ?DateTimeInterface $signedOn = null,
         public SequenceType $expectedSequenceType = SequenceType::Recurring,
-        public PaymentMethod $paymentMethod = PaymentMethod::DirectDebit,
     ) {}
 
-    public static function missing(PaymentMethod $paymentMethod = PaymentMethod::DirectDebit): self
+    public static function missing(): self
     {
-        return new self(MandateReadinessStatus::Missing, paymentMethod: $paymentMethod);
+        return new self(MandateReadinessStatus::Missing);
     }
 
     public function isUsable(): bool

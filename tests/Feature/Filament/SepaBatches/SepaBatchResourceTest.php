@@ -34,6 +34,7 @@ use App\Models\SepaBatch;
 use App\Models\SepaExportOverride;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Filament\Forms\Components\Select;
 use Filament\Resources\RelationManagers\RelationManagerConfiguration;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
@@ -346,6 +347,53 @@ final class SepaBatchResourceTest extends FeatureTestCase
         ]);
     }
 
+    public function test_add_invoices_action_offers_every_invoice_except_uncollectable_transfer_invoices(): void
+    {
+        $this->withAuthorizedUser();
+
+        $batch = SepaBatch::factory()->create(['status' => SepaBatchStatus::Open]);
+
+        $collectableTransfer = Member::factory()->transfer()->createQuietly();
+        PaymentInformation::factory()->createQuietly(['member_id' => $collectableTransfer->id]);
+        $collectableTransferInvoice = $this->openInvoiceFor($collectableTransfer);
+
+        $transferWithoutMandate = Member::factory()->transfer()->createQuietly();
+        $transferWithoutMandateInvoice = $this->openInvoiceFor($transferWithoutMandate);
+
+        $transferWithRevokedMandate = Member::factory()->transfer()->createQuietly();
+        PaymentInformation::factory()
+            ->revoked()
+            ->createQuietly(['member_id' => $transferWithRevokedMandate->id]);
+        $transferWithRevokedMandateInvoice = $this->openInvoiceFor($transferWithRevokedMandate);
+
+        $directDebitWithoutMandate = Member::factory()->createQuietly();
+        $directDebitInvoice = $this->openInvoiceFor($directDebitWithoutMandate);
+
+        Livewire::test(SepaBatchInvoicesRelationManager::class, [
+            'ownerRecord' => $batch,
+            'pageClass' => EditSepaBatch::class,
+        ])
+            ->mountTableAction('addInvoices')
+            ->assertSchemaComponentExists(
+                'invoice_ids',
+                'mountedActionSchema0',
+                static function (Select $select) use (
+                    $collectableTransferInvoice,
+                    $transferWithoutMandateInvoice,
+                    $transferWithRevokedMandateInvoice,
+                    $directDebitInvoice,
+                ): bool {
+                    /** @var array<int, string> $options */
+                    $options = $select->getOptions();
+
+                    return array_key_exists($collectableTransferInvoice->id, $options)
+                        && array_key_exists($directDebitInvoice->id, $options)
+                        && !array_key_exists($transferWithoutMandateInvoice->id, $options)
+                        && !array_key_exists($transferWithRevokedMandateInvoice->id, $options);
+                },
+            );
+    }
+
     public function test_export_overrides_relation_manager_is_hidden_when_the_batch_has_no_overrides(): void
     {
         $this->withAuthorizedUser();
@@ -511,7 +559,7 @@ final class SepaBatchResourceTest extends FeatureTestCase
         ]);
     }
 
-    public function test_readiness_action_lists_expected_manual_payer_exclusions(): void
+    public function test_readiness_action_lists_a_transfer_member_without_a_mandate_as_broken_data(): void
     {
         $this->withAuthorizedUser();
 
@@ -525,7 +573,7 @@ final class SepaBatchResourceTest extends FeatureTestCase
 
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
             ->mountAction('readiness')
-            ->assertMountedActionModalSee(__('labels.export_readiness.expected_exclusions'));
+            ->assertMountedActionModalSee(__('labels.export_readiness.broken_data'));
     }
 
     public function test_readiness_action_lists_broken_data(): void
@@ -678,12 +726,7 @@ final class SepaBatchResourceTest extends FeatureTestCase
         $this->withAuthorizedUser();
 
         $batch = $this->exportableBatch();
-        $member = Member::factory()->transfer()->createQuietly();
-        $invoice = Invoice::factory()
-            ->forMember($member)
-            ->forBatch($batch)
-            ->createQuietly(['status' => InvoiceStatus::Pending]);
-        $this->createInvoiceLine($invoice);
+        $this->createRefundInvoiceForBatch($batch);
 
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
             ->callAction('exportSepa')
@@ -740,12 +783,7 @@ final class SepaBatchResourceTest extends FeatureTestCase
         $this->withAuthorizedUser();
 
         $batch = $this->exportableBatch();
-        $member = Member::factory()->transfer()->createQuietly();
-        $invoice = Invoice::factory()
-            ->forMember($member)
-            ->forBatch($batch)
-            ->createQuietly(['status' => InvoiceStatus::Pending]);
-        $this->createInvoiceLine($invoice);
+        $this->createRefundInvoiceForBatch($batch);
         $this->attachPurchaseOrder($batch);
 
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
@@ -1019,6 +1057,16 @@ final class SepaBatchResourceTest extends FeatureTestCase
         ]);
     }
 
+    private function openInvoiceFor(Member $member): Invoice
+    {
+        return Invoice::factory()
+            ->forMember($member)
+            ->createQuietly([
+                'status' => InvoiceStatus::Open,
+                'sepa_batch_id' => null,
+            ]);
+    }
+
     private function createInvoiceForBatch(SepaBatch $batch): Invoice
     {
         $member = Member::factory()->createQuietly();
@@ -1028,6 +1076,21 @@ final class SepaBatchResourceTest extends FeatureTestCase
             ->createQuietly(['status' => InvoiceStatus::Pending]);
 
         $this->createInvoiceLine($invoice);
+
+        return $invoice;
+    }
+
+    private function createRefundInvoiceForBatch(SepaBatch $batch): Invoice
+    {
+        $member = Member::factory()->createQuietly();
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Pending]);
+
+        InvoiceLine::factory()
+            ->state(['invoice_id' => $invoice->id])
+            ->createQuietly(['price' => -10.00, 'quantity' => 1, 'vat' => -2.10]);
 
         return $invoice;
     }

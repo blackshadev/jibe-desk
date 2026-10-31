@@ -27,22 +27,13 @@ final class ExportReadinessReportTest extends UnitTestCase
         static::assertCount(1, $report->brokenDataIssues());
     }
 
-    public function test_it_is_not_blocked_by_expected_manual_payer_exclusions(): void
+    public function test_it_is_blocked_by_a_missing_mandate(): void
     {
         $report = $this->report([$this->invoiceIssue(ExportReadinessReason::MissingMandate)]);
 
-        static::assertFalse($report->isBlocked());
-        static::assertCount(1, $report->expectedExclusions());
-        static::assertSame([], $report->blockingIssues());
-    }
-
-    public function test_it_requires_acknowledgement_of_expected_exclusions(): void
-    {
-        $report = $this->report([$this->invoiceIssue(ExportReadinessReason::MissingMandate)]);
-
-        static::assertTrue($report->requiresExclusionAcknowledgement());
-        static::assertFalse($report->isSatisfiedBy(new ExportConfirmation(exclusionsAcknowledged: false)));
-        static::assertTrue($report->isSatisfiedBy(new ExportConfirmation(exclusionsAcknowledged: true)));
+        static::assertTrue($report->isBlocked());
+        static::assertCount(1, $report->brokenDataIssues());
+        static::assertCount(1, $report->blockingIssues());
     }
 
     public function test_it_treats_refund_exclusions_as_acknowledgeable_and_non_blocking(): void
@@ -50,7 +41,6 @@ final class ExportReadinessReportTest extends UnitTestCase
         $report = $this->report([$this->invoiceIssue(ExportReadinessReason::RefundIbanUnavailable)]);
 
         static::assertCount(1, $report->refundExclusions());
-        static::assertSame([], $report->expectedExclusions());
         static::assertFalse($report->isBlocked());
         static::assertTrue($report->requiresExclusionAcknowledgement());
         static::assertFalse($report->isSatisfiedBy(new ExportConfirmation(exclusionsAcknowledged: false)));

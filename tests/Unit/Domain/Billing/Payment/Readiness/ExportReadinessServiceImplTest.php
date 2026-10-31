@@ -21,7 +21,6 @@ use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Domain\Billing\Payment\SepaConfiguration;
 use App\Domain\Billing\Payment\SequenceType;
 use App\Domain\Members\MemberId;
-use App\Domain\Members\PaymentMethod;
 use App\Domain\SharedKernel\CompoundPrice;
 use Carbon\CarbonImmutable;
 use Override;
@@ -56,27 +55,12 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
         );
     }
 
-    public function test_assess_reports_a_manual_payer_as_an_expected_exclusion(): void
+    public function test_assess_reports_a_member_without_a_mandate_as_broken_data(): void
     {
         $memberId = MemberId::create(7);
         $this->expectAssessment(
             [$this->candidate(new CompoundPrice(100.0, 21.0), $memberId)],
-            [$memberId->value => MandateReadiness::missing(PaymentMethod::Transfer)],
-        );
-
-        $report = $this->service->assess($this->batchId());
-
-        $this->assertReasons($report, [ExportReadinessReason::MissingMandate]);
-        static::assertCount(1, $report->expectedExclusions());
-        static::assertFalse($report->isBlocked());
-    }
-
-    public function test_assess_reports_a_direct_debit_member_without_a_mandate_as_broken_data(): void
-    {
-        $memberId = MemberId::create(7);
-        $this->expectAssessment(
-            [$this->candidate(new CompoundPrice(100.0, 21.0), $memberId)],
-            [$memberId->value => MandateReadiness::missing(PaymentMethod::DirectDebit)],
+            [$memberId->value => MandateReadiness::missing()],
         );
 
         $report = $this->service->assess($this->batchId());
@@ -86,21 +70,19 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
         static::assertTrue($report->isBlocked());
     }
 
-    public function test_assess_reports_a_revoked_mandate_of_a_transfer_member_as_an_expected_exclusion(): void
+    public function test_assess_reports_a_revoked_mandate_as_broken_data(): void
     {
         $memberId = MemberId::create(7);
         $this->expectAssessment(
             [$this->candidate(new CompoundPrice(100.0, 21.0), $memberId)],
-            [$memberId->value => new MandateReadiness(
-                MandateReadinessStatus::Revoked,
-                paymentMethod: PaymentMethod::Transfer,
-            )],
+            [$memberId->value => new MandateReadiness(MandateReadinessStatus::Revoked)],
         );
 
         $report = $this->service->assess($this->batchId());
 
         $this->assertReasons($report, [ExportReadinessReason::RevokedMandate]);
-        static::assertFalse($report->isBlocked());
+        static::assertCount(1, $report->brokenDataIssues());
+        static::assertTrue($report->isBlocked());
     }
 
     public function test_assess_reports_an_expired_mandate_as_overridable(): void

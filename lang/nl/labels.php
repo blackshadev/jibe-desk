@@ -238,7 +238,6 @@ return [
         'close_confirm' => 'Weet je zeker dat je de SEPA-ronde wilt sluiten?',
         'close_warning' => 'Controleer de aandachtspunten hieronder. Ze blokkeren het sluiten niet, maar kunnen de export later tegenhouden.',
         'broken_data' => 'Actie nodig: gegevens onvolledig',
-        'expected_exclusions' => 'Verwacht: handmatige betalers',
         'refund_exclusions' => 'Verwacht: terugbetaling zonder bruikbaar IBAN',
         'overridable' => 'Afwijkend: verlopen mandaat',
         'batch_level' => 'Actie nodig: incassodatum',
@@ -246,8 +245,8 @@ return [
         'expired_mandate_overrides' => 'Toch incasseren op een verlopen mandaat',
         'override_reason' => 'Reden voor de afwijking',
         'reason' => [
-            'missing_mandate' => 'Geen actief mandaat (handmatige betaler)',
-            'revoked_mandate' => 'Mandaat ingetrokken (handmatige betaler)',
+            'missing_mandate' => 'Geen actief mandaat',
+            'revoked_mandate' => 'Mandaat ingetrokken',
             'expired_mandate' => 'Mandaat is verlopen',
             'missing_iban' => 'Geen IBAN bekend',
             'malformed_iban' => 'IBAN is ongeldig',

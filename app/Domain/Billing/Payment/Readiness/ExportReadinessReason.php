@@ -20,11 +20,10 @@ enum ExportReadinessReason: string
     public function category(): ExportReadinessCategory
     {
         return match ($this) {
-            self::MissingMandate, self::RevokedMandate => ExportReadinessCategory::ManualPayerExpected,
             self::ExpiredMandate => ExportReadinessCategory::Overridable,
             self::NoticePeriodTooShort => ExportReadinessCategory::BatchLevel,
             self::RefundIbanUnavailable => ExportReadinessCategory::RefundExclusion,
-            self::MissingIban, self::MalformedIban, self::ZeroAmount, self::UncollectableStatus, self::SequenceTypeMismatch => ExportReadinessCategory::BrokenData,
+            self::MissingMandate, self::RevokedMandate, self::MissingIban, self::MalformedIban, self::ZeroAmount, self::UncollectableStatus, self::SequenceTypeMismatch => ExportReadinessCategory::BrokenData,
         };
     }
 

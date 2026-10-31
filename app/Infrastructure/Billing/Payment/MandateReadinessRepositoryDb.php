@@ -12,7 +12,6 @@ use App\Domain\Billing\Payment\Readiness\MandateReadiness;
 use App\Domain\Billing\Payment\Readiness\MandateReadinessRepository;
 use App\Domain\Billing\Payment\Readiness\MandateReadinessStatus;
 use App\Domain\Members\MemberId;
-use App\Domain\Members\PaymentMethod;
 use App\Models\Member;
 use App\Models\PaymentInformation;
 use Override;
@@ -39,15 +38,15 @@ final readonly class MandateReadinessRepositoryDb implements MandateReadinessRep
                 $mandate = $member->currentPaymentInformation;
 
                 if (!$mandate instanceof PaymentInformation) {
-                    return [$member->id => MandateReadiness::missing($member->payment_method)];
+                    return [$member->id => MandateReadiness::missing()];
                 }
 
-                return [$member->id => $this->readiness($mandate, $member->payment_method)];
+                return [$member->id => $this->readiness($mandate)];
             })
             ->all();
     }
 
-    private function readiness(PaymentInformation $mandate, PaymentMethod $paymentMethod): MandateReadiness
+    private function readiness(PaymentInformation $mandate): MandateReadiness
     {
         return new MandateReadiness(
             status: match ($mandate->expiration_status) {
@@ -63,7 +62,6 @@ final readonly class MandateReadinessRepositoryDb implements MandateReadinessRep
             ),
             signedOn: $mandate->mandate_accepted_date,
             expectedSequenceType: $this->sequenceResolver->resolve($mandate->last_collected_at),
-            paymentMethod: $paymentMethod,
         );
     }
 }

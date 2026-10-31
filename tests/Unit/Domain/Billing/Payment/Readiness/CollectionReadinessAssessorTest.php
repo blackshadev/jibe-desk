@@ -17,7 +17,6 @@ use App\Domain\Billing\Payment\Readiness\SepaCollectionCandidate;
 use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Domain\Billing\Payment\SequenceType;
 use App\Domain\Members\MemberId;
-use App\Domain\Members\PaymentMethod;
 use App\Domain\SharedKernel\CompoundPrice;
 use Carbon\CarbonImmutable;
 use DateTimeInterface;
@@ -47,7 +46,7 @@ final class CollectionReadinessAssessorTest extends UnitTestCase
         static::assertSame([ExportReadinessReason::UncollectableStatus], $this->reasons($issues));
     }
 
-    public function test_it_reports_a_missing_mandate_for_a_direct_debit_member_as_broken_data(): void
+    public function test_it_reports_a_missing_mandate_as_broken_data(): void
     {
         $issues = $this->assessor->assess($this->candidate(), null, $this->context());
 
@@ -55,19 +54,7 @@ final class CollectionReadinessAssessorTest extends UnitTestCase
         static::assertSame(ExportReadinessCategory::BrokenData, $issues[0]->category());
     }
 
-    public function test_it_reports_a_missing_mandate_for_a_transfer_member_as_an_expected_exclusion(): void
-    {
-        $issues = $this->assessor->assess(
-            $this->candidate(),
-            MandateReadiness::missing(PaymentMethod::Transfer),
-            $this->context(),
-        );
-
-        static::assertSame([ExportReadinessReason::MissingMandate], $this->reasons($issues));
-        static::assertSame(ExportReadinessCategory::ManualPayerExpected, $issues[0]->category());
-    }
-
-    public function test_it_reports_a_revoked_mandate_for_a_direct_debit_member_as_broken_data(): void
+    public function test_it_reports_a_revoked_mandate_as_broken_data(): void
     {
         $issues = $this->assessor->assess(
             $this->candidate(),
@@ -77,18 +64,6 @@ final class CollectionReadinessAssessorTest extends UnitTestCase
 
         static::assertSame([ExportReadinessReason::RevokedMandate], $this->reasons($issues));
         static::assertSame(ExportReadinessCategory::BrokenData, $issues[0]->category());
-    }
-
-    public function test_it_reports_a_revoked_mandate_for_a_transfer_member_as_an_expected_exclusion(): void
-    {
-        $issues = $this->assessor->assess(
-            $this->candidate(),
-            new MandateReadiness(MandateReadinessStatus::Revoked, paymentMethod: PaymentMethod::Transfer),
-            $this->context(),
-        );
-
-        static::assertSame([ExportReadinessReason::RevokedMandate], $this->reasons($issues));
-        static::assertSame(ExportReadinessCategory::ManualPayerExpected, $issues[0]->category());
     }
 
     public function test_it_reports_an_expired_mandate_and_a_sequence_mismatch_together(): void

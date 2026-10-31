@@ -27,12 +27,4 @@ final class MandateReadinessTest extends UnitTestCase
     {
         static::assertSame(SequenceType::Recurring, MandateReadiness::missing()->expectedSequenceType);
     }
-
-    public function test_revoked_and_missing_are_expected_exclusions(): void
-    {
-        static::assertTrue(MandateReadinessStatus::Missing->isExpectedExclusion());
-        static::assertTrue(MandateReadinessStatus::Revoked->isExpectedExclusion());
-        static::assertFalse(MandateReadinessStatus::Expired->isExpectedExclusion());
-        static::assertFalse(MandateReadinessStatus::Active->isExpectedExclusion());
-    }
 }
