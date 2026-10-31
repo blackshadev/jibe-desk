@@ -15,19 +15,21 @@ enum ExportReadinessReason: string
     case UncollectableStatus = 'uncollectable_status';
     case SequenceTypeMismatch = 'sequence_type_mismatch';
     case NoticePeriodTooShort = 'notice_period_too_short';
+    case TransferWithActiveMandate = 'transfer_with_active_mandate';
 
     public function category(): ExportReadinessCategory
     {
         return match ($this) {
-            self::MissingMandate, self::RevokedMandate => ExportReadinessCategory::ManualPayerExpected,
-            self::ExpiredMandate => ExportReadinessCategory::Overridable,
+            self::ExpiredMandate, self::TransferWithActiveMandate => ExportReadinessCategory::Overridable,
             self::NoticePeriodTooShort => ExportReadinessCategory::BatchLevel,
-            self::MissingIban, self::MalformedIban, self::ZeroAmount, self::UncollectableStatus, self::SequenceTypeMismatch => ExportReadinessCategory::BrokenData,
+            self::MissingMandate, self::RevokedMandate, self::MissingIban, self::MalformedIban, self::ZeroAmount, self::UncollectableStatus, self::SequenceTypeMismatch => ExportReadinessCategory::BrokenData,
         };
     }
 
     public function isOverridable(): bool
     {
-        return $this === self::ExpiredMandate || $this === self::NoticePeriodTooShort;
+        return $this === self::ExpiredMandate
+            || $this === self::TransferWithActiveMandate
+            || $this === self::NoticePeriodTooShort;
     }
 }

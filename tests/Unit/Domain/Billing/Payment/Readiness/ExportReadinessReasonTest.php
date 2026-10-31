@@ -30,10 +30,11 @@ final class ExportReadinessReasonTest extends UnitTestCase
         yield 'uncollectable status' => [ExportReadinessReason::UncollectableStatus, false];
         yield 'sequence type mismatch' => [ExportReadinessReason::SequenceTypeMismatch, false];
         yield 'notice period too short' => [ExportReadinessReason::NoticePeriodTooShort, true];
+        yield 'transfer with active mandate' => [ExportReadinessReason::TransferWithActiveMandate, true];
     }
 
     #[DataProvider('overridableProvider')]
-    public function test_only_the_expired_mandate_is_overridable(ExportReadinessReason $reason, bool $expected): void
+    public function test_the_expected_reasons_are_overridable(ExportReadinessReason $reason, bool $expected): void
     {
         static::assertSame($expected, $reason->isOverridable());
     }

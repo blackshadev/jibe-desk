@@ -27,22 +27,22 @@ final class ExportReadinessReportTest extends UnitTestCase
         static::assertCount(1, $report->brokenDataIssues());
     }
 
-    public function test_it_is_not_blocked_by_expected_manual_payer_exclusions(): void
+    public function test_it_is_blocked_by_a_missing_mandate(): void
     {
         $report = $this->report([$this->invoiceIssue(ExportReadinessReason::MissingMandate)]);
 
-        static::assertFalse($report->isBlocked());
-        static::assertCount(1, $report->expectedExclusions());
-        static::assertSame([], $report->blockingIssues());
+        static::assertTrue($report->isBlocked());
+        static::assertCount(1, $report->brokenDataIssues());
+        static::assertCount(1, $report->blockingIssues());
     }
 
-    public function test_it_requires_acknowledgement_of_expected_exclusions(): void
+    public function test_it_is_blocked_by_an_invoice_without_an_iban(): void
     {
-        $report = $this->report([$this->invoiceIssue(ExportReadinessReason::MissingMandate)]);
+        $report = $this->report([$this->invoiceIssue(ExportReadinessReason::MissingIban)]);
 
-        static::assertTrue($report->requiresExclusionAcknowledgement());
-        static::assertFalse($report->isSatisfiedBy(new ExportConfirmation(exclusionsAcknowledged: false)));
-        static::assertTrue($report->isSatisfiedBy(new ExportConfirmation(exclusionsAcknowledged: true)));
+        static::assertCount(1, $report->brokenDataIssues());
+        static::assertTrue($report->isBlocked());
+        static::assertFalse($report->isSatisfiedBy(new ExportConfirmation()));
     }
 
     public function test_it_requires_an_override_for_an_expired_mandate(): void
@@ -51,7 +51,7 @@ final class ExportReadinessReportTest extends UnitTestCase
 
         static::assertTrue($report->isBlocked());
         static::assertCount(1, $report->overridableIssues());
-        static::assertFalse($report->isSatisfiedBy(new ExportConfirmation(exclusionsAcknowledged: true)));
+        static::assertFalse($report->isSatisfiedBy(new ExportConfirmation()));
     }
 
     public function test_it_accepts_an_overridden_expired_mandate_with_a_reason(): void
@@ -59,7 +59,6 @@ final class ExportReadinessReportTest extends UnitTestCase
         $report = $this->report([$this->invoiceIssue(ExportReadinessReason::ExpiredMandate)]);
 
         $confirmation = new ExportConfirmation(
-            exclusionsAcknowledged: true,
             overrides: [
                 new ExportOverride(
                     invoiceId: InvoiceId::create(1),
@@ -72,12 +71,29 @@ final class ExportReadinessReportTest extends UnitTestCase
         static::assertTrue($report->isSatisfiedBy($confirmation));
     }
 
+    public function test_it_requires_an_override_for_a_transfer_member_with_an_active_mandate(): void
+    {
+        $report = $this->report([$this->invoiceIssue(ExportReadinessReason::TransferWithActiveMandate)]);
+
+        static::assertTrue($report->isBlocked());
+        static::assertCount(1, $report->overridableIssues());
+        static::assertFalse($report->isSatisfiedBy(new ExportConfirmation()));
+        static::assertTrue($report->isSatisfiedBy(new ExportConfirmation(
+            overrides: [
+                new ExportOverride(
+                    invoiceId: InvoiceId::create(1),
+                    reason: ExportReadinessReason::TransferWithActiveMandate,
+                    note: 'Member confirmed the collection.',
+                ),
+            ],
+        )));
+    }
+
     public function test_it_rejects_an_override_without_a_reason(): void
     {
         $report = $this->report([$this->invoiceIssue(ExportReadinessReason::ExpiredMandate)]);
 
         $confirmation = new ExportConfirmation(
-            exclusionsAcknowledged: true,
             overrides: [
                 new ExportOverride(
                     invoiceId: InvoiceId::create(1),
@@ -96,7 +112,6 @@ final class ExportReadinessReportTest extends UnitTestCase
         $report = $this->report([$this->invoiceIssue(ExportReadinessReason::ExpiredMandate)]);
 
         $confirmation = new ExportConfirmation(
-            exclusionsAcknowledged: true,
             overrides: [
                 new ExportOverride(
                     invoiceId: InvoiceId::create(1),
@@ -127,8 +142,7 @@ final class ExportReadinessReportTest extends UnitTestCase
 
         static::assertTrue($report->isEmpty());
         static::assertFalse($report->isBlocked());
-        static::assertFalse($report->requiresExclusionAcknowledgement());
-        static::assertTrue($report->isSatisfiedBy(new ExportConfirmation(exclusionsAcknowledged: false)));
+        static::assertTrue($report->isSatisfiedBy(new ExportConfirmation()));
     }
 
     /** @param list<ExportReadinessIssue> $issues */

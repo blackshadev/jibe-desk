@@ -10,7 +10,6 @@ final readonly class ExportConfirmation
 {
     /** @param list<ExportOverride> $overrides */
     public function __construct(
-        public bool $exclusionsAcknowledged,
         public array $overrides = [],
     ) {}
 

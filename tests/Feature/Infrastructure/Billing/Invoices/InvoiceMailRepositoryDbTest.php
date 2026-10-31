@@ -358,7 +358,7 @@ final class InvoiceMailRepositoryDbTest extends FeatureTestCase
         PaymentInformation::factory()
             ->revoked(CarbonImmutable::parse('2026-01-01'))
             ->for($member)
-            ->createQuietly();
+            ->createQuietly(['banking_account_number' => 'NL91ABNA0417164300']);
 
         $batch = SepaBatch::factory()->createQuietly([
             'invoice_date' => '2026-06-30',
@@ -373,6 +373,40 @@ final class InvoiceMailRepositoryDbTest extends FeatureTestCase
         $result = $this->repository->getInvoiceMailData(InvoiceId::create($invoice->id));
 
         static::assertNull($result->sepaTransferDate);
+        static::assertSame('NL91ABNA0417164300', $result->recipientIban);
+    }
+
+    public function test_get_invoice_mail_data_uses_the_latest_revoked_mandate_iban_for_a_refund(): void
+    {
+        $member = Member::factory()->createQuietly();
+        PaymentInformation::factory()
+            ->revoked(CarbonImmutable::parse('2025-01-01'))
+            ->for($member)
+            ->createQuietly(['banking_account_number' => 'NL91ABNA0417164300']);
+        PaymentInformation::factory()
+            ->revoked(CarbonImmutable::parse('2026-01-01'))
+            ->for($member)
+            ->createQuietly(['banking_account_number' => 'NL20RABO0123456789']);
+
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->createQuietly();
+
+        $result = $this->repository->getInvoiceMailData(InvoiceId::create($invoice->id));
+
+        static::assertSame('NL20RABO0123456789', $result->recipientIban);
+    }
+
+    public function test_get_invoice_mail_data_returns_an_empty_recipient_iban_without_a_mandate(): void
+    {
+        $member = Member::factory()->createQuietly();
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->createQuietly();
+
+        $result = $this->repository->getInvoiceMailData(InvoiceId::create($invoice->id));
+
+        static::assertSame('', $result->recipientIban);
     }
 
     public function test_invoice_mail_renders_for_a_member_with_an_active_mandate(): void

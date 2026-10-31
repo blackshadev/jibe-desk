@@ -12,8 +12,9 @@ time and at most one active one. Each carries its own IBAN/BIC/account holder, s
 no mandate that has already been collected changes identity.
 
 Re-authorisation is a new mandate: the old row is revoked (keeping its IBAN for refunds) and the new row gets a new
-reference, which makes its first collection `FRST` again (plan 05). Revocation alone makes the member a manual payer —
-there is no stored payment-method column. Expiry is derived, not stored: 36 months without a collection, counted from
+reference, which makes its first collection `FRST` again (plan 05). Revocation leaves the member's stored payment
+method (plan 06) untouched; the mandate is the instrument, the method is declared. Expiry is derived, not stored: 36
+months without a collection, counted from
 submission, so a collection that is presented and later declined still counts as use. Expired mandates are surfaced on
 the member and in the export readiness report, and can be collected anyway through plan 02's per-export override with a
 reason.
@@ -1283,8 +1284,9 @@ TextColumn::make('mandate_state')
     }),
 ```
 
-The column reports the *mandate* state, not a payment method. Plan 06 owns the explicit "handmatige betaler" label,
-filter and reporting on top of `state === null` and `revoked`; no payment-method column is added here or there.
+The column reports the *mandate* state, not the payment method. Plan 06 owns the explicit stored
+`members.payment_method`, its "handmatige betaler" label, filter and reporting beside this mandate state; this plan
+does not add that column.
 
 ## Permissions
 
@@ -1630,11 +1632,12 @@ fills the mandate seam and rewrites the export rows.
   `InvoiceMailRepositoryDb::getInvoicePaymentDeclinedMailData()`. This plan fills it from the latest mandate (revoked or
   expired → true) as described in the invoice mail section. A decline does not revoke a mandate; a presented-then-declined
   collection counts as use.
-- **Plan 06 (manual payers)** derives the state from the absence of an active mandate. Revocation is now the only way to
-  become a manual payer; do not add a stored payment-method column. Because `paymentInformation` is now active-only,
-  plan 06 must resolve the refund IBAN from `paymentInformations()->first()` (history, including revoked). The
-  `recipientIban` typo in `InvoiceMailRepositoryDb` remains plan 06's fix, and its refund-without-IBAN readiness listing
-  must include members who never had a mandate at all.
+- **Plan 06 (manual payers)** owns the explicit stored `members.payment_method`. Revocation never flips it, and a
+  DirectDebit member without an active mandate is drift: displayed, listed and blocking at export. Because
+  `paymentInformation` is now active-only, plan 06 resolves the refund IBAN from
+  `currentPaymentInformation()` (latest mandate, revoked or not). The `recipientIban` typo in
+  `InvoiceMailRepositoryDb` remains plan 06's fix, and its refund-without-IBAN readiness listing must include members
+  who never had a mandate at all.
 - **Plan 01 (declined-payment recovery)** must not clear `last_collected_at` on decline, reopen or `unlinkReversal`.
   The scenario test above locks that in.
 

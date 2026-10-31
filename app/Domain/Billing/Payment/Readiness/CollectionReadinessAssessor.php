@@ -6,6 +6,7 @@ namespace App\Domain\Billing\Payment\Readiness;
 
 use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Domain\Billing\Payment\SepaBatchStatus;
+use App\Domain\Members\PaymentMethod;
 
 final readonly class CollectionReadinessAssessor
 {
@@ -24,7 +25,7 @@ final readonly class CollectionReadinessAssessor
         }
 
         if ($candidate->isCredit()) {
-            return $this->assessCreditCandidate($candidate, $mandate);
+            return $this->assessIban($candidate, $mandate);
         }
 
         return $this->assessDebitCandidate($candidate, $mandate, $context);
@@ -37,14 +38,23 @@ final readonly class CollectionReadinessAssessor
         SepaBatchExportContext $context,
     ): array {
         if ($mandate === null || $mandate->status === MandateReadinessStatus::Missing) {
-            return [ExportReadinessIssue::forInvoice(ExportReadinessReason::MissingMandate, $candidate)];
+            return [ExportReadinessIssue::forInvoice(
+                ExportReadinessReason::MissingMandate,
+                $candidate,
+                'Automatische incasso verwacht, geen actieve machtiging.',
+            )];
         }
 
         if ($mandate->status === MandateReadinessStatus::Revoked) {
-            return [ExportReadinessIssue::forInvoice(ExportReadinessReason::RevokedMandate, $candidate)];
+            return [ExportReadinessIssue::forInvoice(
+                ExportReadinessReason::RevokedMandate,
+                $candidate,
+                'Automatische incasso verwacht, machtiging is ingetrokken.',
+            )];
         }
 
         return [
+            ...$this->assessPreferredPaymentMethod($candidate, $mandate),
             ...$this->assessMandateExpiration($candidate, $mandate),
             ...$this->assessSepaCandidateSequence($candidate, $mandate, $context),
             ...$this->assessIban($candidate, $mandate),
@@ -52,19 +62,19 @@ final readonly class CollectionReadinessAssessor
     }
 
     /** @return list<ExportReadinessIssue> */
-    private function assessCreditCandidate(SepaCollectionCandidate $candidate, ?MandateReadiness $mandate): array
+    private function assessIban(SepaCollectionCandidate $candidate, ?MandateReadiness $mandate): array
     {
         $iban = $mandate?->iban;
 
         if ($iban === null || trim($iban) === '') {
-            return [];
+            return [ExportReadinessIssue::forInvoice(ExportReadinessReason::MissingIban, $candidate)];
         }
 
-        if (IbanFormat::isWellFormed($iban)) {
-            return [];
+        if (!IbanFormat::isWellFormed($iban)) {
+            return [ExportReadinessIssue::forInvoice(ExportReadinessReason::MalformedIban, $candidate)];
         }
 
-        return [ExportReadinessIssue::forInvoice(ExportReadinessReason::MalformedIban, $candidate)];
+        return [];
     }
 
     /** @return list<ExportReadinessIssue> */
@@ -101,18 +111,21 @@ final readonly class CollectionReadinessAssessor
     }
 
     /** @return list<ExportReadinessIssue> */
-    private function assessIban(SepaCollectionCandidate $candidate, MandateReadiness $mandate): array
-    {
-        $iban = $mandate->iban;
-
-        if ($iban === null || trim($iban) === '') {
-            return [ExportReadinessIssue::forInvoice(ExportReadinessReason::MissingIban, $candidate)];
-        }
-
-        if (IbanFormat::isWellFormed($iban)) {
+    private function assessPreferredPaymentMethod(
+        SepaCollectionCandidate $candidate,
+        MandateReadiness $mandate,
+    ): array {
+        if ($candidate->paymentMethod !== PaymentMethod::Transfer) {
             return [];
         }
 
-        return [ExportReadinessIssue::forInvoice(ExportReadinessReason::MalformedIban, $candidate)];
+        if ($mandate->status !== MandateReadinessStatus::Active) {
+            return [];
+        }
+
+        return [ExportReadinessIssue::forInvoice(
+            ExportReadinessReason::TransferWithActiveMandate,
+            $candidate,
+        )];
     }
 }

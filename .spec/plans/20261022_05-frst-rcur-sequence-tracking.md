@@ -1140,9 +1140,9 @@ Extend `tests/Feature/Filament/SepaBatches/SepaBatchResourceTest.php`:
   `sepa_sequence_type` when it detaches an invoice, otherwise a retried invoice keeps the plan of the batch it left.
   Its decline path must continue to leave `last_collected_at` untouched (plan 04's rule), which is what makes the
   retry RCUR.
-- **Plan 06 (manual payers)** keeps the derived manual-payer state. An invoice of a member without an active
-  mandate is not exported; its frozen `FRST` is harmless and is cleared if the invoice is re-batched. Do not add a
-  payment-method column or a second sequence source.
+- **Plan 06 (manual payers)** keeps the stored `members.payment_method`. An invoice of a Transfer member without an
+  active mandate is not exported; its frozen `FRST` is harmless and is cleared if the invoice is re-batched. The
+  method is not a second sequence source.
 - **Plan 03 (declined-SEPA notice)** is unaffected: it consumes plan 01's event and plan 04's
   `mandateNeedsReauthorisation`; the sequence is not part of the notice.
 

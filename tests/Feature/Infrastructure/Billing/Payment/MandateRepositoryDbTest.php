@@ -12,6 +12,7 @@ use App\Domain\Billing\Payment\MandateRepository;
 use App\Domain\Billing\Payment\PaymentInformationId;
 use App\Domain\Billing\Payment\SepaBatchId;
 use App\Domain\Members\MemberId;
+use App\Domain\Members\PaymentMethod;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;
 use App\Models\Member;
@@ -57,6 +58,45 @@ final class MandateRepositoryDbTest extends FeatureTestCase
         static::assertSame('2026-01-15', $mandate->mandate_accepted_date->format('Y-m-d'));
         static::assertNull($mandate->revoked_at);
         static::assertNull($mandate->last_collected_at);
+    }
+
+    public function test_create_with_a_switch_moves_the_member_to_direct_debit(): void
+    {
+        $member = Member::factory()->transfer()->createQuietly();
+
+        $id = $this->repository->create(
+            MemberId::create($member->id),
+            new MandateDetails(
+                iban: 'NL91ABNA0417164300',
+                bic: 'ABNANL2A',
+                accountHolderName: 'Jan de Vries',
+                signedAt: CarbonImmutable::parse('2026-01-15'),
+            ),
+            PaymentMethod::DirectDebit,
+        );
+
+        $mandate = PaymentInformation::query()->findOrFail($id->value);
+
+        static::assertSame(PaymentMethod::DirectDebit, $member->refresh()->payment_method);
+        static::assertSame($member->id, $mandate->member_id);
+        static::assertNull($mandate->revoked_at);
+    }
+
+    public function test_create_without_a_switch_leaves_the_member_on_transfer(): void
+    {
+        $member = Member::factory()->transfer()->createQuietly();
+
+        $this->repository->create(
+            MemberId::create($member->id),
+            new MandateDetails(
+                iban: 'NL91ABNA0417164300',
+                bic: 'ABNANL2A',
+                accountHolderName: 'Jan de Vries',
+                signedAt: CarbonImmutable::parse('2026-01-15'),
+            ),
+        );
+
+        static::assertSame(PaymentMethod::Transfer, $member->refresh()->payment_method);
     }
 
     public function test_create_creates_a_new_active_mandate_and_revokes_the_old_one(): void

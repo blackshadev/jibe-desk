@@ -20,7 +20,7 @@ final class ExportConfirmationTest extends UnitTestCase
             note: 'Member confirmed by phone.',
         );
 
-        $confirmation = new ExportConfirmation(exclusionsAcknowledged: true, overrides: [$override]);
+        $confirmation = new ExportConfirmation(overrides: [$override]);
 
         static::assertSame($override, $confirmation->overrideFor(InvoiceId::create(5)));
     }
@@ -28,7 +28,6 @@ final class ExportConfirmationTest extends UnitTestCase
     public function test_override_for_returns_null_when_absent(): void
     {
         $confirmation = new ExportConfirmation(
-            exclusionsAcknowledged: true,
             overrides: [
                 new ExportOverride(InvoiceId::create(5), ExportReadinessReason::ExpiredMandate, 'Note'),
             ],

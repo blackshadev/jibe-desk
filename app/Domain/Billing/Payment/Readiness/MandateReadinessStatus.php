@@ -10,9 +10,4 @@ enum MandateReadinessStatus: string
     case Missing = 'missing';
     case Revoked = 'revoked';
     case Expired = 'expired';
-
-    public function isExpectedExclusion(): bool
-    {
-        return $this === self::Missing || $this === self::Revoked;
-    }
 }

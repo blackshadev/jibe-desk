@@ -16,10 +16,12 @@ use App\Domain\Billing\Payment\Readiness\SepaCollectionCandidate;
 use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Domain\Billing\Payment\SequenceType;
 use App\Domain\Members\MemberId;
+use App\Domain\Members\PaymentMethod;
 use App\Domain\SharedKernel\CompoundPrice;
 use Carbon\CarbonImmutable;
 use DateTimeInterface;
 use Override;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\UnitTestCase;
 
 final class CollectionReadinessAssessorTest extends UnitTestCase
@@ -34,72 +36,305 @@ final class CollectionReadinessAssessorTest extends UnitTestCase
         $this->assessor = new CollectionReadinessAssessor();
     }
 
-    public function test_it_reports_an_open_candidate_on_a_pending_batch_as_uncollectable(): void
-    {
-        $issues = $this->assessor->assess(
-            $this->candidate(InvoiceStatus::Open),
-            $this->mandate(),
-            $this->context(),
-        );
+    /** @param list<ExportReadinessReason> $expectedReasons */
+    #[DataProvider('assessmentProvider')]
+    public function test_it_assesses_the_candidate(
+        SepaCollectionCandidate $candidate,
+        ?MandateReadiness $mandate,
+        SepaBatchExportContext $context,
+        array $expectedReasons,
+    ): void {
+        $issues = $this->assessor->assess($candidate, $mandate, $context);
 
-        static::assertSame([ExportReadinessReason::UncollectableStatus], $this->reasons($issues));
+        static::assertSame($expectedReasons, $this->reasons($issues));
     }
 
-    public function test_it_reports_a_missing_mandate_for_a_debit(): void
-    {
-        $issues = $this->assessor->assess($this->candidate(), null, $this->context());
+    #[DataProvider('explanationProvider')]
+    public function test_it_explains_the_reported_issue(
+        SepaCollectionCandidate $candidate,
+        ?MandateReadiness $mandate,
+        SepaBatchExportContext $context,
+        string $expectedExplanation,
+    ): void {
+        $issues = $this->assessor->assess($candidate, $mandate, $context);
 
-        static::assertSame([ExportReadinessReason::MissingMandate], $this->reasons($issues));
+        static::assertCount(1, $issues);
+        static::assertSame($expectedExplanation, $issues[0]->detail);
     }
 
-    public function test_it_reports_an_expired_mandate_and_a_sequence_mismatch_together(): void
+    /** @return iterable<string, array{SepaCollectionCandidate, ?MandateReadiness, SepaBatchExportContext, list<ExportReadinessReason>}> */
+    public static function assessmentProvider(): iterable
     {
-        $issues = $this->assessor->assess(
-            $this->candidate(sequenceType: SequenceType::First),
-            new MandateReadiness(
-                status: MandateReadinessStatus::Expired,
-                iban: 'NL91ABNA0417164300',
-                expectedSequenceType: SequenceType::Recurring,
-            ),
-            $this->context(),
-        );
+        yield 'open invoice on a pending batch' => [
+            self::candidate(status: InvoiceStatus::Open),
+            self::mandate(),
+            self::context(),
+            [ExportReadinessReason::UncollectableStatus],
+        ];
 
-        static::assertSame(
+        yield 'open invoice on a pending batch takes precedence over a missing mandate' => [
+            self::candidate(status: InvoiceStatus::Open),
+            null,
+            self::context(),
+            [ExportReadinessReason::UncollectableStatus],
+        ];
+
+        yield 'open invoice on an open batch' => [
+            self::candidate(status: InvoiceStatus::Open),
+            self::mandate(),
+            self::context(status: SepaBatchStatus::Open),
+            [],
+        ];
+
+        yield 'zero amount' => [
+            self::candidate(total: new CompoundPrice(0.0, 0.0)),
+            self::mandate(),
+            self::context(),
+            [ExportReadinessReason::ZeroAmount],
+        ];
+
+        yield 'zero amount on an open invoice of a pending batch' => [
+            self::candidate(status: InvoiceStatus::Open, total: new CompoundPrice(0.0, 0.0)),
+            self::mandate(),
+            self::context(),
+            [ExportReadinessReason::UncollectableStatus],
+        ];
+
+        yield 'zero amount takes precedence over a missing mandate' => [
+            self::candidate(total: new CompoundPrice(0.0, 0.0)),
+            null,
+            self::context(),
+            [ExportReadinessReason::ZeroAmount],
+        ];
+
+        yield 'refund with a usable iban' => [
+            self::candidate(total: new CompoundPrice(-10.0, -2.1)),
+            self::mandate(),
+            self::context(),
+            [],
+        ];
+
+        yield 'refund without a mandate' => [
+            self::candidate(total: new CompoundPrice(-10.0, -2.1)),
+            null,
+            self::context(),
+            [ExportReadinessReason::MissingIban],
+        ];
+
+        yield 'refund with an active mandate without an iban' => [
+            self::candidate(total: new CompoundPrice(-10.0, -2.1)),
+            self::mandate(iban: null),
+            self::context(),
+            [ExportReadinessReason::MissingIban],
+        ];
+
+        yield 'refund with a blank iban' => [
+            self::candidate(total: new CompoundPrice(-10.0, -2.1)),
+            self::mandate(iban: '   '),
+            self::context(),
+            [ExportReadinessReason::MissingIban],
+        ];
+
+        yield 'refund with a malformed iban' => [
+            self::candidate(total: new CompoundPrice(-10.0, -2.1)),
+            self::mandate(iban: 'NOT-AN-IBAN'),
+            self::context(),
+            [ExportReadinessReason::MalformedIban],
+        ];
+
+        yield 'refund with a revoked mandate and a usable iban' => [
+            self::candidate(total: new CompoundPrice(-10.0, -2.1)),
+            self::mandate(status: MandateReadinessStatus::Revoked),
+            self::context(),
+            [],
+        ];
+
+        yield 'refund with a revoked mandate and a malformed iban' => [
+            self::candidate(total: new CompoundPrice(-10.0, -2.1)),
+            self::mandate(status: MandateReadinessStatus::Revoked, iban: 'NOT-AN-IBAN'),
+            self::context(),
+            [ExportReadinessReason::MalformedIban],
+        ];
+
+        yield 'debit without a mandate' => [
+            self::candidate(),
+            null,
+            self::context(),
+            [ExportReadinessReason::MissingMandate],
+        ];
+
+        yield 'debit with a missing mandate' => [
+            self::candidate(),
+            self::mandate(status: MandateReadinessStatus::Missing, iban: null),
+            self::context(),
+            [ExportReadinessReason::MissingMandate],
+        ];
+
+        yield 'debit with a revoked mandate' => [
+            self::candidate(),
+            self::mandate(status: MandateReadinessStatus::Revoked),
+            self::context(),
+            [ExportReadinessReason::RevokedMandate],
+        ];
+
+        yield 'debit with a transfer payment method and an active mandate' => [
+            self::candidate(paymentMethod: PaymentMethod::Transfer),
+            self::mandate(),
+            self::context(),
+            [ExportReadinessReason::TransferWithActiveMandate],
+        ];
+
+        yield 'debit with a transfer payment method and an expired mandate' => [
+            self::candidate(paymentMethod: PaymentMethod::Transfer),
+            self::mandate(status: MandateReadinessStatus::Expired),
+            self::context(),
+            [ExportReadinessReason::ExpiredMandate],
+        ];
+
+        yield 'debit with a direct debit payment method and an active mandate' => [
+            self::candidate(paymentMethod: PaymentMethod::DirectDebit),
+            self::mandate(),
+            self::context(),
+            [],
+        ];
+
+        yield 'debit with an expired mandate' => [
+            self::candidate(),
+            self::mandate(status: MandateReadinessStatus::Expired),
+            self::context(),
+            [ExportReadinessReason::ExpiredMandate],
+        ];
+
+        yield 'debit with a stale first collection plan' => [
+            self::candidate(sequenceType: SequenceType::First),
+            self::mandate(expectedSequenceType: SequenceType::Recurring),
+            self::context(),
+            [ExportReadinessReason::SequenceTypeMismatch],
+        ];
+
+        yield 'debit with a stale recurring collection plan' => [
+            self::candidate(sequenceType: SequenceType::Recurring),
+            self::mandate(expectedSequenceType: SequenceType::First),
+            self::context(),
+            [ExportReadinessReason::SequenceTypeMismatch],
+        ];
+
+        yield 'debit with a matching first collection' => [
+            self::candidate(sequenceType: SequenceType::First),
+            self::mandate(expectedSequenceType: SequenceType::First),
+            self::context(),
+            [],
+        ];
+
+        yield 'debit with an expired mandate and a stale collection plan' => [
+            self::candidate(sequenceType: SequenceType::First),
+            self::mandate(status: MandateReadinessStatus::Expired, expectedSequenceType: SequenceType::Recurring),
+            self::context(),
             [ExportReadinessReason::ExpiredMandate, ExportReadinessReason::SequenceTypeMismatch],
-            $this->reasons($issues),
-        );
-    }
+        ];
 
-    public function test_it_skips_the_sequence_check_for_a_presented_batch(): void
-    {
-        $issues = $this->assessor->assess(
-            $this->candidate(sequenceType: SequenceType::First),
-            new MandateReadiness(
-                status: MandateReadinessStatus::Active,
-                iban: 'NL91ABNA0417164300',
+        yield 'debit with a transfer payment method and a stale collection plan' => [
+            self::candidate(sequenceType: SequenceType::First, paymentMethod: PaymentMethod::Transfer),
+            self::mandate(expectedSequenceType: SequenceType::Recurring),
+            self::context(),
+            [ExportReadinessReason::TransferWithActiveMandate, ExportReadinessReason::SequenceTypeMismatch],
+        ];
+
+        yield 'debit without an iban' => [
+            self::candidate(),
+            self::mandate(iban: null),
+            self::context(),
+            [ExportReadinessReason::MissingIban],
+        ];
+
+        yield 'debit with a blank iban' => [
+            self::candidate(),
+            self::mandate(iban: '   '),
+            self::context(),
+            [ExportReadinessReason::MissingIban],
+        ];
+
+        yield 'debit with a malformed iban' => [
+            self::candidate(),
+            self::mandate(iban: 'NOT-AN-IBAN'),
+            self::context(),
+            [ExportReadinessReason::MalformedIban],
+        ];
+
+        yield 'debit with every applicable issue' => [
+            self::candidate(sequenceType: SequenceType::First),
+            self::mandate(
+                status: MandateReadinessStatus::Expired,
+                iban: null,
                 expectedSequenceType: SequenceType::Recurring,
             ),
-            $this->context(submittedAt: CarbonImmutable::parse('2026-10-23 09:30:00')),
-        );
+            self::context(),
+            [
+                ExportReadinessReason::ExpiredMandate,
+                ExportReadinessReason::SequenceTypeMismatch,
+                ExportReadinessReason::MissingIban,
+            ],
+        ];
 
-        static::assertSame([], $issues);
+        yield 'submitted batch skips the collection plan check' => [
+            self::candidate(sequenceType: SequenceType::First),
+            self::mandate(expectedSequenceType: SequenceType::Recurring),
+            self::context(submittedAt: CarbonImmutable::parse('2026-10-23 09:30:00')),
+            [],
+        ];
+
+        yield 'submitted batch still reports an expired mandate' => [
+            self::candidate(),
+            self::mandate(status: MandateReadinessStatus::Expired),
+            self::context(submittedAt: CarbonImmutable::parse('2026-10-23 09:30:00')),
+            [ExportReadinessReason::ExpiredMandate],
+        ];
+
+        yield 'submitted batch still reports a transfer payment method on an active mandate' => [
+            self::candidate(paymentMethod: PaymentMethod::Transfer),
+            self::mandate(),
+            self::context(submittedAt: CarbonImmutable::parse('2026-10-23 09:30:00')),
+            [ExportReadinessReason::TransferWithActiveMandate],
+        ];
     }
 
-    public function test_it_skips_a_missing_refund_iban(): void
+    /** @return iterable<string, array{SepaCollectionCandidate, ?MandateReadiness, SepaBatchExportContext, string}> */
+    public static function explanationProvider(): iterable
     {
-        $issues = $this->assessor->assess(
-            $this->candidate(total: new CompoundPrice(-10.0, -2.1), sequenceType: SequenceType::Recurring),
-            new MandateReadiness(status: MandateReadinessStatus::Active, iban: null),
-            $this->context(),
-        );
+        yield 'missing mandate' => [
+            self::candidate(),
+            null,
+            self::context(),
+            'Automatische incasso verwacht, geen actieve machtiging.',
+        ];
 
-        static::assertSame([], $issues);
+        yield 'revoked mandate' => [
+            self::candidate(),
+            self::mandate(status: MandateReadinessStatus::Revoked),
+            self::context(),
+            'Automatische incasso verwacht, machtiging is ingetrokken.',
+        ];
+
+        yield 'first collection planned on a recurring mandate' => [
+            self::candidate(sequenceType: SequenceType::First),
+            self::mandate(expectedSequenceType: SequenceType::Recurring),
+            self::context(),
+            'Gepland: FRST, mandaat verwacht: RCUR.',
+        ];
+
+        yield 'recurring collection planned on a first mandate' => [
+            self::candidate(sequenceType: SequenceType::Recurring),
+            self::mandate(expectedSequenceType: SequenceType::First),
+            self::context(),
+            'Gepland: RCUR, mandaat verwacht: FRST.',
+        ];
     }
 
-    private function candidate(
+    private static function candidate(
         InvoiceStatus $status = InvoiceStatus::Pending,
         CompoundPrice $total = new CompoundPrice(10.0, 2.1),
         SequenceType $sequenceType = SequenceType::Recurring,
+        PaymentMethod $paymentMethod = PaymentMethod::DirectDebit,
     ): SepaCollectionCandidate {
         return new SepaCollectionCandidate(
             invoiceId: InvoiceId::create(1),
@@ -109,22 +344,28 @@ final class CollectionReadinessAssessorTest extends UnitTestCase
             total: $total,
             status: $status,
             sequenceType: $sequenceType,
+            paymentMethod: $paymentMethod,
         );
     }
 
-    private function mandate(): MandateReadiness
-    {
+    private static function mandate(
+        MandateReadinessStatus $status = MandateReadinessStatus::Active,
+        ?string $iban = 'NL91ABNA0417164300',
+        SequenceType $expectedSequenceType = SequenceType::Recurring,
+    ): MandateReadiness {
         return new MandateReadiness(
-            status: MandateReadinessStatus::Active,
-            iban: 'NL91ABNA0417164300',
-            expectedSequenceType: SequenceType::Recurring,
+            status: $status,
+            iban: $iban,
+            expectedSequenceType: $expectedSequenceType,
         );
     }
 
-    private function context(?DateTimeInterface $submittedAt = null): SepaBatchExportContext
-    {
+    private static function context(
+        SepaBatchStatus $status = SepaBatchStatus::Pending,
+        ?DateTimeInterface $submittedAt = null,
+    ): SepaBatchExportContext {
         return new SepaBatchExportContext(
-            status: SepaBatchStatus::Pending,
+            status: $status,
             sepaTransferDate: CarbonImmutable::parse('2026-11-05'),
             closedAt: CarbonImmutable::parse('2026-10-22'),
             submittedAt: $submittedAt,

@@ -374,7 +374,7 @@ final class FrstRcurSequenceScenarioTest extends FeatureTestCase
     {
         return app(SepaBatchService::class)->export(
             SepaBatchId::create($batch->id),
-            new ExportConfirmation(exclusionsAcknowledged: true),
+            new ExportConfirmation(),
             User::factory()->createQuietly()->id,
         );
     }

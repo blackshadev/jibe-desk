@@ -132,7 +132,6 @@ final class MandateLifecycleScenarioTest extends FeatureTestCase
         $export = app(SepaBatchService::class)->export(
             SepaBatchId::create($batch->id),
             new ExportConfirmation(
-                exclusionsAcknowledged: true,
                 overrides: [
                     new ExportOverride(
                         InvoiceId::create($invoice->id),
@@ -163,7 +162,6 @@ final class MandateLifecycleScenarioTest extends FeatureTestCase
         app(SepaBatchService::class)->export(
             SepaBatchId::create($batch->id),
             new ExportConfirmation(
-                exclusionsAcknowledged: true,
                 overrides: [
                     new ExportOverride(
                         InvoiceId::create($invoice->id),
@@ -179,7 +177,7 @@ final class MandateLifecycleScenarioTest extends FeatureTestCase
 
         app(SepaBatchService::class)->export(
             SepaBatchId::create($batch->id),
-            new ExportConfirmation(exclusionsAcknowledged: true),
+            new ExportConfirmation(),
             $userId,
         );
     }

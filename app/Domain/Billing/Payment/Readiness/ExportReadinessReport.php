@@ -22,12 +22,6 @@ final readonly class ExportReadinessReport
     ) {}
 
     /** @return list<ExportReadinessIssue> */
-    public function expectedExclusions(): array
-    {
-        return $this->withCategory(ExportReadinessCategory::ManualPayerExpected);
-    }
-
-    /** @return list<ExportReadinessIssue> */
     public function overridableIssues(): array
     {
         return $this->withCategory(ExportReadinessCategory::Overridable);
@@ -68,17 +62,8 @@ final readonly class ExportReadinessReport
         return $this->blockingIssues() !== [];
     }
 
-    public function requiresExclusionAcknowledgement(): bool
-    {
-        return $this->expectedExclusions() !== [];
-    }
-
     public function isSatisfiedBy(ExportConfirmation $confirmation): bool
     {
-        if ($this->requiresExclusionAcknowledgement() && !$confirmation->exclusionsAcknowledged) {
-            return false;
-        }
-
         return $this->unresolvedIssues($confirmation) === [];
     }
 

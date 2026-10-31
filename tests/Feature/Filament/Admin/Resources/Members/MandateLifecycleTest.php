@@ -8,6 +8,7 @@ use App\Domain\Authorization\RoleName;
 use App\Domain\Billing\Invoices\InvoiceId;
 use App\Domain\Billing\Invoices\InvoiceStatus;
 use App\Domain\Billing\Payment\MandateExpirationStatus;
+use App\Domain\Members\PaymentMethod;
 use App\Filament\Admin\Resources\Members\Pages\EditMember;
 use App\Filament\Admin\Resources\Members\Pages\ListMembers;
 use App\Filament\Admin\Resources\Members\Pages\ViewMember;
@@ -233,7 +234,7 @@ final class MandateLifecycleTest extends FeatureTestCase
         static::assertNull($member->refresh()->paymentInformation);
     }
 
-    public function test_revoke_keeps_the_iban_and_the_member_becomes_a_manual_payer(): void
+    public function test_revoke_keeps_the_iban_and_leaves_the_payment_method_unchanged(): void
     {
         $this->withUserHavingRole(RoleName::FinancialAdministration);
         $member = Member::factory()->createQuietly();
@@ -261,7 +262,68 @@ final class MandateLifecycleTest extends FeatureTestCase
             ->getInvoiceMailData(InvoiceId::create($invoice->id));
 
         static::assertNull($mailData->sepaTransferDate);
+        static::assertSame('NL91ABNA0417164300', $mailData->recipientIban);
+        static::assertSame(PaymentMethod::DirectDebit, $member->refresh()->payment_method);
         static::assertSame('NL91ABNA0417164300', $member->paymentInformations()->first()?->banking_account_number);
+    }
+
+    public function test_create_mandate_offers_a_checked_switch_for_a_transfer_member(): void
+    {
+        $this->withUserHavingRole(RoleName::FinancialAdministration);
+        $member = Member::factory()->transfer()->createQuietly();
+
+        Livewire::test(MandatesRelationManager::class, [
+            'ownerRecord' => $member,
+            'pageClass' => ViewMember::class,
+        ])
+            ->mountTableAction('createMandate')
+            ->assertTableActionDataSet(['switch_to_direct_debit' => true]);
+    }
+
+    public function test_creating_a_mandate_can_switch_a_transfer_member_to_direct_debit(): void
+    {
+        $this->withUserHavingRole(RoleName::FinancialAdministration);
+        $member = Member::factory()->transfer()->createQuietly();
+
+        Livewire::test(MandatesRelationManager::class, [
+            'ownerRecord' => $member,
+            'pageClass' => ViewMember::class,
+        ])
+            ->mountTableAction('createMandate')
+            ->setTableActionData([
+                'banking_account_number' => 'NL91ABNA0417164300',
+                'banking_bic' => 'ABNANL2A',
+                'banking_account_holder_name' => 'Jan de Vries',
+                'mandate_accepted_date' => '2026-01-15',
+                'switch_to_direct_debit' => true,
+            ])
+            ->callMountedTableAction()
+            ->assertHasNoTableActionErrors();
+
+        static::assertSame(PaymentMethod::DirectDebit, $member->refresh()->payment_method);
+    }
+
+    public function test_creating_a_mandate_can_leave_a_transfer_member_on_transfer(): void
+    {
+        $this->withUserHavingRole(RoleName::FinancialAdministration);
+        $member = Member::factory()->transfer()->createQuietly();
+
+        Livewire::test(MandatesRelationManager::class, [
+            'ownerRecord' => $member,
+            'pageClass' => ViewMember::class,
+        ])
+            ->mountTableAction('createMandate')
+            ->setTableActionData([
+                'banking_account_number' => 'NL91ABNA0417164300',
+                'banking_bic' => 'ABNANL2A',
+                'banking_account_holder_name' => 'Jan de Vries',
+                'mandate_accepted_date' => '2026-01-15',
+                'switch_to_direct_debit' => false,
+            ])
+            ->callMountedTableAction()
+            ->assertHasNoTableActionErrors();
+
+        static::assertSame(PaymentMethod::Transfer, $member->refresh()->payment_method);
     }
 
     public function test_member_administration_cannot_view_the_mandate_relation_manager(): void
@@ -318,7 +380,7 @@ final class MandateLifecycleTest extends FeatureTestCase
             ->assertFormFieldDoesNotExist('uuid');
     }
 
-    public function test_payment_tab_shows_no_active_mandate_after_revocation(): void
+    public function test_payment_tab_shows_the_revoked_mandate_state_after_revocation(): void
     {
         $this->withAuthorizedUser();
         $member = Member::factory()->createQuietly();
@@ -327,6 +389,7 @@ final class MandateLifecycleTest extends FeatureTestCase
             ->createQuietly(['member_id' => $member->id]);
 
         Livewire::test(EditMember::class, ['record' => $member->getRouteKey()])
-            ->assertSee('Geen actieve machtiging');
+            ->assertSee('Geen machtiging')
+            ->assertSee('Ingetrokken');
     }
 }

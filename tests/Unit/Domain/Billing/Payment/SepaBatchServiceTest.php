@@ -136,7 +136,7 @@ final class SepaBatchServiceTest extends UnitTestCase
     public function test_export_throws_when_readiness_is_not_satisfied(): void
     {
         $batchId = SepaBatchId::create(5);
-        $confirmation = new ExportConfirmation(exclusionsAcknowledged: true);
+        $confirmation = new ExportConfirmation();
         $report = $this->blockedReport($batchId);
 
         $this->repo->expectsGetExportContext($batchId, $this->pendingContext());
@@ -150,7 +150,7 @@ final class SepaBatchServiceTest extends UnitTestCase
     public function test_export_does_not_generate_or_stamp_when_not_ready(): void
     {
         $batchId = SepaBatchId::create(5);
-        $confirmation = new ExportConfirmation(exclusionsAcknowledged: true);
+        $confirmation = new ExportConfirmation();
         $report = $this->blockedReport($batchId);
 
         $this->repo->expectsGetExportContext($batchId, $this->pendingContext());
@@ -166,7 +166,7 @@ final class SepaBatchServiceTest extends UnitTestCase
     public function test_export_records_the_export_and_returns_the_files(): void
     {
         $batchId = SepaBatchId::create(5);
-        $confirmation = new ExportConfirmation(exclusionsAcknowledged: true);
+        $confirmation = new ExportConfirmation();
         $now = CarbonImmutable::parse('2026-10-22 12:00:00');
         $export = new SepaExport(creditTransfers: '', directDebit: '<xml/>');
 
@@ -183,7 +183,7 @@ final class SepaBatchServiceTest extends UnitTestCase
     public function test_export_rejects_a_batch_that_is_not_pending(): void
     {
         $batchId = SepaBatchId::create(5);
-        $confirmation = new ExportConfirmation(exclusionsAcknowledged: true);
+        $confirmation = new ExportConfirmation();
 
         $this->repo->expectsGetExportContext($batchId, new SepaBatchExportContext(
             status: SepaBatchStatus::Open,

@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Domain\Members\Gender;
 use App\Domain\Members\MemberNameFormatter;
+use App\Domain\Members\PaymentMethod;
 use App\Domain\Registration\FormData;
 use App\Models\Pivots\ActivityMember;
 use App\Observers\MemberObserver;
@@ -29,6 +30,7 @@ use RuntimeException;
 /**
  * @phpstan-import-type FormDataArray from FormData
  *
+ * @property PaymentMethod $payment_method
  * @property null|DateTimeInterface $stopped_at
  * @property null|DateTimeInterface $accepted_at
  * @property FormDataArray|null $registration_data
@@ -189,6 +191,7 @@ final class Member extends Model
             'birthdate' => 'date',
             'is_volunteer' => 'boolean',
             'gender' => Gender::class,
+            'payment_method' => PaymentMethod::class,
             'registration_data' => 'array',
             'stopped_at' => 'datetime',
             'accepted_at' => 'datetime',

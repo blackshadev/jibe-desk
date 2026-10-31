@@ -34,10 +34,12 @@ final readonly class MandateReadinessRepositoryDb implements MandateReadinessRep
             ->whereIn('id', array_map(static fn (MemberId $memberId): int => $memberId->value, $memberIds))
             ->with('currentPaymentInformation')
             ->get()
-            ->filter(static fn (Member $member): bool => $member->currentPaymentInformation instanceof PaymentInformation)
             ->mapWithKeys(function (Member $member): array {
-                /** @var PaymentInformation $mandate */
                 $mandate = $member->currentPaymentInformation;
+
+                if ($mandate === null) {
+                    return [$member->id => MandateReadiness::missing()];
+                }
 
                 return [$member->id => $this->readiness($mandate)];
             })

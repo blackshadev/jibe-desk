@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Domain\Members\Gender;
+use App\Domain\Members\PaymentMethod;
 use App\Models\Activity;
 use App\Models\Household;
 use App\Models\Member;
@@ -33,8 +34,15 @@ final class MemberFactory extends Factory
             'address_city' => fake()->city(),
             'address_postalcode' => fake()->postcode(),
             'birthdate' => fake()->date(),
-            'gender' => fake()->randomElement(Gender::cases()),
+            'gender' => fake()->randomElement([
+                Gender::Male,
+                Gender::Female,
+                Gender::NonBinary,
+                Gender::Unknown,
+                Gender::Other,
+            ]),
             'membership_id' => Membership::factory(),
+            'payment_method' => PaymentMethod::DirectDebit,
             'is_volunteer' => fake()->boolean(),
             'accepted_at' => fake()->dateTimeBetween('-1 years', 'now'),
             'created_at' => fake()->dateTimeBetween('-1 years', 'now'),
@@ -60,6 +68,14 @@ final class MemberFactory extends Factory
     public function withPaymentInfo(): self
     {
         return $this->has(PaymentInformation::factory());
+    }
+
+    public function transfer(): self
+    {
+        // @mago-expect lint:prefer-static-closure
+        return $this->state(fn (array $_attributes): array => [
+            'payment_method' => PaymentMethod::Transfer,
+        ]);
     }
 
     /** @param iterable<Activity> $activities */

@@ -67,7 +67,7 @@ final class MemberResource extends Resource
     #[Override]
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery()->with('paymentInformation');
+        $query = parent::getEloquentQuery()->with(['paymentInformation', 'currentPaymentInformation']);
 
         $user = auth()->user();
 

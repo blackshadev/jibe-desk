@@ -34,6 +34,7 @@ use App\Models\SepaBatch;
 use App\Models\SepaExportOverride;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Filament\Forms\Components\Select;
 use Filament\Resources\RelationManagers\RelationManagerConfiguration;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
@@ -346,6 +347,53 @@ final class SepaBatchResourceTest extends FeatureTestCase
         ]);
     }
 
+    public function test_add_invoices_action_offers_every_invoice_except_uncollectable_transfer_invoices(): void
+    {
+        $this->withAuthorizedUser();
+
+        $batch = SepaBatch::factory()->create(['status' => SepaBatchStatus::Open]);
+
+        $collectableTransfer = Member::factory()->transfer()->createQuietly();
+        PaymentInformation::factory()->createQuietly(['member_id' => $collectableTransfer->id]);
+        $collectableTransferInvoice = $this->openInvoiceFor($collectableTransfer);
+
+        $transferWithoutMandate = Member::factory()->transfer()->createQuietly();
+        $transferWithoutMandateInvoice = $this->openInvoiceFor($transferWithoutMandate);
+
+        $transferWithRevokedMandate = Member::factory()->transfer()->createQuietly();
+        PaymentInformation::factory()
+            ->revoked()
+            ->createQuietly(['member_id' => $transferWithRevokedMandate->id]);
+        $transferWithRevokedMandateInvoice = $this->openInvoiceFor($transferWithRevokedMandate);
+
+        $directDebitWithoutMandate = Member::factory()->createQuietly();
+        $directDebitInvoice = $this->openInvoiceFor($directDebitWithoutMandate);
+
+        Livewire::test(SepaBatchInvoicesRelationManager::class, [
+            'ownerRecord' => $batch,
+            'pageClass' => EditSepaBatch::class,
+        ])
+            ->mountTableAction('addInvoices')
+            ->assertSchemaComponentExists(
+                'invoice_ids',
+                'mountedActionSchema0',
+                static function (Select $select) use (
+                    $collectableTransferInvoice,
+                    $transferWithoutMandateInvoice,
+                    $transferWithRevokedMandateInvoice,
+                    $directDebitInvoice,
+                ): bool {
+                    /** @var array<int, string> $options */
+                    $options = $select->getOptions();
+
+                    return array_key_exists($collectableTransferInvoice->id, $options)
+                        && array_key_exists($directDebitInvoice->id, $options)
+                        && !array_key_exists($transferWithoutMandateInvoice->id, $options)
+                        && !array_key_exists($transferWithRevokedMandateInvoice->id, $options);
+                },
+            );
+    }
+
     public function test_export_overrides_relation_manager_is_hidden_when_the_batch_has_no_overrides(): void
     {
         $this->withAuthorizedUser();
@@ -511,12 +559,12 @@ final class SepaBatchResourceTest extends FeatureTestCase
         ]);
     }
 
-    public function test_readiness_action_lists_expected_manual_payer_exclusions(): void
+    public function test_readiness_action_lists_a_transfer_member_without_a_mandate_as_broken_data(): void
     {
         $this->withAuthorizedUser();
 
         $batch = SepaBatch::factory()->create(['status' => SepaBatchStatus::Pending]);
-        $member = Member::factory()->createQuietly();
+        $member = Member::factory()->transfer()->createQuietly();
         $invoice = Invoice::factory()
             ->forMember($member)
             ->forBatch($batch)
@@ -525,7 +573,7 @@ final class SepaBatchResourceTest extends FeatureTestCase
 
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
             ->mountAction('readiness')
-            ->assertMountedActionModalSee(__('labels.export_readiness.expected_exclusions'));
+            ->assertMountedActionModalSee(__('labels.export_readiness.broken_data'));
     }
 
     public function test_readiness_action_lists_broken_data(): void
@@ -540,6 +588,26 @@ final class SepaBatchResourceTest extends FeatureTestCase
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
             ->mountAction('readiness')
             ->assertMountedActionModalSee(__('labels.export_readiness.broken_data'));
+    }
+
+    public function test_readiness_action_lists_a_refund_without_an_iban_as_broken_data(): void
+    {
+        $this->withAuthorizedUser();
+
+        $batch = SepaBatch::factory()->create(['status' => SepaBatchStatus::Pending]);
+        $member = Member::factory()->createQuietly();
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Pending]);
+        InvoiceLine::factory()
+            ->state(['invoice_id' => $invoice->id])
+            ->createQuietly(['price' => -10.00, 'quantity' => 1, 'vat' => -2.10]);
+
+        Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
+            ->mountAction('readiness')
+            ->assertMountedActionModalSee(__('labels.export_readiness.broken_data'))
+            ->assertMountedActionModalSee(__('labels.export_readiness.reason.missing_iban'));
     }
 
     public function test_close_batch_warns_but_still_closes_the_batch(): void
@@ -654,21 +722,16 @@ final class SepaBatchResourceTest extends FeatureTestCase
         static::assertNull($batch->fresh()->exported_at);
     }
 
-    public function test_export_action_requires_exclusion_acknowledgement(): void
+    public function test_export_action_is_blocked_by_a_refund_without_an_iban(): void
     {
         $this->withAuthorizedUser();
 
         $batch = $this->exportableBatch();
-        $member = Member::factory()->createQuietly();
-        $invoice = Invoice::factory()
-            ->forMember($member)
-            ->forBatch($batch)
-            ->createQuietly(['status' => InvoiceStatus::Pending]);
-        $this->createInvoiceLine($invoice);
+        $this->createRefundInvoiceForBatch($batch);
 
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
             ->callAction('exportSepa')
-            ->assertHasActionErrors(['acknowledge_exclusions']);
+            ->assertNotified(__('notifications.sepa_export_blocked'));
 
         static::assertNull($batch->fresh()->exported_at);
     }
@@ -683,7 +746,6 @@ final class SepaBatchResourceTest extends FeatureTestCase
 
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
             ->callAction('exportSepa', data: [
-                'acknowledge_exclusions' => true,
                 'overridden_invoices' => [$invoice->id],
                 'override_reason' => '',
             ])
@@ -703,39 +765,38 @@ final class SepaBatchResourceTest extends FeatureTestCase
 
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
             ->callAction('exportSepa', data: [
-                'acknowledge_exclusions' => true,
                 'overridden_invoices' => [$invoice->id],
                 'override_reason' => 'Written confirmation received.',
             ])
             ->assertFileDownloaded();
 
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
-            ->callAction('exportSepa', data: ['acknowledge_exclusions' => true])
+            ->callAction('exportSepa')
             ->assertNotified(__('notifications.sepa_export_blocked'));
 
         $this->assertDatabaseCount('sepa_export_overrides', 1);
     }
 
-    public function test_export_action_requires_exclusion_acknowledgement_on_every_export(): void
+    public function test_export_action_rechecks_the_refund_iban_on_every_export(): void
     {
         $this->withAuthorizedUser();
 
         $batch = $this->exportableBatch();
-        $member = Member::factory()->createQuietly();
-        $invoice = Invoice::factory()
-            ->forMember($member)
-            ->forBatch($batch)
-            ->createQuietly(['status' => InvoiceStatus::Pending]);
-        $this->createInvoiceLine($invoice);
+        $refund = $this->createRefundInvoiceForBatch($batch);
+        $this->attachPaymentInformation($refund);
         $this->attachPurchaseOrder($batch);
 
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
-            ->callAction('exportSepa', data: ['acknowledge_exclusions' => true])
+            ->callAction('exportSepa')
             ->assertFileDownloaded();
+
+        PaymentInformation::query()
+            ->where('member_id', $refund->member_id)
+            ->update(['banking_account_number' => 'NOT-AN-IBAN']);
 
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
             ->callAction('exportSepa')
-            ->assertHasActionErrors(['acknowledge_exclusions']);
+            ->assertNotified(__('notifications.sepa_export_blocked'));
     }
 
     public function test_export_action_records_the_override_and_stamps_the_export(): void
@@ -749,7 +810,6 @@ final class SepaBatchResourceTest extends FeatureTestCase
 
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
             ->callAction('exportSepa', data: [
-                'acknowledge_exclusions' => true,
                 'overridden_invoices' => [$invoice->id],
                 'override_reason' => 'Written confirmation received.',
             ])
@@ -761,6 +821,40 @@ final class SepaBatchResourceTest extends FeatureTestCase
             'invoice_id' => $invoice->id,
             'reason' => 'expired_mandate',
             'note' => 'Written confirmation received.',
+        ]);
+    }
+
+    public function test_export_action_requires_an_override_for_a_transfer_member_with_an_active_mandate(): void
+    {
+        $this->withAuthorizedUser();
+
+        $batch = $this->exportableBatch();
+        $member = Member::factory()->transfer()->createQuietly();
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Pending]);
+        $this->createInvoiceLine($invoice);
+        $this->attachPaymentInformation($invoice);
+
+        Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
+            ->callAction('exportSepa')
+            ->assertNotified(__('notifications.sepa_export_blocked'));
+
+        static::assertNull($batch->fresh()->exported_at);
+
+        Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
+            ->callAction('exportSepa', data: [
+                'overridden_invoices' => [$invoice->id],
+                'override_reason' => 'Member confirmed the collection.',
+            ])
+            ->assertFileDownloaded();
+
+        $this->assertDatabaseHas('sepa_export_overrides', [
+            'sepa_batch_id' => $batch->id,
+            'invoice_id' => $invoice->id,
+            'reason' => 'transfer_with_active_mandate',
+            'note' => 'Member confirmed the collection.',
         ]);
     }
 
@@ -986,7 +1080,7 @@ final class SepaBatchResourceTest extends FeatureTestCase
             ->callAction('replanSequence');
 
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
-            ->callAction('exportSepa', data: ['acknowledge_exclusions' => true])
+            ->callAction('exportSepa')
             ->assertFileDownloaded();
     }
 
@@ -1000,6 +1094,16 @@ final class SepaBatchResourceTest extends FeatureTestCase
         ]);
     }
 
+    private function openInvoiceFor(Member $member): Invoice
+    {
+        return Invoice::factory()
+            ->forMember($member)
+            ->createQuietly([
+                'status' => InvoiceStatus::Open,
+                'sepa_batch_id' => null,
+            ]);
+    }
+
     private function createInvoiceForBatch(SepaBatch $batch): Invoice
     {
         $member = Member::factory()->createQuietly();
@@ -1009,6 +1113,21 @@ final class SepaBatchResourceTest extends FeatureTestCase
             ->createQuietly(['status' => InvoiceStatus::Pending]);
 
         $this->createInvoiceLine($invoice);
+
+        return $invoice;
+    }
+
+    private function createRefundInvoiceForBatch(SepaBatch $batch): Invoice
+    {
+        $member = Member::factory()->createQuietly();
+        $invoice = Invoice::factory()
+            ->forMember($member)
+            ->forBatch($batch)
+            ->createQuietly(['status' => InvoiceStatus::Pending]);
+
+        InvoiceLine::factory()
+            ->state(['invoice_id' => $invoice->id])
+            ->createQuietly(['price' => -10.00, 'quantity' => 1, 'vat' => -2.10]);
 
         return $invoice;
     }

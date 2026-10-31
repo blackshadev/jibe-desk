@@ -23,6 +23,7 @@
     <php>
         <ini name="memory_limit" value="-1"/>
         <env name="APP_ENV" value="testing"/>
+        <env name="APP_FAKER_LOCALE" value="nl_NL"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>

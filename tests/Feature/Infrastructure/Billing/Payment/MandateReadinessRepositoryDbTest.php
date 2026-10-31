@@ -61,11 +61,12 @@ final class MandateReadinessRepositoryDbTest extends FeatureTestCase
 
     public function test_for_members_returns_missing_for_a_member_without_payment_information(): void
     {
-        $member = Member::factory()->createQuietly();
+        $member = Member::factory()->transfer()->createQuietly();
 
         $result = $this->service->forMembers([MemberId::create($member->id)]);
 
-        static::assertArrayNotHasKey($member->id, $result);
+        static::assertArrayHasKey($member->id, $result);
+        static::assertSame(MandateReadinessStatus::Missing, $result[$member->id]->status);
     }
 
     public function test_for_members_returns_active_for_a_mandate_within_thirty_six_months(): void

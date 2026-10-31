@@ -21,6 +21,7 @@ use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Domain\Billing\Payment\SepaConfiguration;
 use App\Domain\Billing\Payment\SequenceType;
 use App\Domain\Members\MemberId;
+use App\Domain\Members\PaymentMethod;
 use App\Domain\SharedKernel\CompoundPrice;
 use Carbon\CarbonImmutable;
 use Override;
@@ -55,7 +56,7 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
         );
     }
 
-    public function test_assess_reports_a_manual_payer_as_an_expected_exclusion(): void
+    public function test_assess_reports_a_member_without_a_mandate_as_broken_data(): void
     {
         $memberId = MemberId::create(7);
         $this->expectAssessment(
@@ -66,11 +67,11 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
         $report = $this->service->assess($this->batchId());
 
         $this->assertReasons($report, [ExportReadinessReason::MissingMandate]);
-        static::assertCount(1, $report->expectedExclusions());
-        static::assertFalse($report->isBlocked());
+        static::assertCount(1, $report->brokenDataIssues());
+        static::assertTrue($report->isBlocked());
     }
 
-    public function test_assess_reports_a_revoked_mandate_as_an_expected_exclusion(): void
+    public function test_assess_reports_a_revoked_mandate_as_broken_data(): void
     {
         $memberId = MemberId::create(7);
         $this->expectAssessment(
@@ -81,7 +82,8 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
         $report = $this->service->assess($this->batchId());
 
         $this->assertReasons($report, [ExportReadinessReason::RevokedMandate]);
-        static::assertFalse($report->isBlocked());
+        static::assertCount(1, $report->brokenDataIssues());
+        static::assertTrue($report->isBlocked());
     }
 
     public function test_assess_reports_an_expired_mandate_as_overridable(): void
@@ -167,6 +169,20 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
         static::assertTrue($report->isBlocked());
     }
 
+    public function test_assess_reports_a_transfer_member_with_an_active_mandate_as_overridable(): void
+    {
+        $memberId = MemberId::create(7);
+        $this->expectAssessment(
+            [$this->candidate(new CompoundPrice(100.0, 21.0), $memberId, paymentMethod: PaymentMethod::Transfer)],
+            [$memberId->value => $this->activeMandate()],
+        );
+
+        $report = $this->service->assess($this->batchId());
+
+        $this->assertReasons($report, [ExportReadinessReason::TransferWithActiveMandate]);
+        static::assertCount(1, $report->overridableIssues());
+    }
+
     public function test_assess_passes_a_legitimate_first_collection(): void
     {
         $memberId = MemberId::create(7);
@@ -249,7 +265,7 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
         static::assertTrue($report->isEmpty());
     }
 
-    public function test_assess_does_not_flag_a_refund_without_an_iban(): void
+    public function test_assess_reports_a_refund_without_an_iban_as_broken_data(): void
     {
         $memberId = MemberId::create(7);
         $this->expectAssessment(
@@ -259,10 +275,12 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
 
         $report = $this->service->assess($this->batchId());
 
-        static::assertTrue($report->isEmpty());
+        $this->assertReasons($report, [ExportReadinessReason::MissingIban]);
+        static::assertCount(1, $report->brokenDataIssues());
+        static::assertTrue($report->isBlocked());
     }
 
-    public function test_assess_reports_a_malformed_refund_iban(): void
+    public function test_assess_reports_a_malformed_refund_iban_as_broken_data(): void
     {
         $memberId = MemberId::create(7);
         $this->expectAssessment(
@@ -273,6 +291,8 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
         $report = $this->service->assess($this->batchId());
 
         $this->assertReasons($report, [ExportReadinessReason::MalformedIban]);
+        static::assertCount(1, $report->brokenDataIssues());
+        static::assertTrue($report->isBlocked());
     }
 
     public function test_assess_blocks_one_day_inside_the_notice_period(): void
@@ -402,6 +422,7 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
         ?MemberId $memberId = null,
         InvoiceStatus $status = InvoiceStatus::Pending,
         SequenceType $sequenceType = SequenceType::Recurring,
+        PaymentMethod $paymentMethod = PaymentMethod::DirectDebit,
     ): SepaCollectionCandidate {
         return new SepaCollectionCandidate(
             invoiceId: InvoiceId::create(1),
@@ -411,6 +432,7 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
             total: $total,
             status: $status,
             sequenceType: $sequenceType,
+            paymentMethod: $paymentMethod,
         );
     }
 

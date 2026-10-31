@@ -11,6 +11,7 @@ use App\Domain\Members\MemberId;
 use App\Domain\Members\MemberNameFormatter;
 use App\Domain\Members\MemberRepository;
 use App\Domain\Members\MembershipId;
+use App\Domain\Members\PaymentMethod;
 use App\Models\Member;
 use Override;
 
@@ -57,6 +58,7 @@ final class MemberDbRepository implements MemberRepository
             'address_city' => $newMember->personalInformation->addressCity,
             'is_volunteer' => false,
             'membership_id' => $newMember->membershipInformation->membershipId->value,
+            'payment_method' => PaymentMethod::DirectDebit,
             'registration_data' => $newMember->registrationData,
             'accepted_at' => null,
         ]);
