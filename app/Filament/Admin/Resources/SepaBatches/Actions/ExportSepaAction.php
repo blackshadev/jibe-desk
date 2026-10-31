@@ -16,7 +16,6 @@ use App\Domain\Billing\Payment\SepaBatchService;
 use App\Domain\Billing\Payment\SepaBatchStatus;
 use App\Models\SepaBatch;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Textarea;
 use Filament\Resources\Pages\EditRecord;
@@ -39,10 +38,6 @@ final class ExportSepaAction
 
                 return [
                     ExportReadinessView::make($report),
-                    Checkbox::make('acknowledge_exclusions')
-                        ->label(__('labels.export_readiness.acknowledge_exclusions'))
-                        ->visible($report->requiresExclusionAcknowledgement(...))
-                        ->accepted($report->requiresExclusionAcknowledgement(...)),
                     CheckboxList::make('overridden_invoices')
                         ->label(__('labels.export_readiness.expired_mandate_overrides'))
                         ->options(
@@ -71,7 +66,6 @@ final class ExportSepaAction
                 Action $action,
             ): ?Response {
                 $confirmation = new ExportConfirmation(
-                    exclusionsAcknowledged: (bool) ($data['acknowledge_exclusions'] ?? false),
                     overrides: array_map(
                         static fn (int|string $invoiceId): ExportOverride => new ExportOverride(
                             invoiceId: InvoiceId::create((int) $invoiceId),

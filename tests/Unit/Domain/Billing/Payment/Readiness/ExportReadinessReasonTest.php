@@ -30,7 +30,6 @@ final class ExportReadinessReasonTest extends UnitTestCase
         yield 'uncollectable status' => [ExportReadinessReason::UncollectableStatus, false];
         yield 'sequence type mismatch' => [ExportReadinessReason::SequenceTypeMismatch, false];
         yield 'notice period too short' => [ExportReadinessReason::NoticePeriodTooShort, true];
-        yield 'refund iban unavailable' => [ExportReadinessReason::RefundIbanUnavailable, false];
     }
 
     #[DataProvider('overridableProvider')]

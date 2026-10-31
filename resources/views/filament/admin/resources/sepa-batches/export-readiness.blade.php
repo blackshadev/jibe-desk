@@ -8,7 +8,6 @@
             'batch_level' => $report->batchLevelIssues(),
             'broken_data' => $report->brokenDataIssues(),
             'overridable' => $report->overridableIssues(),
-            'refund_exclusions' => $report->refundExclusions(),
         ] as $section => $issues)
             @if ($issues !== [])
                 <div>

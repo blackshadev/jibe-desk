@@ -15,14 +15,12 @@ enum ExportReadinessReason: string
     case UncollectableStatus = 'uncollectable_status';
     case SequenceTypeMismatch = 'sequence_type_mismatch';
     case NoticePeriodTooShort = 'notice_period_too_short';
-    case RefundIbanUnavailable = 'refund_iban_unavailable';
 
     public function category(): ExportReadinessCategory
     {
         return match ($this) {
             self::ExpiredMandate => ExportReadinessCategory::Overridable,
             self::NoticePeriodTooShort => ExportReadinessCategory::BatchLevel,
-            self::RefundIbanUnavailable => ExportReadinessCategory::RefundExclusion,
             self::MissingMandate, self::RevokedMandate, self::MissingIban, self::MalformedIban, self::ZeroAmount, self::UncollectableStatus, self::SequenceTypeMismatch => ExportReadinessCategory::BrokenData,
         };
     }

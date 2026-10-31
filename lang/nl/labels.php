@@ -238,10 +238,8 @@ return [
         'close_confirm' => 'Weet je zeker dat je de SEPA-ronde wilt sluiten?',
         'close_warning' => 'Controleer de aandachtspunten hieronder. Ze blokkeren het sluiten niet, maar kunnen de export later tegenhouden.',
         'broken_data' => 'Actie nodig: gegevens onvolledig',
-        'refund_exclusions' => 'Verwacht: terugbetaling zonder bruikbaar IBAN',
         'overridable' => 'Afwijkend: verlopen mandaat',
         'batch_level' => 'Actie nodig: incassodatum',
-        'acknowledge_exclusions' => 'Ik heb de verwachte uitsluitingen gecontroleerd',
         'expired_mandate_overrides' => 'Toch incasseren op een verlopen mandaat',
         'override_reason' => 'Reden voor de afwijking',
         'reason' => [
@@ -254,7 +252,6 @@ return [
             'uncollectable_status' => 'Factuur is nog niet vrijgegeven voor incasso',
             'sequence_type_mismatch' => 'Eerste/volgende incasso komt niet overeen met het mandaat',
             'notice_period_too_short' => 'Incassodatum ligt te dicht bij de factuurmail',
-            'refund_iban_unavailable' => 'Terugbetaling zonder bruikbaar IBAN',
         ],
     ],
     'mark_as_paid' => 'Markeer als betaald',

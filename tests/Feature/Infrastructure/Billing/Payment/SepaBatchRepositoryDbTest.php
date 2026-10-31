@@ -834,7 +834,6 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
         $this->repository->recordExport(
             SepaBatchId::create($batch->id),
             new ExportConfirmation(
-                exclusionsAcknowledged: true,
                 overrides: [
                     new ExportOverride(
                         invoiceId: InvoiceId::create($invoice->id),
@@ -868,7 +867,6 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
         $invoice = Invoice::factory()->forBatch($batch)->createQuietly();
 
         $confirmation = new ExportConfirmation(
-            exclusionsAcknowledged: true,
             overrides: [
                 new ExportOverride(
                     invoiceId: InvoiceId::create($invoice->id),
@@ -905,7 +903,7 @@ final class SepaBatchRepositoryDbTest extends FeatureTestCase
 
         $this->repository->recordExport(
             SepaBatchId::create($batch->id),
-            new ExportConfirmation(exclusionsAcknowledged: true),
+            new ExportConfirmation(),
             null,
             $exportedAt,
         );

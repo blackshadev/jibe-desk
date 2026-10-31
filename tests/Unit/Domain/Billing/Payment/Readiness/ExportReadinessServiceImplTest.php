@@ -250,7 +250,7 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
         static::assertTrue($report->isEmpty());
     }
 
-    public function test_assess_reports_a_refund_without_an_iban_as_a_refund_exclusion(): void
+    public function test_assess_reports_a_refund_without_an_iban_as_broken_data(): void
     {
         $memberId = MemberId::create(7);
         $this->expectAssessment(
@@ -260,13 +260,12 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
 
         $report = $this->service->assess($this->batchId());
 
-        $this->assertReasons($report, [ExportReadinessReason::RefundIbanUnavailable]);
-        static::assertCount(1, $report->refundExclusions());
-        static::assertFalse($report->isBlocked());
-        static::assertTrue($report->requiresExclusionAcknowledgement());
+        $this->assertReasons($report, [ExportReadinessReason::MissingIban]);
+        static::assertCount(1, $report->brokenDataIssues());
+        static::assertTrue($report->isBlocked());
     }
 
-    public function test_assess_reports_a_malformed_refund_iban_as_a_refund_exclusion(): void
+    public function test_assess_reports_a_malformed_refund_iban_as_broken_data(): void
     {
         $memberId = MemberId::create(7);
         $this->expectAssessment(
@@ -276,9 +275,9 @@ final class ExportReadinessServiceImplTest extends UnitTestCase
 
         $report = $this->service->assess($this->batchId());
 
-        $this->assertReasons($report, [ExportReadinessReason::RefundIbanUnavailable]);
-        static::assertCount(1, $report->refundExclusions());
-        static::assertFalse($report->isBlocked());
+        $this->assertReasons($report, [ExportReadinessReason::MalformedIban]);
+        static::assertCount(1, $report->brokenDataIssues());
+        static::assertTrue($report->isBlocked());
     }
 
     public function test_assess_blocks_one_day_inside_the_notice_period(): void

@@ -24,7 +24,7 @@ final readonly class CollectionReadinessAssessor
         }
 
         if ($candidate->isCredit()) {
-            return $this->assessCreditCandidate($candidate, $mandate);
+            return $this->assessIban($candidate, $mandate);
         }
 
         return $this->assessDebitCandidate($candidate, $mandate, $context);
@@ -60,24 +60,16 @@ final readonly class CollectionReadinessAssessor
     }
 
     /** @return list<ExportReadinessIssue> */
-    private function assessCreditCandidate(SepaCollectionCandidate $candidate, ?MandateReadiness $mandate): array
+    private function assessIban(SepaCollectionCandidate $candidate, ?MandateReadiness $mandate): array
     {
         $iban = $mandate?->iban;
 
         if ($iban === null || trim($iban) === '') {
-            return [ExportReadinessIssue::forInvoice(
-                ExportReadinessReason::RefundIbanUnavailable,
-                $candidate,
-                'Geen IBAN bekend voor terugbetaling.',
-            )];
+            return [ExportReadinessIssue::forInvoice(ExportReadinessReason::MissingIban, $candidate)];
         }
 
         if (!IbanFormat::isWellFormed($iban)) {
-            return [ExportReadinessIssue::forInvoice(
-                ExportReadinessReason::RefundIbanUnavailable,
-                $candidate,
-                'IBAN is ongeldig.',
-            )];
+            return [ExportReadinessIssue::forInvoice(ExportReadinessReason::MalformedIban, $candidate)];
         }
 
         return [];
@@ -114,21 +106,5 @@ final readonly class CollectionReadinessAssessor
                 ),
             ),
         ];
-    }
-
-    /** @return list<ExportReadinessIssue> */
-    private function assessIban(SepaCollectionCandidate $candidate, MandateReadiness $mandate): array
-    {
-        $iban = $mandate->iban;
-
-        if ($iban === null || trim($iban) === '') {
-            return [ExportReadinessIssue::forInvoice(ExportReadinessReason::MissingIban, $candidate)];
-        }
-
-        if (IbanFormat::isWellFormed($iban)) {
-            return [];
-        }
-
-        return [ExportReadinessIssue::forInvoice(ExportReadinessReason::MalformedIban, $candidate)];
     }
 }

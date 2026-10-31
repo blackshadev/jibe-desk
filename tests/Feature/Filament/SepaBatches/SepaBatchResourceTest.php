@@ -590,7 +590,7 @@ final class SepaBatchResourceTest extends FeatureTestCase
             ->assertMountedActionModalSee(__('labels.export_readiness.broken_data'));
     }
 
-    public function test_readiness_action_lists_refund_exclusions(): void
+    public function test_readiness_action_lists_a_refund_without_an_iban_as_broken_data(): void
     {
         $this->withAuthorizedUser();
 
@@ -606,7 +606,8 @@ final class SepaBatchResourceTest extends FeatureTestCase
 
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
             ->mountAction('readiness')
-            ->assertMountedActionModalSee(__('labels.export_readiness.refund_exclusions'));
+            ->assertMountedActionModalSee(__('labels.export_readiness.broken_data'))
+            ->assertMountedActionModalSee(__('labels.export_readiness.reason.missing_iban'));
     }
 
     public function test_close_batch_warns_but_still_closes_the_batch(): void
@@ -721,7 +722,7 @@ final class SepaBatchResourceTest extends FeatureTestCase
         static::assertNull($batch->fresh()->exported_at);
     }
 
-    public function test_export_action_requires_exclusion_acknowledgement(): void
+    public function test_export_action_is_blocked_by_a_refund_without_an_iban(): void
     {
         $this->withAuthorizedUser();
 
@@ -730,7 +731,7 @@ final class SepaBatchResourceTest extends FeatureTestCase
 
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
             ->callAction('exportSepa')
-            ->assertHasActionErrors(['acknowledge_exclusions']);
+            ->assertNotified(__('notifications.sepa_export_blocked'));
 
         static::assertNull($batch->fresh()->exported_at);
     }
@@ -745,7 +746,6 @@ final class SepaBatchResourceTest extends FeatureTestCase
 
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
             ->callAction('exportSepa', data: [
-                'acknowledge_exclusions' => true,
                 'overridden_invoices' => [$invoice->id],
                 'override_reason' => '',
             ])
@@ -765,34 +765,38 @@ final class SepaBatchResourceTest extends FeatureTestCase
 
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
             ->callAction('exportSepa', data: [
-                'acknowledge_exclusions' => true,
                 'overridden_invoices' => [$invoice->id],
                 'override_reason' => 'Written confirmation received.',
             ])
             ->assertFileDownloaded();
 
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
-            ->callAction('exportSepa', data: ['acknowledge_exclusions' => true])
+            ->callAction('exportSepa')
             ->assertNotified(__('notifications.sepa_export_blocked'));
 
         $this->assertDatabaseCount('sepa_export_overrides', 1);
     }
 
-    public function test_export_action_requires_exclusion_acknowledgement_on_every_export(): void
+    public function test_export_action_rechecks_the_refund_iban_on_every_export(): void
     {
         $this->withAuthorizedUser();
 
         $batch = $this->exportableBatch();
-        $this->createRefundInvoiceForBatch($batch);
+        $refund = $this->createRefundInvoiceForBatch($batch);
+        $this->attachPaymentInformation($refund);
         $this->attachPurchaseOrder($batch);
 
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
-            ->callAction('exportSepa', data: ['acknowledge_exclusions' => true])
+            ->callAction('exportSepa')
             ->assertFileDownloaded();
+
+        PaymentInformation::query()
+            ->where('member_id', $refund->member_id)
+            ->update(['banking_account_number' => 'NOT-AN-IBAN']);
 
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
             ->callAction('exportSepa')
-            ->assertHasActionErrors(['acknowledge_exclusions']);
+            ->assertNotified(__('notifications.sepa_export_blocked'));
     }
 
     public function test_export_action_records_the_override_and_stamps_the_export(): void
@@ -806,7 +810,6 @@ final class SepaBatchResourceTest extends FeatureTestCase
 
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
             ->callAction('exportSepa', data: [
-                'acknowledge_exclusions' => true,
                 'overridden_invoices' => [$invoice->id],
                 'override_reason' => 'Written confirmation received.',
             ])
@@ -1043,7 +1046,7 @@ final class SepaBatchResourceTest extends FeatureTestCase
             ->callAction('replanSequence');
 
         Livewire::test(EditSepaBatch::class, ['record' => $batch->getRouteKey()])
-            ->callAction('exportSepa', data: ['acknowledge_exclusions' => true])
+            ->callAction('exportSepa')
             ->assertFileDownloaded();
     }
 

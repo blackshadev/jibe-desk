@@ -36,15 +36,13 @@ final class ExportReadinessReportTest extends UnitTestCase
         static::assertCount(1, $report->blockingIssues());
     }
 
-    public function test_it_treats_refund_exclusions_as_acknowledgeable_and_non_blocking(): void
+    public function test_it_is_blocked_by_an_invoice_without_an_iban(): void
     {
-        $report = $this->report([$this->invoiceIssue(ExportReadinessReason::RefundIbanUnavailable)]);
+        $report = $this->report([$this->invoiceIssue(ExportReadinessReason::MissingIban)]);
 
-        static::assertCount(1, $report->refundExclusions());
-        static::assertFalse($report->isBlocked());
-        static::assertTrue($report->requiresExclusionAcknowledgement());
-        static::assertFalse($report->isSatisfiedBy(new ExportConfirmation(exclusionsAcknowledged: false)));
-        static::assertTrue($report->isSatisfiedBy(new ExportConfirmation(exclusionsAcknowledged: true)));
+        static::assertCount(1, $report->brokenDataIssues());
+        static::assertTrue($report->isBlocked());
+        static::assertFalse($report->isSatisfiedBy(new ExportConfirmation()));
     }
 
     public function test_it_requires_an_override_for_an_expired_mandate(): void
@@ -53,7 +51,7 @@ final class ExportReadinessReportTest extends UnitTestCase
 
         static::assertTrue($report->isBlocked());
         static::assertCount(1, $report->overridableIssues());
-        static::assertFalse($report->isSatisfiedBy(new ExportConfirmation(exclusionsAcknowledged: true)));
+        static::assertFalse($report->isSatisfiedBy(new ExportConfirmation()));
     }
 
     public function test_it_accepts_an_overridden_expired_mandate_with_a_reason(): void
@@ -61,7 +59,6 @@ final class ExportReadinessReportTest extends UnitTestCase
         $report = $this->report([$this->invoiceIssue(ExportReadinessReason::ExpiredMandate)]);
 
         $confirmation = new ExportConfirmation(
-            exclusionsAcknowledged: true,
             overrides: [
                 new ExportOverride(
                     invoiceId: InvoiceId::create(1),
@@ -79,7 +76,6 @@ final class ExportReadinessReportTest extends UnitTestCase
         $report = $this->report([$this->invoiceIssue(ExportReadinessReason::ExpiredMandate)]);
 
         $confirmation = new ExportConfirmation(
-            exclusionsAcknowledged: true,
             overrides: [
                 new ExportOverride(
                     invoiceId: InvoiceId::create(1),
@@ -98,7 +94,6 @@ final class ExportReadinessReportTest extends UnitTestCase
         $report = $this->report([$this->invoiceIssue(ExportReadinessReason::ExpiredMandate)]);
 
         $confirmation = new ExportConfirmation(
-            exclusionsAcknowledged: true,
             overrides: [
                 new ExportOverride(
                     invoiceId: InvoiceId::create(1),
@@ -129,8 +124,7 @@ final class ExportReadinessReportTest extends UnitTestCase
 
         static::assertTrue($report->isEmpty());
         static::assertFalse($report->isBlocked());
-        static::assertFalse($report->requiresExclusionAcknowledgement());
-        static::assertTrue($report->isSatisfiedBy(new ExportConfirmation(exclusionsAcknowledged: false)));
+        static::assertTrue($report->isSatisfiedBy(new ExportConfirmation()));
     }
 
     /** @param list<ExportReadinessIssue> $issues */

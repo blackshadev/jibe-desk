@@ -110,7 +110,7 @@ final class CollectionReadinessAssessorTest extends UnitTestCase
         static::assertSame([], $issues);
     }
 
-    public function test_it_reports_a_refund_without_an_iban_as_a_refund_exclusion(): void
+    public function test_it_reports_a_refund_without_an_iban_as_broken_data(): void
     {
         $issues = $this->assessor->assess(
             $this->candidate(total: new CompoundPrice(-10.0, -2.1), sequenceType: SequenceType::Recurring),
@@ -118,11 +118,11 @@ final class CollectionReadinessAssessorTest extends UnitTestCase
             $this->context(),
         );
 
-        static::assertSame([ExportReadinessReason::RefundIbanUnavailable], $this->reasons($issues));
-        static::assertSame(ExportReadinessCategory::RefundExclusion, $issues[0]->category());
+        static::assertSame([ExportReadinessReason::MissingIban], $this->reasons($issues));
+        static::assertSame(ExportReadinessCategory::BrokenData, $issues[0]->category());
     }
 
-    public function test_it_reports_a_refund_without_any_mandate_as_a_refund_exclusion(): void
+    public function test_it_reports_a_refund_without_any_mandate_as_broken_data(): void
     {
         $issues = $this->assessor->assess(
             $this->candidate(total: new CompoundPrice(-10.0, -2.1), sequenceType: SequenceType::Recurring),
@@ -130,11 +130,11 @@ final class CollectionReadinessAssessorTest extends UnitTestCase
             $this->context(),
         );
 
-        static::assertSame([ExportReadinessReason::RefundIbanUnavailable], $this->reasons($issues));
-        static::assertSame(ExportReadinessCategory::RefundExclusion, $issues[0]->category());
+        static::assertSame([ExportReadinessReason::MissingIban], $this->reasons($issues));
+        static::assertSame(ExportReadinessCategory::BrokenData, $issues[0]->category());
     }
 
-    public function test_it_reports_a_refund_with_a_malformed_iban_as_a_refund_exclusion(): void
+    public function test_it_reports_a_refund_with_a_malformed_iban_as_broken_data(): void
     {
         $issues = $this->assessor->assess(
             $this->candidate(total: new CompoundPrice(-10.0, -2.1), sequenceType: SequenceType::Recurring),
@@ -142,8 +142,8 @@ final class CollectionReadinessAssessorTest extends UnitTestCase
             $this->context(),
         );
 
-        static::assertSame([ExportReadinessReason::RefundIbanUnavailable], $this->reasons($issues));
-        static::assertSame(ExportReadinessCategory::RefundExclusion, $issues[0]->category());
+        static::assertSame([ExportReadinessReason::MalformedIban], $this->reasons($issues));
+        static::assertSame(ExportReadinessCategory::BrokenData, $issues[0]->category());
     }
 
     private function candidate(
