@@ -25,10 +25,8 @@ final readonly class CostCenterImportReportBuilder
             static fn (GrootboekRecord $record): string => $record->accountNumber,
             $grootboek,
         );
-        sort($fileAccountNumbers);
 
         $fileGroupNumbers = $hierarchy->groupNumbers();
-        sort($fileGroupNumbers);
 
         return new CostCenterImportReport(
             costCentersInFile: count($grootboek),
