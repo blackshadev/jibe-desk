@@ -1,6 +1,13 @@
 # Task: Export the e-Captain Grootboek (Almere-Centraal) to CSV
 
-Requires a logged-in session; see [ecaptain-login.md](./ecaptain-login.md).
+## Prerequisites
+
+Log in and open the CMS exactly as described in
+[ecaptain-login.md](./ecaptain-login.md) — credentials, tooling and
+[logging in](./ecaptain-login.md#logging-in). This runbook starts on the
+logged-in CMS dashboard and does not repeat those steps. Module/submenu ids and
+the frame-navigation pattern come from
+[Navigating the CMS](./ecaptain-login.md#navigating-the-cms).
 
 Export the complete Grootboek from the e-Captain CMS to
 `exports/gboverzicht.csv`. The file is the source for the app's cost centers:
@@ -37,8 +44,10 @@ The chart of accounts is a system report, not the maintenance grid.
 
 ### Steps with agent-browser
 
-Do it in two steps, because the report select auto-submits and `#btnview` stays
-disabled until that submit has reloaded the page:
+Assumes the logged-in session and open CMS from
+[ecaptain-login.md](./ecaptain-login.md). Do it in two steps, because the report
+select auto-submits and `#btnview` stays disabled until that submit has reloaded
+the page:
 
 ```js
 // Step 1: select the report. This submits the form and reloads the page.
