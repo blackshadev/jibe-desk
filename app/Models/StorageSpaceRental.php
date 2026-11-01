@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Observers\StorageSpaceRentalObserver;
+use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -49,5 +53,34 @@ final class StorageSpaceRental extends Model
             'start_date' => 'date',
             'end_date' => 'date',
         ];
+    }
+
+    /**
+     * A rental overlaps when it starts before the period ends and has no end,
+     * or ends after the period starts.
+     *
+     * @param list<int> $excludeRentalIds
+     */
+    #[Scope]
+    protected function overlapping(
+        Builder $query,
+        int $storageSpaceId,
+        ?DateTimeInterface $startDate,
+        ?DateTimeInterface $endDate,
+        array $excludeRentalIds = [],
+    ): Builder {
+        $effectiveStartDate = $startDate ?? CarbonImmutable::startOfTime();
+        $effectiveEndDate = $endDate ?? CarbonImmutable::create('9999-12-31 23:59:59');
+
+        return $query
+            ->where('storage_space_rentals.storage_space_id', $storageSpaceId)
+            ->where('storage_space_rentals.start_date', '<', $effectiveEndDate)
+            ->where(static fn (Builder $query): Builder => $query
+                ->whereNull('storage_space_rentals.end_date')
+                ->orWhere('storage_space_rentals.end_date', '>', $effectiveStartDate))
+            ->when(
+                $excludeRentalIds !== [],
+                static fn (Builder $query): Builder => $query->whereNotIn('storage_space_rentals.id', $excludeRentalIds),
+            );
     }
 }
