@@ -35,7 +35,7 @@ final class VerdichtingRecordMapperTest extends UnitTestCase
             ['10', 'materiaal', '20', 'Kosten'],
         ]));
 
-        $records = (new VerdichtingRecordMapper())->map($path);
+        $records = new VerdichtingRecordMapper()->map($path);
 
         static::assertCount(1, $records);
         static::assertSame(2, $records[0]->lineNumber);
@@ -55,7 +55,7 @@ final class VerdichtingRecordMapperTest extends UnitTestCase
         $this->expectException(CostCenterImportFormatException::class);
         $this->expectExceptionMessage('duplicate numbers: 10');
 
-        (new VerdichtingRecordMapper())->map($path);
+        new VerdichtingRecordMapper()->map($path);
     }
 
     public function test_it_rejects_a_row_without_a_parent_number(): void
@@ -67,7 +67,7 @@ final class VerdichtingRecordMapperTest extends UnitTestCase
         $this->expectException(CostCenterImportFormatException::class);
         $this->expectExceptionMessage('column "Hoofdverdichting nummer" is required but empty');
 
-        (new VerdichtingRecordMapper())->map($path);
+        new VerdichtingRecordMapper()->map($path);
     }
 
     private function track(string $path): string
