@@ -30,9 +30,11 @@ final class ImportStorageSpaceRentalsCommand extends Command
             return self::FAILURE;
         }
 
-        $this->info($request->dryRun
-            ? 'Dry run complete. The transaction was rolled back and no data was written.'
-            : 'Import complete.');
+        $this->info(
+            $request->dryRun
+                ? 'Dry run complete. The transaction was rolled back and no data was written.'
+                : 'Import complete.',
+        );
 
         $this->table(['Result', 'Count'], [
             ['Imported rentals', $report->importedRentals],

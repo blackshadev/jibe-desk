@@ -30,7 +30,7 @@ final class CostCenterResource extends Resource
     protected static ?string $model = CostCenter::class;
 
     #[Override]
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::Banknotes;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::BuildingStorefront;
 
     #[Override]
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Bookkeeping;

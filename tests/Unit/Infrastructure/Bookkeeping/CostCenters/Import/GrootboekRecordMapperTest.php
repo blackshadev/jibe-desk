@@ -35,7 +35,7 @@ final class GrootboekRecordMapperTest extends UnitTestCase
             ['100', 'Materiaal', 'B', 'K', 'D', '', '10', 'materiaal'],
         ]));
 
-        $records = (new GrootboekRecordMapper())->map($path);
+        $records = new GrootboekRecordMapper()->map($path);
 
         static::assertCount(1, $records);
         static::assertSame(2, $records[0]->lineNumber);
@@ -55,7 +55,7 @@ final class GrootboekRecordMapperTest extends UnitTestCase
         $this->expectException(CostCenterImportFormatException::class);
         $this->expectExceptionMessage('duplicate account numbers: 100');
 
-        (new GrootboekRecordMapper())->map($path);
+        new GrootboekRecordMapper()->map($path);
     }
 
     public function test_it_rejects_a_row_without_an_account_number(): void
@@ -67,7 +67,7 @@ final class GrootboekRecordMapperTest extends UnitTestCase
         $this->expectException(CostCenterImportFormatException::class);
         $this->expectExceptionMessage('column "Rekening" is required but empty');
 
-        (new GrootboekRecordMapper())->map($path);
+        new GrootboekRecordMapper()->map($path);
     }
 
     private function track(string $path): string

@@ -128,6 +128,7 @@ return [
     'cost_center_group_parent' => 'Bovenliggende kostengroep',
     'cost_center_group_cost_centers_count' => 'Aantal kostenplaatsen',
     'cost_center_group_cycle' => 'Een kostengroep kan niet onder zichzelf of een subgroep hangen.',
+    'cost_center_group_hierarchy' => 'Kostengroephiërarchie',
     'number' => 'Nummer',
     'title' => 'Titel',
     'bill_period' => 'Factuurperiode',

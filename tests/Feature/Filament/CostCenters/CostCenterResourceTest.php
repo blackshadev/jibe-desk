@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Filament\CostCenters;
 
 use App\Domain\Authorization\RoleName;
+use App\Filament\Admin\Resources\CostCenterGroups\CostCenterGroupResource;
 use App\Filament\Admin\Resources\CostCenters\Pages\CreateCostCenter;
 use App\Filament\Admin\Resources\CostCenters\Pages\EditCostCenter;
 use App\Filament\Admin\Resources\CostCenters\Pages\ListCostCenters;
@@ -99,6 +100,24 @@ final class CostCenterResourceTest extends FeatureTestCase
             'id' => $costCenter->id,
             'title' => 'Contributie Updated',
         ]);
+    }
+
+    public function test_edit_page_shows_the_cost_center_group_hierarchy_with_clickable_groups(): void
+    {
+        $this->withAuthorizedUser();
+        $root = CostCenterGroup::factory()->createOne(['number' => '900', 'name' => 'Root']);
+        $child = CostCenterGroup::factory()->createOne([
+            'number' => '900.910',
+            'name' => 'Child',
+            'parent_id' => $root->id,
+        ]);
+        $costCenter = CostCenter::factory()->createOne(['cost_center_group_id' => $child->id]);
+
+        Livewire::test(EditCostCenter::class, ['record' => $costCenter->id])
+            ->assertSee('900 Root')
+            ->assertSee('900.910 Child')
+            ->assertSeeHtml(CostCenterGroupResource::getUrl('edit', ['record' => $root]))
+            ->assertSeeHtml(CostCenterGroupResource::getUrl('edit', ['record' => $child]));
     }
 
     public function test_can_delete_cost_center(): void

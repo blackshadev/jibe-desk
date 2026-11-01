@@ -56,7 +56,7 @@ final class MemberTagImportImplTest extends FeatureTestCase
 
         $report = $this->subject->import($this->request([
             ['1001', '012345678', '2026-01-01', ''],
-            ['1002', '12345678', '2026-02-01', '2026-06-30'],
+            ['1002', '12345678',  '2026-02-01', '2026-06-30'],
         ]));
 
         static::assertSame(2, $report->importedTags);
@@ -231,7 +231,7 @@ final class MemberTagImportImplTest extends FeatureTestCase
         try {
             $this->subject->import($this->request([
                 ['1001', '012345678', '2026-01-01', ''],
-                ['9999', '12345678', '2026-01-01', ''],
+                ['9999', '12345678',  '2026-01-01', ''],
             ]));
             static::fail('Expected exception');
         } catch (CsvImportException $exception) {

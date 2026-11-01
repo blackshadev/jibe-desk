@@ -36,7 +36,7 @@ final class BankAccountResource extends Resource
     protected static ?string $cluster = BookkeepingCluster::class;
 
     #[Override]
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 7;
 
     #[Override]
     protected static ?string $recordTitleAttribute = 'name';

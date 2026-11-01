@@ -38,6 +38,22 @@ final class CostCenterGroup extends Model
     }
 
     /**
+     * @return list<self>
+     */
+    public function ancestorChain(): array
+    {
+        $ancestors = [];
+        $parent = $this->parent;
+
+        while ($parent !== null) {
+            $ancestors[] = $parent;
+            $parent = $parent->parent;
+        }
+
+        return array_reverse($ancestors);
+    }
+
+    /**
      * @return list<int>
      */
     public function selfAndDescendantIds(): array

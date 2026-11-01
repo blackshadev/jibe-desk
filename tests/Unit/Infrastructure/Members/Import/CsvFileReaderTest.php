@@ -34,7 +34,7 @@ final class CsvFileReaderTest extends UnitTestCase
     {
         $path = $this->writeLatin1File("\"Nummer \";Verdichting\n10;café\n");
 
-        $rows = (new CsvFileReader(delimiter: ';', sourceEncoding: 'ISO-8859-1'))
+        $rows = new CsvFileReader(delimiter: ';', sourceEncoding: 'ISO-8859-1')
             ->read($path, ['Nummer', 'Verdichting']);
 
         static::assertCount(1, $rows);
@@ -49,7 +49,7 @@ final class CsvFileReaderTest extends UnitTestCase
 
         $this->expectException(CsvFormatException::class);
 
-        (new CsvFileReader(delimiter: ';'))->read($path, ['Nummer', 'Verdichting']);
+        new CsvFileReader(delimiter: ';')->read($path, ['Nummer', 'Verdichting']);
     }
 
     public function test_it_rejects_a_file_that_does_not_exist(): void
@@ -58,7 +58,7 @@ final class CsvFileReaderTest extends UnitTestCase
 
         $this->expectException(CsvFileException::class);
 
-        (new CsvFileReader())->read($path, ['Nummer']);
+        new CsvFileReader()->read($path, ['Nummer']);
     }
 
     private function writeLatin1File(string $utf8Contents): string

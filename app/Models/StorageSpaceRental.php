@@ -72,9 +72,11 @@ final class StorageSpaceRental extends Model
         return $query
             ->where('storage_space_rentals.storage_space_id', $storageSpaceId)
             ->where('storage_space_rentals.start_date', '<', $effectiveEndDate)
-            ->where(static fn (Builder $query): Builder => $query
-                ->whereNull('storage_space_rentals.end_date')
-                ->orWhere('storage_space_rentals.end_date', '>', $effectiveStartDate))
+            ->where(
+                static fn (Builder $query): Builder => $query
+                    ->whereNull('storage_space_rentals.end_date')
+                    ->orWhere('storage_space_rentals.end_date', '>', $effectiveStartDate),
+            )
             ->when(
                 $excludeRentalIds !== [],
                 static fn (Builder $query): Builder => $query->whereNotIn('storage_space_rentals.id', $excludeRentalIds),

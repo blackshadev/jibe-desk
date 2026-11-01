@@ -152,9 +152,11 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
             ->whereIn('storage_space_location_id', array_values($locationIdsByName))
             ->get()
             ->groupBy(static fn (StorageSpace $storageSpace): string => (string) $storageSpace->storage_space_location_id)
-            ->map(static fn (Collection $storageSpaces): array => $storageSpaces
-                ->keyBy(static fn (StorageSpace $storageSpace): string => (string) $storageSpace->number)
-                ->all())
+            ->map(
+                static fn (Collection $storageSpaces): array => $storageSpaces
+                    ->keyBy(static fn (StorageSpace $storageSpace): string => (string) $storageSpace->number)
+                    ->all(),
+            )
             ->all();
     }
 
@@ -176,10 +178,12 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
             $objectNumber->locationName,
         );
 
-        return $storageSpacesByLocationId[(string) $locationId][$objectNumber->number] ?? throw CsvValueException::unknownStorageSpace(
-            $record->rowNumber,
-            $record->memberNumber,
-            $record->objectNumber,
+        return (
+            $storageSpacesByLocationId[(string) $locationId][$objectNumber->number] ?? throw CsvValueException::unknownStorageSpace(
+                $record->rowNumber,
+                $record->memberNumber,
+                $record->objectNumber,
+            )
         );
     }
 
@@ -225,9 +229,7 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
 
     private static function isLastDayOfDecember(?DateTimeInterface $date): bool
     {
-        return $date !== null
-            && (int) $date->format('n') === 12
-            && (int) $date->format('j') === 31;
+        return $date !== null && (int) $date->format('n') === 12 && (int) $date->format('j') === 31;
     }
 
     private static function assignmentKey(MemberObjectCsvRecord $record): string

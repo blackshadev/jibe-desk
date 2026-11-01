@@ -37,7 +37,7 @@ final class ImportMemberTagsCommandTest extends FeatureTestCase
         $member = Member::factory()->createQuietly(['lidnr' => '1001']);
         $path = $this->csv([
             ['1001', '012345678', '2026-01-01', ''],
-            ['1001', '12345678', '2026-01-01', ''],
+            ['1001', '12345678',  '2026-01-01', ''],
         ]);
 
         $this

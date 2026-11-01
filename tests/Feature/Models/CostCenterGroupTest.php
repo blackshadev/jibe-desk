@@ -31,6 +31,22 @@ final class CostCenterGroupTest extends FeatureTestCase
         $group->delete();
     }
 
+    public function test_ancestor_chain_returns_the_parents_from_root_to_direct_parent(): void
+    {
+        $root = CostCenterGroup::factory()->create(['number' => '20']);
+        $child = CostCenterGroup::factory()->create(['number' => '20.21', 'parent_id' => $root->id]);
+        $grandchild = CostCenterGroup::factory()->create([
+            'number' => '20.21.5',
+            'parent_id' => $child->id,
+        ]);
+
+        static::assertSame(
+            [$root->id, $child->id],
+            array_map(static fn (CostCenterGroup $group): int => $group->id, $grandchild->ancestorChain()),
+        );
+        static::assertSame([], $root->ancestorChain());
+    }
+
     public function test_self_and_descendant_ids_returns_the_whole_subtree(): void
     {
         $parent = CostCenterGroup::factory()->create(['number' => '20']);
