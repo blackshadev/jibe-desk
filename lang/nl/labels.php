@@ -126,7 +126,6 @@ return [
     'cost_center_groups' => 'Kostengroepen',
     'cost_center_group_hint' => 'e-Captain: verdichting / hoofdverdichting',
     'cost_center_group_parent' => 'Bovenliggende kostengroep',
-    'cost_center_group_external_number' => 'e-Captain nummer',
     'cost_center_group_cost_centers_count' => 'Aantal kostenplaatsen',
     'cost_center_group_cycle' => 'Een kostengroep kan niet onder zichzelf of een subgroep hangen.',
     'number' => 'Nummer',

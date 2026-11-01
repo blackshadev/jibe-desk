@@ -37,7 +37,6 @@ final class CostCenterGroupResourceTest extends FeatureTestCase
         Livewire::test(CreateCostCenterGroup::class)
             ->fillForm([
                 'number' => '900.910',
-                'external_number' => '910',
                 'name' => 'Materiaal',
                 'parent_id' => $parent->id,
             ])
@@ -46,7 +45,7 @@ final class CostCenterGroupResourceTest extends FeatureTestCase
 
         $this->assertDatabaseHas('cost_center_groups', [
             'number' => '900.910',
-            'external_number' => '910',
+            'external_number' => null,
             'name' => 'Materiaal',
             'parent_id' => $parent->id,
         ]);
