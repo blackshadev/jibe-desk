@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Models\CostCenter;
+use Database\Seeders\CostCenterNumber;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Override;
 
@@ -18,9 +19,23 @@ final class CostCenterFactory extends Factory
     public function definition(): array
     {
         return [
-            'number' => fake()->unique()->numerify('####'),
+            'number' => $this->numberOutsideSeededRange(),
             'title' => fake()->words(3, true),
             'description' => fake()->optional()->sentence(),
         ];
+    }
+
+    /**
+     * The seeders own the numbers listed in {@see CostCenterNumber}. Faker's unique()
+     * only tracks the numbers it generated itself, so a random factory number would
+     * every now and then collide with a seeded one on the unique index.
+     */
+    private function numberOutsideSeededRange(): string
+    {
+        do {
+            $number = fake()->unique()->numerify('####');
+        } while (CostCenterNumber::tryFrom((int) $number) !== null);
+
+        return $number;
     }
 }
