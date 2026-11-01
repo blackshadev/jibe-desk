@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Models\CostCenter;
+use App\Models\CostCenterGroup;
 use Database\Seeders\CostCenterNumber;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Override;
@@ -22,6 +23,7 @@ final class CostCenterFactory extends Factory
             'number' => $this->numberOutsideSeededRange(),
             'title' => fake()->words(3, true),
             'description' => fake()->optional()->sentence(),
+            'cost_center_group_id' => CostCenterGroup::factory(),
         ];
     }
 

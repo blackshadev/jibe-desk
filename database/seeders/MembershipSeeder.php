@@ -8,6 +8,7 @@ use App\Domain\Billing\BillableItems\BillPeriod;
 use App\Domain\Members\ExtraMembershipItemCode;
 use App\Models\BillableItem;
 use App\Models\CostCenter;
+use App\Models\CostCenterGroup;
 use App\Models\ExtraMembershipItem;
 use App\Models\Membership;
 use Illuminate\Database\Seeder;
@@ -23,13 +24,19 @@ final class MembershipSeeder extends Seeder
 
     public function run(): void
     {
+        $generalIncomeGroupId = CostCenterGroup::query()
+            ->where('number', CostCenterGroupNumber::GeneralIncome->value)
+            ->value('id');
+
         $costCenter = CostCenter::query()
             ->where('number', CostCenterNumber::Contribution)
-            ->firstOrCreate([
-                'title' => 'Contributie leden',
-                'number' => CostCenterNumber::Contribution,
-            ]);
-
+            ->firstOrCreate(
+                ['number' => CostCenterNumber::Contribution],
+                [
+                    'title' => 'Contributie leden',
+                    'cost_center_group_id' => $generalIncomeGroupId,
+                ],
+            );
         foreach (self::MEMBERSHIPS as $membership) {
             $adultBillableItem = BillableItem::create([
                 'description' => "Lidmaatschap {$membership['name']} (volwassenen)",
@@ -117,10 +124,13 @@ final class MembershipSeeder extends Seeder
             ]);
 
         $registrationFeeCostCenter = CostCenter::query()
-            ->firstOrCreate([
-                'title' => 'Inschrijf geld',
-                'number' => CostCenterNumber::RegistrationFee,
-            ]);
+            ->firstOrCreate(
+                ['number' => CostCenterNumber::RegistrationFee],
+                [
+                    'title' => 'Inschrijf geld',
+                    'cost_center_group_id' => $generalIncomeGroupId,
+                ],
+            );
 
         ExtraMembershipItem::factory()
             ->for(
