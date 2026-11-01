@@ -24,6 +24,8 @@ final class MembershipSeeder extends Seeder
 
     public function run(): void
     {
+        $this->call(CostCenterGroupSeeder::class);
+
         $generalIncomeGroupId = CostCenterGroup::query()
             ->where('number', CostCenterGroupNumber::GeneralIncome->value)
             ->value('id');

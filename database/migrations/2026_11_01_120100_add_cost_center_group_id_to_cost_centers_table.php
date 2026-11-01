@@ -27,9 +27,11 @@ return new class() extends Migration {
             $table->unsignedBigInteger('cost_center_group_id')->nullable();
         });
 
-        $this->seedGroups();
-        $this->assignKnownCostCenters();
-        $this->assignRemainingCostCenters();
+        if (DB::table('cost_centers')->exists()) {
+            $this->seedGroups();
+            $this->assignKnownCostCenters();
+            $this->assignRemainingCostCenters();
+        }
 
         Schema::table('cost_centers', static function (Blueprint $table): void {
             $table->unsignedBigInteger('cost_center_group_id')->nullable(false)->change();
