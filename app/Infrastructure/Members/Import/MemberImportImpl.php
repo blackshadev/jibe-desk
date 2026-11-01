@@ -21,7 +21,6 @@ use App\Models\CostCenter;
 use App\Models\Member;
 use App\Models\Membership;
 use App\Models\PaymentInformation;
-use Carbon\CarbonImmutable;
 use Database\Seeders\CostCenterNumber;
 use DateTimeInterface;
 use Illuminate\Support\Facades\DB;
@@ -32,11 +31,8 @@ final readonly class MemberImportImpl implements MemberImport
 {
     private const string ERELID_MEMBERSHIP_NAME = 'Erelid';
 
-    private const int MINIMUM_INSTRUCTOR_AGE = 16;
-
     public function __construct(
-        private MemberSpreadsheetReader $reader,
-        private SpreadsheetRowMapper $rowMapper,
+        private MemberSpreadsheetValidator $validator,
         private HouseholdCreator $householdCreator,
         private MemberImportReportBuilder $reportBuilder,
         private ApplyMembershipBilling $applyMembershipBilling,
@@ -47,17 +43,22 @@ final readonly class MemberImportImpl implements MemberImport
     #[Override]
     public function import(MemberImportRequest $request): MemberImportReport
     {
-        if (Member::query()->exists()) {
+        if (!$request->validateOnly && Member::query()->exists()) {
             throw MemberImportException::membersTableNotEmpty();
         }
 
-        $spreadsheetRows = $this->reader->read($request->path);
+        $rows = $this->validator->validate($request->path);
+
+        if ($request->validateOnly) {
+            return $this->reportBuilder->preview($rows);
+        }
+
         $report = null;
 
         DB::beginTransaction();
 
         try {
-            $report = $this->write($spreadsheetRows, $request);
+            $report = $this->write($rows, $request);
 
             if ($request->dryRun) {
                 DB::rollBack();
@@ -75,12 +76,12 @@ final readonly class MemberImportImpl implements MemberImport
         return $report;
     }
 
-    /** @param list<SpreadsheetImportRow> $spreadsheetRows */
-    private function write(array $spreadsheetRows, MemberImportRequest $request): MemberImportReport
+    /** @param list<MappedMemberRow> $rows */
+    private function write(array $rows, MemberImportRequest $request): MemberImportReport
     {
         $erelidMembershipCreated = $this->ensureErelidMembership();
         $membershipIds = $this->membershipIds();
-        $createdMembers = $this->createMembers($spreadsheetRows, $membershipIds);
+        $createdMembers = $this->createMembers($rows, $membershipIds);
 
         foreach ($createdMembers as $createdMember) {
             $this->createMandate($createdMember, $request->lastCollected);
@@ -105,18 +106,15 @@ final readonly class MemberImportImpl implements MemberImport
     }
 
     /**
-     * @param list<SpreadsheetImportRow> $spreadsheetRows
+     * @param list<MappedMemberRow> $rows
      * @param array<string, int> $membershipIds
      * @return list<CreatedMember>
      */
-    private function createMembers(array $spreadsheetRows, array $membershipIds): array
+    private function createMembers(array $rows, array $membershipIds): array
     {
         $createdMembers = [];
 
-        foreach ($spreadsheetRows as $spreadsheetRow) {
-            $row = $this->rowMapper->map($spreadsheetRow->values, $spreadsheetRow->number);
-            $this->assertSailInstructorIsAdult($row, $spreadsheetRow->number);
-
+        foreach ($rows as $row) {
             $membershipId = $membershipIds[$row->membershipName] ?? throw MemberImportException::missingMembership($row->membershipName);
 
             $member = $this->createMember($row, $membershipId);
@@ -150,19 +148,6 @@ final readonly class MemberImportImpl implements MemberImport
             'accepted_at' => $row->startDate,
             'stopped_at' => $row->stopDate,
         ]);
-    }
-
-    private function assertSailInstructorIsAdult(MappedMemberRow $row, int $rowNumber): void
-    {
-        if (!$row->isSailInstructor()) {
-            return;
-        }
-
-        $ageAtMembershipStart = CarbonImmutable::instance($row->birthdate)->diffInYears($row->startDate);
-
-        if ($ageAtMembershipStart < self::MINIMUM_INSTRUCTOR_AGE) {
-            throw MemberImportException::instructorTooYoung($rowNumber, $row->birthdate->format('Y-m-d'));
-        }
     }
 
     /** @return array<string, int> */

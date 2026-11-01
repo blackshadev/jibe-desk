@@ -16,7 +16,7 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Throwable;
 
-#[Signature('app:import-members {path} {--dry-run} {--billing-start=2027-01-01} {--last-collected=2026-12-31}')]
+#[Signature('app:import-members {path} {--dry-run} {--validate-only} {--billing-start=2027-01-01} {--last-collected=2026-12-31}')]
 #[Description('Import the legacy member export into an empty database')]
 final class ImportMembersCommand extends Command
 {
@@ -26,6 +26,7 @@ final class ImportMembersCommand extends Command
             $request = new MemberImportRequest(
                 path: (string) $this->argument('path'),
                 dryRun: (bool) $this->option('dry-run'),
+                validateOnly: (bool) $this->option('validate-only'),
                 billingStart: $this->dateOption('billing-start'),
                 lastCollected: $this->dateOption('last-collected'),
             );
@@ -37,14 +38,23 @@ final class ImportMembersCommand extends Command
             return self::FAILURE;
         }
 
-        $message = $request->dryRun
-            ? 'Dry run complete. The transaction was rolled back and no data was written.'
-            : 'Import complete.';
-        $this->info($message);
-
+        $this->info($this->completionMessage($request));
         $this->renderReport($report);
 
         return self::SUCCESS;
+    }
+
+    private function completionMessage(MemberImportRequest $request): string
+    {
+        if ($request->validateOnly) {
+            return 'Validation complete. The spreadsheet is valid and nothing was written.';
+        }
+
+        if ($request->dryRun) {
+            return 'Dry run complete. The transaction was rolled back and no data was written.';
+        }
+
+        return 'Import complete.';
     }
 
     private function dateOption(string $option): CarbonImmutable

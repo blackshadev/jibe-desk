@@ -21,40 +21,94 @@ final readonly class MemberImportReportBuilder
         int $billingInstancesCreated,
         bool $erelidMembershipCreated,
     ): MemberImportReport {
-        $rowsWithoutMembershipType = $this->reportRows(
-            $this->filterByRow($allMembers, static fn (MappedMemberRow $row): bool => !$row->hasMembershipType()),
-        );
-
-        return new MemberImportReport(
-            importedMembers: count($continuingMembers),
-            stoppedMembers: count($allMembers) - count($continuingMembers),
+        return self::report(
+            rows: self::rows($allMembers),
+            continuingRows: self::rows($continuingMembers),
             householdsCreated: $householdsCreated,
             mandatesCreated: count($allMembers),
             billingInstancesCreated: $billingInstancesCreated,
             erelidMembershipCreated: $erelidMembershipCreated,
-            leavers: $this->reportRows(
-                $this->filterByRow($allMembers, static fn (MappedMemberRow $row): bool => $row->isLeaver()),
-            ),
-            rowsWithoutMembershipType: $rowsWithoutMembershipType,
-            emailMismatches: $this->emailMismatches($allMembers),
+        );
+    }
+
+    /**
+     * @param list<MappedMemberRow> $rows
+     */
+    public function preview(array $rows): MemberImportReport
+    {
+        return self::report(
+            rows: $rows,
+            continuingRows: self::continuingRows($rows),
+            householdsCreated: 0,
+            mandatesCreated: 0,
+            billingInstancesCreated: 0,
+            erelidMembershipCreated: false,
+        );
+    }
+
+    /**
+     * @param list<MappedMemberRow> $rows
+     * @param list<MappedMemberRow> $continuingRows
+     */
+    private static function report(
+        array $rows,
+        array $continuingRows,
+        int $householdsCreated,
+        int $mandatesCreated,
+        int $billingInstancesCreated,
+        bool $erelidMembershipCreated,
+    ): MemberImportReport {
+        return new MemberImportReport(
+            importedMembers: count($continuingRows),
+            stoppedMembers: count($rows) - count($continuingRows),
+            householdsCreated: $householdsCreated,
+            mandatesCreated: $mandatesCreated,
+            billingInstancesCreated: $billingInstancesCreated,
+            erelidMembershipCreated: $erelidMembershipCreated,
+            leavers: self::reportRows(self::leavers($rows)),
+            rowsWithoutMembershipType: self::reportRows(self::rowsWithoutMembershipType($rows)),
+            emailMismatches: self::emailMismatches($rows),
         );
     }
 
     /**
      * @param list<CreatedMember> $members
-     * @param callable(MappedMemberRow): bool $predicate
      * @return list<MappedMemberRow>
      */
-    private function filterByRow(array $members, callable $predicate): array
+    private static function rows(array $members): array
     {
-        return array_values(array_map(
-            static fn (CreatedMember $member): MappedMemberRow => $member->row,
-            array_filter($members, static fn (CreatedMember $member): bool => $predicate($member->row)),
-        ));
+        return array_map(static fn (CreatedMember $member): MappedMemberRow => $member->row, $members);
+    }
+
+    /**
+     * @param list<MappedMemberRow> $rows
+     * @return list<MappedMemberRow>
+     */
+    private static function continuingRows(array $rows): array
+    {
+        return array_values(array_filter($rows, static fn (MappedMemberRow $row): bool => !$row->isLeaver()));
+    }
+
+    /**
+     * @param list<MappedMemberRow> $rows
+     * @return list<MappedMemberRow>
+     */
+    private static function leavers(array $rows): array
+    {
+        return array_values(array_filter($rows, static fn (MappedMemberRow $row): bool => $row->isLeaver()));
+    }
+
+    /**
+     * @param list<MappedMemberRow> $rows
+     * @return list<MappedMemberRow>
+     */
+    private static function rowsWithoutMembershipType(array $rows): array
+    {
+        return array_values(array_filter($rows, static fn (MappedMemberRow $row): bool => !$row->hasMembershipType()));
     }
 
     /** @param list<MappedMemberRow> $rows @return list<MemberImportReportRow> */
-    private function reportRows(array $rows): array
+    private static function reportRows(array $rows): array
     {
         return array_map(
             static fn (MappedMemberRow $row): MemberImportReportRow => new MemberImportReportRow(
@@ -67,16 +121,14 @@ final readonly class MemberImportReportBuilder
     }
 
     /**
-     * @param list<CreatedMember> $members
+     * @param list<MappedMemberRow> $rows
      * @return list<MemberImportEmailMismatch>
      */
-    private function emailMismatches(array $members): array
+    private static function emailMismatches(array $rows): array
     {
         $mismatches = [];
 
-        foreach ($members as $member) {
-            $row = $member->row;
-
+        foreach ($rows as $row) {
             if ($row->contactEmail === null) {
                 continue;
             }

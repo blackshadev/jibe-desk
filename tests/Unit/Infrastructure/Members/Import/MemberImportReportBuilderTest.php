@@ -147,6 +147,39 @@ final class MemberImportReportBuilderTest extends UnitTestCase
         static::assertSame([], $report->emailMismatches);
     }
 
+    public function test_preview_reports_the_rows_without_counting_any_writes(): void
+    {
+        $anna = $this->createdMember();
+        $dana = $this->createdMember(
+            lidnr: '1004',
+            name: 'Dana Doekes',
+            stopDate: new DateTimeImmutable('2026-12-31'),
+        );
+        $frank = $this->createdMember(
+            lidnr: '124361',
+            name: 'Frank Frits',
+            membershipType: null,
+        );
+        $mismatch = $this->createdMember(
+            lidnr: '124175',
+            name: 'Gijs Groot',
+            email: 'jimmyfock@hotmail.com',
+            contactEmail: 'Kickiefock@icloud.com',
+        );
+
+        $report = $this->subject->preview([$anna->row, $dana->row, $frank->row, $mismatch->row]);
+
+        static::assertSame(3, $report->importedMembers);
+        static::assertSame(1, $report->stoppedMembers);
+        static::assertSame(0, $report->householdsCreated);
+        static::assertSame(0, $report->mandatesCreated);
+        static::assertSame(0, $report->billingInstancesCreated);
+        static::assertFalse($report->erelidMembershipCreated);
+        static::assertCount(1, $report->leavers);
+        static::assertCount(1, $report->rowsWithoutMembershipType);
+        static::assertCount(1, $report->emailMismatches);
+    }
+
     private function createdMember(
         string $lidnr = '1001',
         string $name = 'Anna Aalbers',

@@ -127,6 +127,48 @@ final class ImportMembersCommandTest extends FeatureTestCase
         static::assertSame(0, BillableItemInstance::count());
     }
 
+    public function test_a_validate_only_run_succeeds_on_a_populated_members_table_and_writes_nothing(): void
+    {
+        $this->seed([CostCenterSeeder::class, MembershipSeeder::class]);
+        Member::factory()->createQuietly();
+        $path = $this->createSpreadsheet($this->rows());
+
+        $this
+            ->artisan('app:import-members', ['path' => $path, '--validate-only' => true])
+            ->expectsOutputToContain('Validation complete. The spreadsheet is valid and nothing was written.')
+            ->expectsOutputToContain('Leavers (1)')
+            ->expectsOutputToContain('Email mismatches (1)')
+            ->assertSuccessful();
+
+        static::assertSame(1, Member::count());
+        static::assertSame(0, PaymentInformation::count());
+        static::assertSame(0, Household::count());
+        static::assertSame(0, BillableItemInstance::count());
+    }
+
+    public function test_a_validate_only_run_reports_an_invalid_row(): void
+    {
+        $this->seed([CostCenterSeeder::class, MembershipSeeder::class]);
+        Member::factory()->createQuietly();
+        $path = $this->createSpreadsheet([
+            MemberImportFixture::row(),
+            MemberImportFixture::row([
+                'Lidnr' => '1002',
+                'Voornaam' => 'Broken',
+                'Achternaam' => 'Row',
+                'E-mail privé' => 'broken@example.com',
+                'Banknummer 1' => 'NL00BANK0123456789',
+            ]),
+        ]);
+
+        $this
+            ->artisan('app:import-members', ['path' => $path, '--validate-only' => true])
+            ->expectsOutputToContain('Row 4, column "Banknummer 1"')
+            ->assertFailed();
+
+        static::assertSame(1, Member::count());
+    }
+
     public function test_it_aborts_when_the_members_table_is_not_empty(): void
     {
         $this->seed([CostCenterSeeder::class, MembershipSeeder::class]);

@@ -199,6 +199,21 @@ final class MemberImportImplTest extends FeatureTestCase
         static::assertSame($membershipCount, Membership::query()->count());
     }
 
+    public function test_import_validate_only_reports_without_touching_a_populated_table(): void
+    {
+        $this->seed([CostCenterSeeder::class, MembershipSeeder::class]);
+        Member::factory()->createQuietly();
+
+        $report = $this->subject->import($this->request([$this->annaRow(), $this->danaRow()], validateOnly: true));
+
+        static::assertSame(1, $report->importedMembers);
+        static::assertSame(1, $report->stoppedMembers);
+        static::assertSame(0, $report->mandatesCreated);
+        static::assertSame(0, $report->billingInstancesCreated);
+        static::assertSame(1, Member::count());
+        static::assertSame(0, PaymentInformation::count());
+    }
+
     public function test_import_refuses_to_run_when_the_members_table_is_not_empty(): void
     {
         $this->seed([CostCenterSeeder::class, MembershipSeeder::class]);
@@ -302,16 +317,17 @@ final class MemberImportImplTest extends FeatureTestCase
     }
 
     /** @param list<array<string, mixed>> $rows */
-    private function request(array $rows, bool $dryRun = false): MemberImportRequest
+    private function request(array $rows, bool $dryRun = false, bool $validateOnly = false): MemberImportRequest
     {
-        return $this->requestForPath($this->spreadsheet($rows), $dryRun);
+        return $this->requestForPath($this->spreadsheet($rows), $dryRun, $validateOnly);
     }
 
-    private function requestForPath(string $path, bool $dryRun = false): MemberImportRequest
+    private function requestForPath(string $path, bool $dryRun = false, bool $validateOnly = false): MemberImportRequest
     {
         return new MemberImportRequest(
             path: $path,
             dryRun: $dryRun,
+            validateOnly: $validateOnly,
             billingStart: new DateTimeImmutable('2027-01-01'),
             lastCollected: new DateTimeImmutable('2026-12-31'),
         );

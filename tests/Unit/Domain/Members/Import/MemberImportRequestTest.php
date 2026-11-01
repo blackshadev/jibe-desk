@@ -18,12 +18,14 @@ final class MemberImportRequestTest extends UnitTestCase
         $subject = new MemberImportRequest(
             path: '/tmp/leden.xlsx',
             dryRun: true,
+            validateOnly: true,
             billingStart: $billingStart,
             lastCollected: $lastCollected,
         );
 
         static::assertSame('/tmp/leden.xlsx', $subject->path);
         static::assertTrue($subject->dryRun);
+        static::assertTrue($subject->validateOnly);
         static::assertSame($billingStart, $subject->billingStart);
         static::assertSame($lastCollected, $subject->lastCollected);
     }
