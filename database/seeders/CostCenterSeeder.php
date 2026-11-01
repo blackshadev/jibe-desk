@@ -13,6 +13,8 @@ final class CostCenterSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->call(CostCenterGroupSeeder::class);
+
         $groupIds = CostCenterGroup::query()
             ->whereIn('number', [
                 CostCenterGroupNumber::OtherReceivables->value,
