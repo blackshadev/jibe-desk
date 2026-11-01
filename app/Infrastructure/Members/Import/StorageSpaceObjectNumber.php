@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Members\Import;
 
-use App\Domain\Members\Import\LegacyCsvImportException;
+use App\Domain\Members\Import\LegacyCsvValueException;
 
-/**
- * An e-Captain object number such as "5-01": container 5, space 1.
- */
 final readonly class StorageSpaceObjectNumber
 {
     private const string PATTERN = '/^(\d+)-(\d+)$/';
@@ -19,14 +16,14 @@ final readonly class StorageSpaceObjectNumber
     ) {}
 
     /**
-     * @throws LegacyCsvImportException when the value is not a container-number pair
+     * @throws LegacyCsvValueException when the value is not a container-number pair
      */
     public static function from(string $value, int $rowNumber, string $lidnr): self
     {
         $matched = preg_match(self::PATTERN, $value, $matches);
 
         if ($matched !== 1) {
-            throw LegacyCsvImportException::invalidObjectNumber($rowNumber, $lidnr, $value);
+            throw LegacyCsvValueException::invalidObjectNumber($rowNumber, $lidnr, $value);
         }
 
         return new self(
