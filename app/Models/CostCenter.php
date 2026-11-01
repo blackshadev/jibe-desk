@@ -7,12 +7,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['number', 'title', 'description'])]
+#[Fillable(['number', 'title', 'description', 'cost_center_group_id'])]
 final class CostCenter extends Model
 {
     use HasFactory;
+
+    /** @return BelongsTo<CostCenterGroup, $this> */
+    public function costCenterGroup(): BelongsTo
+    {
+        return $this->belongsTo(CostCenterGroup::class);
+    }
 
     /** @return HasMany<BillableItem, $this> */
     public function billableItems(): HasMany

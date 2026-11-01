@@ -12,6 +12,8 @@ final class DatabaseSeeder extends Seeder
     {
         $this->call(RolePermissionSeeder::class);
 
+        $this->call(CostCenterGroupSeeder::class);
+
         $this->call(CostCenterSeeder::class);
 
         $this->call(ActivitySeeder::class);

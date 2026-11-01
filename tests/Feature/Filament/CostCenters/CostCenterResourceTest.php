@@ -9,6 +9,7 @@ use App\Filament\Admin\Resources\CostCenters\Pages\CreateCostCenter;
 use App\Filament\Admin\Resources\CostCenters\Pages\EditCostCenter;
 use App\Filament\Admin\Resources\CostCenters\Pages\ListCostCenters;
 use App\Models\CostCenter;
+use App\Models\CostCenterGroup;
 use Livewire\Livewire;
 use Tests\Concerns\WithAuthorizedUser;
 use Tests\FeatureTestCase;
@@ -31,12 +32,14 @@ final class CostCenterResourceTest extends FeatureTestCase
     public function test_can_create_cost_center(): void
     {
         $this->withAuthorizedUser();
+        $group = CostCenterGroup::factory()->createOne();
 
         Livewire::test(CreateCostCenter::class)
             ->fillForm([
                 'number' => '1000',
                 'title' => 'Contributie',
                 'description' => 'Lidmaatschapscontributie',
+                'cost_center_group_id' => $group->id,
             ])
             ->call('create')
             ->assertHasNoFormErrors();
@@ -44,7 +47,39 @@ final class CostCenterResourceTest extends FeatureTestCase
         $this->assertDatabaseHas('cost_centers', [
             'number' => '1000',
             'title' => 'Contributie',
+            'cost_center_group_id' => $group->id,
         ]);
+    }
+
+    public function test_a_cost_center_requires_a_group(): void
+    {
+        $this->withAuthorizedUser();
+
+        Livewire::test(CreateCostCenter::class)
+            ->fillForm([
+                'number' => '1000',
+                'title' => 'Contributie',
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['cost_center_group_id' => 'required']);
+    }
+
+    public function test_the_group_filter_includes_the_selected_group_subtree(): void
+    {
+        $this->withAuthorizedUser();
+
+        $parent = CostCenterGroup::factory()->createOne(['number' => '900']);
+        $child = CostCenterGroup::factory()->createOne(['number' => '900.910', 'parent_id' => $parent->id]);
+        $other = CostCenterGroup::factory()->createOne(['number' => '950']);
+
+        $parentCostCenter = CostCenter::factory()->createOne(['cost_center_group_id' => $parent->id]);
+        $childCostCenter = CostCenter::factory()->createOne(['cost_center_group_id' => $child->id]);
+        $otherCostCenter = CostCenter::factory()->createOne(['cost_center_group_id' => $other->id]);
+
+        Livewire::test(ListCostCenters::class)
+            ->filterTable('cost_center_group_id', $parent->id)
+            ->assertCanSeeTableRecords([$parentCostCenter, $childCostCenter])
+            ->assertCanNotSeeTableRecords([$otherCostCenter]);
     }
 
     public function test_can_edit_cost_center(): void

@@ -8,6 +8,7 @@ use App\Filament\Admin\Pages\CostCenterResults;
 use App\Models\BookkeepingRecord;
 use App\Models\CostCenter;
 use App\Models\CostCenterBudget;
+use App\Models\CostCenterGroup;
 use Livewire\Livewire;
 use Tests\Concerns\WithAuthorizedUser;
 use Tests\FeatureTestCase;
@@ -39,6 +40,54 @@ final class CostCenterResultsPageTest extends FeatureTestCase
             ->assertTableColumnSummarySet('budget_amount', 'total_budget', 7500.00)
             ->assertTableColumnSummarySet('total_amount', 'total_amount_sum', 2300.00)
             ->assertTableColumnSummarySet('closing_balance', 'total_closing_balance', 3800.00);
+    }
+
+    public function test_rows_are_grouped_by_kostengroep_with_group_subtotals(): void
+    {
+        $this->withAuthorizedUser();
+        $year = now()->year;
+
+        $group = CostCenterGroup::factory()->createOne(['number' => '900', 'name' => 'Kosten']);
+        $first = CostCenter::factory()->createOne(['cost_center_group_id' => $group->id]);
+        $second = CostCenter::factory()->createOne(['cost_center_group_id' => $group->id]);
+
+        CostCenterBudget::factory()->createMany([
+            ['cost_center_id' => $first->id, 'year' => $year, 'starting_amount' => 100, 'budget_amount' => 500],
+            ['cost_center_id' => $second->id, 'year' => $year, 'starting_amount' => 200, 'budget_amount' => 750],
+        ]);
+
+        $component = Livewire::test(CostCenterResults::class);
+        $livewire = $component->instance();
+        $table = $livewire->getTable();
+        $grouping = $table->getDefaultGroup();
+
+        static::assertNotNull($grouping);
+        static::assertSame('cost_center_group_number', $grouping->getId());
+        $component->assertSee('900 Kosten');
+
+        $groupedQuery = $grouping->scopeQueryByKey($livewire->getAllTableSummaryQuery(), '900');
+        $summarizer = $table->getColumn('starting_amount')->getSummarizer('total_starting_amount');
+        $summary = $summarizer->query($groupedQuery)->selectedState([])->getState();
+
+        static::assertSame(300.0, (float) $summary);
+    }
+
+    public function test_the_group_filter_includes_the_selected_group_subtree(): void
+    {
+        $this->withAuthorizedUser();
+
+        $parent = CostCenterGroup::factory()->createOne(['number' => '900']);
+        $child = CostCenterGroup::factory()->createOne(['number' => '900.910', 'parent_id' => $parent->id]);
+        $other = CostCenterGroup::factory()->createOne(['number' => '950']);
+
+        $parentCostCenter = CostCenter::factory()->createOne(['cost_center_group_id' => $parent->id]);
+        $childCostCenter = CostCenter::factory()->createOne(['cost_center_group_id' => $child->id]);
+        $otherCostCenter = CostCenter::factory()->createOne(['cost_center_group_id' => $other->id]);
+
+        Livewire::test(CostCenterResults::class)
+            ->set('selectedGroupId', $parent->id)
+            ->assertCanSeeTableRecords([$parentCostCenter, $childCostCenter])
+            ->assertCanNotSeeTableRecords([$otherCostCenter]);
     }
 
     public function test_total_amount_is_rendered_red_when_over_budget(): void

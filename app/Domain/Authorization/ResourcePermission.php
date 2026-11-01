@@ -142,6 +142,14 @@ enum ResourcePermission: string
     case DeleteCostCenters = 'delete_cost_centers';
     case DeleteAnyCostCenters = 'delete_any_cost_centers';
 
+    // Cost Center Groups
+    case ViewAnyCostCenterGroups = 'view_any_cost_center_groups';
+    case ViewCostCenterGroups = 'view_cost_center_groups';
+    case CreateCostCenterGroups = 'create_cost_center_groups';
+    case UpdateCostCenterGroups = 'update_cost_center_groups';
+    case DeleteCostCenterGroups = 'delete_cost_center_groups';
+    case DeleteAnyCostCenterGroups = 'delete_any_cost_center_groups';
+
     // Bookkeeping Records
     case ViewAnyBookkeepingRecords = 'view_any_bookkeeping_records';
     case ViewBookkeepingRecords = 'view_bookkeeping_records';
