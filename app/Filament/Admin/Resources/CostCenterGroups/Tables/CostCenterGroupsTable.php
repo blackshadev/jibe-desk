@@ -23,9 +23,6 @@ final class CostCenterGroupsTable
                     ->label(__('labels.name'))
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('external_number')
-                    ->label(__('labels.cost_center_group_external_number'))
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('parent.label')
                     ->label(__('labels.cost_center_group_parent'))
                     ->placeholder('-')

@@ -25,9 +25,6 @@ final class CostCenterGroupForm
                             ->helperText(__('labels.cost_center_group_hint'))
                             ->required()
                             ->unique(ignoreRecord: true),
-                        TextInput::make('external_number')
-                            ->label(__('labels.cost_center_group_external_number'))
-                            ->required(),
                         TextInput::make('name')
                             ->label(__('labels.name'))
                             ->required(),

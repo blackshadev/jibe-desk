@@ -12,7 +12,7 @@ return new class() extends Migration {
         Schema::create('cost_center_groups', static function (Blueprint $table): void {
             $table->id();
             $table->string('number')->unique();
-            $table->string('external_number');
+            $table->string('external_number')->nullable();
             $table->string('name');
             $table->foreignId('parent_id')
                 ->nullable()
