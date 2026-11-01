@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Rules;
 
+use App\Domain\Bookkeeping\CostCenters\CostCenterGroupSubtree;
 use App\Models\CostCenterGroup;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -22,7 +23,9 @@ final readonly class CostCenterGroupIsNotOwnAncestor implements ValidationRule
             return;
         }
 
-        if (!in_array((int) $value, $this->group->selfAndDescendantIds(), true)) {
+        $subtree = new CostCenterGroupSubtree($this->group->selfAndDescendantIds());
+
+        if (!$subtree->contains((int) $value)) {
             return;
         }
 

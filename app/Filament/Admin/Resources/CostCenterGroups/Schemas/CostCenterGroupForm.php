@@ -10,6 +10,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Operation;
 
 final class CostCenterGroupForm
 {
@@ -24,7 +25,8 @@ final class CostCenterGroupForm
                             ->label(__('labels.number'))
                             ->helperText(__('labels.cost_center_group_hint'))
                             ->required()
-                            ->unique(ignoreRecord: true),
+                            ->unique(ignoreRecord: true)
+                            ->readOnlyOn(Operation::Edit->value),
                         TextInput::make('name')
                             ->label(__('labels.name'))
                             ->required(),
