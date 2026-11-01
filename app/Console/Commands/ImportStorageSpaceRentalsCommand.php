@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Domain\Members\Import\LegacyCsvImportException;
+use App\Domain\Members\Import\LegacyCsvValueException;
 use App\Domain\Members\Import\StorageSpaceRentalImport;
 use App\Domain\Members\Import\StorageSpaceRentalImportRequest;
 use Carbon\CarbonImmutable;
@@ -52,7 +53,7 @@ final class ImportStorageSpaceRentalsCommand extends Command
         try {
             return CarbonImmutable::parse($value)->startOfDay();
         } catch (Throwable) {
-            throw LegacyCsvImportException::invalidDateOption($option, $value);
+            throw LegacyCsvValueException::invalidDateOption($option, $value);
         }
     }
 }

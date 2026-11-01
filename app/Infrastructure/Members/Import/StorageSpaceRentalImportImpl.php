@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Members\Import;
 
-use App\Domain\Members\Import\LegacyCsvImportException;
+use App\Domain\Members\Import\LegacyCsvValueException;
 use App\Domain\Members\Import\StorageSpaceRentalImport;
 use App\Domain\Members\Import\StorageSpaceRentalImportReport;
 use App\Domain\Members\Import\StorageSpaceRentalImportRequest;
@@ -26,7 +26,7 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
 
     public function __construct(
         private LegacyCsvReader $reader,
-        private LegacyCsvRecordMapper $recordMapper,
+        private MemberObjectCsvRecordMapper $recordMapper,
     ) {}
 
     #[Override]
@@ -57,7 +57,7 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
         return $report;
     }
 
-    /** @param list<LegacyCsvRecord> $records */
+    /** @param list<MemberObjectCsvRecord> $records */
     private function write(array $records, DateTimeInterface $billingStart): StorageSpaceRentalImportReport
     {
         $membersByLidnr = $this->membersByLidnr($records);
@@ -69,7 +69,7 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
         $rentalIds = [];
 
         foreach ($records as $index => $record) {
-            $member = $membersByLidnr[$record->lidnr] ?? throw LegacyCsvImportException::unknownLidnr($record->rowNumber, $record->lidnr);
+            $member = $membersByLidnr[$record->memberNumber] ?? throw LegacyCsvValueException::unknownLidnr($record->rowNumber, $record->memberNumber);
             $objectNumber = $objectNumbers[$index];
 
             $this->assertNotDuplicated($seenAssignments, $record);
@@ -99,12 +99,12 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
     }
 
     /**
-     * @param list<LegacyCsvRecord> $records
+     * @param list<MemberObjectCsvRecord> $records
      * @return array<string, Member>
      */
     private function membersByLidnr(array $records): array
     {
-        $lidnrs = array_map(static fn (LegacyCsvRecord $record): string => $record->lidnr, $records);
+        $lidnrs = array_map(static fn (MemberObjectCsvRecord $record): string => $record->memberNumber, $records);
 
         return Member::query()
             ->whereIn('lidnr', array_values(array_unique($lidnrs)))
@@ -114,16 +114,16 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
     }
 
     /**
-     * @param list<LegacyCsvRecord> $records
+     * @param list<MemberObjectCsvRecord> $records
      * @return list<StorageSpaceObjectNumber>
      */
     private function objectNumbers(array $records): array
     {
         return array_map(
-            static fn (LegacyCsvRecord $record): StorageSpaceObjectNumber => StorageSpaceObjectNumber::from(
-                $record->number,
+            static fn (MemberObjectCsvRecord $record): StorageSpaceObjectNumber => StorageSpaceObjectNumber::from(
+                $record->objectNumber,
                 $record->rowNumber,
-                $record->lidnr,
+                $record->memberNumber,
             ),
             $records,
         );
@@ -169,38 +169,38 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
      * @param array<string, int> $locationIdsByName
      * @param array<string, array<string, StorageSpace>> $storageSpacesByLocationId
      *
-     * @throws LegacyCsvImportException
+     * @throws LegacyCsvValueException
      */
     private function storageSpace(
         StorageSpaceObjectNumber $objectNumber,
-        LegacyCsvRecord $record,
+        MemberObjectCsvRecord $record,
         array $locationIdsByName,
         array $storageSpacesByLocationId,
     ): StorageSpace {
-        $locationId = $locationIdsByName[$objectNumber->locationName] ?? throw LegacyCsvImportException::unknownStorageSpaceLocation(
+        $locationId = $locationIdsByName[$objectNumber->locationName] ?? throw LegacyCsvValueException::unknownStorageSpaceLocation(
             $record->rowNumber,
-            $record->lidnr,
+            $record->memberNumber,
             $objectNumber->locationName,
         );
 
-        return $storageSpacesByLocationId[(string) $locationId][$objectNumber->number] ?? throw LegacyCsvImportException::unknownStorageSpace(
+        return $storageSpacesByLocationId[(string) $locationId][$objectNumber->number] ?? throw LegacyCsvValueException::unknownStorageSpace(
             $record->rowNumber,
-            $record->lidnr,
-            $record->number,
+            $record->memberNumber,
+            $record->objectNumber,
         );
     }
 
     /** @param array<string, true> $seenAssignments */
-    private function assertNotDuplicated(array $seenAssignments, LegacyCsvRecord $record): void
+    private function assertNotDuplicated(array $seenAssignments, MemberObjectCsvRecord $record): void
     {
         if (!array_key_exists($this->assignmentKey($record), $seenAssignments)) {
             return;
         }
 
-        throw LegacyCsvImportException::duplicateRecord($record->rowNumber, $record->lidnr, $record->number);
+        throw LegacyCsvValueException::duplicateRecord($record->rowNumber, $record->memberNumber, $record->objectNumber);
     }
 
-    private function assertNoOverlap(StorageSpace $storageSpace, LegacyCsvRecord $record): void
+    private function assertNoOverlap(StorageSpace $storageSpace, MemberObjectCsvRecord $record): void
     {
         $overlaps = StorageSpaceRental::query()
             ->overlapping(
@@ -214,16 +214,16 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
             return;
         }
 
-        throw LegacyCsvImportException::overlappingRental($record->rowNumber, $record->lidnr, $record->number);
+        throw LegacyCsvValueException::overlappingRental($record->rowNumber, $record->memberNumber, $record->objectNumber);
     }
 
-    private function assertMemberIsActive(Member $member, LegacyCsvRecord $record): void
+    private function assertMemberIsActive(Member $member, MemberObjectCsvRecord $record): void
     {
         if (!$record->isOpenEnded() || $member->stopped_at === null) {
             return;
         }
 
-        throw LegacyCsvImportException::openEndForStoppedMember($record->rowNumber, $record->lidnr, 'rental');
+        throw LegacyCsvValueException::openEndForStoppedMember($record->rowNumber, $record->memberNumber, 'rental');
     }
 
     /**
@@ -252,8 +252,8 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
         return $instancesToShift->count();
     }
 
-    private function assignmentKey(LegacyCsvRecord $record): string
+    private function assignmentKey(MemberObjectCsvRecord $record): string
     {
-        return sprintf('%s|%s', $record->lidnr, $record->number);
+        return sprintf('%s|%s', $record->memberNumber, $record->objectNumber);
     }
 }

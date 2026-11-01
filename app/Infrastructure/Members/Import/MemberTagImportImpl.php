@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Members\Import;
 
-use App\Domain\Members\Import\LegacyCsvImportException;
+use App\Domain\Members\Import\LegacyCsvValueException;
 use App\Domain\Members\Import\MemberTagImport;
 use App\Domain\Members\Import\MemberTagImportReport;
 use App\Domain\Members\Import\MemberTagImportRequest;
@@ -23,7 +23,7 @@ final readonly class MemberTagImportImpl implements MemberTagImport
 
     public function __construct(
         private LegacyCsvReader $reader,
-        private LegacyCsvRecordMapper $recordMapper,
+        private MemberObjectCsvRecordMapper $recordMapper,
     ) {}
 
     #[Override]
@@ -54,7 +54,7 @@ final readonly class MemberTagImportImpl implements MemberTagImport
         return $report;
     }
 
-    /** @param list<LegacyCsvRecord> $records */
+    /** @param list<MemberObjectCsvRecord> $records */
     private function write(array $records): MemberTagImportReport
     {
         $memberObjectTypeId = $this->tagObjectTypeId();
@@ -65,7 +65,7 @@ final readonly class MemberTagImportImpl implements MemberTagImport
         $importedTags = 0;
 
         foreach ($records as $record) {
-            $member = $membersByLidnr[$record->lidnr] ?? throw LegacyCsvImportException::unknownLidnr($record->rowNumber, $record->lidnr);
+            $member = $membersByLidnr[$record->memberNumber] ?? throw LegacyCsvValueException::unknownLidnr($record->rowNumber, $record->memberNumber);
 
             $this->assertNotDuplicated($seenAssignedTags, $record);
             $this->assertTagNumberIsNew($recordedTagNumbers, $record);
@@ -74,13 +74,13 @@ final readonly class MemberTagImportImpl implements MemberTagImport
             MemberObject::query()->createQuietly([
                 'member_id' => $member->id,
                 'member_object_type_id' => $memberObjectTypeId,
-                'name' => $record->number,
+                'name' => $record->objectNumber,
                 'start_date' => $record->startDate,
                 'end_date' => $record->endDate,
             ]);
 
             $seenAssignedTags[$this->assignedTagKey($record)] = true;
-            $recordedTagNumbers[$record->number] = true;
+            $recordedTagNumbers[$record->objectNumber] = true;
             $importedTags++;
         }
 
@@ -93,16 +93,16 @@ final readonly class MemberTagImportImpl implements MemberTagImport
             ->where('name', self::TAG_OBJECT_TYPE_NAME)
             ->first();
 
-        return $memberObjectType->id ?? throw LegacyCsvImportException::missingMemberObjectType(self::TAG_OBJECT_TYPE_NAME);
+        return $memberObjectType->id ?? throw LegacyCsvValueException::missingMemberObjectType(self::TAG_OBJECT_TYPE_NAME);
     }
 
     /**
-     * @param list<LegacyCsvRecord> $records
+     * @param list<MemberObjectCsvRecord> $records
      * @return array<string, Member>
      */
     private function membersByLidnr(array $records): array
     {
-        $lidnrs = array_map(static fn (LegacyCsvRecord $record): string => $record->lidnr, $records);
+        $lidnrs = array_map(static fn (MemberObjectCsvRecord $record): string => $record->memberNumber, $records);
 
         return Member::query()
             ->whereIn('lidnr', array_values(array_unique($lidnrs)))
@@ -112,12 +112,12 @@ final readonly class MemberTagImportImpl implements MemberTagImport
     }
 
     /**
-     * @param list<LegacyCsvRecord> $records
+     * @param list<MemberObjectCsvRecord> $records
      * @return array<string, true>
      */
     private function recordedTagNumbers(int $memberObjectTypeId, array $records): array
     {
-        $tagNumbers = array_map(static fn (LegacyCsvRecord $record): string => $record->number, $records);
+        $tagNumbers = array_map(static fn (MemberObjectCsvRecord $record): string => $record->objectNumber, $records);
 
         $recordedNames = MemberObject::query()
             ->where('member_object_type_id', $memberObjectTypeId)
@@ -131,36 +131,36 @@ final readonly class MemberTagImportImpl implements MemberTagImport
     }
 
     /** @param array<string, true> $seenAssignedTags */
-    private function assertNotDuplicated(array $seenAssignedTags, LegacyCsvRecord $record): void
+    private function assertNotDuplicated(array $seenAssignedTags, MemberObjectCsvRecord $record): void
     {
         if (!array_key_exists($this->assignedTagKey($record), $seenAssignedTags)) {
             return;
         }
 
-        throw LegacyCsvImportException::duplicateRecord($record->rowNumber, $record->lidnr, $record->number);
+        throw LegacyCsvValueException::duplicateRecord($record->rowNumber, $record->memberNumber, $record->objectNumber);
     }
 
     /** @param array<string, true> $recordedTagNumbers */
-    private function assertTagNumberIsNew(array $recordedTagNumbers, LegacyCsvRecord $record): void
+    private function assertTagNumberIsNew(array $recordedTagNumbers, MemberObjectCsvRecord $record): void
     {
-        if (!array_key_exists($record->number, $recordedTagNumbers)) {
+        if (!array_key_exists($record->objectNumber, $recordedTagNumbers)) {
             return;
         }
 
-        throw LegacyCsvImportException::tagAlreadyRecorded($record->rowNumber, $record->lidnr, $record->number);
+        throw LegacyCsvValueException::tagAlreadyRecorded($record->rowNumber, $record->memberNumber, $record->objectNumber);
     }
 
-    private function assertMemberIsActive(Member $member, LegacyCsvRecord $record): void
+    private function assertMemberIsActive(Member $member, MemberObjectCsvRecord $record): void
     {
         if (!$record->isOpenEnded() || $member->stopped_at === null) {
             return;
         }
 
-        throw LegacyCsvImportException::openEndForStoppedMember($record->rowNumber, $record->lidnr, 'tag');
+        throw LegacyCsvValueException::openEndForStoppedMember($record->rowNumber, $record->memberNumber, 'tag');
     }
 
-    private function assignedTagKey(LegacyCsvRecord $record): string
+    private function assignedTagKey(MemberObjectCsvRecord $record): string
     {
-        return sprintf('%s|%s', $record->lidnr, $record->number);
+        return sprintf('%s|%s', $record->memberNumber, $record->objectNumber);
     }
 }

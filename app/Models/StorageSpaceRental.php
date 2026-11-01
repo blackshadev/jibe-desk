@@ -56,9 +56,6 @@ final class StorageSpaceRental extends Model
     }
 
     /**
-     * A rental overlaps when it starts before the period ends and has no end,
-     * or ends after the period starts.
-     *
      * @param list<int> $excludeRentalIds
      */
     #[Scope]
