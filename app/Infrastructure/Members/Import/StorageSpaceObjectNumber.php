@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Members\Import;
 
-use App\Domain\Members\Import\LegacyCsvValueException;
+use App\Domain\Members\Import\CsvValueException;
 
 final readonly class StorageSpaceObjectNumber
 {
@@ -16,14 +16,14 @@ final readonly class StorageSpaceObjectNumber
     ) {}
 
     /**
-     * @throws LegacyCsvValueException when the value is not a container-number pair
+     * @throws CsvValueException when the value is not a container-number pair
      */
     public static function from(string $value, int $rowNumber, string $lidnr): self
     {
         $matched = preg_match(self::PATTERN, $value, $matches);
 
         if ($matched !== 1) {
-            throw LegacyCsvValueException::invalidObjectNumber($rowNumber, $lidnr, $value);
+            throw CsvValueException::invalidObjectNumber($rowNumber, $lidnr, $value);
         }
 
         return new self(

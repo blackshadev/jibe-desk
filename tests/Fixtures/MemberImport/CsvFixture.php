@@ -6,7 +6,7 @@ namespace Tests\Fixtures\MemberImport;
 
 use RuntimeException;
 
-final class LegacyCsvFixture
+final class CsvFixture
 {
     /**
      * @param list<string> $headers
@@ -14,7 +14,7 @@ final class LegacyCsvFixture
      */
     public static function create(array $headers, array $rows): string
     {
-        $path = sys_get_temp_dir() . '/legacy-csv-' . bin2hex(random_bytes(8)) . '.csv';
+        $path = sys_get_temp_dir() . '/csv-' . bin2hex(random_bytes(8)) . '.csv';
         $handle = fopen($path, 'wb');
 
         if ($handle === false) {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Domain\Members\Import\LegacyCsvImportException;
+use App\Domain\Members\Import\CsvImportException;
 use App\Domain\Members\Import\MemberTagImport;
 use App\Domain\Members\Import\MemberTagImportRequest;
 use Illuminate\Console\Attributes\Description;
@@ -24,7 +24,7 @@ final class ImportMemberTagsCommand extends Command
             );
 
             $report = $memberTagImport->import($request);
-        } catch (LegacyCsvImportException $exception) {
+        } catch (CsvImportException $exception) {
             $this->error($exception->getMessage());
 
             return self::FAILURE;

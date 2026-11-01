@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Infrastructure\Members\Import;
 
-use App\Domain\Members\Import\LegacyCsvImportException;
+use App\Domain\Members\Import\CsvImportException;
 use App\Domain\Members\Import\MemberTagImportRequest;
 use App\Infrastructure\Members\Import\MemberTagImportImpl;
 use App\Models\InvoiceLine;
@@ -15,7 +15,7 @@ use Database\Seeders\CostCenterSeeder;
 use Database\Seeders\MemberObjectTypeSeeder;
 use Override;
 use Tests\FeatureTestCase;
-use Tests\Fixtures\MemberImport\LegacyCsvFixture;
+use Tests\Fixtures\MemberImport\CsvFixture;
 
 final class MemberTagImportImplTest extends FeatureTestCase
 {
@@ -106,7 +106,7 @@ final class MemberTagImportImplTest extends FeatureTestCase
 
     public function test_import_fails_when_the_file_does_not_exist(): void
     {
-        $this->expectException(LegacyCsvImportException::class);
+        $this->expectException(CsvImportException::class);
         $this->expectExceptionMessage('CSV file not found: /does/not/exist.csv');
 
         $this->subject->import(new MemberTagImportRequest('/does/not/exist.csv', false));
@@ -116,7 +116,7 @@ final class MemberTagImportImplTest extends FeatureTestCase
     {
         $path = $this->csv(['lidnr', 'tagnummer', 'start_date'], [['1001', '012345678', '2026-01-01']]);
 
-        $this->expectException(LegacyCsvImportException::class);
+        $this->expectException(CsvImportException::class);
         $this->expectExceptionMessage('CSV is missing required columns: end_date');
 
         $this->subject->import($this->requestForPath($path));
@@ -127,7 +127,7 @@ final class MemberTagImportImplTest extends FeatureTestCase
         $this->seedTagObjectType();
         $this->member('1001');
 
-        $this->expectException(LegacyCsvImportException::class);
+        $this->expectException(CsvImportException::class);
         $this->expectExceptionMessage('Row 2 (lidnr 1001): column "start_date", value "31-01-2026" is not a valid Y-m-d date.');
 
         $this->subject->import($this->request([['1001', '012345678', '31-01-2026', '']]));
@@ -137,7 +137,7 @@ final class MemberTagImportImplTest extends FeatureTestCase
     {
         $this->seedTagObjectType();
 
-        $this->expectException(LegacyCsvImportException::class);
+        $this->expectException(CsvImportException::class);
         $this->expectExceptionMessage('Row 2 (lidnr 9999): lidnr "9999" does not belong to a member.');
 
         $this->subject->import($this->request([['9999', '012345678', '2026-01-01', '']]));
@@ -148,7 +148,7 @@ final class MemberTagImportImplTest extends FeatureTestCase
         $this->seed(CostCenterSeeder::class);
         $this->member('1001');
 
-        $this->expectException(LegacyCsvImportException::class);
+        $this->expectException(CsvImportException::class);
         $this->expectExceptionMessage('Member object type "Tag" does not exist.');
 
         $this->subject->import($this->request([['1001', '012345678', '2026-01-01', '']]));
@@ -159,7 +159,7 @@ final class MemberTagImportImplTest extends FeatureTestCase
         $this->seedTagObjectType();
         $this->member('1001');
 
-        $this->expectException(LegacyCsvImportException::class);
+        $this->expectException(CsvImportException::class);
         $this->expectExceptionMessage('Row 3 (lidnr 1001): "012345678" appears more than once for this member.');
 
         $this->subject->import($this->request([
@@ -180,7 +180,7 @@ final class MemberTagImportImplTest extends FeatureTestCase
             'end_date' => null,
         ]);
 
-        $this->expectException(LegacyCsvImportException::class);
+        $this->expectException(CsvImportException::class);
         $this->expectExceptionMessage('Row 2 (lidnr 1001): tag "012345678" is already recorded.');
 
         $this->subject->import($this->request([['1001', '012345678', '2026-01-01', '']]));
@@ -191,7 +191,7 @@ final class MemberTagImportImplTest extends FeatureTestCase
         $this->seedTagObjectType();
         $this->member('1001');
 
-        $this->expectException(LegacyCsvImportException::class);
+        $this->expectException(CsvImportException::class);
         $this->expectExceptionMessage('Row 2 (lidnr 1001): end_date "2026-01-01" is before start_date "2026-06-01".');
 
         $this->subject->import($this->request([['1001', '012345678', '2026-06-01', '2026-01-01']]));
@@ -202,7 +202,7 @@ final class MemberTagImportImplTest extends FeatureTestCase
         $this->seedTagObjectType();
         $this->member('1001', '2026-06-30');
 
-        $this->expectException(LegacyCsvImportException::class);
+        $this->expectException(CsvImportException::class);
         $this->expectExceptionMessage('Row 2 (lidnr 1001): an open-ended tag is not allowed because the member has stopped.');
 
         $this->subject->import($this->request([['1001', '012345678', '2026-01-01', '']]));
@@ -230,7 +230,7 @@ final class MemberTagImportImplTest extends FeatureTestCase
                 ['9999', '12345678', '2026-01-01', ''],
             ]));
             static::fail('Expected exception');
-        } catch (LegacyCsvImportException $exception) {
+        } catch (CsvImportException $exception) {
             static::assertSame(3, $exception->rowNumber);
             static::assertSame('9999', $exception->lidnr);
         }
@@ -268,7 +268,7 @@ final class MemberTagImportImplTest extends FeatureTestCase
      */
     private function csv(array $headers, array $rows): string
     {
-        $path = LegacyCsvFixture::create($headers, $rows);
+        $path = CsvFixture::create($headers, $rows);
         $this->csvPaths[] = $path;
 
         return $path;

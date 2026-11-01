@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Members\Import;
 
-final class LegacyCsvFileException extends LegacyCsvImportException
+final class CsvFileException extends CsvImportException
 {
     public static function fileNotFound(string $path): self
     {

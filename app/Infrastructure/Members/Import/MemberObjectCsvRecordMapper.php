@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Members\Import;
 
-use App\Domain\Members\Import\LegacyCsvValueException;
+use App\Domain\Members\Import\CsvValueException;
 use DateTimeImmutable;
 
 final readonly class MemberObjectCsvRecordMapper
 {
     public function __construct(
-        private CsvReader $reader = new LegacyCsvReader(),
+        private CsvReader $reader = new CsvFileReader(),
     ) {}
 
     /**
@@ -52,7 +52,7 @@ final readonly class MemberObjectCsvRecordMapper
             return;
         }
 
-        throw LegacyCsvValueException::endBeforeStart(
+        throw CsvValueException::endBeforeStart(
             $row->number,
             $memberNumber,
             $startDate->format('Y-m-d'),

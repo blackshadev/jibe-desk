@@ -13,7 +13,7 @@ use Database\Seeders\CostCenterSeeder;
 use Database\Seeders\StorageSpaceLocationSeeder;
 use Override;
 use Tests\FeatureTestCase;
-use Tests\Fixtures\MemberImport\LegacyCsvFixture;
+use Tests\Fixtures\MemberImport\CsvFixture;
 
 final class ImportStorageSpaceRentalsCommandTest extends FeatureTestCase
 {
@@ -108,7 +108,7 @@ final class ImportStorageSpaceRentalsCommandTest extends FeatureTestCase
     /** @param list<list<string>> $rows */
     private function csv(array $rows): string
     {
-        $path = LegacyCsvFixture::create(['lidnr', 'objectnummer', 'start_date', 'end_date'], $rows);
+        $path = CsvFixture::create(['lidnr', 'objectnummer', 'start_date', 'end_date'], $rows);
         $this->csvPaths[] = $path;
 
         return $path;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Members\Import;
 
-use App\Domain\Members\Import\LegacyCsvValueException;
+use App\Domain\Members\Import\CsvValueException;
 use App\Domain\Members\Import\StorageSpaceRentalImport;
 use App\Domain\Members\Import\StorageSpaceRentalImportReport;
 use App\Domain\Members\Import\StorageSpaceRentalImportRequest;
@@ -25,7 +25,7 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
     private const array REQUIRED_HEADERS = ['lidnr', 'objectnummer', 'start_date', 'end_date'];
 
     public function __construct(
-        private LegacyCsvReader $reader,
+        private CsvFileReader $reader,
         private MemberObjectCsvRecordMapper $recordMapper,
     ) {}
 
@@ -69,7 +69,7 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
         $rentalIds = [];
 
         foreach ($records as $index => $record) {
-            $member = $membersByLidnr[$record->memberNumber] ?? throw LegacyCsvValueException::unknownLidnr($record->rowNumber, $record->memberNumber);
+            $member = $membersByLidnr[$record->memberNumber] ?? throw CsvValueException::unknownLidnr($record->rowNumber, $record->memberNumber);
             $objectNumber = $objectNumbers[$index];
 
             $this->assertNotDuplicated($seenAssignments, $record);
@@ -169,7 +169,7 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
      * @param array<string, int> $locationIdsByName
      * @param array<string, array<string, StorageSpace>> $storageSpacesByLocationId
      *
-     * @throws LegacyCsvValueException
+     * @throws CsvValueException
      */
     private function storageSpace(
         StorageSpaceObjectNumber $objectNumber,
@@ -177,13 +177,13 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
         array $locationIdsByName,
         array $storageSpacesByLocationId,
     ): StorageSpace {
-        $locationId = $locationIdsByName[$objectNumber->locationName] ?? throw LegacyCsvValueException::unknownStorageSpaceLocation(
+        $locationId = $locationIdsByName[$objectNumber->locationName] ?? throw CsvValueException::unknownStorageSpaceLocation(
             $record->rowNumber,
             $record->memberNumber,
             $objectNumber->locationName,
         );
 
-        return $storageSpacesByLocationId[(string) $locationId][$objectNumber->number] ?? throw LegacyCsvValueException::unknownStorageSpace(
+        return $storageSpacesByLocationId[(string) $locationId][$objectNumber->number] ?? throw CsvValueException::unknownStorageSpace(
             $record->rowNumber,
             $record->memberNumber,
             $record->objectNumber,
@@ -197,7 +197,7 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
             return;
         }
 
-        throw LegacyCsvValueException::duplicateRecord($record->rowNumber, $record->memberNumber, $record->objectNumber);
+        throw CsvValueException::duplicateRecord($record->rowNumber, $record->memberNumber, $record->objectNumber);
     }
 
     private function assertNoOverlap(StorageSpace $storageSpace, MemberObjectCsvRecord $record): void
@@ -214,7 +214,7 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
             return;
         }
 
-        throw LegacyCsvValueException::overlappingRental($record->rowNumber, $record->memberNumber, $record->objectNumber);
+        throw CsvValueException::overlappingRental($record->rowNumber, $record->memberNumber, $record->objectNumber);
     }
 
     private function assertMemberIsActive(Member $member, MemberObjectCsvRecord $record): void
@@ -223,7 +223,7 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
             return;
         }
 
-        throw LegacyCsvValueException::openEndForStoppedMember($record->rowNumber, $record->memberNumber, 'rental');
+        throw CsvValueException::openEndForStoppedMember($record->rowNumber, $record->memberNumber, 'rental');
     }
 
     /**

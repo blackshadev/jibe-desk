@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Infrastructure\Members\Import;
 
-use App\Domain\Members\Import\LegacyCsvValueException;
+use App\Domain\Members\Import\CsvValueException;
 use App\Infrastructure\Members\Import\MemberObjectCsvRecordMapper;
 use App\Infrastructure\Members\Import\SpreadsheetImportRow;
 use DateTimeImmutable;
@@ -84,7 +84,7 @@ final class MemberObjectCsvRecordMapperTest extends UnitTestCase
         $this->reader->expectsRequiredDate($row, 'start_date', '1001', new DateTimeImmutable('2026-06-01'));
         $this->reader->expectsOptionalDate($row, 'end_date', '1001', new DateTimeImmutable('2026-01-01'));
 
-        $this->expectException(LegacyCsvValueException::class);
+        $this->expectException(CsvValueException::class);
         $this->expectExceptionMessage('Row 9 (lidnr 1001): end_date "2026-01-01" is before start_date "2026-06-01".');
 
         $this->subject->map([$row], 'objectnummer');

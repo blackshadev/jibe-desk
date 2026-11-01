@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Members\Import;
 
-final class LegacyCsvValueException extends LegacyCsvImportException
+final class CsvValueException extends CsvImportException
 {
     public static function invalidDateOption(string $option, string $value): self
     {

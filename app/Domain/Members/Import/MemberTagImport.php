@@ -10,7 +10,7 @@ use JeroenG\Autowire\Attribute\Autowire;
 interface MemberTagImport
 {
     /**
-     * @throws LegacyCsvImportException when the file cannot be read or a row is invalid
+     * @throws CsvImportException when the file cannot be read or a row is invalid
      */
     public function import(MemberTagImportRequest $request): MemberTagImportReport;
 }

@@ -4,33 +4,33 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain\Members\Import;
 
-use App\Domain\Members\Import\LegacyCsvFileException;
-use App\Domain\Members\Import\LegacyCsvFormatException;
-use App\Domain\Members\Import\LegacyCsvImportException;
-use App\Domain\Members\Import\LegacyCsvValueException;
+use App\Domain\Members\Import\CsvFileException;
+use App\Domain\Members\Import\CsvFormatException;
+use App\Domain\Members\Import\CsvImportException;
+use App\Domain\Members\Import\CsvValueException;
 use Tests\UnitTestCase;
 
-final class LegacyCsvImportExceptionTest extends UnitTestCase
+final class CsvImportExceptionTest extends UnitTestCase
 {
-    public function test_every_failure_is_a_legacy_csv_import_exception(): void
+    public function test_every_failure_is_a_csv_import_exception(): void
     {
         static::assertInstanceOf(
-            LegacyCsvImportException::class,
-            LegacyCsvFileException::fileNotFound('members.csv'),
+            CsvImportException::class,
+            CsvFileException::fileNotFound('members.csv'),
         );
         static::assertInstanceOf(
-            LegacyCsvImportException::class,
-            LegacyCsvFormatException::headerMismatch(['lidnr']),
+            CsvImportException::class,
+            CsvFormatException::headerMismatch(['lidnr']),
         );
         static::assertInstanceOf(
-            LegacyCsvImportException::class,
-            LegacyCsvValueException::unknownLidnr(7, '124175'),
+            CsvImportException::class,
+            CsvValueException::unknownLidnr(7, '124175'),
         );
     }
 
     public function test_a_row_failure_carries_the_row_and_lidnr(): void
     {
-        $subject = LegacyCsvValueException::unknownLidnr(7, '124175');
+        $subject = CsvValueException::unknownLidnr(7, '124175');
 
         static::assertSame(7, $subject->rowNumber);
         static::assertSame('124175', $subject->lidnr);
@@ -39,7 +39,7 @@ final class LegacyCsvImportExceptionTest extends UnitTestCase
 
     public function test_a_row_failure_without_a_lidnr_names_only_the_row(): void
     {
-        $subject = LegacyCsvFormatException::missingValue(4, 'lidnr');
+        $subject = CsvFormatException::missingValue(4, 'lidnr');
 
         static::assertSame(4, $subject->rowNumber);
         static::assertNull($subject->lidnr);
