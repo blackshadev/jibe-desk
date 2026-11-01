@@ -11,6 +11,11 @@ use Override;
 
 final readonly class CsvFileReader implements CsvReader
 {
+    public function __construct(
+        private string $delimiter = ',',
+        private string $sourceEncoding = 'UTF-8',
+    ) {}
+
     /**
      * @param list<string> $requiredHeaders
      * @return list<SpreadsheetImportRow>
@@ -30,6 +35,7 @@ final readonly class CsvFileReader implements CsvReader
         }
     }
 
+    #[Override]
     public function text(SpreadsheetImportRow $row, string $column): string
     {
         $value = $row->values[$column] ?? null;
@@ -88,7 +94,25 @@ final readonly class CsvFileReader implements CsvReader
             throw CsvFileException::unreadableFile($path);
         }
 
+        $this->convertSourceEncoding($handle);
+
         return $handle;
+    }
+
+    /**
+     * @param resource $handle
+     */
+    private function convertSourceEncoding($handle): void
+    {
+        if ($this->sourceEncoding === 'UTF-8') {
+            return;
+        }
+
+        stream_filter_append(
+            $handle,
+            sprintf('convert.iconv.%s/UTF-8', $this->sourceEncoding),
+            STREAM_FILTER_READ,
+        );
     }
 
     /**
@@ -98,7 +122,7 @@ final readonly class CsvFileReader implements CsvReader
      */
     private function headers($handle, array $requiredHeaders): array
     {
-        $values = fgetcsv($handle);
+        $values = fgetcsv($handle, null, $this->delimiter, '"', '\\');
 
         if ($values === false) {
             throw CsvFormatException::headerMismatch($requiredHeaders);
@@ -137,7 +161,7 @@ final readonly class CsvFileReader implements CsvReader
         $rows = [];
         $lineNumber = 1;
 
-        while (($values = fgetcsv($handle)) !== false) {
+        while (($values = fgetcsv($handle, null, $this->delimiter, '"', '\\')) !== false) {
             $lineNumber++;
 
             if ($this->isBlank($values)) {

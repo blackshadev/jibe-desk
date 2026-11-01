@@ -14,6 +14,8 @@ interface CsvReader
      */
     public function read(string $path, array $requiredHeaders): array;
 
+    public function text(SpreadsheetImportRow $row, string $column): string;
+
     public function requiredText(SpreadsheetImportRow $row, string $column, ?string $lidnr = null): string;
 
     public function requiredDate(SpreadsheetImportRow $row, string $column, ?string $lidnr = null): DateTimeImmutable;

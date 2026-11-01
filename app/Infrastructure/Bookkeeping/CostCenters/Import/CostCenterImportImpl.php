@@ -17,16 +17,18 @@ use Throwable;
 final readonly class CostCenterImportImpl implements CostCenterImport
 {
     public function __construct(
-        private CostCenterImportReader $reader,
+        private GrootboekRecordMapper $grootboekMapper,
+        private VerdichtingRecordMapper $verdichtingMapper,
+        private HoofdverdichtingRecordMapper $hoofdverdichtingMapper,
         private CostCenterImportReportBuilder $reportBuilder,
     ) {}
 
     #[Override]
     public function import(CostCenterImportRequest $request): CostCenterImportReport
     {
-        $grootboek = $this->reader->readGrootboek($request->grootboekPath);
-        $verdichtingen = $this->reader->readVerdichtingen($request->verdichtingenPath);
-        $hoofdverdichtingen = $this->reader->readHoofdverdichtingen($request->hoofdverdichtingenPath);
+        $grootboek = $this->grootboekMapper->map($request->grootboekPath);
+        $verdichtingen = $this->verdichtingMapper->map($request->verdichtingenPath);
+        $hoofdverdichtingen = $this->hoofdverdichtingMapper->map($request->hoofdverdichtingenPath);
 
         $hierarchy = new CostCenterHierarchy($hoofdverdichtingen, $verdichtingen);
         $hierarchy->assertAccountsBelong($grootboek);
