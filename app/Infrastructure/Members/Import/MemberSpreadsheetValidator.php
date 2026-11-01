@@ -24,15 +24,27 @@ final readonly class MemberSpreadsheetValidator
     public function validate(string $path): array
     {
         $rows = [];
+        $seenLidnrs = [];
 
         foreach ($this->reader->read($path) as $spreadsheetRow) {
             $row = $this->rowMapper->map($spreadsheetRow->values, $spreadsheetRow->number);
             self::assertSailInstructorIsAdult($row, $spreadsheetRow->number);
+            self::assertLidnrIsUnique($row, $seenLidnrs, $spreadsheetRow->number);
 
             $rows[] = $row;
         }
 
         return $rows;
+    }
+
+    /** @param array<string, true> $seenLidnrs */
+    private static function assertLidnrIsUnique(MappedMemberRow $row, array &$seenLidnrs, int $rowNumber): void
+    {
+        if (array_key_exists($row->lidnr, $seenLidnrs)) {
+            throw MemberImportException::duplicateLidnr($rowNumber, $row->lidnr);
+        }
+
+        $seenLidnrs[$row->lidnr] = true;
     }
 
     private static function assertSailInstructorIsAdult(MappedMemberRow $row, int $rowNumber): void

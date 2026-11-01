@@ -82,6 +82,67 @@ final class MemberImportImplTest extends FeatureTestCase
         static::assertSame('124175', $report->emailMismatches[0]->lidnr);
     }
 
+    public function test_import_persists_the_legacy_lidnr(): void
+    {
+        $this->seed([CostCenterSeeder::class, MembershipSeeder::class]);
+
+        $this->subject->import($this->request([
+            $this->annaRow(),
+            $this->bobRow(),
+        ]));
+
+        static::assertSame(
+            '1001',
+            Member::query()->where('email', 'anna@example.com')->sole()->lidnr,
+        );
+        static::assertSame(
+            '1002',
+            Member::query()->where('email', 'bob@example.com')->sole()->lidnr,
+        );
+    }
+
+    public function test_import_rejects_a_duplicate_lidnr(): void
+    {
+        $this->seed([CostCenterSeeder::class, MembershipSeeder::class]);
+
+        try {
+            $this->subject->import($this->request([
+                $this->annaRow(),
+                $this->row([
+                    'Lidnr' => '1001',
+                    'Voornaam' => 'Tweede',
+                    'Naamvoluit' => 'Tweede Anna',
+                    'E-mail privé' => 'tweede@example.com',
+                    'Contact.email' => 'tweede@example.com',
+                ]),
+            ]));
+            static::fail('Expected exception');
+        } catch (MemberImportException $exception) {
+            static::assertSame(4, $exception->rowNumber);
+            static::assertSame('Lidnr', $exception->column);
+            static::assertSame('1001', $exception->value);
+        }
+
+        static::assertSame(0, Member::count());
+    }
+
+    public function test_import_rejects_a_blank_lidnr(): void
+    {
+        $this->seed([CostCenterSeeder::class, MembershipSeeder::class]);
+
+        try {
+            $this->subject->import($this->request([
+                $this->row(['Lidnr' => '']),
+            ]));
+            static::fail('Expected exception');
+        } catch (MemberImportException $exception) {
+            static::assertSame(3, $exception->rowNumber);
+            static::assertSame('Lidnr', $exception->column);
+        }
+
+        static::assertSame(0, Member::count());
+    }
+
     public function test_import_maps_the_spreadsheet_values_onto_the_members(): void
     {
         $this->seed([CostCenterSeeder::class, MembershipSeeder::class]);
