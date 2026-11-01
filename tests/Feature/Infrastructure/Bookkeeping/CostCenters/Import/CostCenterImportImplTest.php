@@ -125,18 +125,30 @@ final class CostCenterImportImplTest extends FeatureTestCase
             'external_number' => '999',
             'name' => 'Handmatig',
         ]);
+        $otherOrphanGroup = CostCenterGroup::query()->create([
+            'number' => '998',
+            'external_number' => '998',
+            'name' => 'Ook handmatig',
+        ]);
         $orphanCostCenter = CostCenter::query()->create([
             'number' => '9999',
             'title' => 'Handmatige kostenplaats',
             'cost_center_group_id' => $orphanGroup->id,
         ]);
+        $otherOrphanCostCenter = CostCenter::query()->create([
+            'number' => '9998',
+            'title' => 'Ook een handmatige kostenplaats',
+            'cost_center_group_id' => $otherOrphanGroup->id,
+        ]);
 
         $report = $this->subject->import($this->request(CostCenterImportFixture::smallDataset()));
 
-        static::assertContains('9999', $report->costCentersAbsentFromFiles);
-        static::assertContains('999', $report->groupsAbsentFromFiles);
+        static::assertSame(['9998', '9999'], $report->costCentersAbsentFromFiles);
+        static::assertSame(['998', '999'], $report->groupsAbsentFromFiles);
         static::assertTrue($orphanCostCenter->exists);
+        static::assertTrue($otherOrphanCostCenter->exists);
         static::assertTrue($orphanGroup->exists);
+        static::assertTrue($otherOrphanGroup->exists);
     }
 
     public function test_it_fails_when_an_account_references_an_unknown_verdichting(): void
