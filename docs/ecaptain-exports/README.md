@@ -17,8 +17,7 @@ at <https://almerecentraal-cms.e-captain.nl/index2.php>.
   personal data and financial data and must never be committed.
 - Keep e-Captain's native format for the Grootboek export. The member assignment
   exports are converted to the app's CSV dialect because an importer already
-  consumes them.
-- The exports are one-time migration inputs. Do not wire them into a schedule.
+  consumes them.- The exports are one-time migration inputs. Do not wire them into a schedule.
 
 ## What consumes each file
 
@@ -27,7 +26,11 @@ at <https://almerecentraal-cms.e-captain.nl/index2.php>.
 | `exports/members-all.xlsx` | `app:import-members` |
 | `exports/members-with-active-verhuurobject.csv` | `app:import-storage-space-rentals` |
 | `exports/members-with-active-tags.csv` | `app:import-member-tags` |
-| `exports/gboverzicht.csv` | No importer yet; target is `cost_centers` |
+| `exports/gboverzicht.csv` | `app:import-cost-centers` |
+| `exports/verdichtingoverzicht.csv` | `app:import-cost-centers` |
+| `exports/hoofdverdichtingoverzicht.csv` | `app:import-cost-centers` |
 
-The cost-center import does not exist yet. [export-bookkeeping.md](./export-bookkeeping.md)
-defines the export and the target mapping so the importer can be built against it.
+The cost-center import needs all three files: the chart of accounts and the two
+grouping reports that describe the Kostengroep hierarchy. See
+[export-bookkeeping.md](./export-bookkeeping.md) for the exports and the target
+mapping.
