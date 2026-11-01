@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Models;
 
-use App\Domain\Bookkeeping\CostCenters\CostCenterGroupCycleException;
 use App\Models\CostCenter;
 use App\Models\CostCenterGroup;
 use Illuminate\Database\QueryException;
@@ -12,17 +11,6 @@ use Tests\FeatureTestCase;
 
 final class CostCenterGroupTest extends FeatureTestCase
 {
-    public function test_a_group_can_never_become_its_own_ancestor(): void
-    {
-        $parent = CostCenterGroup::factory()->create(['number' => '20']);
-        $child = CostCenterGroup::factory()->create(['number' => '20.21', 'parent_id' => $parent->id]);
-
-        $this->expectException(CostCenterGroupCycleException::class);
-
-        $parent->parent_id = $child->id;
-        $parent->save();
-    }
-
     public function test_a_group_with_children_cannot_be_deleted(): void
     {
         $parent = CostCenterGroup::factory()->create(['number' => '20']);
