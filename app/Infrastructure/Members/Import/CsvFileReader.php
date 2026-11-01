@@ -4,15 +4,12 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Members\Import;
 
-use App\Domain\Members\Import\LegacyCsvFileException;
-use App\Domain\Members\Import\LegacyCsvFormatException;
+use App\Domain\Members\Import\CsvFileException;
+use App\Domain\Members\Import\CsvFormatException;
 use DateTimeImmutable;
 use Override;
 
-/**
- * Reads a UTF-8 comma-separated legacy export into header-keyed rows.
- */
-final readonly class LegacyCsvReader implements CsvReader
+final readonly class CsvFileReader implements CsvReader
 {
     /**
      * @param list<string> $requiredHeaders
@@ -46,7 +43,7 @@ final readonly class LegacyCsvReader implements CsvReader
         $value = $this->text($row, $column);
 
         if ($value === '') {
-            throw LegacyCsvFormatException::missingValue($row->number, $column, $lidnr);
+            throw CsvFormatException::missingValue($row->number, $column, $lidnr);
         }
 
         return $value;
@@ -58,7 +55,7 @@ final readonly class LegacyCsvReader implements CsvReader
         $value = $this->text($row, $column);
 
         if ($value === '') {
-            throw LegacyCsvFormatException::missingValue($row->number, $column, $lidnr);
+            throw CsvFormatException::missingValue($row->number, $column, $lidnr);
         }
 
         return $this->parseDate($row->number, $column, $value, $lidnr);
@@ -78,17 +75,17 @@ final readonly class LegacyCsvReader implements CsvReader
     private function open(string $path)
     {
         if (!is_file($path)) {
-            throw LegacyCsvFileException::fileNotFound($path);
+            throw CsvFileException::fileNotFound($path);
         }
 
         if (!is_readable($path)) {
-            throw LegacyCsvFileException::unreadableFile($path);
+            throw CsvFileException::unreadableFile($path);
         }
 
         $handle = fopen($path, 'rb');
 
         if ($handle === false) {
-            throw LegacyCsvFileException::unreadableFile($path);
+            throw CsvFileException::unreadableFile($path);
         }
 
         return $handle;
@@ -104,7 +101,7 @@ final readonly class LegacyCsvReader implements CsvReader
         $values = fgetcsv($handle);
 
         if ($values === false) {
-            throw LegacyCsvFormatException::headerMismatch($requiredHeaders);
+            throw CsvFormatException::headerMismatch($requiredHeaders);
         }
 
         $headers = array_map(
@@ -126,7 +123,7 @@ final readonly class LegacyCsvReader implements CsvReader
         $missingHeaders = array_values(array_diff($requiredHeaders, $headers));
 
         if ($missingHeaders !== []) {
-            throw LegacyCsvFormatException::headerMismatch($missingHeaders);
+            throw CsvFormatException::headerMismatch($missingHeaders);
         }
     }
 
@@ -183,7 +180,7 @@ final readonly class LegacyCsvReader implements CsvReader
         $date = DateTimeImmutable::createFromFormat('!Y-m-d', $value);
 
         if ($date === false || $this->hasParseErrors()) {
-            throw LegacyCsvFormatException::invalidDate($rowNumber, $column, $value, $lidnr);
+            throw CsvFormatException::invalidDate($rowNumber, $column, $value, $lidnr);
         }
 
         return $date;

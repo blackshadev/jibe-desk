@@ -6,7 +6,7 @@ namespace App\Domain\Members\Import;
 
 use RuntimeException;
 
-abstract class LegacyCsvImportException extends RuntimeException
+abstract class CsvImportException extends RuntimeException
 {
     protected function __construct(
         string $message,

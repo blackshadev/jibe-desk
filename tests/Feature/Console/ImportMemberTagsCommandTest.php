@@ -10,7 +10,7 @@ use Database\Seeders\CostCenterSeeder;
 use Database\Seeders\MemberObjectTypeSeeder;
 use Override;
 use Tests\FeatureTestCase;
-use Tests\Fixtures\MemberImport\LegacyCsvFixture;
+use Tests\Fixtures\MemberImport\CsvFixture;
 
 final class ImportMemberTagsCommandTest extends FeatureTestCase
 {
@@ -79,7 +79,7 @@ final class ImportMemberTagsCommandTest extends FeatureTestCase
     /** @param list<list<string>> $rows */
     private function csv(array $rows): string
     {
-        $path = LegacyCsvFixture::create(['lidnr', 'tagnummer', 'start_date', 'end_date'], $rows);
+        $path = CsvFixture::create(['lidnr', 'tagnummer', 'start_date', 'end_date'], $rows);
         $this->csvPaths[] = $path;
 
         return $path;

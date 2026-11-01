@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Members\Import;
 
-use App\Domain\Members\Import\LegacyCsvValueException;
+use App\Domain\Members\Import\CsvValueException;
 use App\Domain\Members\Import\MemberTagImport;
 use App\Domain\Members\Import\MemberTagImportReport;
 use App\Domain\Members\Import\MemberTagImportRequest;
@@ -22,7 +22,7 @@ final readonly class MemberTagImportImpl implements MemberTagImport
     private const array REQUIRED_HEADERS = ['lidnr', 'tagnummer', 'start_date', 'end_date'];
 
     public function __construct(
-        private LegacyCsvReader $reader,
+        private CsvFileReader $reader,
         private MemberObjectCsvRecordMapper $recordMapper,
     ) {}
 
@@ -65,7 +65,7 @@ final readonly class MemberTagImportImpl implements MemberTagImport
         $importedTags = 0;
 
         foreach ($records as $record) {
-            $member = $membersByLidnr[$record->memberNumber] ?? throw LegacyCsvValueException::unknownLidnr($record->rowNumber, $record->memberNumber);
+            $member = $membersByLidnr[$record->memberNumber] ?? throw CsvValueException::unknownLidnr($record->rowNumber, $record->memberNumber);
 
             $this->assertNotDuplicated($seenAssignedTags, $record);
             $this->assertTagNumberIsNew($recordedTagNumbers, $record);
@@ -93,7 +93,7 @@ final readonly class MemberTagImportImpl implements MemberTagImport
             ->where('name', self::TAG_OBJECT_TYPE_NAME)
             ->first();
 
-        return $memberObjectType->id ?? throw LegacyCsvValueException::missingMemberObjectType(self::TAG_OBJECT_TYPE_NAME);
+        return $memberObjectType->id ?? throw CsvValueException::missingMemberObjectType(self::TAG_OBJECT_TYPE_NAME);
     }
 
     /**
@@ -137,7 +137,7 @@ final readonly class MemberTagImportImpl implements MemberTagImport
             return;
         }
 
-        throw LegacyCsvValueException::duplicateRecord($record->rowNumber, $record->memberNumber, $record->objectNumber);
+        throw CsvValueException::duplicateRecord($record->rowNumber, $record->memberNumber, $record->objectNumber);
     }
 
     /** @param array<string, true> $recordedTagNumbers */
@@ -147,7 +147,7 @@ final readonly class MemberTagImportImpl implements MemberTagImport
             return;
         }
 
-        throw LegacyCsvValueException::tagAlreadyRecorded($record->rowNumber, $record->memberNumber, $record->objectNumber);
+        throw CsvValueException::tagAlreadyRecorded($record->rowNumber, $record->memberNumber, $record->objectNumber);
     }
 
     private function assertMemberIsActive(Member $member, MemberObjectCsvRecord $record): void
@@ -156,7 +156,7 @@ final readonly class MemberTagImportImpl implements MemberTagImport
             return;
         }
 
-        throw LegacyCsvValueException::openEndForStoppedMember($record->rowNumber, $record->memberNumber, 'tag');
+        throw CsvValueException::openEndForStoppedMember($record->rowNumber, $record->memberNumber, 'tag');
     }
 
     private function assignedTagKey(MemberObjectCsvRecord $record): string

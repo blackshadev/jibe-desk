@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Members\Import;
 
-final class LegacyCsvFormatException extends LegacyCsvImportException
+final class CsvFormatException extends CsvImportException
 {
     /**
      * @param list<string> $missingHeaders

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Infrastructure\Members\Import;
 
-use App\Domain\Members\Import\LegacyCsvImportException;
+use App\Domain\Members\Import\CsvImportException;
 use App\Domain\Members\Import\StorageSpaceRentalImportRequest;
 use App\Infrastructure\Members\Import\StorageSpaceRentalImportImpl;
 use App\Models\BillableItemInstance;
@@ -17,7 +17,7 @@ use Database\Seeders\StorageSpaceLocationSeeder;
 use DateTimeImmutable;
 use Override;
 use Tests\FeatureTestCase;
-use Tests\Fixtures\MemberImport\LegacyCsvFixture;
+use Tests\Fixtures\MemberImport\CsvFixture;
 
 final class StorageSpaceRentalImportImplTest extends FeatureTestCase
 {
@@ -120,7 +120,7 @@ final class StorageSpaceRentalImportImplTest extends FeatureTestCase
         $this->seedLocations();
         $this->member('1001');
 
-        $this->expectException(LegacyCsvImportException::class);
+        $this->expectException(CsvImportException::class);
         $this->expectExceptionMessage('Row 2 (lidnr 1001): object number "501" must look like 5-01.');
 
         $this->subject->import($this->request([['1001', '501', '2026-03-01', '']]));
@@ -131,7 +131,7 @@ final class StorageSpaceRentalImportImplTest extends FeatureTestCase
         $this->seedLocations();
         $this->member('1001');
 
-        $this->expectException(LegacyCsvImportException::class);
+        $this->expectException(CsvImportException::class);
         $this->expectExceptionMessage('Row 2 (lidnr 1001): storage location "Container 9" does not exist.');
 
         $this->subject->import($this->request([['1001', '9-01', '2026-03-01', '']]));
@@ -143,7 +143,7 @@ final class StorageSpaceRentalImportImplTest extends FeatureTestCase
         $this->storageSpace('Container 5', '1');
         $this->member('1001');
 
-        $this->expectException(LegacyCsvImportException::class);
+        $this->expectException(CsvImportException::class);
         $this->expectExceptionMessage('Row 2 (lidnr 1001): storage space "5-99" does not exist.');
 
         $this->subject->import($this->request([['1001', '5-99', '2026-03-01', '']]));
@@ -154,7 +154,7 @@ final class StorageSpaceRentalImportImplTest extends FeatureTestCase
         $this->seedLocations();
         $this->storageSpace('Container 5', '1');
 
-        $this->expectException(LegacyCsvImportException::class);
+        $this->expectException(CsvImportException::class);
         $this->expectExceptionMessage('Row 2 (lidnr 9999): lidnr "9999" does not belong to a member.');
 
         $this->subject->import($this->request([['9999', '5-01', '2026-03-01', '']]));
@@ -166,7 +166,7 @@ final class StorageSpaceRentalImportImplTest extends FeatureTestCase
         $this->storageSpace('Container 5', '1');
         $this->member('1001');
 
-        $this->expectException(LegacyCsvImportException::class);
+        $this->expectException(CsvImportException::class);
         $this->expectExceptionMessage('Row 3 (lidnr 1001): "5-01" appears more than once for this member.');
 
         $this->subject->import($this->request([
@@ -188,7 +188,7 @@ final class StorageSpaceRentalImportImplTest extends FeatureTestCase
             'end_date' => null,
         ]);
 
-        $this->expectException(LegacyCsvImportException::class);
+        $this->expectException(CsvImportException::class);
         $this->expectExceptionMessage('Row 2 (lidnr 1001): storage space "5-01" is already rented in this period.');
 
         $this->subject->import($this->request([['1001', '5-01', '2026-03-01', '2026-08-31']]));
@@ -201,7 +201,7 @@ final class StorageSpaceRentalImportImplTest extends FeatureTestCase
         $this->member('1001');
         $this->member('1002');
 
-        $this->expectException(LegacyCsvImportException::class);
+        $this->expectException(CsvImportException::class);
         $this->expectExceptionMessage('Row 3 (lidnr 1002): storage space "5-01" is already rented in this period.');
 
         $this->subject->import($this->request([
@@ -216,7 +216,7 @@ final class StorageSpaceRentalImportImplTest extends FeatureTestCase
         $this->storageSpace('Container 5', '1');
         $this->member('1001');
 
-        $this->expectException(LegacyCsvImportException::class);
+        $this->expectException(CsvImportException::class);
         $this->expectExceptionMessage('Row 2 (lidnr 1001): end_date "2026-01-01" is before start_date "2026-06-01".');
 
         $this->subject->import($this->request([['1001', '5-01', '2026-06-01', '2026-01-01']]));
@@ -228,7 +228,7 @@ final class StorageSpaceRentalImportImplTest extends FeatureTestCase
         $this->storageSpace('Container 5', '1');
         $this->member('1001', '2026-06-30');
 
-        $this->expectException(LegacyCsvImportException::class);
+        $this->expectException(CsvImportException::class);
         $this->expectExceptionMessage('Row 2 (lidnr 1001): an open-ended rental is not allowed because the member has stopped.');
 
         $this->subject->import($this->request([['1001', '5-01', '2026-03-01', '']]));
@@ -246,7 +246,7 @@ final class StorageSpaceRentalImportImplTest extends FeatureTestCase
                 ['9999', '9-01', '2026-03-01', ''],
             ]));
             static::fail('Expected exception');
-        } catch (LegacyCsvImportException $exception) {
+        } catch (CsvImportException $exception) {
             static::assertSame(3, $exception->rowNumber);
         }
 
@@ -306,7 +306,7 @@ final class StorageSpaceRentalImportImplTest extends FeatureTestCase
     /** @param list<list<string>> $rows */
     private function csv(array $rows): string
     {
-        $path = LegacyCsvFixture::create(self::HEADERS, $rows);
+        $path = CsvFixture::create(self::HEADERS, $rows);
         $this->csvPaths[] = $path;
 
         return $path;
