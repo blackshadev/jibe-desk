@@ -49,14 +49,13 @@ final class ImportStorageSpaceRentalsCommandTest extends FeatureTestCase
             ->artisan('app:import-storage-space-rentals', ['path' => $path])
             ->expectsOutputToContain('Import complete.')
             ->expectsOutputToContain('Imported rentals')
-            ->expectsOutputToContain('Billing instances moved to the billing start')
             ->assertSuccessful();
 
         static::assertSame(1, StorageSpaceRental::query()->where('member_id', $member->id)->count());
-        static::assertSame('2027-01-01', BillableItemInstance::query()->sole()->start_date->format('Y-m-d'));
+        static::assertSame('2026-03-01', BillableItemInstance::query()->sole()->start_date->format('Y-m-d'));
     }
 
-    public function test_the_billing_start_option_moves_the_instance_start(): void
+    public function test_it_treats_a_december_last_day_rental_for_a_non_stopped_member_as_open(): void
     {
         $this->seed([CostCenterSeeder::class, StorageSpaceLocationSeeder::class]);
         $location = StorageSpaceLocation::query()->where('name', 'Container 5')->sole();
@@ -65,13 +64,14 @@ final class ImportStorageSpaceRentalsCommandTest extends FeatureTestCase
             'number' => '1',
         ]);
         Member::factory()->createQuietly(['lidnr' => '1001']);
-        $path = $this->csv([['1001', '5-01', '2026-03-01', '']]);
+        $path = $this->csv([['1001', '5-01', '2026-03-01', '2026-12-31']]);
 
         $this
-            ->artisan('app:import-storage-space-rentals', ['path' => $path, '--billing-start' => '2028-01-01'])
+            ->artisan('app:import-storage-space-rentals', ['path' => $path])
             ->assertSuccessful();
 
-        static::assertSame('2028-01-01', BillableItemInstance::query()->sole()->start_date->format('Y-m-d'));
+        static::assertNull(StorageSpaceRental::query()->sole()->end_date);
+        static::assertNull(BillableItemInstance::query()->sole()->end_date);
     }
 
     public function test_a_dry_run_writes_nothing(): void

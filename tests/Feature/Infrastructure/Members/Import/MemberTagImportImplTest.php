@@ -197,15 +197,19 @@ final class MemberTagImportImplTest extends FeatureTestCase
         $this->subject->import($this->request([['1001', '012345678', '2026-06-01', '2026-01-01']]));
     }
 
-    public function test_import_fails_on_an_open_ended_tag_for_a_stopped_member(): void
+    public function test_import_ends_an_open_ended_tag_for_a_stopped_member_on_the_member_end_date(): void
     {
         $this->seedTagObjectType();
         $this->member('1001', '2026-06-30');
 
-        $this->expectException(CsvImportException::class);
-        $this->expectExceptionMessage('Row 2 (lidnr 1001): an open-ended tag is not allowed because the member has stopped.');
+        $report = $this->subject->import($this->request([['1001', '012345678', '2026-01-01', '']]));
 
-        $this->subject->import($this->request([['1001', '012345678', '2026-01-01', '']]));
+        static::assertSame(1, $report->importedTags);
+
+        $tag = MemberObject::query()->sole();
+
+        static::assertSame('2026-01-01', $tag->start_date?->format('Y-m-d'));
+        static::assertSame('2026-06-30', $tag->end_date?->format('Y-m-d'));
     }
 
     public function test_import_allows_a_closed_tag_for_a_stopped_member(): void

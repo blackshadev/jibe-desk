@@ -11,6 +11,7 @@ use App\Domain\Members\Import\MemberTagImportRequest;
 use App\Models\Member;
 use App\Models\MemberObject;
 use App\Models\MemberObjectType;
+use DateTimeInterface;
 use Illuminate\Support\Facades\DB;
 use Override;
 use Throwable;
@@ -67,19 +68,18 @@ final readonly class MemberTagImportImpl implements MemberTagImport
         foreach ($records as $record) {
             $member = $membersByLidnr[$record->memberNumber] ?? throw CsvValueException::unknownLidnr($record->rowNumber, $record->memberNumber);
 
-            $this->assertNotDuplicated($seenAssignedTags, $record);
-            $this->assertTagNumberIsNew($recordedTagNumbers, $record);
-            $this->assertMemberIsActive($member, $record);
+            self::assertNotDuplicated($seenAssignedTags, $record);
+            self::assertTagNumberIsNew($recordedTagNumbers, $record);
 
             MemberObject::query()->createQuietly([
                 'member_id' => $member->id,
                 'member_object_type_id' => $memberObjectTypeId,
                 'name' => $record->objectNumber,
                 'start_date' => $record->startDate,
-                'end_date' => $record->endDate,
+                'end_date' => self::tagEndDate($member, $record),
             ]);
 
-            $seenAssignedTags[$this->assignedTagKey($record)] = true;
+            $seenAssignedTags[self::assignedTagKey($record)] = true;
             $recordedTagNumbers[$record->objectNumber] = true;
             $importedTags++;
         }
@@ -131,9 +131,9 @@ final readonly class MemberTagImportImpl implements MemberTagImport
     }
 
     /** @param array<string, true> $seenAssignedTags */
-    private function assertNotDuplicated(array $seenAssignedTags, MemberObjectCsvRecord $record): void
+    private static function assertNotDuplicated(array $seenAssignedTags, MemberObjectCsvRecord $record): void
     {
-        if (!array_key_exists($this->assignedTagKey($record), $seenAssignedTags)) {
+        if (!array_key_exists(self::assignedTagKey($record), $seenAssignedTags)) {
             return;
         }
 
@@ -141,7 +141,7 @@ final readonly class MemberTagImportImpl implements MemberTagImport
     }
 
     /** @param array<string, true> $recordedTagNumbers */
-    private function assertTagNumberIsNew(array $recordedTagNumbers, MemberObjectCsvRecord $record): void
+    private static function assertTagNumberIsNew(array $recordedTagNumbers, MemberObjectCsvRecord $record): void
     {
         if (!array_key_exists($record->objectNumber, $recordedTagNumbers)) {
             return;
@@ -150,16 +150,16 @@ final readonly class MemberTagImportImpl implements MemberTagImport
         throw CsvValueException::tagAlreadyRecorded($record->rowNumber, $record->memberNumber, $record->objectNumber);
     }
 
-    private function assertMemberIsActive(Member $member, MemberObjectCsvRecord $record): void
+    private static function tagEndDate(Member $member, MemberObjectCsvRecord $record): ?DateTimeInterface
     {
-        if (!$record->isOpenEnded() || $member->stopped_at === null) {
-            return;
+        if ($record->isOpenEnded() && $member->stopped_at !== null) {
+            return $member->stopped_at;
         }
 
-        throw CsvValueException::openEndForStoppedMember($record->rowNumber, $record->memberNumber, 'tag');
+        return $record->endDate;
     }
 
-    private function assignedTagKey(MemberObjectCsvRecord $record): string
+    private static function assignedTagKey(MemberObjectCsvRecord $record): string
     {
         return sprintf('%s|%s', $record->memberNumber, $record->objectNumber);
     }

@@ -35,15 +35,6 @@ final class CsvValueException extends CsvImportException
         );
     }
 
-    public static function openEndForStoppedMember(int $rowNumber, string $lidnr, string $subject): self
-    {
-        return self::forRow(
-            $rowNumber,
-            sprintf('an open-ended %s is not allowed because the member has stopped.', $subject),
-            $lidnr,
-        );
-    }
-
     public static function tagAlreadyRecorded(int $rowNumber, string $lidnr, string $tagNumber): self
     {
         return self::forRow($rowNumber, sprintf('tag "%s" is already recorded.', $tagNumber), $lidnr);
