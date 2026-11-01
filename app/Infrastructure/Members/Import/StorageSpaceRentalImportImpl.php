@@ -8,13 +8,11 @@ use App\Domain\Members\Import\CsvValueException;
 use App\Domain\Members\Import\StorageSpaceRentalImport;
 use App\Domain\Members\Import\StorageSpaceRentalImportReport;
 use App\Domain\Members\Import\StorageSpaceRentalImportRequest;
-use App\Models\BillableItemInstance;
 use App\Models\Member;
 use App\Models\StorageSpace;
 use App\Models\StorageSpaceLocation;
 use App\Models\StorageSpaceRental;
 use DateTimeInterface;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Override;
@@ -39,7 +37,7 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
         DB::beginTransaction();
 
         try {
-            $report = $this->write($records, $request->billingStart);
+            $report = $this->write($records);
 
             if ($request->dryRun) {
                 DB::rollBack();
@@ -58,7 +56,7 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
     }
 
     /** @param list<MemberObjectCsvRecord> $records */
-    private function write(array $records, DateTimeInterface $billingStart): StorageSpaceRentalImportReport
+    private function write(array $records): StorageSpaceRentalImportReport
     {
         $membersByLidnr = $this->membersByLidnr($records);
         $objectNumbers = $this->objectNumbers($records);
@@ -66,36 +64,31 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
         $storageSpacesByLocationId = $this->storageSpacesByLocationId($locationIdsByName);
 
         $seenAssignments = [];
-        $rentalIds = [];
+        $importedRentals = 0;
 
         foreach ($records as $index => $record) {
             $member = $membersByLidnr[$record->memberNumber] ?? throw CsvValueException::unknownLidnr($record->rowNumber, $record->memberNumber);
             $objectNumber = $objectNumbers[$index];
 
-            $this->assertNotDuplicated($seenAssignments, $record);
+            self::assertNotDuplicated($seenAssignments, $record);
 
             $storageSpace = $this->storageSpace($objectNumber, $record, $locationIdsByName, $storageSpacesByLocationId);
+            $endDate = self::rentalEndDate($member, $record);
 
-            $this->assertNoOverlap($storageSpace, $record);
-            $this->assertMemberIsActive($member, $record);
+            self::assertNoOverlap($storageSpace, $record, $endDate);
 
-            $rental = StorageSpaceRental::query()->create([
+            StorageSpaceRental::query()->create([
                 'storage_space_id' => $storageSpace->id,
                 'member_id' => $member->id,
                 'start_date' => $record->startDate,
-                'end_date' => $record->endDate,
+                'end_date' => $endDate,
             ]);
 
-            $seenAssignments[$this->assignmentKey($record)] = true;
-            $rentalIds[] = $rental->id;
+            $seenAssignments[self::assignmentKey($record)] = true;
+            $importedRentals++;
         }
 
-        $billingInstancesShifted = $this->shiftBillingStart($rentalIds, $billingStart);
-
-        return new StorageSpaceRentalImportReport(
-            importedRentals: count($rentalIds),
-            billingInstancesShifted: $billingInstancesShifted,
-        );
+        return new StorageSpaceRentalImportReport(importedRentals: $importedRentals);
     }
 
     /**
@@ -191,22 +184,22 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
     }
 
     /** @param array<string, true> $seenAssignments */
-    private function assertNotDuplicated(array $seenAssignments, MemberObjectCsvRecord $record): void
+    private static function assertNotDuplicated(array $seenAssignments, MemberObjectCsvRecord $record): void
     {
-        if (!array_key_exists($this->assignmentKey($record), $seenAssignments)) {
+        if (!array_key_exists(self::assignmentKey($record), $seenAssignments)) {
             return;
         }
 
         throw CsvValueException::duplicateRecord($record->rowNumber, $record->memberNumber, $record->objectNumber);
     }
 
-    private function assertNoOverlap(StorageSpace $storageSpace, MemberObjectCsvRecord $record): void
+    private static function assertNoOverlap(StorageSpace $storageSpace, MemberObjectCsvRecord $record, ?DateTimeInterface $endDate): void
     {
         $overlaps = StorageSpaceRental::query()
             ->overlapping(
                 storageSpaceId: $storageSpace->id,
                 startDate: $record->startDate,
-                endDate: $record->endDate,
+                endDate: $endDate,
             )
             ->exists();
 
@@ -217,42 +210,27 @@ final readonly class StorageSpaceRentalImportImpl implements StorageSpaceRentalI
         throw CsvValueException::overlappingRental($record->rowNumber, $record->memberNumber, $record->objectNumber);
     }
 
-    private function assertMemberIsActive(Member $member, MemberObjectCsvRecord $record): void
+    private static function rentalEndDate(Member $member, MemberObjectCsvRecord $record): ?DateTimeInterface
     {
-        if (!$record->isOpenEnded() || $member->stopped_at === null) {
-            return;
+        if ($record->isOpenEnded()) {
+            return $member->stopped_at;
         }
 
-        throw CsvValueException::openEndForStoppedMember($record->rowNumber, $record->memberNumber, 'rental');
+        if ($member->stopped_at === null && self::isLastDayOfDecember($record->endDate)) {
+            return null;
+        }
+
+        return $record->endDate;
     }
 
-    /**
-     * Ended rentals keep their historical dates. Open and future rentals start
-     * billing on the cutover date.
-     *
-     * @param list<int> $rentalIds
-     */
-    private function shiftBillingStart(array $rentalIds, DateTimeInterface $billingStart): int
+    private static function isLastDayOfDecember(?DateTimeInterface $date): bool
     {
-        $instanceIds = StorageSpaceRental::query()
-            ->whereIn('id', $rentalIds)
-            ->pluck('billable_item_instance_id');
-
-        $instancesToShift = BillableItemInstance::query()
-            ->whereIn('id', $instanceIds)
-            ->where(static fn (Builder $query): Builder => $query
-                ->whereNull('end_date')
-                ->orWhere('end_date', '>', $billingStart))
-            ->pluck('id');
-
-        BillableItemInstance::query()
-            ->whereIn('id', $instancesToShift)
-            ->update(['start_date' => $billingStart]);
-
-        return $instancesToShift->count();
+        return $date !== null
+            && (int) $date->format('n') === 12
+            && (int) $date->format('j') === 31;
     }
 
-    private function assignmentKey(MemberObjectCsvRecord $record): string
+    private static function assignmentKey(MemberObjectCsvRecord $record): string
     {
         return sprintf('%s|%s', $record->memberNumber, $record->objectNumber);
     }

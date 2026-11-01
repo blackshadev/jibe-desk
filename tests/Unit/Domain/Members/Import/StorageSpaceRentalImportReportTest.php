@@ -9,11 +9,10 @@ use Tests\UnitTestCase;
 
 final class StorageSpaceRentalImportReportTest extends UnitTestCase
 {
-    public function test_it_stores_the_rental_and_billing_counts(): void
+    public function test_it_stores_the_rental_count(): void
     {
-        $subject = new StorageSpaceRentalImportReport(importedRentals: 72, billingInstancesShifted: 60);
+        $subject = new StorageSpaceRentalImportReport(importedRentals: 72);
 
         static::assertSame(72, $subject->importedRentals);
-        static::assertSame(60, $subject->billingInstancesShifted);
     }
 }

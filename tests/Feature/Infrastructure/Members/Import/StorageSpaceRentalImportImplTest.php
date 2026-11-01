@@ -14,7 +14,6 @@ use App\Models\StorageSpaceLocation;
 use App\Models\StorageSpaceRental;
 use Database\Seeders\CostCenterSeeder;
 use Database\Seeders\StorageSpaceLocationSeeder;
-use DateTimeImmutable;
 use Override;
 use Tests\FeatureTestCase;
 use Tests\Fixtures\MemberImport\CsvFixture;
@@ -50,7 +49,7 @@ final class StorageSpaceRentalImportImplTest extends FeatureTestCase
         parent::tearDown();
     }
 
-    public function test_import_creates_rentals_and_shifts_the_open_ones_to_the_billing_start(): void
+    public function test_import_creates_rentals_and_billing_instances(): void
     {
         $this->seedLocations();
         $containerFiveOne = $this->storageSpace('Container 5', '1');
@@ -66,7 +65,6 @@ final class StorageSpaceRentalImportImplTest extends FeatureTestCase
         ]));
 
         static::assertSame(3, $report->importedRentals);
-        static::assertSame(2, $report->billingInstancesShifted);
         static::assertSame(3, StorageSpaceRental::query()->count());
 
         $openRental = StorageSpaceRental::query()
@@ -79,7 +77,7 @@ final class StorageSpaceRentalImportImplTest extends FeatureTestCase
         static::assertNotNull($openRental->billable_item_instance_id);
 
         $openInstance = BillableItemInstance::query()->findOrFail($openRental->billable_item_instance_id);
-        static::assertSame('2027-01-01', $openInstance->start_date->format('Y-m-d'));
+        static::assertSame('2026-03-01', $openInstance->start_date->format('Y-m-d'));
         static::assertNull($openInstance->end_date);
 
         $endedRental = StorageSpaceRental::query()
@@ -93,7 +91,7 @@ final class StorageSpaceRentalImportImplTest extends FeatureTestCase
             ->where('storage_space_id', $containerFourSeven->id)
             ->sole();
         $futureEndedInstance = BillableItemInstance::query()->findOrFail($futureEndedRental->billable_item_instance_id);
-        static::assertSame('2027-01-01', $futureEndedInstance->start_date->format('Y-m-d'));
+        static::assertSame('2026-03-01', $futureEndedInstance->start_date->format('Y-m-d'));
         static::assertSame('2027-06-30', $futureEndedInstance->end_date?->format('Y-m-d'));
 
         static::assertSame($bob->id, $futureEndedRental->member_id);
@@ -110,7 +108,6 @@ final class StorageSpaceRentalImportImplTest extends FeatureTestCase
         );
 
         static::assertSame(1, $report->importedRentals);
-        static::assertSame(1, $report->billingInstancesShifted);
         static::assertSame(0, StorageSpaceRental::query()->count());
         static::assertSame(0, BillableItemInstance::query()->count());
     }
@@ -222,16 +219,25 @@ final class StorageSpaceRentalImportImplTest extends FeatureTestCase
         $this->subject->import($this->request([['1001', '5-01', '2026-06-01', '2026-01-01']]));
     }
 
-    public function test_import_fails_on_an_open_ended_rental_for_a_stopped_member(): void
+    public function test_import_ends_an_open_ended_rental_for_a_stopped_member_on_the_member_end_date(): void
     {
         $this->seedLocations();
         $this->storageSpace('Container 5', '1');
         $this->member('1001', '2026-06-30');
 
-        $this->expectException(CsvImportException::class);
-        $this->expectExceptionMessage('Row 2 (lidnr 1001): an open-ended rental is not allowed because the member has stopped.');
+        $report = $this->subject->import($this->request([['1001', '5-01', '2026-03-01', '']]));
 
-        $this->subject->import($this->request([['1001', '5-01', '2026-03-01', '']]));
+        static::assertSame(1, $report->importedRentals);
+
+        $rental = StorageSpaceRental::query()->sole();
+
+        static::assertSame('2026-03-01', $rental->start_date?->format('Y-m-d'));
+        static::assertSame('2026-06-30', $rental->end_date?->format('Y-m-d'));
+
+        $instance = BillableItemInstance::query()->findOrFail($rental->billable_item_instance_id);
+
+        static::assertSame('2026-03-01', $instance->start_date->format('Y-m-d'));
+        static::assertSame('2026-06-30', $instance->end_date?->format('Y-m-d'));
     }
 
     public function test_import_rolls_back_every_created_rental_when_a_later_row_fails(): void
@@ -254,20 +260,22 @@ final class StorageSpaceRentalImportImplTest extends FeatureTestCase
         static::assertSame(0, BillableItemInstance::query()->count());
     }
 
-    public function test_import_shifts_billing_on_a_custom_billing_start(): void
+    public function test_import_treats_a_december_last_day_rental_for_a_non_stopped_member_as_open(): void
     {
         $this->seedLocations();
         $this->storageSpace('Container 5', '1');
         $this->member('1001');
 
-        $this->subject->import($this->request(
-            [['1001', '5-01', '2026-03-01', '']],
-            billingStart: '2028-01-01',
-        ));
+        $this->subject->import($this->request([['1001', '5-01', '2026-03-01', '2026-12-31']]));
 
-        $instance = BillableItemInstance::query()->sole();
+        $rental = StorageSpaceRental::query()->sole();
 
-        static::assertSame('2028-01-01', $instance->start_date->format('Y-m-d'));
+        static::assertSame('2026-03-01', $rental->start_date?->format('Y-m-d'));
+        static::assertNull($rental->end_date);
+
+        $instance = BillableItemInstance::query()->findOrFail($rental->billable_item_instance_id);
+
+        static::assertNull($instance->end_date);
     }
 
     private function seedLocations(): void
@@ -294,12 +302,11 @@ final class StorageSpaceRentalImportImplTest extends FeatureTestCase
     }
 
     /** @param list<list<string>> $rows */
-    private function request(array $rows, bool $dryRun = false, string $billingStart = '2027-01-01'): StorageSpaceRentalImportRequest
+    private function request(array $rows, bool $dryRun = false): StorageSpaceRentalImportRequest
     {
         return new StorageSpaceRentalImportRequest(
             path: $this->csv($rows),
             dryRun: $dryRun,
-            billingStart: new DateTimeImmutable($billingStart),
         );
     }
 
