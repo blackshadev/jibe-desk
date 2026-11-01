@@ -34,4 +34,17 @@ final class MemberImportExceptionTest extends UnitTestCase
 
         static::assertSame('Spreadsheet is missing required columns: Lidnr, BIC 1', $subject->getMessage());
     }
+
+    public function test_duplicate_lidnr_carries_the_row_and_value(): void
+    {
+        $subject = MemberImportException::duplicateLidnr(8, '1001');
+
+        static::assertSame(8, $subject->rowNumber);
+        static::assertSame('Lidnr', $subject->column);
+        static::assertSame('1001', $subject->value);
+        static::assertSame(
+            'Row 8, column "Lidnr", value "1001" appears more than once in the spreadsheet.',
+            $subject->getMessage(),
+        );
+    }
 }

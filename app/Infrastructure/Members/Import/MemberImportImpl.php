@@ -113,6 +113,7 @@ final readonly class MemberImportImpl implements MemberImport
     private function createMembers(array $rows, array $membershipIds): array
     {
         $createdMembers = [];
+        $seenLidnrs = [];
 
         foreach ($rows as $row) {
             $membershipId = $membershipIds[$row->membershipName] ?? throw MemberImportException::missingMembership($row->membershipName);
@@ -131,6 +132,7 @@ final readonly class MemberImportImpl implements MemberImport
     private function createMember(MappedMemberRow $row, int $membershipId): Member
     {
         return Member::query()->createQuietly([
+            'lidnr' => $row->lidnr,
             'first_name' => $row->firstName,
             'infix_name' => $row->infixName,
             'last_name' => $row->lastName,

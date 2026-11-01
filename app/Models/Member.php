@@ -30,6 +30,7 @@ use Override;
 /**
  * @phpstan-import-type FormDataArray from FormData
  *
+ * @property null|string $lidnr
  * @property PaymentMethod $payment_method
  * @property null|DateTimeInterface $stopped_at
  * @property null|DateTimeInterface $stop_requested_at

@@ -70,6 +70,11 @@ final class MemberImportException extends RuntimeException
         return self::forRow($rowNumber, $column, $value, 'is not a valid date');
     }
 
+    public static function duplicateLidnr(int $rowNumber, string $lidnr): self
+    {
+        return self::forRow($rowNumber, 'Lidnr', $lidnr, 'appears more than once in the spreadsheet');
+    }
+
     public static function invalidIban(int $rowNumber, string $value): self
     {
         return self::forRow($rowNumber, 'Banknummer 1', $value, 'is not a valid IBAN');
