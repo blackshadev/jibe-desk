@@ -21,13 +21,53 @@ Laravel's `timestamp` cast returns an int; `datetime` returns a
 passed into a `DateTimeInterface`-typed parameter, or a `TypeError` surfaces
 downstream. 
 
+## A helper that holds no state is static
+
+A private helper that never touches `$this` and needs no instance state is
+declared `static` and called with `self::`. The modifier states that the answer
+cannot vary with the object, and it lets the helper be reused from a static
+context without conjuring an instance.
+
+## Name the type after the domain concept
+
+An intermediate type that models something in this domain takes that concept's
+name — the member's object, the rental period — not the export it was read from.
+A provenance prefix (`Legacy`, `Old`, `External`) belongs only on the adapter
+whose subject really is that external format, such as the reader that parses it;
+the value it produces does not inherit the prefix.
+
+## A property names the entity it identifies
+
+An identifier property carries the entity in its name — `objectNumber`, not
+`number` — so the type reads without a docblock explaining which number it is.
+
+## New identifiers are English
+
+A new property, variable, or method names its concept in English even when the
+source column or export header is Dutch: `memberNumber`, not `lidnr`. The
+mapping happens once, where the row is read. Renaming the column itself is a
+separate, deliberate change.
+
+## Failure types split by kind
+
+A module's exception surface splits by the kind of failure a caller can act on:
+the input file (missing or unreadable), the shape of the input (headers, missing
+cells, unparseable dates), and a value that parses but is wrong (unknown member,
+period out of order). One class with a static constructor per failure forces
+every catch site into a `match`; the split lets a caller catch the kind it can
+handle. The kinds extend one abstract base, so a caller that only cares that the
+module failed keeps a single catch.
+
 ## PHPStan conventions
 
 Enforced by `./Taskfile stan`; written here so a new class satisfies them the
 first time instead of discovering the message.
 
 - Every class under `app/Domain/**` needs a matching `tests/Unit/**` test
-  (`extrastan.UnitTestRequired`). Create it alongside the class.
+  (`extrastan.UnitTestRequired`). Create it alongside the class. The same bar
+  applies to an infrastructure type that carries logic of its own — a parser, a
+  row mapper, a value object around one column — even though no rule enforces
+  it; a thin Eloquent adapter is covered by its feature test instead.
 - `@phpstan-ignore domain.dependency` sits on the `use` line, not the usage line —
   the rule matches import statements. See `NewMemberAdminNotification.php`.
 - Eloquent scope calls from Filament closures (`->pending()`, `->active()`,

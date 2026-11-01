@@ -44,6 +44,7 @@ final readonly class FooExpectation
 - Name expectation methods to clearly describe the mocked call being configured (prefix `expects`).
 - Prefer reusing existing Expectation classes instead of creating new ones when possible.
 - Add a small unit test for an Expectation when its matching logic is non-trivial or likely to change.
+- The mocked collaborator is an interface. When the concrete class is `final`, add the interface it implements and inject that, rather than mocking the final class or dropping the test.
 
 ## Template
 
